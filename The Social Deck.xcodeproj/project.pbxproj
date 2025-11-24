@@ -6,6 +6,15 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		2B2729B72ED3B286006FA60E /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 2B2729B62ED3B286006FA60E /* FirebaseAnalytics */; };
+		2B2729B92ED3B286006FA60E /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 2B2729B82ED3B286006FA60E /* FirebaseAuth */; };
+		2B2729BB2ED3B286006FA60E /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 2B2729BA2ED3B286006FA60E /* FirebaseCrashlytics */; };
+		2B2729BD2ED3B286006FA60E /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 2B2729BC2ED3B286006FA60E /* FirebaseFirestore */; };
+		2B2729BF2ED3B286006FA60E /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 2B2729BE2ED3B286006FA60E /* FirebaseMessaging */; };
+		2B2729C12ED3B4A6006FA60E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2B2729C02ED3B4A6006FA60E /* GoogleService-Info.plist */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		2B27292B2ED39AEC006FA60E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +36,7 @@
 		2B27291B2ED39AEA006FA60E /* The Social Deck.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "The Social Deck.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B27292A2ED39AEC006FA60E /* The Social DeckTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "The Social DeckTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B2729342ED39AEC006FA60E /* The Social DeckUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "The Social DeckUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2B2729C02ED3B4A6006FA60E /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -52,6 +62,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2B2729BB2ED3B286006FA60E /* FirebaseCrashlytics in Frameworks */,
+				2B2729BD2ED3B286006FA60E /* FirebaseFirestore in Frameworks */,
+				2B2729BF2ED3B286006FA60E /* FirebaseMessaging in Frameworks */,
+				2B2729B72ED3B286006FA60E /* FirebaseAnalytics in Frameworks */,
+				2B2729B92ED3B286006FA60E /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,6 +94,7 @@
 				2B27292D2ED39AEC006FA60E /* The Social DeckTests */,
 				2B2729372ED39AEC006FA60E /* The Social DeckUITests */,
 				2B27291C2ED39AEA006FA60E /* Products */,
+				2B2729C02ED3B4A6006FA60E /* GoogleService-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -112,6 +128,11 @@
 			);
 			name = "The Social Deck";
 			packageProductDependencies = (
+				2B2729B62ED3B286006FA60E /* FirebaseAnalytics */,
+				2B2729B82ED3B286006FA60E /* FirebaseAuth */,
+				2B2729BA2ED3B286006FA60E /* FirebaseCrashlytics */,
+				2B2729BC2ED3B286006FA60E /* FirebaseFirestore */,
+				2B2729BE2ED3B286006FA60E /* FirebaseMessaging */,
 			);
 			productName = "The Social Deck";
 			productReference = 2B27291B2ED39AEA006FA60E /* The Social Deck.app */;
@@ -195,6 +216,9 @@
 			);
 			mainGroup = 2B2729122ED39AEA006FA60E;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				2B2729B52ED3B286006FA60E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2B27291C2ED39AEA006FA60E /* Products */;
 			projectDirPath = "";
@@ -212,6 +236,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2B2729C12ED3B4A6006FA60E /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -400,18 +425,23 @@
 				DEVELOPMENT_TEAM = 92WLTY8S42;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = TheSocialDeck;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.card-games";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.fumanest.thesocialdeck.The-Social-Deck";
+				PRODUCT_BUNDLE_IDENTIFIER = com.fumanest.thesocialdeck;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -428,18 +458,23 @@
 				DEVELOPMENT_TEAM = 92WLTY8S42;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = TheSocialDeck;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.card-games";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.fumanest.thesocialdeck.The-Social-Deck";
+				PRODUCT_BUNDLE_IDENTIFIER = com.fumanest.thesocialdeck;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -558,6 +593,45 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2B2729B52ED3B286006FA60E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2B2729B62ED3B286006FA60E /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2B2729B52ED3B286006FA60E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		2B2729B82ED3B286006FA60E /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2B2729B52ED3B286006FA60E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		2B2729BA2ED3B286006FA60E /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2B2729B52ED3B286006FA60E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+		2B2729BC2ED3B286006FA60E /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2B2729B52ED3B286006FA60E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		2B2729BE2ED3B286006FA60E /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2B2729B52ED3B286006FA60E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2B2729132ED39AEA006FA60E /* Project object */;
 }
