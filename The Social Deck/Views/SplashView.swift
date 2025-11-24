@@ -12,6 +12,7 @@ struct SplashView: View {
     @State private var logoScale: CGFloat = 0.5
     @State private var logoRotation: Double = -180
     @State private var logoBounce: CGFloat = 0
+    @State private var logoExitOffset: CGFloat = 0
     @State private var showAgeCheck: Bool = false
     @State private var ageCheckOpacity: Double = 0
     
@@ -19,13 +20,14 @@ struct SplashView: View {
     @State private var wordOpacities: [Double] = [0, 0, 0]
     @State private var wordScales: [CGFloat] = [0.3, 0.3, 0.3]
     @State private var wordOffsets: [CGFloat] = [50, 50, 50]
+    @State private var wordExitOffsets: [CGFloat] = [0, 0, 0]
     
     var body: some View {
         ZStack {
             // Splash screen content
             ZStack {
-                // Red background
-                Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+                // White background
+                Color.white
                     .ignoresSafeArea()
                 
                 // Logo and text
@@ -38,7 +40,7 @@ struct SplashView: View {
                         .opacity(logoOpacity)
                         .scaleEffect(logoScale)
                         .rotationEffect(.degrees(logoRotation))
-                        .offset(y: logoBounce)
+                        .offset(y: logoBounce + logoExitOffset)
                     
                     // Text under logo - word by word animation
                     HStack(spacing: 8) {
@@ -48,7 +50,7 @@ struct SplashView: View {
                                 .foregroundColor(.black)
                                 .opacity(wordOpacities[index])
                                 .scaleEffect(wordScales[index])
-                                .offset(y: wordOffsets[index])
+                                .offset(y: wordOffsets[index] + wordExitOffsets[index])
                         }
                     }
                 }
@@ -93,17 +95,38 @@ struct SplashView: View {
                 }
             }
             
-            // Fade out and navigate after 4.5 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 4.5) {
-                // Fade out splash screen
-                withAnimation(.easeIn(duration: 0.5)) {
-                    showAgeCheck = true
+            // Start exit animations and navigate after 3.5 seconds
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
+                // Logo exit animation: scale down, rotate slightly, fade out, move up
+                withAnimation(.easeIn(duration: 0.4)) {
+                    logoScale = 0.3
+                    logoRotation = 15
+                    logoOpacity = 0
+                    logoExitOffset = -30
                 }
                 
-                // Fade in AgeCheckView
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    withAnimation(.easeIn(duration: 0.5)) {
-                        ageCheckOpacity = 1.0
+                // Text exit animation: scale down, fade out, move up (staggered in reverse)
+                for index in (0..<words.count).reversed() {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + Double(words.count - 1 - index) * 0.08) {
+                        withAnimation(.easeIn(duration: 0.4)) {
+                            wordScales[index] = 0.2
+                            wordOpacities[index] = 0
+                            wordExitOffsets[index] = -20
+                        }
+                    }
+                }
+                
+                // Fade out background and show AgeCheckView after exit animations
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation(.easeIn(duration: 0.3)) {
+                        showAgeCheck = true
+                    }
+                    
+                    // Fade in AgeCheckView
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        withAnimation(.easeIn(duration: 0.5)) {
+                            ageCheckOpacity = 1.0
+                        }
                     }
                 }
             }
