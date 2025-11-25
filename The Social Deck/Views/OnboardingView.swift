@@ -173,7 +173,7 @@ struct OnboardingView: View {
                 startPage1Animations()
             }
         }
-        .onChange(of: currentPage) { newPage in
+        .onChange(of: currentPage) { oldValue, newPage in
             dragOffset = 0
             if newPage == 2 {
                 resetPage2Animations()

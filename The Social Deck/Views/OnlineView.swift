@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct OnlineView: View {
+    @Environment(\.dismiss) private var dismiss
     var body: some View {
         ZStack {
             // White background
@@ -70,6 +71,18 @@ struct OnlineView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button(action: {
+                    dismiss()
+                }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                }
+            }
+        }
+        .navigationBarBackButtonHidden(true)
     }
 }
 
