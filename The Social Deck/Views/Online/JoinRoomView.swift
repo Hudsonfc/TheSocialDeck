@@ -17,23 +17,45 @@ struct JoinRoomView: View {
                 .ignoresSafeArea()
             
             ScrollView {
-                VStack(spacing: 24) {
-                    // Top Title
-                    Text("Join Room")
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                        .padding(.top, 20)
+                VStack(spacing: 32) {
+                    Spacer()
+                        .frame(height: 40)
                     
-                    // Room Code Input Placeholder
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                        .frame(height: 60)
-                        .overlay(
-                            Text("Enter Code")
-                                .font(.system(size: 16, weight: .regular, design: .rounded))
-                                .foregroundColor(Color.gray)
-                        )
-                        .padding(.horizontal, 40)
+                    // Top Title
+                    VStack(spacing: 8) {
+                        Text("Join Room")
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        
+                        Text("Enter the room code to join")
+                            .font(.system(size: 16, weight: .regular, design: .rounded))
+                            .foregroundColor(Color.gray)
+                    }
+                    .multilineTextAlignment(.center)
+                    
+                    // Room Code Input Section
+                    VStack(spacing: 16) {
+                        // Icon
+                        Image(systemName: "key.fill")
+                            .font(.system(size: 40))
+                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .padding(.bottom, 8)
+                        
+                        // Room Code Input Placeholder
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .frame(height: 60)
+                            .overlay(
+                                HStack {
+                                    Text("Enter Code")
+                                        .font(.system(size: 18, weight: .medium, design: .rounded))
+                                        .foregroundColor(Color.gray)
+                                    Spacer()
+                                }
+                                .padding(.horizontal, 20)
+                            )
+                            .padding(.horizontal, 40)
+                    }
                     
                     // Join Button
                     NavigationLink(destination: OnlineRoomView()) {
@@ -48,16 +70,30 @@ struct JoinRoomView: View {
                     .padding(.horizontal, 40)
                     
                     // Placeholder Lobby Area
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                        .frame(height: 160)
-                        .overlay(
-                            Text("Room preview will appear here")
-                                .font(.system(size: 16, weight: .regular, design: .rounded))
-                                .foregroundColor(Color.gray)
-                        )
-                        .padding(.horizontal, 40)
-                        .padding(.bottom, 30)
+                    VStack(spacing: 12) {
+                        Text("Room Preview")
+                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .frame(height: 160)
+                            .overlay(
+                                VStack(spacing: 8) {
+                                    Image(systemName: "person.3.fill")
+                                        .font(.system(size: 32))
+                                        .foregroundColor(Color.gray.opacity(0.6))
+                                    Text("Room preview will appear here")
+                                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                                        .foregroundColor(Color.gray)
+                                }
+                            )
+                    }
+                    .padding(.horizontal, 40)
+                    .padding(.top, 20)
+                    
+                    Spacer()
+                        .frame(height: 40)
                 }
             }
         }

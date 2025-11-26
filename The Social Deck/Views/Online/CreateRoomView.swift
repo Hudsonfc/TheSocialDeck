@@ -9,6 +9,9 @@ import SwiftUI
 
 struct CreateRoomView: View {
     @Environment(\.dismiss) private var dismiss
+    @State private var roomName: String = ""
+    @State private var maxPlayers: Int = 4
+    @State private var isPrivate: Bool = false
     
     var body: some View {
         ZStack {
@@ -24,16 +27,62 @@ struct CreateRoomView: View {
                         .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                         .padding(.top, 20)
                     
-                    // Room Settings Placeholder
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                        .frame(height: 200)
-                        .overlay(
-                            Text("Room settings will appear here")
+                    // Room Settings
+                    VStack(spacing: 20) {
+                        // Room Name
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Room Name")
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            
+                            TextField("Enter room name", text: $roomName)
                                 .font(.system(size: 16, weight: .regular, design: .rounded))
-                                .foregroundColor(Color.gray)
-                        )
-                        .padding(.horizontal, 40)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                                .cornerRadius(12)
+                        }
+                        
+                        // Max Players
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Max Players")
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            
+                            HStack(spacing: 12) {
+                                ForEach([2, 4, 6, 8], id: \.self) { count in
+                                    Button(action: {
+                                        maxPlayers = count
+                                    }) {
+                                        Text("\(count)")
+                                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                            .foregroundColor(maxPlayers == count ? .white : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                            .frame(width: 60, height: 44)
+                                            .background(maxPlayers == count ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                                            .cornerRadius(12)
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Privacy Toggle
+                        HStack {
+                            Text("Private Room")
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            
+                            Spacer()
+                            
+                            Toggle("", isOn: $isPrivate)
+                                .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        }
+                        .padding(.vertical, 8)
+                    }
+                    .padding(20)
+                    .background(Color.white)
+                    .cornerRadius(16)
+                    .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
+                    .padding(.horizontal, 40)
                     
                     // Create Button
                     NavigationLink(destination: OnlineRoomView()) {
