@@ -1,5 +1,5 @@
 //
-//  NHIEEndView.swift
+//  TOREndView.swift
 //  The Social Deck
 //
 //  Created by Hudson Ferreira on 11/23/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct NHIEEndView: View {
+struct TOREndView: View {
     let deck: Deck
     let selectedCategories: [String]
     @Environment(\.dismiss) private var dismiss
@@ -77,14 +77,14 @@ struct NHIEEndView: View {
 
 #Preview {
     NavigationView {
-        NHIEEndView(
+        TOREndView(
             deck: Deck(
-                title: "Never Have I Ever",
+                title: "Truth or Dare",
                 description: "Test",
-                numberOfCards: 50,
-                estimatedTime: "5-10 min",
+                numberOfCards: 330,
+                estimatedTime: "30-45 min",
                 imageName: "Art 1.4",
-                type: .neverHaveIEver,
+                type: .truthOrDare,
                 cards: [],
                 availableCategories: []
             ),

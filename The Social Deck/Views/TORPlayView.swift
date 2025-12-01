@@ -1,5 +1,5 @@
 //
-//  NHIEPlayView.swift
+//  TORPlayView.swift
 //  The Social Deck
 //
 //  Created by Hudson Ferreira on 11/23/25.
@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct NHIEPlayView: View {
-    @ObservedObject var manager: NHIEGameManager
+struct TORPlayView: View {
+    @ObservedObject var manager: TORGameManager
     let deck: Deck
     let selectedCategories: [String]
     @Environment(\.dismiss) private var dismiss
@@ -16,6 +16,8 @@ struct NHIEPlayView: View {
     @State private var showEndView: Bool = false
     @State private var nextButtonOpacity: Double = 0
     @State private var nextButtonOffset: CGFloat = 20
+    @State private var acceptSwitchButtonsOpacity: Double = 0
+    @State private var acceptSwitchButtonsOffset: CGFloat = 20
     
     var body: some View {
         ZStack {
@@ -59,12 +61,10 @@ struct NHIEPlayView: View {
                     
                     Spacer()
                     
-                    // Progress indicator
-                    if let currentCard = manager.currentCard() {
-                        Text("\(manager.currentIndex + 1) / \(manager.cards.count)")
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                    }
+                    // Progress indicator (uses gamePosition which tracks original card, not switched card)
+                    Text("\(manager.gamePosition + 1) / \(manager.cards.count)")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                 }
                 .padding(.horizontal, 40)
                 .padding(.top, 20)
@@ -72,21 +72,15 @@ struct NHIEPlayView: View {
                 
                 Spacer()
                 
-                // "Never Have I Ever" label
-                Text("Never Have I Ever")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                    .padding(.bottom, 32)
-                
                 // Card
                 if let currentCard = manager.currentCard() {
                     ZStack {
                         // Card front - visible when rotation < 90
-                        CardFrontView(text: currentCard.text)
+                        TORCardFrontView(card: currentCard)
                             .opacity(cardRotation < 90 ? 1 : 0)
                         
                         // Card back - visible when rotation >= 90, pre-rotated 180
-                        CardBackView(text: currentCard.text)
+                        TORCardBackView(card: currentCard)
                             .opacity(cardRotation >= 90 ? 1 : 0)
                             .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
                     }
@@ -104,8 +98,49 @@ struct NHIEPlayView: View {
                 
                 Spacer()
                 
-                // Next button
-                if manager.isFlipped {
+                // Accept/Switch buttons (shown when card content is revealed but not accepted)
+                if manager.isFlipped && !manager.hasAccepted {
+                    HStack(spacing: 12) {
+                        // Accept button
+                        Button(action: {
+                            acceptCard()
+                        }) {
+                            Text("Accept")
+                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .cornerRadius(12)
+                        }
+                        
+                        // Switch button
+                        if manager.canSwitch, let currentCard = manager.currentCard(), let cardType = currentCard.cardType {
+                            Button(action: {
+                                switchToOpposite()
+                            }) {
+                                Text("Switch to \(cardType == .truth ? "Dare" : "Truth")")
+                                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 16)
+                                    .background(Color.white)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0), lineWidth: 2)
+                                    )
+                                    .cornerRadius(12)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 40)
+                    .padding(.bottom, 40)
+                    .opacity(acceptSwitchButtonsOpacity)
+                    .offset(y: acceptSwitchButtonsOffset)
+                }
+                
+                // Next button (shown when card is accepted)
+                if manager.hasAccepted {
                     Button(action: {
                         if manager.isFinished {
                             showEndView = true
@@ -136,21 +171,43 @@ struct NHIEPlayView: View {
         .navigationBarHidden(true)
         .background(
             NavigationLink(
-                destination: NHIEEndView(deck: deck, selectedCategories: selectedCategories),
+                destination: TOREndView(deck: deck, selectedCategories: selectedCategories),
                 isActive: $showEndView
             ) {
                 EmptyView()
             }
         )
         .onChange(of: manager.isFlipped) { oldValue, newValue in
-            if newValue {
-                // Show next button smoothly
+            if newValue && !manager.hasAccepted {
+                // Show Accept/Switch buttons when card content is revealed
                 withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                    nextButtonOpacity = 1.0
-                    nextButtonOffset = 0
+                    acceptSwitchButtonsOpacity = 1.0
+                    acceptSwitchButtonsOffset = 0
+                }
+            } else if !newValue || manager.hasAccepted {
+                // Hide Accept/Switch buttons
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                    acceptSwitchButtonsOpacity = 0
+                    acceptSwitchButtonsOffset = 20
+                }
+            }
+        }
+        .onChange(of: manager.hasAccepted) { oldValue, newValue in
+            if newValue {
+                // Hide Accept/Switch buttons
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                    acceptSwitchButtonsOpacity = 0
+                    acceptSwitchButtonsOffset = 20
+                }
+                // Show Next button after a short delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                        nextButtonOpacity = 1.0
+                        nextButtonOffset = 0
+                    }
                 }
             } else {
-                // Hide next button smoothly
+                // Hide Next button when card is unaccepted
                 withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                     nextButtonOpacity = 0
                     nextButtonOffset = 20
@@ -158,7 +215,7 @@ struct NHIEPlayView: View {
             }
         }
         .onChange(of: manager.isFinished) { oldValue, newValue in
-            if newValue && manager.isFlipped {
+            if newValue && manager.hasAccepted {
                 // Automatically navigate to end view when game is finished
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     showEndView = true
@@ -167,7 +224,10 @@ struct NHIEPlayView: View {
         }
         .onAppear {
             // Initialize button state
-            if manager.isFlipped {
+            if manager.isFlipped && !manager.hasAccepted {
+                acceptSwitchButtonsOpacity = 1.0
+                acceptSwitchButtonsOffset = 0
+            } else if manager.hasAccepted {
                 nextButtonOpacity = 1.0
                 nextButtonOffset = 0
             }
@@ -184,7 +244,7 @@ struct NHIEPlayView: View {
                 manager.flipCard()
             }
         } else {
-            // Flip to back
+            // Flip to back to show full content
             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
                 cardRotation = 180
             }
@@ -194,10 +254,30 @@ struct NHIEPlayView: View {
         }
     }
     
+    private func acceptCard() {
+        manager.acceptCard()
+    }
+    
+    private func switchToOpposite() {
+        // Smooth transition: flip back slightly, then flip to new card
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            cardRotation = 90 // Halfway point for smooth transition
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            manager.switchToOppositeType()
+            // Continue flip to show new card's full content
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                cardRotation = 180
+            }
+        }
+    }
+    
     private func previousCard() {
         // Smooth transition: reset rotation and go back
         withAnimation(.easeOut(duration: 0.2)) {
             cardRotation = 0
+            acceptSwitchButtonsOpacity = 0
+            nextButtonOpacity = 0
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             // Reset flip state before going back
@@ -225,8 +305,8 @@ struct NHIEPlayView: View {
     }
 }
 
-struct CardFrontView: View {
-    let text: String
+struct TORCardFrontView: View {
+    let card: Card
     
     var body: some View {
         ZStack {
@@ -248,8 +328,8 @@ struct CardFrontView: View {
     }
 }
 
-struct CardBackView: View {
-    let text: String
+struct TORCardBackView: View {
+    let card: Card
     
     var body: some View {
         ZStack {
@@ -257,12 +337,15 @@ struct CardBackView: View {
                 .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
+            // Show full content (type + text)
             VStack(spacing: 16) {
-                Text("Never Have I Ever")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                if let cardType = card.cardType {
+                    Text(cardType == .truth ? "Truth" : "Dare")
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                }
                 
-                Text(text)
+                Text(card.text)
                     .font(.system(size: 24, weight: .semibold, design: .rounded))
                     .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                     .multilineTextAlignment(.center)
@@ -274,31 +357,31 @@ struct CardBackView: View {
 
 #Preview {
     NavigationView {
-        NHIEPlayView(
-            manager: NHIEGameManager(
+        TORPlayView(
+            manager: TORGameManager(
                 deck: Deck(
-                    title: "Never Have I Ever",
+                    title: "Truth or Dare",
                     description: "Test",
                     numberOfCards: 3,
                     estimatedTime: "5-10 min",
                     imageName: "Art 1.4",
-                    type: .neverHaveIEver,
+                    type: .truthOrDare,
                     cards: [
-                        Card(text: "been skydiving", category: "Wild", cardType: nil),
-                        Card(text: "lied about my age", category: "Party", cardType: nil),
-                        Card(text: "kissed a stranger", category: "Wild", cardType: nil)
+                        Card(text: "What's your biggest secret?", category: "Party", cardType: .truth),
+                        Card(text: "Do 20 push-ups", category: "Party", cardType: .dare),
+                        Card(text: "Have you ever cheated?", category: "Wild", cardType: .truth)
                     ],
                     availableCategories: ["Party", "Wild"]
                 ),
                 selectedCategories: ["Party", "Wild"]
             ),
             deck: Deck(
-                title: "Never Have I Ever",
+                title: "Truth or Dare",
                 description: "Test",
                 numberOfCards: 3,
                 estimatedTime: "5-10 min",
                 imageName: "Art 1.4",
-                type: .neverHaveIEver,
+                type: .truthOrDare,
                 cards: [],
                 availableCategories: []
             ),

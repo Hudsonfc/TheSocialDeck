@@ -33,7 +33,16 @@ struct PlayView: View {
                     cards: allNHIECards,
                     availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
                 ),
-                Deck(title: "Truth or Dare", description: "Choose truth or dare and see where the night takes you.", numberOfCards: 75, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
+                Deck(
+                    title: "Truth or Dare",
+                    description: "Choose truth or dare and see where the night takes you.",
+                    numberOfCards: 330,
+                    estimatedTime: "30-45 min",
+                    imageName: "Art 1.4",
+                    type: .truthOrDare,
+                    cards: allTORCards,
+                    availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
+                ),
                 Deck(title: "Would You Rather", description: "Make tough choices and discover what your friends prefer.", numberOfCards: 60, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
                 Deck(title: "Most Likely To", description: "Find out who's most likely to do crazy things.", numberOfCards: 45, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
                 Deck(title: "Two Truths and a Lie", description: "Guess which statement is the lie among three.", numberOfCards: 40, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: [])
@@ -121,7 +130,11 @@ struct PlayView: View {
             NavigationLink(
                 destination: Group {
                     if let deck = navigateToCategorySelection {
-                        NHIECategorySelectionView(deck: deck)
+                        if deck.type == .neverHaveIEver {
+                            NHIECategorySelectionView(deck: deck)
+                        } else if deck.type == .truthOrDare {
+                            TORCategorySelectionView(deck: deck)
+                        }
                     }
                 },
                 isActive: Binding(
@@ -207,7 +220,7 @@ struct ExpandedDeckOverlay: View {
                         .padding(.bottom, 24)
                     
                     // Play button
-                    if deck.type == .neverHaveIEver {
+                    if deck.type == .neverHaveIEver || deck.type == .truthOrDare {
                         PrimaryButton(title: "Play") {
                             // Close overlay and navigate
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
