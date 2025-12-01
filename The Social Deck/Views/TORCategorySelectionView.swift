@@ -114,7 +114,7 @@ struct TORCategorySelectionView: View {
             description: "Test",
             numberOfCards: 330,
             estimatedTime: "30-45 min",
-            imageName: "Art 1.4",
+            imageName: "TOD artwork",
             type: .truthOrDare,
             cards: [],
             availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]

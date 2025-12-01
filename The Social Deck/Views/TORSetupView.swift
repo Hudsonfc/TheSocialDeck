@@ -37,16 +37,14 @@ struct TORSetupView: View {
                 Spacer()
                 
                 VStack(spacing: 32) {
-                    // Deck title
-                    Text(deck.title)
-                        .font(.system(size: 36, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                        .multilineTextAlignment(.center)
-                    
-                    // Subtitle
-                    Text("Truth or Dare")
-                        .font(.system(size: 24, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    // Game artwork
+                    Image(deck.imageName)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 200, height: 200)
+                        .clipped()
+                        .cornerRadius(100)
+                        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     
                     // Selected categories chips
                     VStack(spacing: 12) {
@@ -130,7 +128,7 @@ struct TORSetupView: View {
                 description: "Choose truth or dare and see where the night takes you",
                 numberOfCards: 330,
                 estimatedTime: "30-45 min",
-                imageName: "Art 1.4",
+                imageName: "TOD artwork",
                 type: .truthOrDare,
                 cards: [],
                 availableCategories: []

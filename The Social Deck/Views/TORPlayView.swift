@@ -426,7 +426,7 @@ struct TORCardBackView: View {
                     description: "Test",
                     numberOfCards: 3,
                     estimatedTime: "5-10 min",
-                    imageName: "Art 1.4",
+                    imageName: "TOD artwork",
                     type: .truthOrDare,
                     cards: [
                         Card(text: "What's your biggest secret?", category: "Party", cardType: .truth),
@@ -442,7 +442,7 @@ struct TORCardBackView: View {
                 description: "Test",
                 numberOfCards: 3,
                 estimatedTime: "5-10 min",
-                imageName: "Art 1.4",
+                imageName: "TOD artwork",
                 type: .truthOrDare,
                 cards: [],
                 availableCategories: []

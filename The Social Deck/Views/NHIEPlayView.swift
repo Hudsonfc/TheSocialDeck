@@ -343,7 +343,7 @@ struct CardBackView: View {
                     description: "Test",
                     numberOfCards: 3,
                     estimatedTime: "5-10 min",
-                    imageName: "Art 1.4",
+                    imageName: "NHIE artwork",
                     type: .neverHaveIEver,
                     cards: [
                         Card(text: "been skydiving", category: "Wild", cardType: nil),
@@ -359,7 +359,7 @@ struct CardBackView: View {
                 description: "Test",
                 numberOfCards: 3,
                 estimatedTime: "5-10 min",
-                imageName: "Art 1.4",
+                imageName: "NHIE artwork",
                 type: .neverHaveIEver,
                 cards: [],
                 availableCategories: []

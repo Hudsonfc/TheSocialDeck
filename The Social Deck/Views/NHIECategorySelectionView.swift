@@ -141,7 +141,7 @@ struct CategoryTile: View {
             description: "Test",
             numberOfCards: 50,
             estimatedTime: "5-10 min",
-            imageName: "Art 1.4",
+            imageName: "NHIE artwork",
             type: .neverHaveIEver,
             cards: [],
             availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]

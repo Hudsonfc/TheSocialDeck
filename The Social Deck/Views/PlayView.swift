@@ -28,7 +28,7 @@ struct PlayView: View {
                     description: "Reveal your wildest experiences and learn about your friends.",
                     numberOfCards: 330,
                     estimatedTime: "30-45 min",
-                    imageName: "Art 1.4",
+                    imageName: "NHIE artwork",
                     type: .neverHaveIEver,
                     cards: allNHIECards,
                     availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
@@ -38,7 +38,7 @@ struct PlayView: View {
                     description: "Choose truth or dare and see where the night takes you.",
                     numberOfCards: 330,
                     estimatedTime: "30-45 min",
-                    imageName: "Art 1.4",
+                    imageName: "TOD artwork",
                     type: .truthOrDare,
                     cards: allTORCards,
                     availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
