@@ -10,6 +10,7 @@ import Foundation
 enum DeckType {
     case neverHaveIEver
     case truthOrDare
+    case wouldYouRather
     case other
 }
 
