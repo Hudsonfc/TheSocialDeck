@@ -18,6 +18,8 @@ struct TORPlayView: View {
     @State private var nextButtonOffset: CGFloat = 20
     @State private var acceptSwitchButtonsOpacity: Double = 0
     @State private var acceptSwitchButtonsOffset: CGFloat = 20
+    @State private var cardOffset: CGFloat = 0
+    @State private var isTransitioning: Bool = false
     
     var body: some View {
         ZStack {
@@ -90,8 +92,12 @@ struct TORPlayView: View {
                         axis: (x: 0, y: 1, z: 0),
                         perspective: 0.5
                     )
+                    .offset(x: cardOffset)
+                    .id(currentCard.id) // Force SwiftUI to treat each card as unique
                     .onTapGesture {
-                        toggleCard()
+                        if !isTransitioning {
+                            toggleCard()
+                        }
                     }
                     .padding(.bottom, 32)
                 }
@@ -273,34 +279,90 @@ struct TORPlayView: View {
     }
     
     private func previousCard() {
-        // Smooth transition: reset rotation and go back
-        withAnimation(.easeOut(duration: 0.2)) {
+        isTransitioning = true
+        
+        // Reset rotation and hide buttons
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
             cardRotation = 0
             acceptSwitchButtonsOpacity = 0
             nextButtonOpacity = 0
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+        
+        // Slide current card right out of screen
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+            cardOffset = 500
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             // Reset flip state before going back
             if manager.isFlipped {
                 manager.flipCard()
             }
+            
+            // Position new card off screen to the left BEFORE changing the card
+            var transaction = Transaction(animation: .none)
+            withTransaction(transaction) {
+                cardOffset = -500
+            }
+            
+            // Now change the card
             manager.previousCard()
+            
+            // Small delay to ensure the card view has updated
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
+                // Slide previous card in from left
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                    cardOffset = 0
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    isTransitioning = false
+                }
+            }
         }
     }
     
     private func nextCard() {
-        // Smooth transition: fade out button and reset rotation
-        withAnimation(.easeOut(duration: 0.2)) {
+        isTransitioning = true
+        
+        // Fade out button and reset rotation
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
             nextButtonOpacity = 0
             nextButtonOffset = 20
             cardRotation = 0
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+        
+        // Slide current card left out of screen
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+            cardOffset = -500
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             // Reset flip state before moving to next card
             if manager.isFlipped {
                 manager.flipCard()
             }
+            
+            // Position new card off screen to the right BEFORE changing the card
+            var transaction = Transaction(animation: .none)
+            withTransaction(transaction) {
+                cardOffset = 500
+            }
+            
+            // Now change the card
             manager.nextCard()
+            
+            // Small delay to ensure the card view has updated
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
+                // Slide new card in from right
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                    cardOffset = 0
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    isTransitioning = false
+                }
+            }
         }
     }
 }

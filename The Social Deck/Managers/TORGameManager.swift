@@ -106,10 +106,12 @@ class TORGameManager: ObservableObject {
         
         // Reset switching state for next card
         switchedCardIndex = nil
-        currentIndex += 1
-        originalCardIndex = currentIndex
         
-        if currentIndex >= cards.count {
+        // Always increment from originalCardIndex, not currentIndex (which might be a switched card)
+        originalCardIndex += 1
+        currentIndex = originalCardIndex
+        
+        if originalCardIndex >= cards.count {
             isFinished = true
         }
     }
