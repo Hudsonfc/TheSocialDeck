@@ -11,6 +11,8 @@ enum DeckType {
     case neverHaveIEver
     case truthOrDare
     case wouldYouRather
+    case mostLikelyTo
+    case twoTruthsAndALie
     case other
 }
 
