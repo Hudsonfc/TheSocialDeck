@@ -14,7 +14,7 @@ class WYRGameManager: ObservableObject {
     @Published var isFlipped: Bool = false
     @Published var isFinished: Bool = false
     
-    init(deck: Deck, selectedCategories: [String]) {
+    init(deck: Deck, selectedCategories: [String], cardCount: Int = 0) {
         // Group cards by category and shuffle each category
         var cardsByCategory: [String: [Card]] = [:]
         for category in selectedCategories {
@@ -22,22 +22,44 @@ class WYRGameManager: ObservableObject {
             cardsByCategory[category] = categoryCards.shuffled()
         }
         
-        // Find the minimum number of cards available in any selected category
-        // This ensures we can take equal amounts from each category
-        let minCardsPerCategory = cardsByCategory.values.map { $0.count }.min() ?? 0
+        // If cardCount is 0, use all available cards (equal from each category)
+        if cardCount == 0 {
+            // Find the minimum number of cards available in any selected category
+            // This ensures we can take equal amounts from each category
+            let cardsPerCategory = cardsByCategory.values.map { $0.count }.min() ?? 0
+            
+            var distributedCards: [Card] = []
+            for category in selectedCategories {
+                if let categoryCards = cardsByCategory[category] {
+                    let cardsToTake = min(cardsPerCategory, categoryCards.count)
+                    distributedCards.append(contentsOf: categoryCards.prefix(cardsToTake))
+                }
+            }
+            self.cards = distributedCards.shuffled()
+            return
+        }
+        
+        // Calculate how many cards per category (round up to ensure we have enough)
+        let cardsPerCategory = (cardCount + selectedCategories.count - 1) / selectedCategories.count
         
         // Take equal number of cards from each selected category
         var distributedCards: [Card] = []
         for category in selectedCategories {
             if let categoryCards = cardsByCategory[category] {
-                // Take up to minCardsPerCategory from each category
-                let cardsToTake = min(minCardsPerCategory, categoryCards.count)
+                let cardsToTake = min(cardsPerCategory, categoryCards.count)
                 distributedCards.append(contentsOf: categoryCards.prefix(cardsToTake))
             }
         }
         
         // Shuffle the final result to mix categories
-        self.cards = distributedCards.shuffled()
+        distributedCards = distributedCards.shuffled()
+        
+        // Trim to exact cardCount if we have more than requested
+        if distributedCards.count > cardCount {
+            self.cards = Array(distributedCards.prefix(cardCount))
+        } else {
+            self.cards = distributedCards
+        }
     }
     
     func currentCard() -> Card? {

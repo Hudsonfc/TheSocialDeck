@@ -13,6 +13,38 @@ struct NHIESetupView: View {
     @State private var navigateToPlay: Bool = false
     @Environment(\.dismiss) private var dismiss
     
+    // Calculate max cards available from selected categories
+    private var maxCardsAvailable: Int {
+        let filteredCards = deck.cards.filter { selectedCategories.contains($0.category) }
+        return filteredCards.count
+    }
+    
+    private var minCards: Int {
+        return min(10, maxCardsAvailable)
+    }
+    
+    private var maxCards: Int {
+        return max(maxCardsAvailable, 10)
+    }
+    
+    // Initialize selectedCardCount based on available cards
+    private var initialCardCount: Double {
+        let max = maxCardsAvailable
+        if max == 0 {
+            return 10
+        }
+        return Double(min(30, max))
+    }
+    
+    @State private var selectedCardCount: Double = 30
+    
+    // Update selectedCardCount when view appears if needed
+    private func updateInitialCardCount() {
+        if selectedCardCount > Double(maxCardsAvailable) {
+            selectedCardCount = Double(initialCardCount)
+        }
+    }
+    
     var body: some View {
         ZStack {
             // White background
@@ -92,6 +124,33 @@ struct NHIESetupView: View {
                         .lineSpacing(4)
                         .padding(.horizontal, 40)
                     
+                    // Card Count Selector
+                    VStack(spacing: 12) {
+                        Text("Number of Cards")
+                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        
+                        VStack(spacing: 8) {
+                            Text("\(Int(selectedCardCount)) cards")
+                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            
+                            Slider(value: $selectedCardCount, in: Double(minCards)...Double(maxCards), step: 1)
+                                .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            
+                            HStack {
+                                Text("\(minCards)")
+                                    .font(.system(size: 12, weight: .regular, design: .rounded))
+                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                Spacer()
+                                Text("\(maxCards)")
+                                    .font(.system(size: 12, weight: .regular, design: .rounded))
+                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                    }
+                    
                     // Start Game button
                     PrimaryButton(title: "Start Game") {
                         navigateToPlay = true
@@ -105,10 +164,13 @@ struct NHIESetupView: View {
             }
         }
         .navigationBarHidden(true)
+        .onAppear {
+            updateInitialCardCount()
+        }
         .background(
             NavigationLink(
                 destination: NHIEPlayView(
-                    manager: NHIEGameManager(deck: deck, selectedCategories: selectedCategories),
+                    manager: NHIEGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount)),
                     deck: deck,
                     selectedCategories: selectedCategories
                 ),

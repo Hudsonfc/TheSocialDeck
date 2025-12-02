@@ -83,7 +83,7 @@ struct WYREndView: View {
                 description: "Test",
                 numberOfCards: 330,
                 estimatedTime: "30-45 min",
-                imageName: "Art 1.4",
+                imageName: "WYR artwork",
                 type: .wouldYouRather,
                 cards: [],
                 availableCategories: []

@@ -442,7 +442,7 @@ struct WYRCardBackView: View {
                     description: "Test",
                     numberOfCards: 3,
                     estimatedTime: "5-10 min",
-                    imageName: "Art 1.4",
+                    imageName: "WYR artwork",
                     type: .wouldYouRather,
                     cards: [
                         Card(text: "", category: "Party", optionA: "Dance on a table", optionB: "Sing karaoke"),
@@ -458,7 +458,7 @@ struct WYRCardBackView: View {
                 description: "Test",
                 numberOfCards: 3,
                 estimatedTime: "5-10 min",
-                imageName: "Art 1.4",
+                imageName: "WYR artwork",
                 type: .wouldYouRather,
                 cards: [],
                 availableCategories: []

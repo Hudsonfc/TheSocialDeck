@@ -48,7 +48,7 @@ struct PlayView: View {
                     description: "Make tough choices and discover what your friends prefer.",
                     numberOfCards: 330,
                     estimatedTime: "30-45 min",
-                    imageName: "Art 1.4",
+                    imageName: "WYR artwork",
                     type: .wouldYouRather,
                     cards: allWYRCards,
                     availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
