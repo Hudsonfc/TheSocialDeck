@@ -1,5 +1,5 @@
 //
-//  WYRGameManager.swift
+//  MusicTriviaGameManager.swift
 //  The Social Deck
 //
 //  Created by Hudson Ferreira on 11/23/25.
@@ -8,35 +8,31 @@
 import Foundation
 import SwiftUI
 
-class WYRGameManager: ObservableObject {
+class MusicTriviaGameManager: ObservableObject {
     @Published var cards: [Card] = []
     @Published var currentIndex: Int = 0
-    @Published var isFlipped: Bool = false
     @Published var isFinished: Bool = false
+    @Published var score: Int = 0
+    @Published var selectedAnswer: String? = nil
+    @Published var showAnswer: Bool = false
+    @Published var userAnswers: [Int: String] = [:] // Track answers by card index
+    @Published var correctAnswers: [Int: Bool] = [:] // Track if user got it right
     
     init(deck: Deck, selectedCategories: [String], cardCount: Int = 0) {
+        // If cardCount is 0, use all available cards
+        if cardCount == 0 {
+            let filteredCards = deck.cards.filter { card in
+                selectedCategories.contains(card.category)
+            }
+            self.cards = filteredCards.shuffled()
+            return
+        }
+        
         // Group cards by category and shuffle each category
         var cardsByCategory: [String: [Card]] = [:]
         for category in selectedCategories {
             let categoryCards = deck.cards.filter { $0.category == category }
             cardsByCategory[category] = categoryCards.shuffled()
-        }
-        
-        // If cardCount is 0, use all available cards (equal from each category)
-        if cardCount == 0 {
-        // Find the minimum number of cards available in any selected category
-        // This ensures we can take equal amounts from each category
-            let cardsPerCategory = cardsByCategory.values.map { $0.count }.min() ?? 0
-            
-            var distributedCards: [Card] = []
-            for category in selectedCategories {
-                if let categoryCards = cardsByCategory[category] {
-                    let cardsToTake = min(cardsPerCategory, categoryCards.count)
-                    distributedCards.append(contentsOf: categoryCards.prefix(cardsToTake))
-                }
-            }
-            self.cards = distributedCards.shuffled()
-            return
         }
         
         // Calculate how many cards per category (round up to ensure we have enough)
@@ -67,16 +63,34 @@ class WYRGameManager: ObservableObject {
         return cards[currentIndex]
     }
     
-    func flipCard() {
-        isFlipped.toggle()
+    func selectAnswer(_ answer: String) {
+        guard !showAnswer, let card = currentCard() else { return }
+        
+        selectedAnswer = answer
+        showAnswer = true
+        userAnswers[currentIndex] = answer
+        
+        // Check if answer is correct
+        if answer == card.correctAnswer {
+            score += 1
+            correctAnswers[currentIndex] = true
+        } else {
+            correctAnswers[currentIndex] = false
+        }
     }
     
     func nextCard() {
-        if isFlipped {
-            isFlipped = false
-        }
+        // Reset for next card
+        selectedAnswer = nil
+        showAnswer = false
         
         currentIndex += 1
+        
+        // Load previous answer if user is revisiting
+        if let previousAnswer = userAnswers[currentIndex] {
+            selectedAnswer = previousAnswer
+            showAnswer = true
+        }
         
         if currentIndex >= cards.count {
             isFinished = true
@@ -85,17 +99,32 @@ class WYRGameManager: ObservableObject {
     
     func previousCard() {
         if currentIndex > 0 {
-            if isFlipped {
-                isFlipped = false
-            }
+            // Reset current state
+            selectedAnswer = nil
+            showAnswer = false
             
             currentIndex -= 1
             isFinished = false
+            
+            // Load previous answer if exists
+            if let previousAnswer = userAnswers[currentIndex] {
+                selectedAnswer = previousAnswer
+                showAnswer = true
+            }
         }
     }
     
     var canGoBack: Bool {
         return currentIndex > 0
+    }
+    
+    var isAnswerCorrect: Bool {
+        guard let card = currentCard(), let selected = selectedAnswer else { return false }
+        return selected == card.correctAnswer
+    }
+    
+    var hasAnswered: Bool {
+        return userAnswers[currentIndex] != nil
     }
 }
 

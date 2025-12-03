@@ -17,9 +17,9 @@ class NHIEGameManager: ObservableObject {
     init(deck: Deck, selectedCategories: [String], cardCount: Int = 0) {
         // If cardCount is 0, use all available cards
         if cardCount == 0 {
-            let filteredCards = deck.cards.filter { card in
-                selectedCategories.contains(card.category)
-            }
+        let filteredCards = deck.cards.filter { card in
+            selectedCategories.contains(card.category)
+        }
             self.cards = filteredCards.shuffled()
             return
         }

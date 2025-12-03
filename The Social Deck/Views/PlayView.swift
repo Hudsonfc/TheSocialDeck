@@ -57,23 +57,14 @@ struct PlayView: View {
             ]
         ),
         GameCategory(
-            title: "Challenge Games",
-            decks: [
-                Deck(title: "Dare Challenge", description: "Complete wild dares and push your limits.", numberOfCards: 55, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "Physical Challenge", description: "Get active with fun physical challenges.", numberOfCards: 35, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "Skill Challenge", description: "Test your skills with various challenges.", numberOfCards: 50, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "Speed Challenge", description: "Race against time with speed challenges.", numberOfCards: 30, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: [])
-            ]
-        ),
-        GameCategory(
             title: "Trivia Games",
             decks: [
-                Deck(title: "Pop Culture Trivia", description: "Test your knowledge of movies, music, and celebrities.", numberOfCards: 100, estimatedTime: "15-20 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "History Trivia", description: "Challenge yourself with historical facts and events.", numberOfCards: 80, estimatedTime: "15-20 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "Science Trivia", description: "Explore the world of science and discovery.", numberOfCards: 90, estimatedTime: "15-20 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "Sports Trivia", description: "Show off your sports knowledge.", numberOfCards: 70, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "Movie Trivia", description: "Test your movie knowledge with film questions.", numberOfCards: 85, estimatedTime: "15-20 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "Music Trivia", description: "Guess songs, artists, and music facts.", numberOfCards: 75, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: [])
+                Deck(title: "Pop Culture Trivia", description: "Test your knowledge of movies, music, and celebrities.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .popCultureTrivia, cards: allPopCultureTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
+                Deck(title: "History Trivia", description: "Challenge yourself with historical facts and events.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .historyTrivia, cards: allHistoryTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
+                Deck(title: "Science Trivia", description: "Explore the world of science and discovery.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .scienceTrivia, cards: allScienceTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
+                Deck(title: "Sports Trivia", description: "Show off your sports knowledge.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .sportsTrivia, cards: allSportsTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
+                Deck(title: "Movie Trivia", description: "Test your movie knowledge with film questions.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .movieTrivia, cards: allMovieTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
+                Deck(title: "Music Trivia", description: "Guess songs, artists, and music facts.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .musicTrivia, cards: allMusicTriviaCards, availableCategories: ["Easy", "Medium", "Hard"])
             ]
         ),
         GameCategory(
@@ -146,6 +137,18 @@ struct PlayView: View {
                             WYRCategorySelectionView(deck: deck)
                         } else if deck.type == .mostLikelyTo {
                             MLTCategorySelectionView(deck: deck)
+                        } else if deck.type == .popCultureTrivia {
+                            PopCultureTriviaCategorySelectionView(deck: deck)
+                        } else if deck.type == .historyTrivia {
+                            HistoryTriviaCategorySelectionView(deck: deck)
+                        } else if deck.type == .scienceTrivia {
+                            ScienceTriviaCategorySelectionView(deck: deck)
+                        } else if deck.type == .sportsTrivia {
+                            SportsTriviaCategorySelectionView(deck: deck)
+                        } else if deck.type == .movieTrivia {
+                            MovieTriviaCategorySelectionView(deck: deck)
+                        } else if deck.type == .musicTrivia {
+                            MusicTriviaCategorySelectionView(deck: deck)
                         }
                     }
                 },
@@ -232,7 +235,7 @@ struct ExpandedDeckOverlay: View {
                         .padding(.bottom, 24)
                     
                     // Play button
-                    if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo {
+                    if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .popCultureTrivia || deck.type == .historyTrivia || deck.type == .scienceTrivia || deck.type == .sportsTrivia || deck.type == .movieTrivia || deck.type == .musicTrivia {
                         PrimaryButton(title: "Play") {
                             // Close overlay and navigate
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {

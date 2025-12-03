@@ -1,0 +1,433 @@
+//
+//  PopCultureTriviaPlayView.swift
+//  The Social Deck
+//
+//  Created by Hudson Ferreira on 11/23/25.
+//
+
+import SwiftUI
+
+struct PopCultureTriviaPlayView: View {
+    @ObservedObject var manager: PopCultureTriviaGameManager
+    let deck: Deck
+    let selectedCategories: [String]
+    @Environment(\.dismiss) private var dismiss
+    @State private var showEndView: Bool = false
+    @State private var nextButtonOpacity: Double = 0
+    @State private var nextButtonOffset: CGFloat = 20
+    @State private var cardOffset: CGFloat = 0
+    @State private var isTransitioning: Bool = false
+    
+    var body: some View {
+        ZStack {
+            // White background
+            Color.white
+                .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Top bar with exit, back button, score, and progress
+                HStack {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .frame(width: 44, height: 44)
+                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .clipShape(Circle())
+                    }
+                    
+                    // Back button
+                    if manager.canGoBack {
+                        Button(action: {
+                            previousCard()
+                        }) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "chevron.left")
+                                    .font(.system(size: 14, weight: .semibold))
+                                Text("Previous")
+                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            }
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .cornerRadius(20)
+                        }
+                        .padding(.leading, 12)
+                    }
+                    
+                    Spacer()
+                    
+                    // Score
+                    VStack(spacing: 2) {
+                        Text("Score")
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        Text("\(manager.score)")
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    }
+                    .padding(.trailing, 12)
+                    
+                    // Progress indicator
+                    if let _ = manager.currentCard() {
+                        Text("\(manager.currentIndex + 1) / \(manager.cards.count)")
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    }
+                }
+                .padding(.horizontal, 40)
+                .padding(.top, 20)
+                .padding(.bottom, 32)
+                
+                Spacer()
+                
+                if let currentCard = manager.currentCard() {
+                    VStack(spacing: 32) {
+                        // Question Card
+                        VStack(spacing: 16) {
+                            Text("Question")
+                                .font(.system(size: 18, weight: .medium, design: .rounded))
+                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            
+                            Text(currentCard.text)
+                                .font(.system(size: 24, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .multilineTextAlignment(.center)
+                                .lineLimit(nil)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .padding(.horizontal, 32)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 32)
+                        .background(
+                            RoundedRectangle(cornerRadius: 24)
+                                .fill(Color.white)
+                                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                        )
+                        .padding(.horizontal, 40)
+                        
+                        // Multiple Choice Options
+                        VStack(spacing: 16) {
+                            if let optionA = currentCard.optionA {
+                                AnswerButton(
+                                    label: "A",
+                                    text: optionA,
+                                    isSelected: manager.selectedAnswer == "A",
+                                    isCorrect: manager.showAnswer && currentCard.correctAnswer == "A",
+                                    isIncorrect: manager.showAnswer && manager.selectedAnswer == "A" && currentCard.correctAnswer != "A",
+                                    isDisabled: manager.showAnswer,
+                                    action: {
+                                        if !manager.showAnswer {
+                                            manager.selectAnswer("A")
+                                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                                                nextButtonOpacity = 1.0
+                                                nextButtonOffset = 0
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+                            
+                            if let optionB = currentCard.optionB {
+                                AnswerButton(
+                                    label: "B",
+                                    text: optionB,
+                                    isSelected: manager.selectedAnswer == "B",
+                                    isCorrect: manager.showAnswer && currentCard.correctAnswer == "B",
+                                    isIncorrect: manager.showAnswer && manager.selectedAnswer == "B" && currentCard.correctAnswer != "B",
+                                    isDisabled: manager.showAnswer,
+                                    action: {
+                                        if !manager.showAnswer {
+                                            manager.selectAnswer("B")
+                                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                                                nextButtonOpacity = 1.0
+                                                nextButtonOffset = 0
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+                            
+                            if let optionC = currentCard.optionC {
+                                AnswerButton(
+                                    label: "C",
+                                    text: optionC,
+                                    isSelected: manager.selectedAnswer == "C",
+                                    isCorrect: manager.showAnswer && currentCard.correctAnswer == "C",
+                                    isIncorrect: manager.showAnswer && manager.selectedAnswer == "C" && currentCard.correctAnswer != "C",
+                                    isDisabled: manager.showAnswer,
+                                    action: {
+                                        if !manager.showAnswer {
+                                            manager.selectAnswer("C")
+                                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                                                nextButtonOpacity = 1.0
+                                                nextButtonOffset = 0
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+                            
+                            if let optionD = currentCard.optionD {
+                                AnswerButton(
+                                    label: "D",
+                                    text: optionD,
+                                    isSelected: manager.selectedAnswer == "D",
+                                    isCorrect: manager.showAnswer && currentCard.correctAnswer == "D",
+                                    isIncorrect: manager.showAnswer && manager.selectedAnswer == "D" && currentCard.correctAnswer != "D",
+                                    isDisabled: manager.showAnswer,
+                                    action: {
+                                        if !manager.showAnswer {
+                                            manager.selectAnswer("D")
+                                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                                                nextButtonOpacity = 1.0
+                                                nextButtonOffset = 0
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                    }
+                    .offset(x: cardOffset)
+                    .id(currentCard.id)
+                }
+                
+                Spacer()
+                
+                // Next button
+                if manager.showAnswer {
+                    Button(action: {
+                        if manager.isFinished {
+                            showEndView = true
+                        } else {
+                            nextCard()
+                        }
+                    }) {
+                        Text(manager.isFinished ? "Finish" : "Next")
+                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .cornerRadius(12)
+                    }
+                    .padding(.horizontal, 40)
+                    .padding(.bottom, 40)
+                    .opacity(nextButtonOpacity)
+                    .offset(y: nextButtonOffset)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .bottom).combined(with: .opacity),
+                        removal: .move(edge: .bottom).combined(with: .opacity)
+                    ))
+                }
+            }
+        }
+        .navigationBarHidden(true)
+        .background(
+            NavigationLink(
+                destination: PopCultureTriviaEndView(manager: manager, deck: deck, selectedCategories: selectedCategories),
+                isActive: $showEndView
+            ) {
+                EmptyView()
+            }
+        )
+        .onChange(of: manager.showAnswer) { oldValue, newValue in
+            if newValue {
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                    nextButtonOpacity = 1.0
+                    nextButtonOffset = 0
+                }
+            }
+        }
+        .onChange(of: manager.isFinished) { oldValue, newValue in
+            if newValue && manager.showAnswer {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    showEndView = true
+                }
+            }
+        }
+        .onAppear {
+            if manager.showAnswer {
+                nextButtonOpacity = 1.0
+                nextButtonOffset = 0
+            }
+        }
+    }
+    
+    private func previousCard() {
+        isTransitioning = true
+        
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+            cardOffset = 500
+            nextButtonOpacity = 0
+            nextButtonOffset = 20
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            var transaction = Transaction(animation: .none)
+            withTransaction(transaction) {
+                cardOffset = -500
+            }
+            
+            manager.previousCard()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                    cardOffset = 0
+                }
+                
+                if manager.showAnswer {
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                        nextButtonOpacity = 1.0
+                        nextButtonOffset = 0
+                    }
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    isTransitioning = false
+                }
+            }
+        }
+    }
+    
+    private func nextCard() {
+        isTransitioning = true
+        
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+            nextButtonOpacity = 0
+            nextButtonOffset = 20
+        }
+        
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+            cardOffset = -500
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            var transaction = Transaction(animation: .none)
+            withTransaction(transaction) {
+                cardOffset = 500
+            }
+            
+            manager.nextCard()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                    cardOffset = 0
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    isTransitioning = false
+                }
+            }
+        }
+    }
+}
+
+fileprivate struct AnswerButton: View {
+    let label: String
+    let text: String
+    let isSelected: Bool
+    let isCorrect: Bool
+    let isIncorrect: Bool
+    let isDisabled: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 16) {
+                // Label circle
+                ZStack {
+                    Circle()
+                        .fill(backgroundColor)
+                        .frame(width: 44, height: 44)
+                    
+                    Text(label)
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundColor(textColor)
+                }
+                
+                // Answer text
+                Text(text)
+                    .font(.system(size: 18, weight: .medium, design: .rounded))
+                    .foregroundColor(textColor)
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                // Checkmark or X
+                if isCorrect {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(.green)
+                } else if isIncorrect {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(.red)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .background(buttonBackgroundColor)
+            .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(borderColor, lineWidth: isSelected ? 3 : 0)
+            )
+        }
+        .disabled(isDisabled)
+        .opacity(isDisabled && !isSelected && !isCorrect ? 0.5 : 1.0)
+    }
+    
+    private var backgroundColor: Color {
+        if isCorrect {
+            return .green.opacity(0.2)
+        } else if isIncorrect {
+            return .red.opacity(0.2)
+        } else if isSelected {
+            return Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+        } else {
+            return Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0)
+        }
+    }
+    
+    private var buttonBackgroundColor: Color {
+        if isCorrect {
+            return .green.opacity(0.1)
+        } else if isIncorrect {
+            return .red.opacity(0.1)
+        } else if isSelected {
+            return Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.1)
+        } else {
+            return Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0)
+        }
+    }
+    
+    private var textColor: Color {
+        if isCorrect {
+            return .green
+        } else if isIncorrect {
+            return .red
+        } else if isSelected {
+            return Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+        } else {
+            return Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0)
+        }
+    }
+    
+    private var borderColor: Color {
+        if isCorrect {
+            return .green
+        } else if isIncorrect {
+            return .red
+        } else {
+            return Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+        }
+    }
+}
+
