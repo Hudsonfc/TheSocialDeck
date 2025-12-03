@@ -21,7 +21,7 @@ struct PlayView: View {
     // Placeholder categories with decks
     let categories: [GameCategory] = [
         GameCategory(
-            title: "Party Games",
+            title: "Classic Games",
             decks: [
                 Deck(
                     title: "Never Have I Ever",
