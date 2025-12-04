@@ -59,8 +59,8 @@ struct PlayView: View {
         GameCategory(
             title: "Trivia Games",
             decks: [
-                Deck(title: "Pop Culture Trivia", description: "Test your knowledge of movies, music, and celebrities.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .popCultureTrivia, cards: allPopCultureTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
-                Deck(title: "History Trivia", description: "Challenge yourself with historical facts and events.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .historyTrivia, cards: allHistoryTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
+                Deck(title: "Pop Culture Trivia", description: "Test your knowledge of movies, music, and celebrities.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Pop Culture Art", type: .popCultureTrivia, cards: allPopCultureTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
+                Deck(title: "History Trivia", description: "Challenge yourself with historical facts and events.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "History Art", type: .historyTrivia, cards: allHistoryTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
                 Deck(title: "Science Trivia", description: "Explore the world of science and discovery.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .scienceTrivia, cards: allScienceTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
                 Deck(title: "Sports Trivia", description: "Show off your sports knowledge.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .sportsTrivia, cards: allSportsTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
                 Deck(title: "Movie Trivia", description: "Test your movie knowledge with film questions.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .movieTrivia, cards: allMovieTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
