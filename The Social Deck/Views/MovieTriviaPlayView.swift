@@ -29,17 +29,6 @@ struct MovieTriviaPlayView: View {
             VStack(spacing: 0) {
                 // Top bar with exit, back button, score, and progress
                 HStack {
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                            .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                            .clipShape(Circle())
-                    }
-                    
                     // Home button
                     Button(action: {
                         showHomeAlert = true
@@ -69,29 +58,33 @@ struct MovieTriviaPlayView: View {
                             .padding(.vertical, 10)
                             .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
                             .cornerRadius(20)
+                            .fixedSize()
                         }
                         .padding(.leading, 12)
                     }
                     
                     Spacer()
                     
-                    // Score
-                    VStack(spacing: 2) {
-                        Text("Score")
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                        Text("\(manager.score)")
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    // Progress indicator and Score
+                    VStack(spacing: 4) {
+                        // Progress indicator
+                        if let _ = manager.currentCard() {
+                            Text("\(manager.currentIndex + 1) / \(manager.cards.count)")
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        }
+                        
+                        // Score
+                        VStack(spacing: 2) {
+                            Text("Score")
+                                .font(.system(size: 12, weight: .medium, design: .rounded))
+                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            Text("\(manager.score)")
+                                .font(.system(size: 18, weight: .bold, design: .rounded))
+                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        }
                     }
                     .padding(.trailing, 12)
-                    
-                    // Progress indicator
-                    if let _ = manager.currentCard() {
-                        Text("\(manager.currentIndex + 1) / \(manager.cards.count)")
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                    }
                 }
                 .padding(.horizontal, 40)
                 .padding(.top, 20)

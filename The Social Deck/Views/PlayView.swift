@@ -70,11 +70,12 @@ struct PlayView: View {
         GameCategory(
             title: "Drinking Games",
             decks: [
-                Deck(title: "Kings Cup", description: "The classic card game that gets everyone involved.", numberOfCards: 52, estimatedTime: "20-30 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "Never Have I Ever", description: "Reveal secrets and take drinks along the way.", numberOfCards: 50, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "Most Likely To", description: "Drink when you're most likely to do something.", numberOfCards: 45, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "Truth or Drink", description: "Answer truthfully or take a drink.", numberOfCards: 60, estimatedTime: "15-20 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "Drunk Jenga", description: "Pull blocks and follow the drinking rules.", numberOfCards: 54, estimatedTime: "20-30 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: [])
+                Deck(title: "Truth or Drink", description: "A question appears on the screen — answer honestly or take a drink.", numberOfCards: 480, estimatedTime: "15-20 min", imageName: "Art 1.4", type: .truthOrDrink, cards: allTruthOrDrinkCards, availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends", "Work", "Family"]),
+                Deck(title: "Category Clash", description: "Race to name items in categories or take a drink.", numberOfCards: 50, estimatedTime: "15-20 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
+                Deck(title: "Spin the Bottle", description: "The classic party game with a drinking twist.", numberOfCards: 40, estimatedTime: "20-30 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
+                Deck(title: "Story Chain", description: "Build a story together or drink when you can't continue.", numberOfCards: 45, estimatedTime: "15-25 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
+                Deck(title: "Memory Master", description: "Test your memory with escalating challenges.", numberOfCards: 55, estimatedTime: "20-30 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
+                Deck(title: "Bluff Call", description: "Call out bluffs or take a drink when caught.", numberOfCards: 50, estimatedTime: "15-20 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: [])
             ]
         ),
         GameCategory(
@@ -149,6 +150,8 @@ struct PlayView: View {
                             MovieTriviaCategorySelectionView(deck: deck)
                         } else if deck.type == .musicTrivia {
                             MusicTriviaCategorySelectionView(deck: deck)
+                        } else if deck.type == .truthOrDrink {
+                            TruthOrDrinkCategorySelectionView(deck: deck)
                         }
                     }
                 },
@@ -235,7 +238,7 @@ struct ExpandedDeckOverlay: View {
                         .padding(.bottom, 24)
                     
                     // Play button
-                    if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .popCultureTrivia || deck.type == .historyTrivia || deck.type == .scienceTrivia || deck.type == .sportsTrivia || deck.type == .movieTrivia || deck.type == .musicTrivia {
+                    if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .popCultureTrivia || deck.type == .historyTrivia || deck.type == .scienceTrivia || deck.type == .sportsTrivia || deck.type == .movieTrivia || deck.type == .musicTrivia || deck.type == .truthOrDrink {
                         PrimaryButton(title: "Play") {
                             // Close overlay and navigate
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
