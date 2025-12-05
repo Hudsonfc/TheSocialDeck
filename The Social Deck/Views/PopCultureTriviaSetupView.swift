@@ -176,10 +176,10 @@ struct PopCultureTriviaSetupView: View {
         }
         .background(
             NavigationLink(
-                destination: PopCultureTriviaPlayView(
-                    manager: PopCultureTriviaGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount)),
+                destination: PopCultureTriviaLoadingView(
                     deck: deck,
-                    selectedCategories: selectedCategories
+                    selectedCategories: selectedCategories,
+                    cardCount: Int(selectedCardCount)
                 ),
                 isActive: $navigateToPlay
             ) {

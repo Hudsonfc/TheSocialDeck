@@ -63,8 +63,8 @@ struct PlayView: View {
                 Deck(title: "History Trivia", description: "Challenge yourself with historical facts and events.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "History Art", type: .historyTrivia, cards: allHistoryTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
                 Deck(title: "Science Trivia", description: "Explore the world of science and discovery.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Science Art", type: .scienceTrivia, cards: allScienceTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
                 Deck(title: "Sports Trivia", description: "Show off your sports knowledge.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Sports Art", type: .sportsTrivia, cards: allSportsTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
-                Deck(title: "Movie Trivia", description: "Test your movie knowledge with film questions.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .movieTrivia, cards: allMovieTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
-                Deck(title: "Music Trivia", description: "Guess songs, artists, and music facts.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .musicTrivia, cards: allMusicTriviaCards, availableCategories: ["Easy", "Medium", "Hard"])
+                Deck(title: "Movie Trivia", description: "Test your movie knowledge with film questions.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Movies Art", type: .movieTrivia, cards: allMovieTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
+                Deck(title: "Music Trivia", description: "Guess songs, artists, and music facts.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Music Art", type: .musicTrivia, cards: allMusicTriviaCards, availableCategories: ["Easy", "Medium", "Hard"])
             ]
         ),
         GameCategory(

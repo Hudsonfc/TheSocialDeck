@@ -164,10 +164,10 @@ struct MusicTriviaSetupView: View {
         }
         .background(
             NavigationLink(
-                destination: MusicTriviaPlayView(
-                    manager: MusicTriviaGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount)),
+                destination: MusicTriviaLoadingView(
                     deck: deck,
-                    selectedCategories: selectedCategories
+                    selectedCategories: selectedCategories,
+                    cardCount: Int(selectedCardCount)
                 ),
                 isActive: $navigateToPlay
             ) {

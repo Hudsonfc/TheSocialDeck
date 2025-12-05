@@ -14,6 +14,8 @@ struct MLTPlayView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var cardRotation: Double = 0
     @State private var showEndView: Bool = false
+    @State private var navigateToHome: Bool = false
+    @State private var showHomeAlert: Bool = false
     @State private var nextButtonOpacity: Double = 0
     @State private var nextButtonOffset: CGFloat = 20
     @State private var cardOffset: CGFloat = 0
@@ -38,6 +40,19 @@ struct MLTPlayView: View {
                             .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
                             .clipShape(Circle())
                     }
+                    
+                    // Home button
+                    Button(action: {
+                        showHomeAlert = true
+                    }) {
+                        Image(systemName: "house.fill")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .frame(width: 44, height: 44)
+                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .clipShape(Circle())
+                    }
+                    .padding(.leading, 12)
                     
                     // Back button
                     if manager.canGoBack {
@@ -140,12 +155,29 @@ struct MLTPlayView: View {
             .animation(.spring(response: 0.5, dampingFraction: 0.8), value: manager.isFlipped)
         }
         .navigationBarHidden(true)
+        .alert("Go to Home?", isPresented: $showHomeAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Go Home", role: .destructive) {
+                navigateToHome = true
+            }
+        } message: {
+            Text("Are you sure you want to go back to the home screen? Your progress will be lost.")
+        }
         .background(
-            NavigationLink(
-                destination: MLTEndView(deck: deck, selectedCategories: selectedCategories),
-                isActive: $showEndView
-            ) {
-                EmptyView()
+            Group {
+                NavigationLink(
+                    destination: MLTEndView(deck: deck, selectedCategories: selectedCategories),
+                    isActive: $showEndView
+                ) {
+                    EmptyView()
+                }
+                
+                NavigationLink(
+                    destination: HomeView(),
+                    isActive: $navigateToHome
+                ) {
+                    EmptyView()
+                }
             }
         )
         .onChange(of: manager.isFlipped) { oldValue, newValue in
