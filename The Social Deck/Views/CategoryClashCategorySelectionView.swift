@@ -112,7 +112,7 @@ struct CategoryClashCategorySelectionView: View {
             description: "Test",
             numberOfCards: 250,
             estimatedTime: "15-20 min",
-            imageName: "Art 1.4",
+            imageName: "CC artwork",
             type: .categoryClash,
             cards: [],
             availableCategories: ["Food & Drink", "Pop Culture", "General", "Sports & Activities", "Animals & Nature"]

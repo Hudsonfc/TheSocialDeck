@@ -83,7 +83,7 @@ struct CategoryClashEndView: View {
                 description: "Test",
                 numberOfCards: 250,
                 estimatedTime: "15-20 min",
-                imageName: "Art 1.4",
+                imageName: "CC artwork",
                 type: .categoryClash,
                 cards: [],
                 availableCategories: []

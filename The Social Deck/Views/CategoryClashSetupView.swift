@@ -190,7 +190,7 @@ struct CategoryClashSetupView: View {
                 description: "The phone shows a category (like \"types of beers\" or \"things that are red\"). Players take turns naming something that fits. You hesitate, repeat an answer, or freeze? You drink. The pace gets faster each round, turning it into a hilarious pressure game.",
                 numberOfCards: 250,
                 estimatedTime: "15-20 min",
-                imageName: "Art 1.4",
+                imageName: "CC artwork",
                 type: .categoryClash,
                 cards: [],
                 availableCategories: []

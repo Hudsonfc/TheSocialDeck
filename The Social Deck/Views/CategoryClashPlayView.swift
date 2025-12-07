@@ -267,7 +267,7 @@ struct CategoryClashPlayView: View {
                     description: "Test",
                     numberOfCards: 3,
                     estimatedTime: "15-20 min",
-                    imageName: "Art 1.4",
+                    imageName: "CC artwork",
                     type: .categoryClash,
                     cards: [
                         Card(text: "Types of beers", category: "Food & Drink", cardType: nil),
@@ -283,7 +283,7 @@ struct CategoryClashPlayView: View {
                 description: "Test",
                 numberOfCards: 3,
                 estimatedTime: "15-20 min",
-                imageName: "Art 1.4",
+                imageName: "CC artwork",
                 type: .categoryClash,
                 cards: [],
                 availableCategories: []
