@@ -37,24 +37,22 @@ struct MLTCategorySelectionView: View {
                     
                     VStack(spacing: 8) {
                         Text("Select Categories")
-                            .font(.system(size: 36, weight: .bold, design: .rounded))
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
                             .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                         
-                        Text("Choose one or more categories to play")
-                            .font(.system(size: 16, weight: .regular, design: .rounded))
+                        Text("Choose one or more categories")
+                            .font(.system(size: 15, weight: .regular, design: .rounded))
                             .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                     }
                     .padding(.horizontal, 40)
+                    .padding(.bottom, 8)
                 }
                 
                 Spacer()
                 
                 // Category grid
                 ScrollView {
-                    LazyVGrid(columns: [
-                        GridItem(.flexible(), spacing: 16),
-                        GridItem(.flexible(), spacing: 16)
-                    ], spacing: 16) {
+                    VStack(spacing: 12) {
                         ForEach(deck.availableCategories, id: \.self) { category in
                             CategoryTile(
                                 category: category,

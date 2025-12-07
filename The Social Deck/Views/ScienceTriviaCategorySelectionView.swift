@@ -41,11 +41,11 @@ struct ScienceTriviaCategorySelectionView: View {
                             .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                         
                         Text("Choose one difficulty level")
-                            .font(.system(size: 16, weight: .regular, design: .rounded))
+                            .font(.system(size: 15, weight: .regular, design: .rounded))
                             .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                     }
                     .padding(.horizontal, 40)
-                    .padding(.bottom, 40)
+                    .padding(.bottom, 8)
                 }
                 
                 Spacer()

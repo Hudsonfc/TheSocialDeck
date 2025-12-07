@@ -440,7 +440,7 @@ struct TruthOrDrinkCardBackView: View {
                     description: "Test",
                     numberOfCards: 3,
                     estimatedTime: "5-10 min",
-                    imageName: "Art 1.4",
+                    imageName: "TOD artwork 2",
                     type: .truthOrDrink,
                     cards: [
                         Card(text: "What's your biggest secret?", category: "Party", cardType: nil),
@@ -456,7 +456,7 @@ struct TruthOrDrinkCardBackView: View {
                 description: "Test",
                 numberOfCards: 3,
                 estimatedTime: "5-10 min",
-                imageName: "Art 1.4",
+                imageName: "TOD artwork 2",
                 type: .truthOrDrink,
                 cards: [],
                 availableCategories: []

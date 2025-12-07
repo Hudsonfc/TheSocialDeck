@@ -1,5 +1,5 @@
 //
-//  TruthOrDrinkSetupView.swift
+//  CategoryClashSetupView.swift
 //  The Social Deck
 //
 //  Created by Hudson Ferreira on 11/23/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct TruthOrDrinkSetupView: View {
+struct CategoryClashSetupView: View {
     let deck: Deck
     let selectedCategories: [String]
     @State private var navigateToPlay: Bool = false
@@ -126,12 +126,12 @@ struct TruthOrDrinkSetupView: View {
                     
                     // Card Count Selector
                     VStack(spacing: 12) {
-                        Text("Number of Cards")
+                        Text("Number of Categories")
                             .font(.system(size: 16, weight: .medium, design: .rounded))
                             .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                         
                         VStack(spacing: 8) {
-                            Text("\(Int(selectedCardCount)) cards")
+                            Text("\(Int(selectedCardCount)) categories")
                                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                                 .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                             
@@ -169,8 +169,8 @@ struct TruthOrDrinkSetupView: View {
         }
         .background(
             NavigationLink(
-                destination: TruthOrDrinkPlayView(
-                    manager: TruthOrDrinkGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount)),
+                destination: CategoryClashPlayView(
+                    manager: CategoryClashGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount)),
                     deck: deck,
                     selectedCategories: selectedCategories
                 ),
@@ -184,18 +184,18 @@ struct TruthOrDrinkSetupView: View {
 
 #Preview {
     NavigationView {
-        TruthOrDrinkSetupView(
+        CategoryClashSetupView(
             deck: Deck(
-                title: "Truth or Drink",
-                description: "A question appears on the screen — answer honestly or take a drink.",
-                numberOfCards: 360,
+                title: "Category Clash",
+                description: "The phone shows a category (like \"types of beers\" or \"things that are red\"). Players take turns naming something that fits. You hesitate, repeat an answer, or freeze? You drink. The pace gets faster each round, turning it into a hilarious pressure game.",
+                numberOfCards: 250,
                 estimatedTime: "15-20 min",
-                imageName: "TOD artwork 2",
-                type: .truthOrDrink,
+                imageName: "Art 1.4",
+                type: .categoryClash,
                 cards: [],
                 availableCategories: []
             ),
-            selectedCategories: ["Party", "Wild"]
+            selectedCategories: ["Food & Drink", "Pop Culture"]
         )
     }
 }

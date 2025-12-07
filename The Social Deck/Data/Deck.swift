@@ -20,6 +20,7 @@ enum DeckType {
     case movieTrivia
     case musicTrivia
     case truthOrDrink
+    case categoryClash
     case other
 }
 

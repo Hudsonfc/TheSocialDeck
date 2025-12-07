@@ -73,15 +73,15 @@ struct SportsTriviaPlayView: View {
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                                 .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                         }
-                        
-                        // Score
-                        VStack(spacing: 2) {
-                            Text("Score")
-                                .font(.system(size: 12, weight: .medium, design: .rounded))
-                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                            Text("\(manager.score)")
-                                .font(.system(size: 18, weight: .bold, design: .rounded))
-                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    
+                    // Score
+                    VStack(spacing: 2) {
+                        Text("Score")
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        Text("\(manager.score)")
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                         }
                     }
                     .padding(.trailing, 12)

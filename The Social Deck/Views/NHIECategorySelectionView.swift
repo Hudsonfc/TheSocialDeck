@@ -37,24 +37,22 @@ struct NHIECategorySelectionView: View {
                     
                     VStack(spacing: 8) {
                         Text("Select Categories")
-                            .font(.system(size: 36, weight: .bold, design: .rounded))
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
                             .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                         
-                        Text("Choose one or more categories to play")
-                            .font(.system(size: 16, weight: .regular, design: .rounded))
+                        Text("Choose one or more categories")
+                            .font(.system(size: 15, weight: .regular, design: .rounded))
                             .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                     }
                     .padding(.horizontal, 40)
+                    .padding(.bottom, 8)
                 }
                 
                 Spacer()
                 
                 // Category grid
                 ScrollView {
-                    LazyVGrid(columns: [
-                        GridItem(.flexible(), spacing: 16),
-                        GridItem(.flexible(), spacing: 16)
-                    ], spacing: 16) {
+                    VStack(spacing: 12) {
                         ForEach(deck.availableCategories, id: \.self) { category in
                             CategoryTile(
                                 category: category,
@@ -114,21 +112,31 @@ struct CategoryTile: View {
     
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 8) {
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 24, weight: .semibold))
-                    .foregroundColor(isSelected ? .white : Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                
+            HStack {
                 Text(category)
-                    .font(.system(size: 18, weight: .semibold, design: .rounded))
-                    .foregroundColor(isSelected ? .white : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .foregroundColor(isSelected ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                
+                Spacer()
+                
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                }
             }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 18)
             .frame(maxWidth: .infinity)
-            .frame(height: 100)
             .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(isSelected ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.white)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(isSelected ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0xE5/255.0, green: 0xE5/255.0, blue: 0xE5/255.0), lineWidth: isSelected ? 2 : 1)
             )
+            )
+            .shadow(color: isSelected ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.15) : Color.black.opacity(0.05), radius: isSelected ? 8 : 4, x: 0, y: 2)
         }
         .buttonStyle(PlainButtonStyle())
     }

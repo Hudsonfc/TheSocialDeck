@@ -1,5 +1,5 @@
 //
-//  TORCategorySelectionView.swift
+//  CategoryClashCategorySelectionView.swift
 //  The Social Deck
 //
 //  Created by Hudson Ferreira on 11/23/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct TORCategorySelectionView: View {
+struct CategoryClashCategorySelectionView: View {
     let deck: Deck
     @State private var selectedCategories: Set<String> = []
     @State private var navigateToSetup: Bool = false
@@ -96,7 +96,7 @@ struct TORCategorySelectionView: View {
         .navigationBarHidden(true)
         .background(
             NavigationLink(
-                destination: TORSetupView(deck: deck, selectedCategories: Array(selectedCategories)),
+                destination: CategoryClashSetupView(deck: deck, selectedCategories: Array(selectedCategories)),
                 isActive: $navigateToSetup
             ) {
                 EmptyView()
@@ -107,15 +107,15 @@ struct TORCategorySelectionView: View {
 
 #Preview {
     NavigationView {
-        TORCategorySelectionView(deck: Deck(
-            title: "Truth or Dare",
+        CategoryClashCategorySelectionView(deck: Deck(
+            title: "Category Clash",
             description: "Test",
-            numberOfCards: 330,
-            estimatedTime: "30-45 min",
-            imageName: "TOD artwork",
-            type: .truthOrDare,
+            numberOfCards: 250,
+            estimatedTime: "15-20 min",
+            imageName: "Art 1.4",
+            type: .categoryClash,
             cards: [],
-            availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
+            availableCategories: ["Food & Drink", "Pop Culture", "General", "Sports & Activities", "Animals & Nature"]
         ))
     }
 }

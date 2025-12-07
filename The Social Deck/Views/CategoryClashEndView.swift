@@ -1,5 +1,5 @@
 //
-//  TruthOrDrinkEndView.swift
+//  CategoryClashEndView.swift
 //  The Social Deck
 //
 //  Created by Hudson Ferreira on 11/23/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct TruthOrDrinkEndView: View {
+struct CategoryClashEndView: View {
     let deck: Deck
     let selectedCategories: [String]
     @Environment(\.dismiss) private var dismiss
@@ -33,7 +33,7 @@ struct TruthOrDrinkEndView: View {
                 
                 // Completion text
                 VStack(spacing: 12) {
-                    Text("Deck Completed!")
+                    Text("Game Completed!")
                         .font(.system(size: 36, weight: .bold, design: .rounded))
                         .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                         .multilineTextAlignment(.center)
@@ -77,18 +77,18 @@ struct TruthOrDrinkEndView: View {
 
 #Preview {
     NavigationView {
-        TruthOrDrinkEndView(
+        CategoryClashEndView(
             deck: Deck(
-                title: "Truth or Drink",
+                title: "Category Clash",
                 description: "Test",
-                numberOfCards: 360,
+                numberOfCards: 250,
                 estimatedTime: "15-20 min",
-                imageName: "TOD artwork 2",
-                type: .truthOrDrink,
+                imageName: "Art 1.4",
+                type: .categoryClash,
                 cards: [],
                 availableCategories: []
             ),
-            selectedCategories: ["Party", "Wild"]
+            selectedCategories: ["Food & Drink", "Pop Culture"]
         )
     }
 }
