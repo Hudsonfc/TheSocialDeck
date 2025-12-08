@@ -22,6 +22,7 @@ enum DeckType {
     case truthOrDrink
     case categoryClash
     case spinTheBottle
+    case storyChain
     case other
 }
 
