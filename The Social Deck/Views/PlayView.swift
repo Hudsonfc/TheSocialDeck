@@ -18,6 +18,7 @@ struct PlayView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var expandedDeck: Deck? = nil
     @State private var navigateToCategorySelection: Deck? = nil
+    @State private var navigateToPlayView: Deck? = nil
     // Placeholder categories with decks
     let categories: [GameCategory] = [
         GameCategory(
@@ -72,7 +73,7 @@ struct PlayView: View {
             decks: [
                 Deck(title: "Truth or Drink", description: "A question appears on the screen — answer honestly or take a drink.", numberOfCards: 480, estimatedTime: "15-20 min", imageName: "TOD artwork 2", type: .truthOrDrink, cards: allTruthOrDrinkCards, availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends", "Work", "Family"]),
                 Deck(title: "Category Clash", description: "The phone shows a category (like \"types of beers\" or \"things that are red\"). Players take turns naming something that fits. You hesitate, repeat an answer, or freeze? You drink. The pace gets faster each round, turning it into a hilarious pressure game.", numberOfCards: 250, estimatedTime: "15-20 min", imageName: "CC artwork", type: .categoryClash, cards: allCategoryClashCards, availableCategories: ["Food & Drink", "Pop Culture", "General", "Sports & Activities", "Animals & Nature"]),
-                Deck(title: "Spin the Bottle", description: "The classic party game with a drinking twist.", numberOfCards: 40, estimatedTime: "20-30 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
+                Deck(title: "Spin the Bottle", description: "Tap to spin and let the bottle decide everyone's fate. No strategy, no mercy, just pure chaos. If it points at you… well, take it up with the bottle.", numberOfCards: 40, estimatedTime: "20-30 min", imageName: "STB artwork", type: .spinTheBottle, cards: [], availableCategories: []),
                 Deck(title: "Story Chain", description: "Build a story together or drink when you can't continue.", numberOfCards: 45, estimatedTime: "15-25 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
                 Deck(title: "Memory Master", description: "Test your memory with escalating challenges.", numberOfCards: 55, estimatedTime: "20-30 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
                 Deck(title: "Bluff Call", description: "Call out bluffs or take a drink when caught.", numberOfCards: 50, estimatedTime: "15-20 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: [])
@@ -122,7 +123,7 @@ struct PlayView: View {
             
             // Expanded card overlay
             if let deck = expandedDeck {
-                ExpandedDeckOverlay(deck: deck, expandedDeck: $expandedDeck, navigateToCategorySelection: $navigateToCategorySelection)
+                ExpandedDeckOverlay(deck: deck, expandedDeck: $expandedDeck, navigateToCategorySelection: $navigateToCategorySelection, navigateToPlayView: $navigateToPlayView)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -165,6 +166,23 @@ struct PlayView: View {
                 EmptyView()
             }
         )
+        .background(
+            NavigationLink(
+                destination: Group {
+                    if let deck = navigateToPlayView {
+                        if deck.type == .spinTheBottle {
+                            SpinTheBottleView()
+                        }
+                    }
+                },
+                isActive: Binding(
+                    get: { navigateToPlayView != nil },
+                    set: { if !$0 { navigateToPlayView = nil } }
+                )
+            ) {
+                EmptyView()
+            }
+        )
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
@@ -185,6 +203,7 @@ struct ExpandedDeckOverlay: View {
     let deck: Deck
     @Binding var expandedDeck: Deck?
     @Binding var navigateToCategorySelection: Deck?
+    @Binding var navigateToPlayView: Deck?
     
     var body: some View {
         ZStack {
@@ -248,6 +267,19 @@ struct ExpandedDeckOverlay: View {
                             }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                 navigateToCategorySelection = deck
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.top, 8)
+                        .padding(.bottom, 40)
+                    } else if deck.type == .spinTheBottle {
+                        PrimaryButton(title: "Play") {
+                            // Close overlay and navigate
+                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                expandedDeck = nil
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                navigateToPlayView = deck
                             }
                         }
                         .padding(.horizontal, 40)
