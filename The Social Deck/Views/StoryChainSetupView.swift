@@ -63,32 +63,39 @@ struct StoryChainSetupView: View {
                         }
                         
                         // Player list
-                        ScrollView {
-                            VStack(spacing: 12) {
-                                ForEach(Array(players.enumerated()), id: \.offset) { index, player in
-                                    HStack {
-                                        Text(player)
-                                            .font(.system(size: 16, weight: .medium, design: .rounded))
-                                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                        
-                                        Spacer()
-                                        
-                                        Button(action: {
-                                            players.remove(at: index)
-                                        }) {
-                                            Image(systemName: "xmark.circle.fill")
-                                                .font(.system(size: 20))
-                                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        if players.isEmpty {
+                            Text("No players added yet")
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
+                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                .padding(.vertical, 20)
+                        } else {
+                            ScrollView {
+                                VStack(spacing: 12) {
+                                    ForEach(Array(players.enumerated()), id: \.offset) { index, player in
+                                        HStack {
+                                            Text(player)
+                                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                            
+                                            Spacer()
+                                            
+                                            Button(action: {
+                                                players.remove(at: index)
+                                            }) {
+                                                Image(systemName: "xmark.circle.fill")
+                                                    .font(.system(size: 20))
+                                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                            }
                                         }
+                                        .padding(.horizontal, 20)
+                                        .padding(.vertical, 14)
+                                        .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                                        .cornerRadius(12)
                                     }
-                                    .padding(.horizontal, 20)
-                                    .padding(.vertical, 14)
-                                    .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                                    .cornerRadius(12)
                                 }
                             }
+                            .frame(maxHeight: 200)
                         }
-                        .frame(maxHeight: 200)
                         
                         // Add player input
                         HStack(spacing: 12) {
@@ -98,6 +105,8 @@ struct StoryChainSetupView: View {
                                 .padding(.vertical, 12)
                                 .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
                                 .cornerRadius(12)
+                                .autocapitalization(.words)
+                                .disableAutocorrection(true)
                                 .onSubmit {
                                     addPlayer()
                                 }
@@ -142,7 +151,10 @@ struct StoryChainSetupView: View {
     
     private func addPlayer() {
         let trimmedName = newPlayerName.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !trimmedName.isEmpty && !players.contains(trimmedName) {
+        // Validate: not empty, not duplicate, and reasonable length
+        if !trimmedName.isEmpty 
+            && !players.contains(trimmedName) 
+            && trimmedName.count <= 30 {
             players.append(trimmedName)
             newPlayerName = ""
         }
@@ -155,9 +167,9 @@ struct StoryChainSetupView: View {
             deck: Deck(
                 title: "Story Chain",
                 description: "Build a story together or drink when you can't continue.",
-                numberOfCards: 75,
+                numberOfCards: 145,
                 estimatedTime: "15-25 min",
-                imageName: "Art 1.4",
+                imageName: "SC artwork",
                 type: .storyChain,
                 cards: allStoryChainCards,
                 availableCategories: []

@@ -128,9 +128,9 @@ struct StoryChainEndView: View {
             deck: Deck(
                 title: "Story Chain",
                 description: "Build a story together or drink when you can't continue.",
-                numberOfCards: 75,
+                numberOfCards: 145,
                 estimatedTime: "15-25 min",
-                imageName: "Art 1.4",
+                imageName: "SC artwork",
                 type: .storyChain,
                 cards: [],
                 availableCategories: []

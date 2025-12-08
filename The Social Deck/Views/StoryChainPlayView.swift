@@ -180,6 +180,8 @@ struct StoryChainPlayView: View {
                             .cornerRadius(12)
                             .focused($isTextFieldFocused)
                             .lineLimit(3...6)
+                            .autocapitalization(.sentences)
+                            .disableAutocorrection(false)
                         
                         Button(action: {
                             manager.submitSentence()
@@ -274,9 +276,9 @@ struct StoryChainPlayView: View {
                 deck: Deck(
                     title: "Story Chain",
                     description: "Build a story together or drink when you can't continue.",
-                    numberOfCards: 75,
+                    numberOfCards: 145,
                     estimatedTime: "15-25 min",
-                    imageName: "Art 1.4",
+                    imageName: "SC artwork",
                     type: .storyChain,
                     cards: allStoryChainCards,
                     availableCategories: []
@@ -286,7 +288,7 @@ struct StoryChainPlayView: View {
             deck: Deck(
                 title: "Story Chain",
                 description: "Build a story together or drink when you can't continue.",
-                numberOfCards: 75,
+                numberOfCards: 125,
                 estimatedTime: "15-25 min",
                 imageName: "Art 1.4",
                 type: .storyChain,

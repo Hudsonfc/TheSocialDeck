@@ -24,7 +24,8 @@ class StoryChainGameManager: ObservableObject {
     @Published var currentSentence: String = "" // Current player's input
     
     init(deck: Deck, players: [String]) {
-        self.players = players
+        // Ensure we have at least one player
+        self.players = players.isEmpty ? ["Player 1"] : players
         // Get a random starting sentence
         if let randomCard = deck.cards.randomElement() {
             self.startingSentence = randomCard.text
