@@ -131,7 +131,8 @@ fileprivate struct DifficultyButton: View {
     var body: some View {
         Button(action: onTap) {
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
+                Spacer()
+                VStack(alignment: .center, spacing: 4) {
                     Text(difficulty.displayName)
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
                         .foregroundColor(isSelected ? .white : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))

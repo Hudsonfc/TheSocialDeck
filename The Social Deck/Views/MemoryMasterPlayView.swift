@@ -22,7 +22,7 @@ struct MemoryMasterPlayView: View {
         if cardCount <= 12 {
             cols = 3 // Easy: 3x4 grid
         } else if cardCount <= 20 {
-            cols = 4 // Medium: 4x5 grid
+            cols = 5 // Medium: 5x4 grid
         } else {
             cols = 6 // Hard and Expert: 6 columns (Hard: 6x5, Expert: 6x7)
         }
@@ -114,8 +114,10 @@ struct MemoryMasterPlayView: View {
                         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: manager.isPreviewPhase)
                 }
                 
-                // Card grid
-                ScrollView {
+                // Card grid - centered for easy and medium
+                if manager.cards.count <= 20 {
+                    // Center the grid for easy (3x4) and medium (5x4)
+                    Spacer()
                     LazyVGrid(columns: columns, spacing: 8) {
                         ForEach(manager.cards.indices, id: \.self) { index in
                             MemoryCardView(
@@ -129,7 +131,25 @@ struct MemoryMasterPlayView: View {
                         }
                     }
                     .padding(.horizontal, 20)
-                    .padding(.bottom, 40)
+                    Spacer()
+                } else {
+                    // Scrollable for hard and expert
+                    ScrollView {
+                        LazyVGrid(columns: columns, spacing: 8) {
+                            ForEach(manager.cards.indices, id: \.self) { index in
+                                MemoryCardView(
+                                    manager: manager,
+                                    cardIndex: index,
+                                    cardSize: cardSize,
+                                    onTap: {
+                                        manager.flipCard(at: index)
+                                    }
+                                )
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 40)
+                    }
                 }
             }
         }
