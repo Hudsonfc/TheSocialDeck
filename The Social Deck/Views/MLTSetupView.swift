@@ -169,10 +169,10 @@ struct MLTSetupView: View {
         }
         .background(
             NavigationLink(
-                destination: MLTPlayView(
-                    manager: MLTGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount)),
+                destination: MLTLoadingView(
                     deck: deck,
-                    selectedCategories: selectedCategories
+                    selectedCategories: selectedCategories,
+                    cardCount: Int(selectedCardCount)
                 ),
                 isActive: $navigateToPlay
             ) {

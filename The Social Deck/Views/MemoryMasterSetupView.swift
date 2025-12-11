@@ -111,9 +111,9 @@ struct MemoryMasterSetupView: View {
         .navigationBarHidden(true)
         .background(
             NavigationLink(
-                destination: MemoryMasterPlayView(
-                    manager: MemoryMasterGameManager(difficulty: selectedDifficulty),
-                    deck: deck
+                destination: MemoryMasterLoadingView(
+                    deck: deck,
+                    difficulty: selectedDifficulty
                 ),
                 isActive: $navigateToPlay
             ) {
@@ -131,7 +131,7 @@ fileprivate struct DifficultyButton: View {
     var body: some View {
         Button(action: onTap) {
             HStack {
-                Spacer()
+                    Spacer()
                 VStack(alignment: .center, spacing: 4) {
                     Text(difficulty.displayName)
                         .font(.system(size: 18, weight: .semibold, design: .rounded))

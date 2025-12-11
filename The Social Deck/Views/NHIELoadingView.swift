@@ -1,5 +1,5 @@
 //
-//  ScienceTriviaLoadingView.swift
+//  NHIELoadingView.swift
 //  The Social Deck
 //
 //  Created by Hudson Ferreira on 11/23/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ScienceTriviaLoadingView: View {
+struct NHIELoadingView: View {
     let deck: Deck
     let selectedCategories: [String]
     let cardCount: Int
@@ -21,6 +21,7 @@ struct ScienceTriviaLoadingView: View {
     
     var body: some View {
         ZStack {
+            // White background
             Color.white
                 .ignoresSafeArea()
             
@@ -92,8 +93,8 @@ struct ScienceTriviaLoadingView: View {
         }
         .background(
             NavigationLink(
-                destination: ScienceTriviaPlayView(
-                    manager: ScienceTriviaGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: cardCount),
+                destination: NHIEPlayView(
+                    manager: NHIEGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: cardCount),
                     deck: deck,
                     selectedCategories: selectedCategories
                 ),
@@ -104,3 +105,4 @@ struct ScienceTriviaLoadingView: View {
         )
     }
 }
+

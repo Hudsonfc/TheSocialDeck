@@ -169,10 +169,10 @@ struct TruthOrDrinkSetupView: View {
         }
         .background(
             NavigationLink(
-                destination: TruthOrDrinkPlayView(
-                    manager: TruthOrDrinkGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount)),
+                destination: TruthOrDrinkLoadingView(
                     deck: deck,
-                    selectedCategories: selectedCategories
+                    selectedCategories: selectedCategories,
+                    cardCount: Int(selectedCardCount)
                 ),
                 isActive: $navigateToPlay
             ) {

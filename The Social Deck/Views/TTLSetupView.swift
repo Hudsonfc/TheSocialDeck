@@ -169,10 +169,10 @@ struct TTLSetupView: View {
         }
         .background(
             NavigationLink(
-                destination: TTLPlayView(
-                    manager: TTLGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount)),
+                destination: TTLLoadingView(
                     deck: deck,
-                    selectedCategories: selectedCategories
+                    selectedCategories: selectedCategories,
+                    cardCount: Int(selectedCardCount)
                 ),
                 isActive: $navigateToPlay
             ) {

@@ -12,46 +12,81 @@ struct HistoryTriviaLoadingView: View {
     let selectedCategories: [String]
     let cardCount: Int
     @State private var navigateToPlay: Bool = false
-    @State private var scale: CGFloat = 1.0
+    @State private var logoOpacity: Double = 0
+    @State private var logoScale: CGFloat = 0.7
+    @State private var logoRotation: Double = 0
+    @State private var logoBounce: CGFloat = 0
+    @State private var hasNavigated: Bool = false
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         ZStack {
             Color.white
                 .ignoresSafeArea()
             
-            VStack(spacing: 40) {
+            VStack(spacing: 0) {
                 Spacer()
                 
-                // Game artwork with pulsing animation
-                Image(deck.imageName)
+                // The Social Deck Logo with bouncy animations
+                Image("TheSocialDeckLogo")
                     .resizable()
-                    .scaledToFill()
-                    .frame(width: 200, height: 200)
-                    .clipped()
-                    .cornerRadius(100)
-                    .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 5)
-                    .scaleEffect(scale)
-                
-                // Loading text
-                Text("Loading...")
-                    .font(.system(size: 24, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                
-                // Custom animated loading indicator
-                LoadingIndicator()
+                    .scaledToFit()
+                    .frame(width: 70, height: 70)
+                    .opacity(logoOpacity)
+                    .scaleEffect(logoScale)
+                    .rotationEffect(.degrees(logoRotation))
+                    .offset(y: logoBounce)
                 
                 Spacer()
             }
         }
         .navigationBarHidden(true)
         .onAppear {
-            // Start pulsing animation for artwork
-            withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
-                scale = 1.1
+            // If we've already navigated (meaning we came back from PlayView), dismiss immediately
+            if hasNavigated {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    dismiss()
+                }
+                return
             }
             
-            // Navigate after 3 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            // Logo animation: fade in with bouncy scale up
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.5)) {
+                logoOpacity = 1.0
+                logoScale = 1.1
+            }
+            
+            // Bounce back after initial scale
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.4)) {
+                    logoScale = 1.0
+                }
+            }
+            
+            // Continuous bouncy scale animation
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                withAnimation(.spring(response: 0.6, dampingFraction: 0.5).repeatForever(autoreverses: true)) {
+                    logoScale = 1.15
+                }
+            }
+            
+            // Bouncy vertical movement
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                withAnimation(.spring(response: 0.8, dampingFraction: 0.6).repeatForever(autoreverses: true)) {
+                    logoBounce = -8
+                }
+            }
+            
+            // Slow continuous rotation animation
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                withAnimation(.linear(duration: 3.0).repeatForever(autoreverses: false)) {
+                    logoRotation = 360
+                }
+            }
+            
+            // Navigate after short delay (1.5 seconds total)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                hasNavigated = true
                 navigateToPlay = true
             }
         }
