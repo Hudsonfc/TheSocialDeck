@@ -23,6 +23,7 @@ enum DeckType {
     case categoryClash
     case spinTheBottle
     case storyChain
+    case memoryMaster
     case other
 }
 

@@ -20,6 +20,7 @@ struct PlayView: View {
     @State private var navigateToCategorySelection: Deck? = nil
     @State private var navigateToPlayView: Deck? = nil
     @State private var navigateToStoryChainSetup: Deck? = nil
+    @State private var navigateToMemoryMasterSetup: Deck? = nil
     // Placeholder categories with decks
     let categories: [GameCategory] = [
         GameCategory(
@@ -76,7 +77,7 @@ struct PlayView: View {
                 Deck(title: "Category Clash", description: "The phone shows a category (like \"types of beers\" or \"things that are red\"). Players take turns naming something that fits. You hesitate, repeat an answer, or freeze? You drink. The pace gets faster each round, turning it into a hilarious pressure game.", numberOfCards: 250, estimatedTime: "15-20 min", imageName: "CC artwork", type: .categoryClash, cards: allCategoryClashCards, availableCategories: ["Food & Drink", "Pop Culture", "General", "Sports & Activities", "Animals & Nature"]),
                 Deck(title: "Spin the Bottle", description: "Tap to spin and let the bottle decide everyone's fate. No strategy, no mercy, just pure chaos. If it points at you… well, take it up with the bottle.", numberOfCards: 40, estimatedTime: "20-30 min", imageName: "STB artwork", type: .spinTheBottle, cards: [], availableCategories: []),
                 Deck(title: "Story Chain", description: "Add one sentence to continue the story. Pass the phone and watch the chaos unfold.", numberOfCards: 145, estimatedTime: "15-25 min", imageName: "SC artwork", type: .storyChain, cards: allStoryChainCards, availableCategories: []),
-                Deck(title: "Memory Master", description: "Test your memory with escalating challenges.", numberOfCards: 55, estimatedTime: "20-30 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
+                Deck(title: "Memory Master", description: "A timed card-matching game. Flip cards to find pairs and clear the board as fast as possible!", numberOfCards: 55, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .memoryMaster, cards: [], availableCategories: []),
                 Deck(title: "Bluff Call", description: "Call out bluffs or take a drink when caught.", numberOfCards: 50, estimatedTime: "15-20 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: [])
             ]
         ),
@@ -181,6 +182,26 @@ struct PlayView: View {
         }
     }
     
+    @ViewBuilder
+    private var memoryMasterSetupDestination: some View {
+        NavigationLink(
+            destination: memoryMasterSetupView,
+            isActive: Binding(
+                get: { navigateToMemoryMasterSetup != nil },
+                set: { if !$0 { navigateToMemoryMasterSetup = nil } }
+            )
+        ) {
+            EmptyView()
+        }
+    }
+    
+    @ViewBuilder
+    private var memoryMasterSetupView: some View {
+        if let deck = navigateToMemoryMasterSetup {
+            MemoryMasterSetupView(deck: deck)
+        }
+    }
+    
     var body: some View {
         ZStack {
             // White background
@@ -214,13 +235,14 @@ struct PlayView: View {
             
             // Expanded card overlay
             if let deck = expandedDeck {
-                ExpandedDeckOverlay(deck: deck, expandedDeck: $expandedDeck, navigateToCategorySelection: $navigateToCategorySelection, navigateToPlayView: $navigateToPlayView, navigateToStoryChainSetup: $navigateToStoryChainSetup)
+                ExpandedDeckOverlay(deck: deck, expandedDeck: $expandedDeck, navigateToCategorySelection: $navigateToCategorySelection, navigateToPlayView: $navigateToPlayView, navigateToStoryChainSetup: $navigateToStoryChainSetup, navigateToMemoryMasterSetup: $navigateToMemoryMasterSetup)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
         .background(categorySelectionDestination)
         .background(playViewDestination)
         .background(storyChainSetupDestination)
+        .background(memoryMasterSetupDestination)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
@@ -243,6 +265,7 @@ struct ExpandedDeckOverlay: View {
     @Binding var navigateToCategorySelection: Deck?
     @Binding var navigateToPlayView: Deck?
     @Binding var navigateToStoryChainSetup: Deck?
+    @Binding var navigateToMemoryMasterSetup: Deck?
     
     var body: some View {
         ZStack {
@@ -332,6 +355,19 @@ struct ExpandedDeckOverlay: View {
                             }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                 navigateToStoryChainSetup = deck
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.top, 8)
+                        .padding(.bottom, 40)
+                    } else if deck.type == .memoryMaster {
+                        PrimaryButton(title: "Play") {
+                            // Close overlay and navigate
+                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                expandedDeck = nil
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                navigateToMemoryMasterSetup = deck
                             }
                         }
                         .padding(.horizontal, 40)
