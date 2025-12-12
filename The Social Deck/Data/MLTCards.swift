@@ -134,7 +134,7 @@ let allMLTCards: [Card] = [
     Card(text: "date their best friend's ex", category: "Couples", cardType: nil),
     Card(text: "cheat on their partner", category: "Couples", cardType: nil),
     Card(text: "get caught cheating", category: "Couples", cardType: nil),
-    Card(text: "have a threesome", category: "Couples", cardType: nil),
+    Card(text: "be caught with multiple people", category: "Couples", cardType: nil),
     Card(text: "be in an open relationship", category: "Couples", cardType: nil),
     Card(text: "date multiple people at once", category: "Couples", cardType: nil),
     Card(text: "get engaged in high school", category: "Couples", cardType: nil),

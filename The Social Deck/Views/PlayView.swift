@@ -71,14 +71,14 @@ struct PlayView: View {
             ]
         ),
         GameCategory(
-            title: "Drinking Games",
+            title: "Party Games",
             decks: [
                 Deck(title: "Truth or Drink", description: "A question appears on the screen — answer honestly or take a drink.", numberOfCards: 480, estimatedTime: "15-20 min", imageName: "TOD artwork 2", type: .truthOrDrink, cards: allTruthOrDrinkCards, availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends", "Work", "Family"]),
                 Deck(title: "Category Clash", description: "The phone shows a category (like \"types of beers\" or \"things that are red\"). Players take turns naming something that fits. You hesitate, repeat an answer, or freeze? You drink. The pace gets faster each round, turning it into a hilarious pressure game.", numberOfCards: 250, estimatedTime: "15-20 min", imageName: "CC artwork", type: .categoryClash, cards: allCategoryClashCards, availableCategories: ["Food & Drink", "Pop Culture", "General", "Sports & Activities", "Animals & Nature"]),
                 Deck(title: "Spin the Bottle", description: "Tap to spin and let the bottle decide everyone's fate. No strategy, no mercy, just pure chaos. If it points at you… well, take it up with the bottle.", numberOfCards: 40, estimatedTime: "20-30 min", imageName: "STB artwork", type: .spinTheBottle, cards: [], availableCategories: []),
                 Deck(title: "Story Chain", description: "Add one sentence to continue the story. Pass the phone and watch the chaos unfold.", numberOfCards: 145, estimatedTime: "15-25 min", imageName: "SC artwork", type: .storyChain, cards: allStoryChainCards, availableCategories: []),
-                Deck(title: "Memory Master", description: "A timed card-matching game. Flip cards to find pairs and clear the board as fast as possible!", numberOfCards: 55, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .memoryMaster, cards: [], availableCategories: []),
-                Deck(title: "Bluff Call", description: "Call out bluffs or take a drink when caught.", numberOfCards: 50, estimatedTime: "15-20 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: [])
+                Deck(title: "Memory Master", description: "A timed card-matching game. Flip cards to find pairs and clear the board as fast as possible!", numberOfCards: 55, estimatedTime: "5-10 min", imageName: "MM artwork", type: .memoryMaster, cards: [], availableCategories: []),
+                Deck(title: "Bluff Call", description: "One player sees a prompt and must convince the group their answer is true. The group decides whether to believe them or call the bluff. If the group calls correctly, the bluffer drinks extra; if wrong, everyone who doubted drinks.", numberOfCards: 300, estimatedTime: "15-20 min", imageName: "BC artwork", type: .bluffCall, cards: allBluffCallCards, availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"])
             ]
         ),
         GameCategory(
@@ -134,6 +134,8 @@ struct PlayView: View {
                 TruthOrDrinkCategorySelectionView(deck: deck)
             case .categoryClash:
                 CategoryClashCategorySelectionView(deck: deck)
+            case .bluffCall:
+                BluffCallCategorySelectionView(deck: deck)
             default:
                 EmptyView()
             }
@@ -321,7 +323,7 @@ struct ExpandedDeckOverlay: View {
                         .padding(.bottom, 24)
                     
                     // Play button
-                    if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .popCultureTrivia || deck.type == .historyTrivia || deck.type == .scienceTrivia || deck.type == .sportsTrivia || deck.type == .movieTrivia || deck.type == .musicTrivia || deck.type == .truthOrDrink || deck.type == .categoryClash {
+                    if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .popCultureTrivia || deck.type == .historyTrivia || deck.type == .scienceTrivia || deck.type == .sportsTrivia || deck.type == .movieTrivia || deck.type == .musicTrivia || deck.type == .truthOrDrink || deck.type == .categoryClash || deck.type == .bluffCall {
                         PrimaryButton(title: "Play") {
                             // Close overlay and navigate
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {

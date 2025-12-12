@@ -24,6 +24,7 @@ enum DeckType {
     case spinTheBottle
     case storyChain
     case memoryMaster
+    case bluffCall
     case other
 }
 
