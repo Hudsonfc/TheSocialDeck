@@ -82,12 +82,13 @@ struct PlayView: View {
             ]
         ),
         GameCategory(
-            title: "Relationship Games",
+            title: "The Social Deck Games",
             decks: [
-                Deck(title: "Couples Questions", description: "Deepen your connection with meaningful questions.", numberOfCards: 50, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "Deep Questions", description: "Explore meaningful topics and get to know each other.", numberOfCards: 40, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "Relationship Goals", description: "Discuss your relationship aspirations and dreams.", numberOfCards: 35, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "Love Languages", description: "Discover how you and your partner express love.", numberOfCards: 30, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: [])
+                Deck(title: "Hot Potato", description: "Answer a question before the timer runs out, or pass it along. If you're holding it when time ends, you drink.", numberOfCards: 50, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
+                Deck(title: "Rhyme Time", description: "Given a word, players take turns rhyming. First to hesitate or repeat a word drinks.", numberOfCards: 40, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
+                Deck(title: "What Would I Do?", description: "Describe a scenario. Others guess what you'd do. Wrong guessers drink.", numberOfCards: 35, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
+                Deck(title: "What's My Secret?", description: "Share a secret about yourself. Others guess if it's true. Wrong guessers drink.", numberOfCards: 30, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
+                Deck(title: "Riddle Me This", description: "Solve riddles to progress. Can't solve? Drink.", numberOfCards: 30, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: [])
             ]
         )
     ]
