@@ -26,6 +26,7 @@ enum DeckType {
     case memoryMaster
     case bluffCall
     case hotPotato
+    case rhymeTime
     case other
 }
 

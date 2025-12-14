@@ -22,13 +22,14 @@ struct PlayView: View {
     @State private var navigateToStoryChainSetup: Deck? = nil
     @State private var navigateToMemoryMasterSetup: Deck? = nil
     @State private var navigateToHotPotatoSetup: Deck? = nil
+    @State private var navigateToRhymeTimeSetup: Deck? = nil
     // Placeholder categories with decks
     let categories: [GameCategory] = [
         GameCategory(
             title: "The Social Deck Games",
             decks: [
                 Deck(title: "Hot Potato", description: "Pass the phone quickly as the heat builds! The player holding it when time expires loses. Watch out for random perks that can help or hurt!", numberOfCards: 50, estimatedTime: "10-15 min", imageName: "HP artwork", type: .hotPotato, cards: [], availableCategories: []),
-                Deck(title: "Rhyme Time", description: "Given a word, players take turns rhyming. First to hesitate or repeat a word drinks.", numberOfCards: 40, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
+                Deck(title: "Rhyme Time", description: "Say a word that rhymes with the base word before time runs out! Repeat a rhyme or hesitate and you lose.", numberOfCards: 40, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .rhymeTime, cards: allRhymeTimeCards, availableCategories: ["Easy", "Medium", "Hard"]),
                 Deck(title: "What Would I Do?", description: "Describe a scenario. Others guess what you'd do. Wrong guessers drink.", numberOfCards: 35, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
                 Deck(title: "What's My Secret?", description: "Share a secret about yourself. Others guess if it's true. Wrong guessers drink.", numberOfCards: 30, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
                 Deck(title: "Riddle Me This", description: "Solve riddles to progress. Can't solve? Drink.", numberOfCards: 30, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: [])
@@ -226,6 +227,26 @@ struct PlayView: View {
         }
     }
     
+    @ViewBuilder
+    private var rhymeTimeSetupDestination: some View {
+        NavigationLink(
+            destination: rhymeTimeSetupView,
+            isActive: Binding(
+                get: { navigateToRhymeTimeSetup != nil },
+                set: { if !$0 { navigateToRhymeTimeSetup = nil } }
+            )
+        ) {
+            EmptyView()
+        }
+    }
+    
+    @ViewBuilder
+    private var rhymeTimeSetupView: some View {
+        if let deck = navigateToRhymeTimeSetup {
+            RhymeTimeSetupView(deck: deck)
+        }
+    }
+    
     var body: some View {
         ZStack {
             // White background
@@ -259,7 +280,7 @@ struct PlayView: View {
             
             // Expanded card overlay
             if let deck = expandedDeck {
-                ExpandedDeckOverlay(deck: deck, expandedDeck: $expandedDeck, navigateToCategorySelection: $navigateToCategorySelection, navigateToPlayView: $navigateToPlayView, navigateToStoryChainSetup: $navigateToStoryChainSetup, navigateToMemoryMasterSetup: $navigateToMemoryMasterSetup, navigateToHotPotatoSetup: $navigateToHotPotatoSetup)
+                ExpandedDeckOverlay(deck: deck, expandedDeck: $expandedDeck, navigateToCategorySelection: $navigateToCategorySelection, navigateToPlayView: $navigateToPlayView, navigateToStoryChainSetup: $navigateToStoryChainSetup, navigateToMemoryMasterSetup: $navigateToMemoryMasterSetup, navigateToHotPotatoSetup: $navigateToHotPotatoSetup, navigateToRhymeTimeSetup: $navigateToRhymeTimeSetup)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -268,6 +289,7 @@ struct PlayView: View {
         .background(storyChainSetupDestination)
         .background(memoryMasterSetupDestination)
         .background(hotPotatoSetupDestination)
+        .background(rhymeTimeSetupDestination)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
@@ -292,6 +314,7 @@ struct ExpandedDeckOverlay: View {
     @Binding var navigateToStoryChainSetup: Deck?
     @Binding var navigateToMemoryMasterSetup: Deck?
     @Binding var navigateToHotPotatoSetup: Deck?
+    @Binding var navigateToRhymeTimeSetup: Deck?
     
     var body: some View {
         ZStack {
@@ -407,6 +430,19 @@ struct ExpandedDeckOverlay: View {
                             }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                 navigateToHotPotatoSetup = deck
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.top, 8)
+                        .padding(.bottom, 40)
+                    } else if deck.type == .rhymeTime {
+                        PrimaryButton(title: "Play") {
+                            // Close overlay and navigate
+                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                expandedDeck = nil
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                navigateToRhymeTimeSetup = deck
                             }
                         }
                         .padding(.horizontal, 40)
