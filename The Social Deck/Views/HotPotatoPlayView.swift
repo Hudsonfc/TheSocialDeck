@@ -117,8 +117,8 @@ struct HotPotatoPlayView: View {
                                     .fill(
                                         LinearGradient(
                                             gradient: Gradient(colors: [
-                                                perk.isSavePerk ? Color.green.opacity(0.2) : (perk.isDestroyPerk ? Color.red.opacity(0.2) : Color.orange.opacity(0.2)),
-                                                perk.isSavePerk ? Color.green.opacity(0.05) : (perk.isDestroyPerk ? Color.red.opacity(0.05) : Color.orange.opacity(0.05))
+                                                perk.iconColor.opacity(0.2),
+                                                perk.iconColor.opacity(0.05)
                                             ]),
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
@@ -126,8 +126,9 @@ struct HotPotatoPlayView: View {
                                     )
                                     .frame(width: 100, height: 100)
                                 
-                                Text(perk.icon)
-                                    .font(.system(size: 48))
+                                Image(systemName: perk.icon)
+                                    .font(.system(size: 44, weight: .medium))
+                                    .foregroundColor(perk.iconColor)
                             }
                             .padding(.top, 8)
                             
@@ -167,15 +168,15 @@ struct HotPotatoPlayView: View {
                                 .background(
                                     LinearGradient(
                                         gradient: Gradient(colors: [
-                                            perk.isSavePerk ? Color.green : (perk.isDestroyPerk ? Color.red : Color.orange),
-                                            perk.isSavePerk ? Color.green.opacity(0.8) : (perk.isDestroyPerk ? Color.red.opacity(0.8) : Color.orange.opacity(0.8))
+                                            perk.iconColor,
+                                            perk.iconColor.opacity(0.8)
                                         ]),
                                         startPoint: .leading,
                                         endPoint: .trailing
                                     )
                                 )
                                 .cornerRadius(14)
-                                .shadow(color: (perk.isSavePerk ? Color.green : (perk.isDestroyPerk ? Color.red : Color.orange)).opacity(0.4), radius: 12, x: 0, y: 6)
+                                .shadow(color: perk.iconColor.opacity(0.4), radius: 12, x: 0, y: 6)
                             }
                             .padding(.top, 8)
                             .padding(.bottom, 32)

@@ -86,18 +86,47 @@ class HotPotatoGameManager: ObservableObject {
         
         var icon: String {
             switch self {
-            case .timeExtension, .freezeTimer:
-                return "⏰"
+            case .timeExtension:
+                return "plus.circle.fill"
+            case .freezeTimer:
+                return "snowflake"
             case .cooling:
-                return "❄️"
-            case .timeReduction, .forcePass, .doubleHeat:
-                return "💥"
+                return "thermometer.snowflake"
+            case .timeReduction:
+                return "minus.circle.fill"
+            case .forcePass:
+                return "arrow.right.circle.fill"
+            case .doubleHeat:
+                return "flame.fill"
             case .speedTime:
-                return "⚡"
+                return "bolt.fill"
             case .swapPlayers:
-                return "🔄"
+                return "arrow.triangle.2.circlepath"
             case .choosePlayer:
-                return "👆"
+                return "hand.point.up.fill"
+            }
+        }
+        
+        var iconColor: Color {
+            switch self {
+            case .timeExtension:
+                return Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0) // Green
+            case .freezeTimer:
+                return Color(red: 0x5A/255.0, green: 0xC9/255.0, blue: 0xFF/255.0) // Light blue
+            case .cooling:
+                return Color(red: 0x87/255.0, green: 0xCE/255.0, blue: 0xEB/255.0) // Sky blue
+            case .timeReduction:
+                return Color(red: 0xFF/255.0, green: 0x3B/255.0, blue: 0x30/255.0) // Red
+            case .forcePass:
+                return Color(red: 0xFF/255.0, green: 0x6B/255.0, blue: 0x00/255.0) // Orange-red
+            case .doubleHeat:
+                return Color(red: 0xFF/255.0, green: 0x45/255.0, blue: 0x00/255.0) // Orange
+            case .speedTime:
+                return Color(red: 0xFF/255.0, green: 0xD7/255.0, blue: 0x00/255.0) // Yellow
+            case .swapPlayers:
+                return Color(red: 0xAF/255.0, green: 0x52/255.0, blue: 0xDE/255.0) // Purple
+            case .choosePlayer:
+                return Color(red: 0xFF/255.0, green: 0x95/255.0, blue: 0x00/255.0) // Orange
             }
         }
         

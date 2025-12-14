@@ -12,19 +12,19 @@ struct PerksBreakdownView: View {
     
     let allPerks: [(name: String, icon: String, description: String, type: String, color: Color)] = [
         // Save perks
-        ("Time Extension", "⏰", "Timer extended by 3 seconds!", "Save Perk", .green),
-        ("Freeze Timer", "⏰", "Timer frozen for 2 seconds!", "Save Perk", .green),
-        ("Cooling", "❄️", "Heat reduced by 30%!", "Save Perk", .green),
+        ("Time Extension", "plus.circle.fill", "Timer extended by 3 seconds!", "Save Perk", Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0)),
+        ("Freeze Timer", "snowflake", "Timer frozen for 2 seconds!", "Save Perk", Color(red: 0x5A/255.0, green: 0xC9/255.0, blue: 0xFF/255.0)),
+        ("Cooling", "thermometer.snowflake", "Heat reduced by 30%!", "Save Perk", Color(red: 0x87/255.0, green: 0xCE/255.0, blue: 0xEB/255.0)),
         
         // Destroy perks
-        ("Time Reduction", "💥", "Timer reduced by 2 seconds!", "Destroy Perk", .red),
-        ("Force Pass", "💥", "Must pass immediately!", "Destroy Perk", .red),
-        ("Double Heat", "💥", "Heat level doubled!", "Destroy Perk", .red),
-        ("Speed Time", "⚡", "Timer speeds up 2x for 3 seconds!", "Destroy Perk", .red),
+        ("Time Reduction", "minus.circle.fill", "Timer reduced by 2 seconds!", "Destroy Perk", Color(red: 0xFF/255.0, green: 0x3B/255.0, blue: 0x30/255.0)),
+        ("Force Pass", "arrow.right.circle.fill", "Must pass immediately!", "Destroy Perk", Color(red: 0xFF/255.0, green: 0x6B/255.0, blue: 0x00/255.0)),
+        ("Double Heat", "flame.fill", "Heat level doubled!", "Destroy Perk", Color(red: 0xFF/255.0, green: 0x45/255.0, blue: 0x00/255.0)),
+        ("Speed Time", "bolt.fill", "Timer speeds up 2x for 3 seconds!", "Destroy Perk", Color(red: 0xFF/255.0, green: 0xD7/255.0, blue: 0x00/255.0)),
         
         // Neutral perks
-        ("Swap Players", "🔄", "Swap with random player!", "Neutral Perk", .orange),
-        ("Choose Player", "👆", "Choose who to pass to!", "Neutral Perk", .orange)
+        ("Swap Players", "arrow.triangle.2.circlepath", "Swap with random player!", "Neutral Perk", Color(red: 0xAF/255.0, green: 0x52/255.0, blue: 0xDE/255.0)),
+        ("Choose Player", "hand.point.up.fill", "Choose who to pass to!", "Neutral Perk", Color(red: 0xFF/255.0, green: 0x95/255.0, blue: 0x00/255.0))
     ]
     
     var body: some View {
@@ -83,8 +83,9 @@ struct PerksBreakdownView: View {
                                         )
                                         .frame(width: 60, height: 60)
                                     
-                                    Text(perk.icon)
-                                        .font(.system(size: 28))
+                                    Image(systemName: perk.icon)
+                                        .font(.system(size: 28, weight: .medium))
+                                        .foregroundColor(perk.color)
                                 }
                                 
                                 // Content
