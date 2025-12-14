@@ -21,8 +21,19 @@ struct PlayView: View {
     @State private var navigateToPlayView: Deck? = nil
     @State private var navigateToStoryChainSetup: Deck? = nil
     @State private var navigateToMemoryMasterSetup: Deck? = nil
+    @State private var navigateToHotPotatoSetup: Deck? = nil
     // Placeholder categories with decks
     let categories: [GameCategory] = [
+        GameCategory(
+            title: "The Social Deck Games",
+            decks: [
+                Deck(title: "Hot Potato", description: "Pass the phone quickly as the heat builds! The player holding it when time expires loses. Watch out for random perks that can help or hurt!", numberOfCards: 50, estimatedTime: "10-15 min", imageName: "HP artwork", type: .hotPotato, cards: [], availableCategories: []),
+                Deck(title: "Rhyme Time", description: "Given a word, players take turns rhyming. First to hesitate or repeat a word drinks.", numberOfCards: 40, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
+                Deck(title: "What Would I Do?", description: "Describe a scenario. Others guess what you'd do. Wrong guessers drink.", numberOfCards: 35, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
+                Deck(title: "What's My Secret?", description: "Share a secret about yourself. Others guess if it's true. Wrong guessers drink.", numberOfCards: 30, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
+                Deck(title: "Riddle Me This", description: "Solve riddles to progress. Can't solve? Drink.", numberOfCards: 30, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: [])
+            ]
+        ),
         GameCategory(
             title: "Classic Games",
             decks: [
@@ -79,16 +90,6 @@ struct PlayView: View {
                 Deck(title: "Story Chain", description: "Add one sentence to continue the story. Pass the phone and watch the chaos unfold.", numberOfCards: 145, estimatedTime: "15-25 min", imageName: "SC artwork", type: .storyChain, cards: allStoryChainCards, availableCategories: []),
                 Deck(title: "Memory Master", description: "A timed card-matching game. Flip cards to find pairs and clear the board as fast as possible!", numberOfCards: 55, estimatedTime: "5-10 min", imageName: "MM artwork", type: .memoryMaster, cards: [], availableCategories: []),
                 Deck(title: "Bluff Call", description: "One player sees a prompt and must convince the group their answer is true. The group decides whether to believe them or call the bluff. If the group calls correctly, the bluffer drinks extra; if wrong, everyone who doubted drinks.", numberOfCards: 300, estimatedTime: "15-20 min", imageName: "BC artwork", type: .bluffCall, cards: allBluffCallCards, availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"])
-            ]
-        ),
-        GameCategory(
-            title: "The Social Deck Games",
-            decks: [
-                Deck(title: "Hot Potato", description: "Answer a question before the timer runs out, or pass it along. If you're holding it when time ends, you drink.", numberOfCards: 50, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "Rhyme Time", description: "Given a word, players take turns rhyming. First to hesitate or repeat a word drinks.", numberOfCards: 40, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "What Would I Do?", description: "Describe a scenario. Others guess what you'd do. Wrong guessers drink.", numberOfCards: 35, estimatedTime: "10-15 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "What's My Secret?", description: "Share a secret about yourself. Others guess if it's true. Wrong guessers drink.", numberOfCards: 30, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
-                Deck(title: "Riddle Me This", description: "Solve riddles to progress. Can't solve? Drink.", numberOfCards: 30, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: [])
             ]
         )
     ]
@@ -205,6 +206,26 @@ struct PlayView: View {
         }
     }
     
+    @ViewBuilder
+    private var hotPotatoSetupDestination: some View {
+        NavigationLink(
+            destination: hotPotatoSetupView,
+            isActive: Binding(
+                get: { navigateToHotPotatoSetup != nil },
+                set: { if !$0 { navigateToHotPotatoSetup = nil } }
+            )
+        ) {
+            EmptyView()
+        }
+    }
+    
+    @ViewBuilder
+    private var hotPotatoSetupView: some View {
+        if let deck = navigateToHotPotatoSetup {
+            HotPotatoSetupView(deck: deck)
+        }
+    }
+    
     var body: some View {
         ZStack {
             // White background
@@ -238,7 +259,7 @@ struct PlayView: View {
             
             // Expanded card overlay
             if let deck = expandedDeck {
-                ExpandedDeckOverlay(deck: deck, expandedDeck: $expandedDeck, navigateToCategorySelection: $navigateToCategorySelection, navigateToPlayView: $navigateToPlayView, navigateToStoryChainSetup: $navigateToStoryChainSetup, navigateToMemoryMasterSetup: $navigateToMemoryMasterSetup)
+                ExpandedDeckOverlay(deck: deck, expandedDeck: $expandedDeck, navigateToCategorySelection: $navigateToCategorySelection, navigateToPlayView: $navigateToPlayView, navigateToStoryChainSetup: $navigateToStoryChainSetup, navigateToMemoryMasterSetup: $navigateToMemoryMasterSetup, navigateToHotPotatoSetup: $navigateToHotPotatoSetup)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -246,6 +267,7 @@ struct PlayView: View {
         .background(playViewDestination)
         .background(storyChainSetupDestination)
         .background(memoryMasterSetupDestination)
+        .background(hotPotatoSetupDestination)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
@@ -269,6 +291,7 @@ struct ExpandedDeckOverlay: View {
     @Binding var navigateToPlayView: Deck?
     @Binding var navigateToStoryChainSetup: Deck?
     @Binding var navigateToMemoryMasterSetup: Deck?
+    @Binding var navigateToHotPotatoSetup: Deck?
     
     var body: some View {
         ZStack {
@@ -371,6 +394,19 @@ struct ExpandedDeckOverlay: View {
                             }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                 navigateToMemoryMasterSetup = deck
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.top, 8)
+                        .padding(.bottom, 40)
+                    } else if deck.type == .hotPotato {
+                        PrimaryButton(title: "Play") {
+                            // Close overlay and navigate
+                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                expandedDeck = nil
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                navigateToHotPotatoSetup = deck
                             }
                         }
                         .padding(.horizontal, 40)
