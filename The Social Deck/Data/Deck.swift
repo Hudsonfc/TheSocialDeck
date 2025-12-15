@@ -29,6 +29,7 @@ enum DeckType {
     case rhymeTime
     case tapDuel
     case whatsMySecret
+    case riddleMeThis
     case other
 }
 

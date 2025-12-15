@@ -24,6 +24,7 @@ struct PlayView: View {
     @State private var navigateToHotPotatoSetup: Deck? = nil
     @State private var navigateToRhymeTimeSetup: Deck? = nil
     @State private var navigateToTapDuelSetup: Deck? = nil
+    @State private var navigateToRiddleMeThisSetup: Deck? = nil
     // Placeholder categories with decks
     let categories: [GameCategory] = [
         GameCategory(
@@ -33,7 +34,7 @@ struct PlayView: View {
                 Deck(title: "Rhyme Time", description: "Say a word that rhymes with the base word before time runs out! Repeat a rhyme or hesitate and you lose.", numberOfCards: 40, estimatedTime: "10-15 min", imageName: "RT artwork", type: .rhymeTime, cards: allRhymeTimeCards, availableCategories: ["Easy", "Medium", "Hard"]),
                 Deck(title: "Tap Duel", description: "Fast head-to-head reaction game. Wait for GO, then tap first to win! Tap too early and you lose.", numberOfCards: 0, estimatedTime: "2-5 min", imageName: "Art 1.4", type: .tapDuel, cards: [], availableCategories: []),
                 Deck(title: "What's My Secret?", description: "One player gets a secret rule to follow. Can the group figure out what it is before time runs out?", numberOfCards: 75, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .whatsMySecret, cards: allWhatsMySecretCards, availableCategories: ["Party", "Wild", "Social", "Actions", "Behavior"]),
-                Deck(title: "Riddle Me This", description: "Solve riddles to progress. Can't solve? Drink.", numberOfCards: 30, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: [])
+                Deck(title: "Riddle Me This", description: "Solve riddles quickly! The first player to say the correct answer wins the round. Wrong answers lock you out.", numberOfCards: 71, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .riddleMeThis, cards: allRiddleMeThisCards, availableCategories: [])
             ]
         ),
         GameCategory(
@@ -270,6 +271,26 @@ struct PlayView: View {
         }
     }
     
+    @ViewBuilder
+    private var riddleMeThisSetupDestination: some View {
+        NavigationLink(
+            destination: riddleMeThisSetupView,
+            isActive: Binding(
+                get: { navigateToRiddleMeThisSetup != nil },
+                set: { if !$0 { navigateToRiddleMeThisSetup = nil } }
+            )
+        ) {
+            EmptyView()
+        }
+    }
+    
+    @ViewBuilder
+    private var riddleMeThisSetupView: some View {
+        if let deck = navigateToRiddleMeThisSetup {
+            RiddleMeThisSetupView(deck: deck)
+        }
+    }
+    
     var body: some View {
         ZStack {
             // White background
@@ -303,7 +324,7 @@ struct PlayView: View {
             
             // Expanded card overlay
             if let deck = expandedDeck {
-                ExpandedDeckOverlay(deck: deck, expandedDeck: $expandedDeck, navigateToCategorySelection: $navigateToCategorySelection, navigateToPlayView: $navigateToPlayView, navigateToStoryChainSetup: $navigateToStoryChainSetup, navigateToMemoryMasterSetup: $navigateToMemoryMasterSetup, navigateToHotPotatoSetup: $navigateToHotPotatoSetup, navigateToRhymeTimeSetup: $navigateToRhymeTimeSetup, navigateToTapDuelSetup: $navigateToTapDuelSetup)
+                ExpandedDeckOverlay(deck: deck, expandedDeck: $expandedDeck, navigateToCategorySelection: $navigateToCategorySelection, navigateToPlayView: $navigateToPlayView, navigateToStoryChainSetup: $navigateToStoryChainSetup, navigateToMemoryMasterSetup: $navigateToMemoryMasterSetup, navigateToHotPotatoSetup: $navigateToHotPotatoSetup, navigateToRhymeTimeSetup: $navigateToRhymeTimeSetup, navigateToTapDuelSetup: $navigateToTapDuelSetup, navigateToRiddleMeThisSetup: $navigateToRiddleMeThisSetup)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -314,6 +335,7 @@ struct PlayView: View {
         .background(hotPotatoSetupDestination)
         .background(rhymeTimeSetupDestination)
         .background(tapDuelSetupDestination)
+        .background(riddleMeThisSetupDestination)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
@@ -340,6 +362,7 @@ struct ExpandedDeckOverlay: View {
     @Binding var navigateToHotPotatoSetup: Deck?
     @Binding var navigateToRhymeTimeSetup: Deck?
     @Binding var navigateToTapDuelSetup: Deck?
+    @Binding var navigateToRiddleMeThisSetup: Deck?
     
     var body: some View {
         ZStack {
@@ -494,6 +517,19 @@ struct ExpandedDeckOverlay: View {
                             }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                 navigateToCategorySelection = deck
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.top, 8)
+                        .padding(.bottom, 40)
+                    } else if deck.type == .riddleMeThis {
+                        PrimaryButton(title: "Play") {
+                            // Close overlay and navigate
+                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                expandedDeck = nil
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                navigateToRiddleMeThisSetup = deck
                             }
                         }
                         .padding(.horizontal, 40)
