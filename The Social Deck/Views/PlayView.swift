@@ -32,7 +32,7 @@ struct PlayView: View {
                 Deck(title: "Hot Potato", description: "Pass the phone quickly as the heat builds! The player holding it when time expires loses. Watch out for random perks that can help or hurt!", numberOfCards: 50, estimatedTime: "10-15 min", imageName: "HP artwork", type: .hotPotato, cards: [], availableCategories: []),
                 Deck(title: "Rhyme Time", description: "Say a word that rhymes with the base word before time runs out! Repeat a rhyme or hesitate and you lose.", numberOfCards: 40, estimatedTime: "10-15 min", imageName: "RT artwork", type: .rhymeTime, cards: allRhymeTimeCards, availableCategories: ["Easy", "Medium", "Hard"]),
                 Deck(title: "Tap Duel", description: "Fast head-to-head reaction game. Wait for GO, then tap first to win! Tap too early and you lose.", numberOfCards: 0, estimatedTime: "2-5 min", imageName: "Art 1.4", type: .tapDuel, cards: [], availableCategories: []),
-                Deck(title: "What's My Secret?", description: "Share a secret about yourself. Others guess if it's true. Wrong guessers drink.", numberOfCards: 30, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: []),
+                Deck(title: "What's My Secret?", description: "One player gets a secret rule to follow. Can the group figure out what it is before time runs out?", numberOfCards: 75, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .whatsMySecret, cards: allWhatsMySecretCards, availableCategories: ["Party", "Wild", "Social", "Actions", "Behavior"]),
                 Deck(title: "Riddle Me This", description: "Solve riddles to progress. Can't solve? Drink.", numberOfCards: 30, estimatedTime: "5-10 min", imageName: "Art 1.4", type: .other, cards: [], availableCategories: [])
             ]
         ),
@@ -140,6 +140,8 @@ struct PlayView: View {
                 CategoryClashCategorySelectionView(deck: deck)
             case .bluffCall:
                 BluffCallCategorySelectionView(deck: deck)
+            case .whatsMySecret:
+                WhatsMySecretSetupView(deck: deck)
             default:
                 EmptyView()
             }
@@ -393,7 +395,7 @@ struct ExpandedDeckOverlay: View {
                         .padding(.bottom, 24)
                     
                     // Play button
-                    if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .popCultureTrivia || deck.type == .historyTrivia || deck.type == .scienceTrivia || deck.type == .sportsTrivia || deck.type == .movieTrivia || deck.type == .musicTrivia || deck.type == .truthOrDrink || deck.type == .categoryClash || deck.type == .bluffCall {
+                    if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .popCultureTrivia || deck.type == .historyTrivia || deck.type == .scienceTrivia || deck.type == .sportsTrivia || deck.type == .movieTrivia || deck.type == .musicTrivia || deck.type == .truthOrDrink || deck.type == .categoryClash || deck.type == .bluffCall || deck.type == .whatsMySecret {
                         PrimaryButton(title: "Play") {
                             // Close overlay and navigate
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
@@ -479,6 +481,19 @@ struct ExpandedDeckOverlay: View {
                             }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                 navigateToTapDuelSetup = deck
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.top, 8)
+                        .padding(.bottom, 40)
+                    } else if deck.type == .whatsMySecret {
+                        PrimaryButton(title: "Play") {
+                            // Close overlay and navigate directly to setup (no category selection)
+                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                expandedDeck = nil
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                navigateToCategorySelection = deck
                             }
                         }
                         .padding(.horizontal, 40)

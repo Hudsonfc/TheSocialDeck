@@ -64,19 +64,31 @@ struct TapDuelPlayView: View {
                     switch manager.gamePhase {
                     case .ready:
                         ReadyView(manager: manager)
-                            .transition(.opacity)
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .bottom).combined(with: .opacity),
+                                removal: .move(edge: .top).combined(with: .opacity)
+                            ))
                     case .countdown, .goSignal:
                         GameView(manager: manager)
-                            .transition(.opacity)
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .bottom).combined(with: .opacity),
+                                removal: .move(edge: .top).combined(with: .opacity)
+                            ))
                     case .finished:
                         FinishedView(manager: manager)
-                            .transition(.scale.combined(with: .opacity))
+                            .transition(.asymmetric(
+                                insertion: .scale(scale: 0.95).combined(with: .opacity),
+                                removal: .scale(scale: 0.95).combined(with: .opacity)
+                            ))
                     case .falseStart:
                         FalseStartView(manager: manager)
-                            .transition(.scale.combined(with: .opacity))
+                            .transition(.asymmetric(
+                                insertion: .scale(scale: 0.95).combined(with: .opacity),
+                                removal: .scale(scale: 0.95).combined(with: .opacity)
+                            ))
                     }
                 }
-                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: manager.gamePhase)
+                .animation(.spring(response: 0.6, dampingFraction: 0.85), value: manager.gamePhase)
             }
         }
         .navigationBarHidden(true)
@@ -131,15 +143,17 @@ struct ReadyView: View {
             }
             .padding(.top, 40)
             
-            Text("Get Ready!")
-                .font(.system(size: 28, weight: .bold, design: .rounded))
-                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-            
-            Text("Place your finger on your side of the screen. Wait for GO!")
-                .font(.system(size: 16, weight: .regular, design: .rounded))
-                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
+            VStack(spacing: 12) {
+                Text("Get Ready!")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                
+                Text("Place your finger on your side of the screen. Wait for GO!")
+                    .font(.system(size: 16, weight: .regular, design: .rounded))
+                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+            }
             
             PrimaryButton(title: "Start Round") {
                 // Add haptic feedback
@@ -159,71 +173,141 @@ struct ReadyView: View {
 // Game View - Split screen during countdown and GO signal
 struct GameView: View {
     @ObservedObject var manager: TapDuelGameManager
+    @State private var leftSideFlash: Bool = false
+    @State private var rightSideFlash: Bool = false
+    @State private var goSignalScale: CGFloat = 1.0
+    @State private var goSignalPulse: Bool = false
     
     var body: some View {
         GeometryReader { geometry in
-            HStack(spacing: 0) {
-                // Left side (Player 1)
-                ZStack {
-                    Color(red: 0xF8/255.0, green: 0xF9/255.0, blue: 0xFA/255.0)
-                    
-                    VStack(spacing: 16) {
-                        Text(manager.currentPlayer1Side)
-                            .font(.system(size: 24, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+            ZStack {
+                HStack(spacing: 0) {
+                    // Left side (Player 1)
+                    ZStack {
+                        // Flash effect when tapped
+                        if leftSideFlash {
+                            Color.white
+                                .ignoresSafeArea()
+                                .transition(.opacity)
+                        }
                         
-                        Text("\(manager.leftSideScore)")
-                            .font(.system(size: 48, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        Color(red: 0xF8/255.0, green: 0xF9/255.0, blue: 0xFA/255.0)
+                        
+                        VStack(spacing: 16) {
+                            Text(manager.currentPlayer1Side)
+                                .font(.system(size: 24, weight: .bold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            
+                            Text("\(manager.leftSideScore)")
+                                .font(.system(size: 48, weight: .bold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        }
+                    }
+                    .frame(width: geometry.size.width / 2)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        // Flash effect
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            leftSideFlash = true
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            leftSideFlash = false
+                        }
+                        
+                        manager.handleTap(isLeftSide: true)
+                    }
+                    
+                    // Divider
+                    Rectangle()
+                        .fill(Color(red: 0xE5/255.0, green: 0xE5/255.0, blue: 0xE5/255.0))
+                        .frame(width: 2)
+                    
+                    // Right side (Player 2)
+                    ZStack {
+                        // Flash effect when tapped
+                        if rightSideFlash {
+                            Color.white
+                                .ignoresSafeArea()
+                                .transition(.opacity)
+                        }
+                        
+                        Color(red: 0xF8/255.0, green: 0xF9/255.0, blue: 0xFA/255.0)
+                        
+                        VStack(spacing: 16) {
+                            Text(manager.currentPlayer2Side)
+                                .font(.system(size: 24, weight: .bold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            
+                            Text("\(manager.rightSideScore)")
+                                .font(.system(size: 48, weight: .bold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        }
+                    }
+                    .frame(width: geometry.size.width / 2)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        // Flash effect
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            rightSideFlash = true
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            rightSideFlash = false
+                        }
+                        
+                        manager.handleTap(isLeftSide: false)
                     }
                 }
-                .frame(width: geometry.size.width / 2)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    manager.handleTap(isLeftSide: true)
+                
+                // Countdown indicator (subtle during countdown)
+                if manager.gamePhase == .countdown {
+                    VStack(spacing: 8) {
+                        Text("Wait for GO...")
+                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .opacity(0.7)
+                    }
+                    .transition(.opacity)
                 }
                 
-                // Divider
-                Rectangle()
-                    .fill(Color(red: 0xE5/255.0, green: 0xE5/255.0, blue: 0xE5/255.0))
-                    .frame(width: 2)
-                
-                // Right side (Player 2)
-                ZStack {
-                    Color(red: 0xF8/255.0, green: 0xF9/255.0, blue: 0xFA/255.0)
-                    
-                    VStack(spacing: 16) {
-                        Text(manager.currentPlayer2Side)
-                            .font(.system(size: 24, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                // GO Signal overlay (centered)
+                if manager.gamePhase == .goSignal {
+                    ZStack {
+                        // Flash effect background with pulse
+                        Color.white
+                            .opacity(manager.goSignalOpacity * 0.95)
+                            .ignoresSafeArea()
                         
-                        Text("\(manager.rightSideScore)")
-                            .font(.system(size: 48, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        // Pulsing glow effect
+                        Circle()
+                            .fill(Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0).opacity(0.2))
+                            .frame(width: 300, height: 300)
+                            .scaleEffect(goSignalPulse ? 1.3 : 1.0)
+                            .opacity(goSignalPulse ? 0 : 1.0)
+                        
+                        Text("GO!")
+                            .font(.system(size: 120, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0))
+                            .opacity(manager.goSignalOpacity)
+                            .scaleEffect(goSignalScale)
+                            .shadow(color: Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0).opacity(0.6), radius: 30, x: 0, y: 0)
+                    }
+                    .allowsHitTesting(false) // Don't block taps
+                    .onAppear {
+                        // Pulse animation
+                        withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
+                            goSignalPulse = true
+                        }
+                        // Initial scale animation
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                            goSignalScale = 1.1
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+                                goSignalScale = 1.0
+                            }
+                        }
                     }
                 }
-                .frame(width: geometry.size.width / 2)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    manager.handleTap(isLeftSide: false)
-                }
-            }
-            
-            // GO Signal overlay (centered)
-            if manager.gamePhase == .goSignal {
-                ZStack {
-                    // Flash effect background
-                    Color.white
-                        .opacity(manager.goSignalOpacity * 0.9)
-                        .ignoresSafeArea()
-                    
-                    Text("GO!")
-                        .font(.system(size: 120, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0))
-                        .opacity(manager.goSignalOpacity)
-                        .shadow(color: Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0).opacity(0.5), radius: 20, x: 0, y: 0)
-                }
-                .allowsHitTesting(false) // Don't block taps
             }
         }
     }
@@ -232,6 +316,8 @@ struct GameView: View {
 // Finished View - Shows winner
 struct FinishedView: View {
     @ObservedObject var manager: TapDuelGameManager
+    @State private var trophyScale: CGFloat = 0.8
+    @State private var trophyRotation: Double = 0
     
     var body: some View {
         VStack(spacing: 32) {
@@ -244,6 +330,27 @@ struct FinishedView: View {
                 Image(systemName: "trophy.fill")
                     .font(.system(size: 60, weight: .medium))
                     .foregroundColor(Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0))
+                    .scaleEffect(trophyScale)
+                    .rotationEffect(.degrees(trophyRotation))
+            }
+            .onAppear {
+                // Entrance animation
+                withAnimation(.spring(response: 0.6, dampingFraction: 0.6)) {
+                    trophyScale = 1.0
+                }
+                withAnimation(.spring(response: 0.8, dampingFraction: 0.7)) {
+                    trophyRotation = 15
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                        trophyRotation = -15
+                    }
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                        trophyRotation = 0
+                    }
+                }
             }
             
             VStack(spacing: 16) {
@@ -323,6 +430,8 @@ struct FinishedView: View {
 // False Start View - Shows when someone tapped too early
 struct FalseStartView: View {
     @ObservedObject var manager: TapDuelGameManager
+    @State private var xmarkScale: CGFloat = 0.5
+    @State private var shakeOffset: CGFloat = 0
     
     var body: some View {
         VStack(spacing: 32) {
@@ -335,6 +444,22 @@ struct FalseStartView: View {
                 Image(systemName: "xmark.circle.fill")
                     .font(.system(size: 60, weight: .medium))
                     .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .scaleEffect(xmarkScale)
+                    .offset(x: shakeOffset)
+            }
+            .onAppear {
+                // Entrance animation with shake
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.5)) {
+                    xmarkScale = 1.0
+                }
+                
+                // Shake animation
+                withAnimation(.easeInOut(duration: 0.1).repeatCount(4, autoreverses: true)) {
+                    shakeOffset = 10
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    shakeOffset = 0
+                }
             }
             
             VStack(spacing: 16) {

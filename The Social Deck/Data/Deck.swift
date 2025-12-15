@@ -28,6 +28,7 @@ enum DeckType {
     case hotPotato
     case rhymeTime
     case tapDuel
+    case whatsMySecret
     case other
 }
 
