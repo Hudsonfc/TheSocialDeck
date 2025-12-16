@@ -13,6 +13,7 @@
 		2B2729BD2ED3B286006FA60E /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 2B2729BC2ED3B286006FA60E /* FirebaseFirestore */; };
 		2B2729BF2ED3B286006FA60E /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 2B2729BE2ED3B286006FA60E /* FirebaseMessaging */; };
 		2B2729C12ED3B4A6006FA60E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2B2729C02ED3B4A6006FA60E /* GoogleService-Info.plist */; };
+		2B84431A2EF1DEED00A245C7 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B8443192EF1DEED00A245C7 /* GameKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,6 +38,7 @@
 		2B27292A2ED39AEC006FA60E /* The Social DeckTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "The Social DeckTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B2729342ED39AEC006FA60E /* The Social DeckUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "The Social DeckUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B2729C02ED3B4A6006FA60E /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		2B8443192EF1DEED00A245C7 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -65,6 +67,7 @@
 				2B2729BB2ED3B286006FA60E /* FirebaseCrashlytics in Frameworks */,
 				2B2729BD2ED3B286006FA60E /* FirebaseFirestore in Frameworks */,
 				2B2729BF2ED3B286006FA60E /* FirebaseMessaging in Frameworks */,
+				2B84431A2EF1DEED00A245C7 /* GameKit.framework in Frameworks */,
 				2B2729B72ED3B286006FA60E /* FirebaseAnalytics in Frameworks */,
 				2B2729B92ED3B286006FA60E /* FirebaseAuth in Frameworks */,
 			);
@@ -95,6 +98,7 @@
 				2B2729372ED39AEC006FA60E /* The Social DeckUITests */,
 				2B27291C2ED39AEA006FA60E /* Products */,
 				2B2729C02ED3B4A6006FA60E /* GoogleService-Info.plist */,
+				2B8443182EF1DEED00A245C7 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -106,6 +110,14 @@
 				2B2729342ED39AEC006FA60E /* The Social DeckUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		2B8443182EF1DEED00A245C7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2B8443192EF1DEED00A245C7 /* GameKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -420,6 +432,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "The Social Deck/The Social Deck.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -454,6 +467,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "The Social Deck/The Social Deck.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;

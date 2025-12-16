@@ -7,9 +7,18 @@
 
 import SwiftUI
 import SwiftData
+import FirebaseCore
 
 @main
 struct The_Social_DeckApp: App {
+    @StateObject private var authManager = AuthManager.shared
+    @StateObject private var gameCenterService = GameCenterService.shared
+    
+    init() {
+        FirebaseApp.configure()
+        // GameCenterService initializes automatically on init
+    }
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -26,6 +35,7 @@ struct The_Social_DeckApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(authManager)
         }
         .modelContainer(sharedModelContainer)
     }

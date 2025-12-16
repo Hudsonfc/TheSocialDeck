@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct HomeView: View {
+    @EnvironmentObject var authManager: AuthManager
     @State private var titleOpacity: Double = 0
     @State private var featuredCardScale: CGFloat = 0.95
     @State private var featuredCardOpacity: Double = 0
@@ -128,6 +129,20 @@ struct HomeView: View {
                     }
                 }
             }
+            }
+            .overlay(alignment: .topTrailing) {
+                // User Avatar Button in top right
+                if authManager.isAuthenticated {
+                    NavigationLink(destination: ProfileView()) {
+                        AvatarView(
+                            avatarType: authManager.userProfile?.avatarType ?? "person.fill",
+                            avatarColor: authManager.userProfile?.avatarColor ?? "red",
+                            size: 44
+                        )
+                    }
+                    .padding(.top, 10)
+                    .padding(.trailing, 20)
+                }
             }
             .navigationBarHidden(true)
             .onAppear {
