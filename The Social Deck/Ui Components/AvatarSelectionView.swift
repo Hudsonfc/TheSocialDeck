@@ -30,7 +30,15 @@ struct AvatarSelectionView: View {
         ("orange", Color(red: 0xF5/255.0, green: 0x7C/255.0, blue: 0x00/255.0)),
         ("pink", Color(red: 0xE9/255.0, green: 0x1E/255.0, blue: 0x63/255.0)),
         ("teal", Color(red: 0x00/255.0, green: 0x96/255.0, blue: 0x88/255.0)),
-        ("yellow", Color(red: 0xF9/255.0, green: 0xA8/255.0, blue: 0x25/255.0))
+        ("yellow", Color(red: 0xF9/255.0, green: 0xA8/255.0, blue: 0x25/255.0)),
+        ("cyan", Color(red: 0x00/255.0, green: 0xBC/255.0, blue: 0xD4/255.0)),
+        ("indigo", Color(red: 0x3F/255.0, green: 0x51/255.0, blue: 0xB5/255.0)),
+        ("brown", Color(red: 0x79/255.0, green: 0x55/255.0, blue: 0x48/255.0)),
+        ("mint", Color(red: 0x00/255.0, green: 0xC8/255.0, blue: 0x96/255.0)),
+        ("lime", Color(red: 0xCD/255.0, green: 0xDC/255.0, blue: 0x39/255.0)),
+        ("coral", Color(red: 0xFF/255.0, green: 0x7F/255.0, blue: 0x50/255.0)),
+        ("lavender", Color(red: 0xE1/255.0, green: 0xBE/255.0, blue: 0xE7/255.0)),
+        ("navy", Color(red: 0x00/255.0, green: 0x1F/255.0, blue: 0x3F/255.0))
     ]
     
     var body: some View {
@@ -236,7 +244,15 @@ struct AvatarView: View {
             "orange": Color(red: 0xF5/255.0, green: 0x7C/255.0, blue: 0x00/255.0),
             "pink": Color(red: 0xE9/255.0, green: 0x1E/255.0, blue: 0x63/255.0),
             "teal": Color(red: 0x00/255.0, green: 0x96/255.0, blue: 0x88/255.0),
-            "yellow": Color(red: 0xF9/255.0, green: 0xA8/255.0, blue: 0x25/255.0)
+            "yellow": Color(red: 0xF9/255.0, green: 0xA8/255.0, blue: 0x25/255.0),
+            "cyan": Color(red: 0x00/255.0, green: 0xBC/255.0, blue: 0xD4/255.0),
+            "indigo": Color(red: 0x3F/255.0, green: 0x51/255.0, blue: 0xB5/255.0),
+            "brown": Color(red: 0x79/255.0, green: 0x55/255.0, blue: 0x48/255.0),
+            "mint": Color(red: 0x00/255.0, green: 0xC8/255.0, blue: 0x96/255.0),
+            "lime": Color(red: 0xCD/255.0, green: 0xDC/255.0, blue: 0x39/255.0),
+            "coral": Color(red: 0xFF/255.0, green: 0x7F/255.0, blue: 0x50/255.0),
+            "lavender": Color(red: 0xE1/255.0, green: 0xBE/255.0, blue: 0xE7/255.0),
+            "navy": Color(red: 0x00/255.0, green: 0x1F/255.0, blue: 0x3F/255.0)
         ]
         return colors[avatarColor] ?? colors["red"]!
     }

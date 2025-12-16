@@ -17,6 +17,7 @@ struct ProfileView: View {
     @State private var tempAvatarType: String = "person.fill"
     @State private var tempAvatarColor: String = "red"
     @State private var showSaveSuccess = false
+    @State private var showSignOutConfirmation = false
     
     var avatarSelectionDestination: some View {
         AvatarSelectionView(
@@ -75,6 +76,7 @@ struct ProfileView: View {
             if !authManager.isAuthenticated {
                 // Show sign-in view if not authenticated
                 SignInView()
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
             } else if authManager.isLoading && authManager.userProfile == nil {
                 // Loading state
                 ZStack {
@@ -90,11 +92,15 @@ struct ProfileView: View {
                             .foregroundColor(Color.gray)
                     }
                 }
+                .transition(.opacity)
             } else {
                 // Profile view
                 profileContentView
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
             }
         }
+        .animation(.easeInOut(duration: 0.4), value: authManager.isAuthenticated)
+        .animation(.easeInOut(duration: 0.3), value: authManager.isLoading)
     }
     
     private var profileContentView: some View {
@@ -302,25 +308,17 @@ struct ProfileView: View {
                 }
                 .padding(.horizontal, 40)
                 
-                // Spacer to push sign out button to bottom
+                // Spacer for spacing
                 Spacer()
-                    
-                // Sign Out Button
-                Button(action: {
-                    authManager.signOut()
-                }) {
-                    Text("Sign Out")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                        .cornerRadius(12)
-                }
-                .padding(.horizontal, 40)
-                .padding(.bottom, 40)
+                    .frame(height: 40)
             }
             .opacity(contentOpacity)
+        }
+        .onAppear {
+            // Animate content appearance smoothly
+            withAnimation(.easeInOut(duration: 0.5)) {
+                contentOpacity = 1.0
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -331,6 +329,21 @@ struct ProfileView: View {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                }
+            }
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button(role: .destructive, action: {
+                        showSignOutConfirmation = true
+                    }) {
+                        Label("Sign Out", systemImage: "arrow.right.square")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .frame(width: 44, height: 44)
                 }
             }
         }
@@ -354,16 +367,18 @@ struct ProfileView: View {
                     .hidden()
                 }
             )
-        .onAppear {
-            // Animate content appearance
-            withAnimation(.easeInOut(duration: 0.3)) {
-                contentOpacity = 1.0
-            }
-        }
         .alert("Error", isPresented: $showError) {
             Button("OK", role: .cancel) { }
         } message: {
             Text(authManager.errorMessage ?? "An unknown error occurred")
+        }
+        .alert("Sign Out", isPresented: $showSignOutConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Sign Out", role: .destructive) {
+                authManager.signOut()
+            }
+        } message: {
+            Text("Are you sure you want to sign out?")
         }
         .onChange(of: authManager.errorMessage) { error in
             if error != nil {

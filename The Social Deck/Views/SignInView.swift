@@ -138,6 +138,7 @@ struct SignInView: View {
                         .padding(.horizontal, 40)
                         .padding(.top, 20)
                         .padding(.bottom, 40)
+                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
                     } else {
                         // Sign in with Apple Button
                         SignInWithAppleButton(.signIn) { request in
@@ -154,10 +155,12 @@ struct SignInView: View {
                         .padding(.horizontal, 40)
                         .padding(.top, 20)
                         .padding(.bottom, 40)
+                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
                     }
                 }
             }
         }
+        .animation(.easeInOut(duration: 0.3), value: authManager.isLoading)
         .alert("Error", isPresented: $showError) {
             Button("OK", role: .cancel) { }
         } message: {
