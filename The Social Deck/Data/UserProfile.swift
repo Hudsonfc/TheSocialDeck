@@ -36,7 +36,7 @@ struct UserProfile: Codable, Identifiable {
         username: String,
         email: String? = nil,
         gameCenterPlayerID: String? = nil,
-        avatarType: String = "person.fill",
+        avatarType: String = "avatar 1",
         avatarColor: String = "red",
         createdAt: Date = Date(),
         updatedAt: Date = Date(),

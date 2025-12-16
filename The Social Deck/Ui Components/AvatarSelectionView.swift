@@ -13,18 +13,13 @@ struct AvatarSelectionView: View {
     @Environment(\.dismiss) private var dismiss
     
     let avatarTypes = [
-        "person.fill",
-        "person.circle.fill",
-        "person.2.fill",
-        "star.fill",
-        "heart.fill",
-        "gamecontroller.fill",
-        "flame.fill",
-        "crown.fill",
-        "sparkles",
-        "bolt.fill",
-        "trophy.fill",
-        "sun.max.fill"
+        "avatar 1",
+        "avatar 2",
+        "avatar 3",
+        "avatar 4",
+        "avatar 5",
+        "avatar 6",
+        "avatar 7"
     ]
     
     let avatarColors: [(String, Color)] = [
@@ -67,7 +62,7 @@ struct AvatarSelectionView: View {
                     
                     // Avatar Types Section
                     VStack(alignment: .leading, spacing: 20) {
-                        Text("Choose Icon")
+                        Text("Choose Avatar")
                             .font(.system(size: 22, weight: .bold, design: .rounded))
                             .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                             .padding(.horizontal, 40)
@@ -148,6 +143,10 @@ struct AvatarTypeButton: View {
     let selectedColor: Color
     let action: () -> Void
     
+    private var isImageAsset: Bool {
+        avatarType.hasPrefix("avatar ")
+    }
+    
     var body: some View {
         Button(action: action) {
             ZStack {
@@ -156,9 +155,17 @@ struct AvatarTypeButton: View {
                     .frame(width: 76, height: 76)
                     .shadow(color: isSelected ? selectedColor.opacity(0.3) : Color.black.opacity(0.05), radius: isSelected ? 8 : 4, x: 0, y: 2)
                 
-                Image(systemName: avatarType)
-                    .font(.system(size: 32, weight: .semibold))
-                    .foregroundColor(isSelected ? selectedColor : Color(red: 0x66/255.0, green: 0x66/255.0, blue: 0x66/255.0))
+                if isImageAsset {
+                    Image(avatarType)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 56, height: 56)
+                        .opacity(isSelected ? 1.0 : 0.7)
+                } else {
+                    Image(systemName: avatarType)
+                        .font(.system(size: 32, weight: .semibold))
+                        .foregroundColor(isSelected ? selectedColor : Color(red: 0x66/255.0, green: 0x66/255.0, blue: 0x66/255.0))
+                }
                 
                 if isSelected {
                     RoundedRectangle(cornerRadius: 16)
@@ -185,7 +192,7 @@ struct ColorButton: View {
                 Circle()
                     .fill(color)
                     .frame(width: 64, height: 64)
-                    .shadow(color: isSelected ? color.opacity(0.4) : Color.black.opacity(0.1), radius: isSelected ? 8 : 4, x: 0, y: 2)
+                    .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                 
                 if isSelected {
                     ZStack {
@@ -234,15 +241,27 @@ struct AvatarView: View {
         return colors[avatarColor] ?? colors["red"]!
     }
     
+    private var isImageAsset: Bool {
+        avatarType.hasPrefix("avatar ")
+    }
+    
     var body: some View {
         ZStack {
             Circle()
                 .fill(color)
                 .frame(width: size, height: size)
             
-            Image(systemName: avatarType)
-                .font(.system(size: size * 0.5, weight: .medium))
-                .foregroundColor(.white)
+            if isImageAsset {
+                Image(avatarType)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: size * 0.8, height: size * 0.8)
+                    .clipShape(Circle())
+            } else {
+                Image(systemName: avatarType)
+                    .font(.system(size: size * 0.5, weight: .medium))
+                    .foregroundColor(.white)
+            }
         }
     }
 }
@@ -250,7 +269,7 @@ struct AvatarView: View {
 #Preview {
     NavigationView {
         AvatarSelectionView(
-            selectedAvatarType: .constant("person.fill"),
+            selectedAvatarType: .constant("avatar 1"),
             selectedAvatarColor: .constant("red")
         )
     }

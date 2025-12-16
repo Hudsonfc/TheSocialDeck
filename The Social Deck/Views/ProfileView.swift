@@ -133,8 +133,8 @@ struct ProfileView: View {
                                                 .frame(width: 36, height: 36)
                                                 .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
                                             
-                                            Image(systemName: "sparkles")
-                                                .font(.system(size: 16, weight: .semibold))
+                                            Image(systemName: "pencil")
+                                                .font(.system(size: 14, weight: .semibold))
                                                 .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                                         }
                                         .padding(6)
@@ -151,21 +151,31 @@ struct ProfileView: View {
                 }
                 
                 // Username Section
-                VStack(spacing: 16) {
-                    HStack(spacing: 12) {
+                VStack(spacing: 12) {
+                    // Username label
+                    Text("Username")
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundColor(Color.gray)
+                    
+                    ZStack {
+                        // Centered username
                         Text(authManager.userProfile?.username ?? "Player")
                             .font(.system(size: 26, weight: .bold, design: .rounded))
                             .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                         
-                        Button(action: {
-                            showChangeUsername = true
-                        }) {
-                            Image(systemName: "pencil")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                .padding(10)
-                                .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                                .cornerRadius(10)
+                        // Pencil button aligned to trailing
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                showChangeUsername = true
+                            }) {
+                                Image(systemName: "pencil")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .padding(10)
+                                    .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                                    .cornerRadius(10)
+                            }
                         }
                     }
                     .padding(.horizontal, 40)
@@ -235,6 +245,62 @@ struct ProfileView: View {
                     }
                     .padding(.horizontal, 40)
                 }
+                
+                // Friends Section
+                VStack(spacing: 16) {
+                    // Add Friends Button
+                    Button(action: {
+                        // TODO: Add friends functionality
+                    }) {
+                        HStack {
+                            Image(systemName: "person.badge.plus")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.white)
+                            
+                            Text("Add Friends")
+                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                .foregroundColor(.white)
+                            
+                            Spacer()
+                            
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.white.opacity(0.7))
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16)
+                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .cornerRadius(12)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    // Added Friends Button
+                    Button(action: {
+                        // TODO: View added friends functionality
+                    }) {
+                        HStack {
+                            Image(systemName: "person.2.fill")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            
+                            Text("Added Friends")
+                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            
+                            Spacer()
+                            
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(Color.gray)
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16)
+                        .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                        .cornerRadius(12)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+                .padding(.horizontal, 40)
                 
                 // Spacer to push sign out button to bottom
                 Spacer()
