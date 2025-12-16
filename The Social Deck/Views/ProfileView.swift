@@ -10,10 +10,9 @@ import SwiftUI
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var authManager: AuthManager
-    @State private var isEditingUsername = false
-    @State private var editedUsername = ""
     @State private var showError = false
     @State private var showAvatarSelection = false
+    @State private var showChangeUsername = false
     @State private var contentOpacity: Double = 0
     @State private var tempAvatarType: String = "person.fill"
     @State private var tempAvatarColor: String = "red"
@@ -134,7 +133,7 @@ struct ProfileView: View {
                                                 .frame(width: 36, height: 36)
                                                 .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
                                             
-                                            Image(systemName: "pencil.fill")
+                                            Image(systemName: "sparkles")
                                                 .font(.system(size: 16, weight: .semibold))
                                                 .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                                         }
@@ -153,69 +152,23 @@ struct ProfileView: View {
                 
                 // Username Section
                 VStack(spacing: 16) {
-                    if isEditingUsername {
-                        VStack(spacing: 12) {
-                            TextField("Username", text: $editedUsername)
-                                .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 14)
+                    HStack(spacing: 12) {
+                        Text(authManager.userProfile?.username ?? "Player")
+                            .font(.system(size: 26, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        
+                        Button(action: {
+                            showChangeUsername = true
+                        }) {
+                            Image(systemName: "pencil")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .padding(10)
                                 .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                                .cornerRadius(12)
-                                .autocapitalization(.none)
-                                .disableAutocorrection(true)
-                            
-                            HStack(spacing: 12) {
-                                Button(action: {
-                                    cancelEditing()
-                                }) {
-                                    Text("Cancel")
-                                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 12)
-                                        .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                                        .cornerRadius(12)
-                                }
-                                
-                                Button(action: {
-                                    saveUsername()
-                                }) {
-                                    Text("Save")
-                                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 12)
-                                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                        .cornerRadius(12)
-                                }
-                                .disabled(authManager.isLoading)
-                            }
+                                .cornerRadius(10)
                         }
-                        .padding(.horizontal, 40)
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                    } else {
-                        HStack(spacing: 12) {
-                            Text(authManager.userProfile?.username ?? "Player")
-                                .font(.system(size: 26, weight: .bold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                            
-                            Button(action: {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                    startEditingUsername()
-                                }
-                            }) {
-                                Image(systemName: "pencil")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                    .padding(10)
-                                    .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                                    .cornerRadius(10)
-                            }
-                        }
-                        .padding(.horizontal, 40)
-                        .transition(.move(edge: .top).combined(with: .opacity))
                     }
+                    .padding(.horizontal, 40)
                 }
                     
                 // Stats Section
@@ -316,15 +269,25 @@ struct ProfileView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        .background(
-            NavigationLink(
-                destination: avatarSelectionDestination,
-                isActive: $showAvatarSelection
-            ) {
-                EmptyView()
-            }
-            .hidden()
-        )
+            .background(
+                Group {
+                    NavigationLink(
+                        destination: avatarSelectionDestination,
+                        isActive: $showAvatarSelection
+                    ) {
+                        EmptyView()
+                    }
+                    .hidden()
+                    
+                    NavigationLink(
+                        destination: ChangeUsernameView(),
+                        isActive: $showChangeUsername
+                    ) {
+                        EmptyView()
+                    }
+                    .hidden()
+                }
+            )
         .onAppear {
             // Animate content appearance
             withAnimation(.easeInOut(duration: 0.3)) {
@@ -343,30 +306,6 @@ struct ProfileView: View {
         }
     }
     
-    private func startEditingUsername() {
-        editedUsername = authManager.userProfile?.username ?? ""
-        isEditingUsername = true
-    }
-    
-    private func cancelEditing() {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-            isEditingUsername = false
-            editedUsername = ""
-        }
-    }
-    
-    private func saveUsername() {
-        guard !editedUsername.trimmingCharacters(in: .whitespaces).isEmpty else {
-            return
-        }
-        
-        Task {
-            await authManager.updateUsername(editedUsername.trimmingCharacters(in: .whitespaces))
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                isEditingUsername = false
-            }
-        }
-    }
 }
 
 #Preview {

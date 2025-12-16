@@ -18,6 +18,7 @@ struct UserProfile: Codable, Identifiable {
     var avatarColor: String // Color name (red, blue, etc.)
     var createdAt: Date
     var updatedAt: Date
+    var lastUsernameChanged: Date? // When the username was last changed (for monthly limit)
     
     // Stats
     var gamesPlayed: Int
@@ -39,6 +40,7 @@ struct UserProfile: Codable, Identifiable {
         avatarColor: String = "red",
         createdAt: Date = Date(),
         updatedAt: Date = Date(),
+        lastUsernameChanged: Date? = nil,
         gamesPlayed: Int = 0,
         gamesWon: Int = 0,
         totalCardsSeen: Int = 0,
@@ -55,6 +57,7 @@ struct UserProfile: Codable, Identifiable {
         self.avatarColor = avatarColor
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+        self.lastUsernameChanged = lastUsernameChanged
         self.gamesPlayed = gamesPlayed
         self.gamesWon = gamesWon
         self.totalCardsSeen = totalCardsSeen

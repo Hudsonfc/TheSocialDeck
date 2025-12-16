@@ -66,14 +66,14 @@ struct AvatarSelectionView: View {
                     .padding(.vertical, 20)
                     
                     // Avatar Types Section
-                    VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 20) {
                         Text("Choose Icon")
-                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
                             .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                             .padding(.horizontal, 40)
                         
                         ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 16) {
+                            HStack(spacing: 20) {
                                 ForEach(avatarTypes, id: \.self) { avatarType in
                                     AvatarTypeButton(
                                         avatarType: avatarType,
@@ -87,18 +87,19 @@ struct AvatarSelectionView: View {
                                 }
                             }
                             .padding(.horizontal, 40)
+                            .padding(.vertical, 4)
                         }
                     }
                     
                     // Colors Section
-                    VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 20) {
                         Text("Choose Color")
-                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
                             .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                             .padding(.horizontal, 40)
                         
                         ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 16) {
+                            HStack(spacing: 20) {
                                 ForEach(avatarColors, id: \.0) { colorName, color in
                                     ColorButton(
                                         color: color,
@@ -111,6 +112,7 @@ struct AvatarSelectionView: View {
                                 }
                             }
                             .padding(.horizontal, 40)
+                            .padding(.vertical, 4)
                         }
                     }
                     
@@ -149,22 +151,25 @@ struct AvatarTypeButton: View {
     var body: some View {
         Button(action: action) {
             ZStack {
-                Circle()
-                    .fill(isSelected ? selectedColor.opacity(0.2) : Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                    .frame(width: 70, height: 70)
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(isSelected ? selectedColor.opacity(0.15) : Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                    .frame(width: 76, height: 76)
+                    .shadow(color: isSelected ? selectedColor.opacity(0.3) : Color.black.opacity(0.05), radius: isSelected ? 8 : 4, x: 0, y: 2)
                 
                 Image(systemName: avatarType)
-                    .font(.system(size: 28, weight: .medium))
-                    .foregroundColor(isSelected ? selectedColor : Color.gray)
+                    .font(.system(size: 32, weight: .semibold))
+                    .foregroundColor(isSelected ? selectedColor : Color(red: 0x66/255.0, green: 0x66/255.0, blue: 0x66/255.0))
                 
                 if isSelected {
-                    Circle()
+                    RoundedRectangle(cornerRadius: 16)
                         .stroke(selectedColor, lineWidth: 3)
-                        .frame(width: 70, height: 70)
+                        .frame(width: 76, height: 76)
                 }
             }
         }
         .buttonStyle(PlainButtonStyle())
+        .scaleEffect(isSelected ? 1.05 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
     }
 }
 
@@ -179,24 +184,33 @@ struct ColorButton: View {
             ZStack {
                 Circle()
                     .fill(color)
-                    .frame(width: 56, height: 56)
+                    .frame(width: 64, height: 64)
+                    .shadow(color: isSelected ? color.opacity(0.4) : Color.black.opacity(0.1), radius: isSelected ? 8 : 4, x: 0, y: 2)
                 
                 if isSelected {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.white)
+                    ZStack {
+                        Circle()
+                            .fill(Color.white.opacity(0.3))
+                            .frame(width: 64, height: 64)
+                        
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundColor(.white)
+                    }
                     
                     Circle()
-                        .stroke(Color.white, lineWidth: 3)
-                        .frame(width: 56, height: 56)
+                        .stroke(Color.white, lineWidth: 3.5)
+                        .frame(width: 64, height: 64)
                 } else {
                     Circle()
-                        .stroke(Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: 2)
-                        .frame(width: 56, height: 56)
+                        .stroke(Color(red: 0xE5/255.0, green: 0xE5/255.0, blue: 0xE5/255.0), lineWidth: 2.5)
+                        .frame(width: 64, height: 64)
                 }
             }
         }
         .buttonStyle(PlainButtonStyle())
+        .scaleEffect(isSelected ? 1.1 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
     }
 }
 

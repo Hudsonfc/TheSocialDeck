@@ -142,13 +142,8 @@ class AuthManager: ObservableObject {
         do {
             let document = try await profileRef.getDocument()
             if !document.exists {
-                // Determine username from Apple info or generate default
-                let username: String
-                if let formattedName = appleUserInfo?.formattedUsername {
-                    username = formattedName
-                } else {
-                    username = "Player \(String(userId.prefix(6)))"
-                }
+                // Generate a unique username (don't use Apple name)
+                let username = await generateUniqueUsername()
                 
                 // Get Game Center player ID if authenticated
                 let gameCenterPlayerID = GameCenterService.shared.isAuthenticated ? GameCenterService.shared.gameCenterPlayerID : nil
@@ -156,6 +151,55 @@ class AuthManager: ObservableObject {
             }
         } catch {
             errorMessage = "Failed to check profile: \(error.localizedDescription)"
+        }
+    }
+    
+    /// Generate a unique username
+    private func generateUniqueUsername() async -> String {
+        let adjectives = ["Swift", "Bold", "Cool", "Epic", "Mighty", "Noble", "Rapid", "Vivid", "Zest", "Peak", "Apex", "Nova", "Zen", "Rift", "Frost", "Flame", "Wave", "Sky", "Star", "Moon"]
+        let nouns = ["Player", "Gamer", "Champion", "Legend", "Hero", "Warrior", "Ace", "Pro", "Elite", "Master", "Rookie", "Sage", "Bolt", "Storm", "Blade", "Arrow", "Pilot", "Captain", "Ranger", "Hunter"]
+        
+        // Try combinations first
+        for _ in 0..<10 {
+            let adjective = adjectives.randomElement() ?? "Swift"
+            let noun = nouns.randomElement() ?? "Player"
+            let randomNum = Int.random(in: 100...9999)
+            let candidate = "\(adjective)\(noun)\(randomNum)"
+            
+            if await isUsernameAvailable(candidate) {
+                return candidate
+            }
+        }
+        
+        // Fallback to Player + random number
+        var attempts = 0
+        while attempts < 50 {
+            let randomNum = Int.random(in: 1000...999999)
+            let candidate = "Player\(randomNum)"
+            
+            if await isUsernameAvailable(candidate) {
+                return candidate
+            }
+            attempts += 1
+        }
+        
+        // Final fallback with timestamp
+        let timestamp = Int(Date().timeIntervalSince1970) % 1000000
+        return "Player\(timestamp)"
+    }
+    
+    /// Check if a username is available
+    private func isUsernameAvailable(_ username: String) async -> Bool {
+        do {
+            let querySnapshot = try await db.collection("profiles")
+                .whereField("username", isEqualTo: username)
+                .limit(to: 1)
+                .getDocuments()
+            
+            return querySnapshot.documents.isEmpty
+        } catch {
+            // If check fails, assume it's available (better than blocking signup)
+            return true
         }
     }
     
@@ -176,17 +220,54 @@ class AuthManager: ObservableObject {
         }
     }
     
+    /// Check if user can change username (monthly limit)
+    func canChangeUsername() -> Bool {
+        guard let profile = userProfile,
+              let lastChanged = profile.lastUsernameChanged else {
+            return true // Never changed before, so can change
+        }
+        
+        let calendar = Calendar.current
+        let daysSinceLastChange = calendar.dateComponents([.day], from: lastChanged, to: Date()).day ?? 0
+        
+        return daysSinceLastChange >= 30
+    }
+    
     /// Update username
     func updateUsername(_ newUsername: String) async {
         guard let userId = authService.currentUserId else { return }
         
+        // Check monthly limit
+        if !canChangeUsername() {
+            errorMessage = "You can only change your username once per month."
+            return
+        }
+        
         isLoading = true
         errorMessage = nil
+        
+        // Check if username is available (excluding current user)
+        let trimmedUsername = newUsername.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !trimmedUsername.isEmpty else {
+            errorMessage = "Username cannot be empty"
+            isLoading = false
+            return
+        }
+        
+        // Check if username is already taken by another user
+        let isAvailable = await isUsernameAvailableForUpdate(trimmedUsername, currentUserId: userId)
+        if !isAvailable {
+            errorMessage = "This username is already taken. Please choose another one."
+            isLoading = false
+            return
+        }
         
         do {
             let profileRef = db.collection("profiles").document(userId)
             try await profileRef.updateData([
-                "username": newUsername,
+                "username": trimmedUsername,
+                "lastUsernameChanged": Timestamp(date: Date()),
                 "updatedAt": Timestamp(date: Date())
             ])
         } catch {
@@ -194,6 +275,33 @@ class AuthManager: ObservableObject {
         }
         
         isLoading = false
+    }
+    
+    /// Check if username is available for change (public method for validation)
+    func isUsernameAvailableForChange(_ username: String) async -> Bool {
+        guard let userId = authService.currentUserId else { return false }
+        return await isUsernameAvailableForUpdate(username, currentUserId: userId)
+    }
+    
+    /// Check if a username is available for update (excluding current user's username)
+    private func isUsernameAvailableForUpdate(_ username: String, currentUserId: String) async -> Bool {
+        do {
+            let querySnapshot = try await db.collection("profiles")
+                .whereField("username", isEqualTo: username)
+                .limit(to: 1)
+                .getDocuments()
+            
+            // If no documents found, username is available
+            guard let document = querySnapshot.documents.first else {
+                return true
+            }
+            
+            // If the document belongs to the current user, it's available (they're just keeping their current username)
+            return document.documentID == currentUserId
+        } catch {
+            // If check fails, allow the update (better than blocking user)
+            return true
+        }
     }
     
     /// Update avatar (type and color)
