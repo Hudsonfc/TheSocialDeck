@@ -117,7 +117,7 @@ struct WhatsMySecretEndView: View {
                 description: "Test",
                 numberOfCards: 50,
                 estimatedTime: "5-10 min",
-                imageName: "Art 1.4",
+                imageName: "WMS artwork",
                 type: .whatsMySecret,
                 cards: [],
                 availableCategories: []

@@ -156,9 +156,9 @@ struct RiddleMeThisSetupView: View {
         .navigationBarHidden(true)
         .background(
             NavigationLink(
-                destination: RiddleMeThisPlayView(
-                    manager: RiddleMeThisGameManager(deck: deck, cardCount: Int(selectedCardCount)),
-                    deck: deck
+                destination: RiddleMeThisLoadingView(
+                    deck: deck,
+                    cardCount: Int(selectedCardCount)
                 ),
                 isActive: $navigateToPlay
             ) {
@@ -176,7 +176,7 @@ struct RiddleMeThisSetupView: View {
                 description: "Solve riddles to progress.",
                 numberOfCards: 50,
                 estimatedTime: "5-10 min",
-                imageName: "Art 1.4",
+                imageName: "RMT artwork",
                 type: .riddleMeThis,
                 cards: allRiddleMeThisCards,
                 availableCategories: []

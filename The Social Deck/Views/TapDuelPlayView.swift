@@ -560,7 +560,7 @@ struct FalseStartView: View {
                 description: "Fast reaction game",
                 numberOfCards: 0,
                 estimatedTime: "2-5 min",
-                imageName: "Art 1.4",
+                imageName: "TD artwork",
                 type: .tapDuel,
                 cards: [],
                 availableCategories: []

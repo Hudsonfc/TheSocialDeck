@@ -122,12 +122,10 @@ struct TapDuelSetupView: View {
         .navigationBarHidden(true)
         .background(
             NavigationLink(
-                destination: TapDuelPlayView(
-                    manager: TapDuelGameManager(
-                        player1Name: player1Name.trimmingCharacters(in: .whitespacesAndNewlines),
-                        player2Name: player2Name.trimmingCharacters(in: .whitespacesAndNewlines)
-                    ),
-                    deck: deck
+                destination: TapDuelLoadingView(
+                    deck: deck,
+                    player1Name: player1Name.trimmingCharacters(in: .whitespacesAndNewlines),
+                    player2Name: player2Name.trimmingCharacters(in: .whitespacesAndNewlines)
                 ),
                 isActive: $navigateToPlay
             ) {
@@ -145,7 +143,7 @@ struct TapDuelSetupView: View {
                 description: "Fast head-to-head reaction game",
                 numberOfCards: 0,
                 estimatedTime: "2-5 min",
-                imageName: "Art 1.4",
+                imageName: "TD artwork",
                 type: .tapDuel,
                 cards: [],
                 availableCategories: []

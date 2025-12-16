@@ -1,14 +1,17 @@
 {
   "images" : [
     {
+      "filename" : "WMS artwork.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "WMS artwork 1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "WMS artwork 2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

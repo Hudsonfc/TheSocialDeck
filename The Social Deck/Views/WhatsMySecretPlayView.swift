@@ -204,6 +204,13 @@ struct ShowingSecretView: View {
         VStack(spacing: 32) {
             if let secret = manager.currentSecret {
                 VStack(spacing: 24) {
+                    // Player's turn text
+                    Text("\(manager.currentPlayer)'s turn")
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                    
                     // Instruction text
                     Text("Tap the card to reveal your secret")
                         .font(.system(size: 16, weight: .medium, design: .rounded))
@@ -652,7 +659,7 @@ struct ResultView: View {
                     description: "Test",
                     numberOfCards: 50,
                     estimatedTime: "5-10 min",
-                    imageName: "Art 1.4",
+                    imageName: "WMS artwork",
                     type: .whatsMySecret,
                     cards: [],
                     availableCategories: []
@@ -666,7 +673,7 @@ struct ResultView: View {
                 description: "Test",
                 numberOfCards: 50,
                 estimatedTime: "5-10 min",
-                imageName: "Art 1.4",
+                imageName: "WMS artwork",
                 type: .whatsMySecret,
                 cards: [],
                 availableCategories: []

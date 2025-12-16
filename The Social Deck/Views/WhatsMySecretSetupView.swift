@@ -190,15 +190,11 @@ struct WhatsMySecretSetupView: View {
         }
         .background(
             NavigationLink(
-                destination: WhatsMySecretPlayView(
-                    manager: WhatsMySecretGameManager(
-                        deck: deck,
-                        selectedCategories: deck.availableCategories,
-                        cardCount: Int(selectedCardCount),
-                        players: players
-                    ),
+                destination: WhatsMySecretLoadingView(
                     deck: deck,
-                    selectedCategories: deck.availableCategories
+                    selectedCategories: deck.availableCategories,
+                    cardCount: Int(selectedCardCount),
+                    players: players
                 ),
                 isActive: $navigateToPlay
             ) {
@@ -227,7 +223,7 @@ struct WhatsMySecretSetupView: View {
                 description: "Test",
                 numberOfCards: 50,
                 estimatedTime: "5-10 min",
-                imageName: "Art 1.4",
+                imageName: "WMS artwork",
                 type: .whatsMySecret,
                 cards: [],
                 availableCategories: ["Party", "Wild"]

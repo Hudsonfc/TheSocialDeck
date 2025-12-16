@@ -86,7 +86,7 @@ struct RiddleMeThisEndView: View {
                 description: "Solve riddles",
                 numberOfCards: 71,
                 estimatedTime: "5-10 min",
-                imageName: "Art 1.4",
+                imageName: "RMT artwork",
                 type: .riddleMeThis,
                 cards: [],
                 availableCategories: []

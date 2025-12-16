@@ -1,14 +1,17 @@
 {
   "images" : [
     {
+      "filename" : "RMT artwork.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "RMT artwork 1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "RMT artwork 2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
