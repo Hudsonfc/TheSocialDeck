@@ -11,32 +11,19 @@ import UIKit
 
 class RiddleMeThisGameManager: ObservableObject {
     @Published var cards: [Card] = []
-    @Published var players: [String] = []
     @Published var currentCardIndex: Int = 0
     @Published var roundNumber: Int = 1
-    @Published var timeRemaining: Double = 0.0
     @Published var winner: String? = nil
     @Published var isFinished: Bool = false
-    @Published var lockedOutPlayers: Set<String> = []
-    
-    private var timer: Timer?
-    let roundDuration: TimeInterval = 90.0 // 90 seconds per riddle
     
     enum GamePhase {
-        case showingRiddle // Riddle is displayed, timer running
+        case showingRiddle // Riddle is displayed
         case showingSolution // Solution revealed, waiting for next round
     }
     
     @Published var gamePhase: GamePhase = .showingRiddle
     
-    init(deck: Deck, cardCount: Int, players: [String]) {
-        // Initialize players - randomize order
-        if players.isEmpty {
-            self.players = ["Player 1"]
-        } else {
-            self.players = players.shuffled()
-        }
-        
+    init(deck: Deck, cardCount: Int) {
         // Get cards - shuffle and take cardCount
         if cardCount == 0 {
             self.cards = deck.cards.shuffled()
@@ -118,52 +105,16 @@ class RiddleMeThisGameManager: ObservableObject {
     func startRound() {
         // Reset state for new round
         winner = nil
-        lockedOutPlayers.removeAll()
         gamePhase = .showingRiddle
-        timeRemaining = roundDuration
-        
-        // Start timer
-        startTimer()
         
         // Haptic feedback
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
         impactFeedback.impactOccurred()
     }
     
-    private func startTimer() {
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] timer in
-            guard let self = self else {
-                timer.invalidate()
-                return
-            }
-            
-            self.timeRemaining -= 0.1
-            
-            // Haptic feedback when timer is low (last 10 seconds, once per second)
-            if self.timeRemaining <= 10 && self.timeRemaining > 0 {
-                let currentSecond = Int(self.timeRemaining)
-                let previousSecond = Int(self.timeRemaining + 0.1)
-                if currentSecond != previousSecond {
-                    let impactFeedback = UIImpactFeedbackGenerator(style: .light)
-                    impactFeedback.impactOccurred()
-                }
-            }
-            
-            if self.timeRemaining <= 0 {
-                self.handleTimerExpired()
-                timer.invalidate()
-            }
-        }
-    }
-    
-    func submitCorrectAnswer(winnerName: String) {
-        // Stop timer
-        timer?.invalidate()
-        timer = nil
-        
-        // Set winner
-        winner = winnerName
+    func submitCorrectAnswer() {
+        // Set winner (no specific name needed)
+        winner = "Someone"
         
         // Move to solution phase
         gamePhase = .showingSolution
@@ -173,10 +124,7 @@ class RiddleMeThisGameManager: ObservableObject {
         notificationFeedback.notificationOccurred(.success)
     }
     
-    func submitIncorrectAnswer(playerName: String) {
-        // Lock out the player for this round
-        lockedOutPlayers.insert(playerName)
-        
+    func submitIncorrectAnswer() {
         // Haptic feedback for incorrect answer
         let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
         impactFeedback.impactOccurred()
@@ -187,10 +135,6 @@ class RiddleMeThisGameManager: ObservableObject {
     }
     
     func showAnswer() {
-        // Stop timer
-        timer?.invalidate()
-        timer = nil
-        
         // No winner when showing answer directly
         winner = nil
         
@@ -200,21 +144,6 @@ class RiddleMeThisGameManager: ObservableObject {
         // Haptic feedback
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
         impactFeedback.impactOccurred()
-    }
-    
-    private func handleTimerExpired() {
-        timer?.invalidate()
-        timer = nil
-        
-        // No winner this round
-        winner = nil
-        
-        // Move to solution phase
-        gamePhase = .showingSolution
-        
-        // Haptic feedback for timer expiration
-        let notificationFeedback = UINotificationFeedbackGenerator()
-        notificationFeedback.notificationOccurred(.warning)
     }
     
     func nextRound() {
@@ -231,19 +160,4 @@ class RiddleMeThisGameManager: ObservableObject {
         }
     }
     
-    func formatTime(_ time: TimeInterval) -> String {
-        let totalSeconds = Int(time)
-        let minutes = totalSeconds / 60
-        let seconds = totalSeconds % 60
-        
-        if minutes > 0 {
-            return String(format: "%d:%02d", minutes, seconds)
-        } else {
-            return String(format: "%d", seconds)
-        }
-    }
-    
-    deinit {
-        timer?.invalidate()
-    }
 }

@@ -10,8 +10,6 @@ import UIKit
 
 struct RiddleMeThisSetupView: View {
     let deck: Deck
-    @State private var players: [String] = []
-    @State private var newPlayerName: String = ""
     @State private var navigateToPlay: Bool = false
     @Environment(\.dismiss) private var dismiss
     
@@ -41,141 +39,117 @@ struct RiddleMeThisSetupView: View {
                 .padding(.horizontal, 40)
                 .padding(.top, 20)
                 
-                ScrollView {
-                    VStack(spacing: 0) {
-                        // Game artwork
-                        Image(deck.imageName)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 200, height: 200)
-                            .clipped()
-                            .cornerRadius(100)
-                            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-                            .padding(.top, 20)
-                            .padding(.bottom, players.count > 3 ? 20 : 32)
-                        
-                        // Players section
-                        VStack(spacing: players.count > 3 ? 12 : 16) {
-                            VStack(spacing: 8) {
-                                Text("Add Players")
+                VStack(spacing: 0) {
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            // Game artwork
+                            Image(deck.imageName)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 200, height: 200)
+                                .clipped()
+                                .cornerRadius(100)
+                                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                                .padding(.top, 20)
+                                .padding(.bottom, 32)
+                            
+                            // Game description
+                            VStack(spacing: 16) {
+                                Text("How to Play")
                                     .font(.system(size: 20, weight: .bold, design: .rounded))
                                     .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                                 
-                                Text("Enter each player's name and tap the + button to add them to the game.")
-                                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                                    .multilineTextAlignment(.center)
-                                    .lineSpacing(4)
-                                    .padding(.horizontal, 20)
-                            }
-                            
-                            // Player list
-                            if players.isEmpty {
-                                Text("No players added yet")
-                                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                                    .padding(.vertical, 20)
-                            } else {
-                                ScrollView {
-                                    VStack(spacing: players.count > 3 ? 8 : 12) {
-                                        ForEach(Array(players.enumerated()), id: \.offset) { index, player in
-                                            HStack {
-                                                Text(player)
-                                                    .font(.system(size: 16, weight: .medium, design: .rounded))
-                                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                                
-                                                Spacer()
-                                                
-                                                Button(action: {
-                                                    players.remove(at: index)
-                                                }) {
-                                                    Image(systemName: "xmark.circle.fill")
-                                                        .font(.system(size: 20))
-                                                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                                }
-                                            }
-                                            .padding(.horizontal, 20)
-                                            .padding(.vertical, players.count > 3 ? 12 : 14)
-                                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                                            .cornerRadius(12)
+                                VStack(spacing: 12) {
+                                    Text("Read the riddle out loud to the group. Players race to say the correct answer. Tap 'Show Answer' when ready to reveal the solution.")
+                                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                        .multilineTextAlignment(.center)
+                                        .lineSpacing(4)
+                                    
+                                    // Tips section
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text("Tips")
+                                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                        
+                                        HStack(alignment: .top, spacing: 8) {
+                                            Text("•")
+                                                .font(.system(size: 14, weight: .regular))
+                                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                            Text("Tap the card to flip it and reveal the riddle")
+                                                .font(.system(size: 13, weight: .regular, design: .rounded))
+                                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                        }
+                                        
+                                        HStack(alignment: .top, spacing: 8) {
+                                            Text("•")
+                                                .font(.system(size: 14, weight: .regular))
+                                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                            Text("You can flip the card back and forth as many times as needed")
+                                                .font(.system(size: 13, weight: .regular, design: .rounded))
+                                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                        }
+                                        
+                                        HStack(alignment: .top, spacing: 8) {
+                                            Text("•")
+                                                .font(.system(size: 14, weight: .regular))
+                                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                            Text("Take your time - there's no timer!")
+                                                .font(.system(size: 13, weight: .regular, design: .rounded))
+                                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                                         }
                                     }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.top, 4)
                                 }
-                                .frame(maxHeight: players.count > 3 ? 180 : 200)
                             }
+                            .padding(.horizontal, 40)
+                            .padding(.bottom, 32)
                             
-                            // Add player input
-                            HStack(spacing: 12) {
-                                TextField("Player name", text: $newPlayerName)
+                            // Card Count Selector
+                            VStack(spacing: 12) {
+                                Text("Number of Riddles")
                                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 12)
-                                    .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                                    .cornerRadius(12)
-                                    .autocapitalization(.words)
-                                    .disableAutocorrection(true)
-                                    .onSubmit {
-                                        addPlayer()
+                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                
+                                VStack(spacing: 8) {
+                                    Text("\(Int(selectedCardCount)) riddle\(Int(selectedCardCount) == 1 ? "" : "s")")
+                                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    
+                                    Slider(value: $selectedCardCount, in: Double(minCards)...Double(min(maxCards, deck.numberOfCards)), step: 1)
+                                        .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    
+                                    HStack {
+                                        Text("\(minCards)")
+                                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                        Spacer()
+                                        Text("\(min(maxCards, deck.numberOfCards))")
+                                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                                     }
-                                
-                                Button(action: {
-                                    addPlayer()
-                                }) {
-                                    Image(systemName: "plus.circle.fill")
-                                        .font(.system(size: 32))
-                                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                                 }
+                                .padding(.horizontal, 20)
                             }
+                            .padding(.horizontal, 40)
+                            .padding(.bottom, 32)
                         }
-                        .padding(.horizontal, 40)
-                        .padding(.bottom, players.count > 3 ? 20 : 32)
-                        
-                        // Card Count Selector
-                        VStack(spacing: 12) {
-                            Text("Number of Riddles")
-                                .font(.system(size: 16, weight: .medium, design: .rounded))
-                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                            
-                            VStack(spacing: 8) {
-                                Text("\(Int(selectedCardCount)) riddle\(Int(selectedCardCount) == 1 ? "" : "s")")
-                                    .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                
-                                Slider(value: $selectedCardCount, in: Double(minCards)...Double(min(maxCards, deck.numberOfCards)), step: 1)
-                                    .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                
-                                HStack {
-                                    Text("\(minCards)")
-                                        .font(.system(size: 12, weight: .regular, design: .rounded))
-                                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                                    Spacer()
-                                    Text("\(min(maxCards, deck.numberOfCards))")
-                                        .font(.system(size: 12, weight: .regular, design: .rounded))
-                                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                                }
-                            }
-                            .padding(.horizontal, 20)
-                        }
-                        .padding(.horizontal, 40)
-                        .padding(.bottom, 32)
-                        
-                        // Start Game button
-                        PrimaryButton(title: "Start Game") {
-                            // Add haptic feedback
-                            let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-                            impactFeedback.impactOccurred()
-                            
-                            // Small delay for smoother transition
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                navigateToPlay = true
-                            }
-                        }
-                        .padding(.horizontal, 40)
-                        .padding(.top, players.count > 3 ? 16 : 20)
-                        .disabled(players.isEmpty)
-                        .opacity(players.isEmpty ? 0.5 : 1.0)
-                        .padding(.bottom, players.count > 3 ? 32 : 40)
                     }
+                    
+                    // Start Game button
+                    PrimaryButton(title: "Start Game") {
+                        // Add haptic feedback
+                        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                        impactFeedback.impactOccurred()
+                        
+                        // Small delay for smoother transition
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            navigateToPlay = true
+                        }
+                    }
+                    .padding(.horizontal, 40)
+                    .padding(.bottom, 40)
                 }
             }
         }
@@ -183,7 +157,7 @@ struct RiddleMeThisSetupView: View {
         .background(
             NavigationLink(
                 destination: RiddleMeThisPlayView(
-                    manager: RiddleMeThisGameManager(deck: deck, cardCount: Int(selectedCardCount), players: players),
+                    manager: RiddleMeThisGameManager(deck: deck, cardCount: Int(selectedCardCount)),
                     deck: deck
                 ),
                 isActive: $navigateToPlay
@@ -191,17 +165,6 @@ struct RiddleMeThisSetupView: View {
                 EmptyView()
             }
         )
-    }
-    
-    private func addPlayer() {
-        let trimmedName = newPlayerName.trimmingCharacters(in: .whitespacesAndNewlines)
-        // Validate: not empty, not duplicate, and reasonable length
-        if !trimmedName.isEmpty 
-            && !players.contains(trimmedName) 
-            && trimmedName.count <= 30 {
-            players.append(trimmedName)
-            newPlayerName = ""
-        }
     }
 }
 

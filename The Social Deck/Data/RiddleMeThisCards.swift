@@ -65,7 +65,72 @@ let allRiddleMeThisCards: [Card] = [
     Card(text: "I have a spine but no bones. What am I?", category: "Objects", correctAnswer: "A book"),
     
     // Time & Numbers
-    Card(text: "What has hands but cannot clap?", category: "Time", correctAnswer: "A clock"),
     Card(text: "What is always in front of you but can't be seen?", category: "Time", correctAnswer: "The future"),
     Card(text: "What comes before but is never found?", category: "Time", correctAnswer: "Never"),
+    
+    // Food Riddles
+    Card(text: "I'm yellow and curved, monkeys love me. What am I?", category: "Food", correctAnswer: "A banana"),
+    Card(text: "I'm round, red, and sometimes green. I'm a fruit that's also a color. What am I?", category: "Food", correctAnswer: "An apple"),
+    Card(text: "I'm white and you drink me. I come from cows. What am I?", category: "Food", correctAnswer: "Milk"),
+    Card(text: "I'm a vegetable that's green and looks like a tree. What am I?", category: "Food", correctAnswer: "Broccoli"),
+    Card(text: "I'm sweet and come in bars. I'm a treat that kids love. What am I?", category: "Food", correctAnswer: "Chocolate"),
+    
+    // Animal Riddles
+    Card(text: "I'm a bird that can't fly, but I can swim really well. What am I?", category: "Animals", correctAnswer: "A penguin"),
+    Card(text: "I'm the king of the jungle, but I'm not actually from the jungle. What am I?", category: "Animals", correctAnswer: "A lion"),
+    Card(text: "I'm black and white, and I'm known for being stinky. What am I?", category: "Animals", correctAnswer: "A skunk"),
+    Card(text: "I'm slow and carry my home on my back. What am I?", category: "Animals", correctAnswer: "A snail"),
+    Card(text: "I have a trunk but I'm not a tree. I'm the largest land animal. What am I?", category: "Animals", correctAnswer: "An elephant"),
+    Card(text: "I'm known for having nine lives. What am I?", category: "Animals", correctAnswer: "A cat"),
+    Card(text: "I hop around and I'm known for my pouch. What am I?", category: "Animals", correctAnswer: "A kangaroo"),
+    
+    // Body Parts
+    Card(text: "I help you see, but I can't see myself. What am I?", category: "Body", correctAnswer: "An eye"),
+    Card(text: "You have two of me, and I help you hear. What am I?", category: "Body", correctAnswer: "An ear"),
+    Card(text: "You use me to smell, and I'm in the middle of your face. What am I?", category: "Body", correctAnswer: "A nose"),
+    
+    // Transportation
+    Card(text: "I have two wheels and you pedal me. What am I?", category: "Transportation", correctAnswer: "A bicycle"),
+    Card(text: "I fly in the sky and have wings, but I'm not a bird. What am I?", category: "Transportation", correctAnswer: "An airplane"),
+    Card(text: "I travel on tracks and make a choo-choo sound. What am I?", category: "Transportation", correctAnswer: "A train"),
+    
+    // Sports & Games
+    Card(text: "I'm round and you kick me. I'm used in a popular sport. What am I?", category: "Sports", correctAnswer: "A soccer ball"),
+    Card(text: "I'm a game you play with rackets and a net. What am I?", category: "Sports", correctAnswer: "Tennis"),
+    Card(text: "You bounce me and try to put me through a hoop. What am I?", category: "Sports", correctAnswer: "A basketball"),
+    
+    // Weather & Sky
+    Card(text: "I appear after rain in the sky. I'm colorful and curved. What am I?", category: "Nature", correctAnswer: "A rainbow"),
+    Card(text: "I'm hot and bright. I shine during the day. What am I?", category: "Nature", correctAnswer: "The sun"),
+    Card(text: "I'm white and fluffy, and I float in the sky. What am I?", category: "Nature", correctAnswer: "A cloud"),
+    Card(text: "I twinkle in the night sky. What am I?", category: "Nature", correctAnswer: "A star"),
+    
+    // More Classic Riddles
+    Card(text: "The more you take away, the larger I become. What am I?", category: "Classic", correctAnswer: "A hole"),
+    Card(text: "I'm seen in water but I'm not wet. What am I?", category: "Classic", correctAnswer: "A reflection"),
+    Card(text: "I'm always coming but never arrive. What am I?", category: "Classic", correctAnswer: "Tomorrow"),
+    Card(text: "I have legs but can't walk. What am I?", category: "Classic", correctAnswer: "A chair"),
+    Card(text: "I have no beginning, no end, and no middle. What am I?", category: "Classic", correctAnswer: "A circle"),
+    Card(text: "I'm not alive, but I grow. I don't have lungs, but I need air. What am I?", category: "Classic", correctAnswer: "Fire"),
+    
+    // More Wordplay
+    Card(text: "What has a bottom at the top?", category: "Wordplay", correctAnswer: "Your legs"),
+    Card(text: "I'm tall when I'm sitting, but short when I'm standing. What am I?", category: "Wordplay", correctAnswer: "A dog"),
+    Card(text: "What can you break without touching it?", category: "Wordplay", correctAnswer: "A promise"),
+    Card(text: "What has words but never speaks?", category: "Wordplay", correctAnswer: "A dictionary"),
+    Card(text: "I'm an odd number. Take away a letter and I become even. What number am I?", category: "Wordplay", correctAnswer: "Seven"),
+    
+    // More Mystery
+    Card(text: "I'm invisible but I'm everywhere. You can't see me but you know I'm there. What am I?", category: "Mystery", correctAnswer: "Air"),
+    Card(text: "I have no legs but I can travel far. I have no mouth but I can make sounds. What am I?", category: "Mystery", correctAnswer: "Wind"),
+    Card(text: "I'm not alive, but I can die. What am I?", category: "Mystery", correctAnswer: "A battery"),
+    Card(text: "I have a heart that doesn't beat. What am I?", category: "Mystery", correctAnswer: "An artichoke"),
+    
+    // More Objects
+    Card(text: "I have teeth but I can't bite. What am I?", category: "Objects", correctAnswer: "A comb"),
+    Card(text: "I'm made of glass but you can't see through me clearly. You look at yourself in me. What am I?", category: "Objects", correctAnswer: "A mirror"),
+    Card(text: "I'm long and thin. I help you see better. What am I?", category: "Objects", correctAnswer: "Glasses"),
+    Card(text: "I open but never close. I'm on your head. What am I?", category: "Objects", correctAnswer: "An umbrella"),
+    Card(text: "I have pages but I'm not a book. I help you stay clean. What am I?", category: "Objects", correctAnswer: "A calendar"),
+    Card(text: "I'm round and you bounce me. I'm used in many sports. What am I?", category: "Objects", correctAnswer: "A ball"),
 ]

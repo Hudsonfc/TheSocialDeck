@@ -9,7 +9,6 @@ import SwiftUI
 
 struct RiddleMeThisEndView: View {
     let deck: Deck
-    let players: [String]
     let totalRounds: Int
     @Environment(\.dismiss) private var dismiss
     @State private var showConfetti: Bool = false
@@ -92,7 +91,6 @@ struct RiddleMeThisEndView: View {
                 cards: [],
                 availableCategories: []
             ),
-            players: ["Player 1", "Player 2"],
             totalRounds: 5
         )
     }

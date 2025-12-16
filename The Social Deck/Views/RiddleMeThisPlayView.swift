@@ -76,8 +76,8 @@ struct RiddleMeThisPlayView: View {
                     case .showingSolution:
                         SolutionView(manager: manager, cardRotation: $cardRotation, isCardFlipped: $isCardFlipped, isTransitioning: $isTransitioning, showEndView: $showEndView)
                             .transition(.asymmetric(
-                                insertion: .scale(scale: 0.95).combined(with: .opacity),
-                                removal: .scale(scale: 0.95).combined(with: .opacity)
+                                insertion: .move(edge: .bottom).combined(with: .opacity),
+                                removal: .move(edge: .top).combined(with: .opacity)
                             ))
                     }
                 }
@@ -105,7 +105,6 @@ struct RiddleMeThisPlayView: View {
             NavigationLink(
                 destination: RiddleMeThisEndView(
                     deck: deck,
-                    players: manager.players,
                     totalRounds: manager.roundNumber - 1
                 ),
                 isActive: $showEndView
@@ -125,7 +124,7 @@ struct RiddleMeThisPlayView: View {
     }
 }
 
-// Riddle View - Shows riddle card, timer, and player buttons
+// Riddle View - Shows riddle card and answer buttons
 struct RiddleView: View {
     @ObservedObject var manager: RiddleMeThisGameManager
     @Binding var cardRotation: Double
@@ -133,32 +132,18 @@ struct RiddleView: View {
     @Binding var isTransitioning: Bool
     
     var body: some View {
-        VStack(spacing: 24) {
-            // Timer
-            VStack(spacing: 8) {
-                Text(manager.formatTime(manager.timeRemaining))
-                    .font(.system(size: 48, weight: .bold, design: .rounded))
-                    .foregroundColor(manager.timeRemaining <= 10 ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                    .animation(.easeInOut(duration: 0.3), value: manager.timeRemaining)
-                
-                if manager.timeRemaining <= 10 {
-                    Text("Time running out!")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                        .transition(.opacity)
-                }
-            }
-            .padding(.top, 20)
+        VStack(spacing: 0) {
+            Spacer()
             
             // Card
             if let riddle = manager.currentRiddle {
                 ZStack {
-                    // Card front - visible when rotation < 90
-                    RiddleCardFrontView(text: riddle.text)
+                    // Card back (initial) - "Riddle Me This" text - visible when rotation < 90
+                    RiddleCardBackView(text: "Riddle Me This")
                         .opacity(cardRotation < 90 ? 1 : 0)
                     
-                    // Card back - visible when rotation >= 90 (showing answer)
-                    RiddleCardBackView(text: riddle.text, answer: manager.currentAnswer)
+                    // Card front (after flip) - showing riddle text - visible when rotation >= 90
+                    RiddleCardFrontView(text: riddle.text)
                         .opacity(cardRotation >= 90 ? 1 : 0)
                         .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
                 }
@@ -174,90 +159,26 @@ struct RiddleView: View {
                         toggleCard()
                     }
                 }
-                .padding(.vertical, 20)
             }
             
             Spacer()
             
-            // Locked out players
-            if !manager.lockedOutPlayers.isEmpty {
-                VStack(spacing: 8) {
-                    Text("Locked Out")
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                    
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(Array(manager.lockedOutPlayers), id: \.self) { player in
-                                Text(player)
-                                    .font(.system(size: 12, weight: .medium, design: .rounded))
-                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 6)
-                                    .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                                    .cornerRadius(16)
-                            }
-                        }
-                        .padding(.horizontal, 40)
-                    }
+            // Show answer button (only when card is flipped to show riddle)
+            if isCardFlipped {
+                PrimaryButton(title: "Show Answer") {
+                    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                    impactFeedback.impactOccurred()
+                    manager.showAnswer()
                 }
-                .padding(.bottom, 8)
+                .padding(.horizontal, 40)
+                .padding(.bottom, 40)
+                .transition(.asymmetric(
+                    insertion: .move(edge: .bottom).combined(with: .opacity),
+                    removal: .move(edge: .bottom).combined(with: .opacity)
+                ))
             }
-            
-            // Player buttons
-            VStack(spacing: 12) {
-                Text("Who gave the answer?")
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                    .padding(.bottom, 4)
-                
-                ScrollView {
-                    VStack(spacing: 10) {
-                        ForEach(manager.players, id: \.self) { player in
-                            if !manager.lockedOutPlayers.contains(player) {
-                                HStack(spacing: 12) {
-                                    // Correct answer button
-                                    Button(action: {
-                                        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-                                        impactFeedback.impactOccurred()
-                                        manager.submitCorrectAnswer(winnerName: player)
-                                    }) {
-                                        HStack(spacing: 8) {
-                                            Image(systemName: "checkmark.circle.fill")
-                                                .font(.system(size: 18, weight: .medium))
-                                            Text("\(player) - Correct")
-                                                .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                        }
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 14)
-                                        .background(Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0))
-                                        .cornerRadius(12)
-                                    }
-                                    
-                                    // Wrong answer button
-                                    Button(action: {
-                                        let impactFeedback = UIImpactFeedbackGenerator(style: .light)
-                                        impactFeedback.impactOccurred()
-                                        manager.submitIncorrectAnswer(playerName: player)
-                                    }) {
-                                        Image(systemName: "xmark.circle.fill")
-                                            .font(.system(size: 20, weight: .medium))
-                                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                            .frame(width: 50, height: 50)
-                                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                                            .cornerRadius(12)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                .frame(maxHeight: 200)
-            }
-            .padding(.horizontal, 40)
-            .padding(.bottom, 32)
         }
+        .animation(.spring(response: 0.6, dampingFraction: 0.8), value: isCardFlipped)
     }
     
     private func toggleCard() {
@@ -290,9 +211,11 @@ struct SolutionView: View {
     @Binding var showEndView: Bool
     
     var body: some View {
-        VStack(spacing: 32) {
+        VStack(spacing: 0) {
+            Spacer()
+            
             // Winner or no winner
-            if let winner = manager.winner {
+            if manager.winner != nil {
                 VStack(spacing: 16) {
                     ZStack {
                         Circle()
@@ -304,58 +227,22 @@ struct SolutionView: View {
                             .foregroundColor(Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0))
                     }
                     
-                    Text("Winner!")
+                    Text("Correct Answer!")
                         .font(.system(size: 32, weight: .bold, design: .rounded))
                         .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                    
-                    Text(winner)
-                        .font(.system(size: 24, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0))
                 }
-                .padding(.top, 20)
+                .padding(.bottom, 24)
             } else {
-                VStack(spacing: 16) {
-                    ZStack {
-                        Circle()
-                            .fill(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0).opacity(0.1))
-                            .frame(width: 150, height: 150)
-                        
-                        Image(systemName: "clock.fill")
-                            .font(.system(size: 50, weight: .medium))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                    }
-                    
-                    Text("Time's Up!")
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                    
-                    Text("No winner this round")
-                        .font(.system(size: 18, weight: .medium, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                }
-                .padding(.top, 20)
+                Text("Answer Revealed")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .padding(.bottom, 24)
             }
             
-            // Card showing riddle and answer
+            // Card showing answer
             if let riddle = manager.currentRiddle {
-                ZStack {
-                    RiddleCardBackView(text: riddle.text, answer: manager.currentAnswer)
-                }
-                .frame(width: 320, height: 480)
-                .rotation3DEffect(
-                    .degrees(cardRotation),
-                    axis: (x: 0, y: 1, z: 0),
-                    perspective: 0.5
-                )
-                .id(riddle.id)
-                .onAppear {
-                    // Auto-flip to show answer
-                    withAnimation(.spring(response: 0.6, dampingFraction: 0.75)) {
-                        cardRotation = 180
-                        isCardFlipped = true
-                    }
-                }
-                .padding(.vertical, 20)
+                RiddleCardAnswerView(text: riddle.text, answer: manager.currentAnswer)
+                    .frame(width: 320, height: 480)
             }
             
             Spacer()
@@ -381,8 +268,29 @@ struct SolutionView: View {
     }
 }
 
-// Card Front View
+// Card Front View (showing riddle)
 struct RiddleCardFrontView: View {
+    let text: String
+    
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 24)
+                .fill(Color.white)
+                .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
+            
+            VStack(spacing: 16) {
+                Text(text)
+                    .font(.system(size: 24, weight: .semibold, design: .rounded))
+                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+            }
+        }
+    }
+}
+
+// Card Back View (showing "Riddle Me This" text)
+struct RiddleCardBackView: View {
     let text: String
     
     var body: some View {
@@ -396,23 +304,16 @@ struct RiddleCardFrontView: View {
                     .font(.system(size: 60))
                     .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                 
-                Text("Riddle Me This")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                
                 Text(text)
-                    .font(.system(size: 22, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-                    .padding(.top, 8)
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
             }
         }
     }
 }
 
-// Card Back View (showing answer)
-struct RiddleCardBackView: View {
+// Card Answer View (showing answer in solution phase)
+struct RiddleCardAnswerView: View {
     let text: String
     let answer: String
     
@@ -422,27 +323,43 @@ struct RiddleCardBackView: View {
                 .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
-            VStack(spacing: 24) {
-                Text("Answer")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+            VStack(spacing: 0) {
+                // Answer section
+                VStack(spacing: 16) {
+                    Text("Answer")
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .padding(.top, 40)
+                    
+                    Text(answer)
+                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 
-                Text(answer)
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-                
+                // Divider with spacing
                 Divider()
                     .padding(.horizontal, 32)
+                    .padding(.top, 32)
+                    .padding(.bottom, 24)
                 
-                Text(text)
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
+                // Riddle section
+                VStack(spacing: 8) {
+                    Text("Riddle")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    
+                    Text(text)
+                        .font(.system(size: 18, weight: .regular, design: .rounded))
+                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.bottom, 40)
+                }
             }
-            .padding(.vertical, 32)
         }
     }
 }
@@ -461,8 +378,7 @@ struct RiddleCardBackView: View {
                     cards: allRiddleMeThisCards,
                     availableCategories: []
                 ),
-                cardCount: 5,
-                players: ["Player 1", "Player 2"]
+                cardCount: 5
             ),
             deck: Deck(
                 title: "Riddle Me This",
