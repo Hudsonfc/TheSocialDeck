@@ -9,9 +9,12 @@ import SwiftUI
 
 struct CreateRoomView: View {
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var onlineManager = OnlineManager.shared
     @State private var roomName: String = ""
     @State private var maxPlayers: Int = 4
     @State private var isPrivate: Bool = false
+    @State private var navigateToRoom = false
+    @State private var showError = false
     
     var body: some View {
         ZStack {
@@ -85,19 +88,56 @@ struct CreateRoomView: View {
                     .padding(.horizontal, 40)
                     
                     // Create Button
-                    NavigationLink(destination: OnlineRoomView()) {
-                        Text("Create Room")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 55)
-                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            .cornerRadius(16)
+                    Button(action: {
+                        Task {
+                            await onlineManager.createRoom(
+                                roomName: roomName.isEmpty ? "My Room" : roomName,
+                                maxPlayers: maxPlayers,
+                                isPrivate: isPrivate
+                            )
+                            
+                            if onlineManager.currentRoom != nil {
+                                navigateToRoom = true
+                            } else if onlineManager.errorMessage != nil {
+                                showError = true
+                            }
+                        }
+                    }) {
+                        if onlineManager.isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 55)
+                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .cornerRadius(16)
+                        } else {
+                            Text("Create Room")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 55)
+                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .cornerRadius(16)
+                        }
                     }
+                    .disabled(onlineManager.isLoading)
                     .padding(.horizontal, 40)
                     .padding(.bottom, 30)
                 }
             }
+        }
+        .background(
+            NavigationLink(
+                destination: OnlineRoomView(),
+                isActive: $navigateToRoom
+            ) {
+                EmptyView()
+            }
+        )
+        .alert("Error", isPresented: $showError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(onlineManager.errorMessage ?? "Failed to create room")
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

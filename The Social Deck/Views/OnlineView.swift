@@ -9,6 +9,8 @@ import SwiftUI
 
 struct OnlineView: View {
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var onlineManager = OnlineManager.shared
+    
     var body: some View {
         ZStack {
             // White background
@@ -47,22 +49,36 @@ struct OnlineView: View {
                     }
                     .padding(.horizontal, 40)
                     
-                    // Placeholder section
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                        .frame(height: 120)
-                        .overlay(
-                            Text("Room Code / Lobby UI Coming Soon")
-                                .font(.system(size: 16, weight: .regular, design: .rounded))
-                                .foregroundColor(Color.gray)
-                        )
-                        .padding(.horizontal, 40)
+                    // Room Invites Button
+                    NavigationLink(destination: RoomInvitesView()) {
+                        ZStack {
+                            Text("Room Invites")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.white)
+                            
+                            if !onlineManager.pendingRoomInvites.isEmpty {
+                                HStack {
+                                    Spacer()
+                                    Text("\(onlineManager.pendingRoomInvites.count)")
+                                        .font(.system(size: 14, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 4)
+                                        .background(Color.red)
+                                        .clipShape(Capsule())
+                                        .padding(.trailing, 16)
+                                }
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .cornerRadius(16)
+                    }
+                    .padding(.horizontal, 40)
                     
-                    // Bottom placeholder text
-                    Text("Online syncing will be added later.")
-                        .font(.system(size: 14, weight: .regular, design: .rounded))
-                        .foregroundColor(Color.gray)
-                        .padding(.bottom, 30)
+                    Spacer()
+                        .frame(height: 20)
                 }
             }
         }
@@ -79,6 +95,11 @@ struct OnlineView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        .onAppear {
+            Task {
+                await onlineManager.loadPendingRoomInvites()
+            }
+        }
     }
 }
 

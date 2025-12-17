@@ -18,6 +18,8 @@ struct ProfileView: View {
     @State private var tempAvatarColor: String = "red"
     @State private var showSaveSuccess = false
     @State private var showSignOutConfirmation = false
+    @State private var showAddFriends = false
+    @State private var showFriendsList = false
     
     var avatarSelectionDestination: some View {
         AvatarSelectionView(
@@ -256,7 +258,7 @@ struct ProfileView: View {
                 VStack(spacing: 16) {
                     // Add Friends Button
                     Button(action: {
-                        // TODO: Add friends functionality
+                        showAddFriends = true
                     }) {
                         HStack {
                             Image(systemName: "person.badge.plus")
@@ -282,7 +284,7 @@ struct ProfileView: View {
                     
                     // Added Friends Button
                     Button(action: {
-                        // TODO: View added friends functionality
+                        showFriendsList = true
                     }) {
                         HStack {
                             Image(systemName: "person.2.fill")
@@ -361,6 +363,22 @@ struct ProfileView: View {
                     NavigationLink(
                         destination: ChangeUsernameView(),
                         isActive: $showChangeUsername
+                    ) {
+                        EmptyView()
+                    }
+                    .hidden()
+                    
+                    NavigationLink(
+                        destination: AddFriendsView(),
+                        isActive: $showAddFriends
+                    ) {
+                        EmptyView()
+                    }
+                    .hidden()
+                    
+                    NavigationLink(
+                        destination: FriendsListView(),
+                        isActive: $showFriendsList
                     ) {
                         EmptyView()
                     }

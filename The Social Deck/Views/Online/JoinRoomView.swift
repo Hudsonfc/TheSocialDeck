@@ -9,6 +9,10 @@ import SwiftUI
 
 struct JoinRoomView: View {
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var onlineManager = OnlineManager.shared
+    @State private var roomCode: String = ""
+    @State private var navigateToRoom = false
+    @State private var showError = false
     
     var body: some View {
         ZStack {
@@ -41,32 +45,50 @@ struct JoinRoomView: View {
                             .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                             .padding(.bottom, 8)
                         
-                        // Room Code Input Placeholder
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                        // Room Code Input
+                        TextField("Enter Code", text: $roomCode)
+                            .font(.system(size: 18, weight: .medium, design: .rounded))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .autocapitalization(.allCharacters)
+                            .disableAutocorrection(true)
+                            .textInputAutocapitalization(.characters)
+                            .padding(.horizontal, 20)
                             .frame(height: 60)
-                            .overlay(
-                                HStack {
-                                    Text("Enter Code")
-                                        .font(.system(size: 18, weight: .medium, design: .rounded))
-                                        .foregroundColor(Color.gray)
-                                    Spacer()
-                                }
-                                .padding(.horizontal, 20)
-                            )
+                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .cornerRadius(16)
                             .padding(.horizontal, 40)
                     }
                     
                     // Join Button
-                    NavigationLink(destination: OnlineRoomView()) {
-                        Text("Join Room")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 55)
-                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            .cornerRadius(16)
+                    Button(action: {
+                        Task {
+                            await onlineManager.joinRoom(roomCode: roomCode)
+                            
+                            if onlineManager.currentRoom != nil {
+                                navigateToRoom = true
+                            } else if onlineManager.errorMessage != nil {
+                                showError = true
+                            }
+                        }
+                    }) {
+                        if onlineManager.isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 55)
+                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .cornerRadius(16)
+                        } else {
+                            Text("Join Room")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 55)
+                                .background(roomCode.isEmpty ? Color.gray : Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .cornerRadius(16)
+                        }
                     }
+                    .disabled(onlineManager.isLoading || roomCode.isEmpty)
                     .padding(.horizontal, 40)
                     
                     // Placeholder Lobby Area
@@ -96,6 +118,19 @@ struct JoinRoomView: View {
                         .frame(height: 40)
                 }
             }
+        }
+        .background(
+            NavigationLink(
+                destination: OnlineRoomView(),
+                isActive: $navigateToRoom
+            ) {
+                EmptyView()
+            }
+        )
+        .alert("Error", isPresented: $showError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(onlineManager.errorMessage ?? "Failed to join room")
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
