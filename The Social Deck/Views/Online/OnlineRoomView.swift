@@ -135,16 +135,39 @@ struct OnlineRoomView: View {
                     .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
                     .padding(.horizontal, 40)
                     
-                    // Game Selection (Host only) - Placeholder for now
-                    if onlineManager.isHost && onlineManager.currentRoom?.status == .waiting {
+                    // Show selected game to all players
+                    if let room = onlineManager.currentRoom,
+                       let gameTypeString = room.selectedGameType,
+                       let gameType = DeckType(stringValue: gameTypeString) {
+                        SelectedGameDisplayCard(
+                            gameType: gameType,
+                            category: room.selectedCategory
+                        )
+                        .padding(.horizontal, 40)
+                    } else {
+                        // Show placeholder message when no game is selected
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("Game Settings")
+                            Text("Selected Game")
                                 .font(.system(size: 20, weight: .bold, design: .rounded))
                                 .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                             
-                            Text("Game selection coming soon")
-                                .font(.system(size: 14, weight: .regular, design: .rounded))
-                                .foregroundColor(Color.gray)
+                            HStack(spacing: 16) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                                        .frame(width: 60, height: 60)
+                                    
+                                    Image(systemName: "gamecontroller.fill")
+                                        .font(.system(size: 28))
+                                        .foregroundColor(Color.gray.opacity(0.5))
+                                }
+                                
+                                Text("No game selected")
+                                    .font(.system(size: 16, weight: .regular, design: .rounded))
+                                    .foregroundColor(Color.gray)
+                                
+                                Spacer()
+                            }
                         }
                         .padding(20)
                         .background(Color.white)

@@ -15,6 +15,7 @@ struct AgeCheckView: View {
     @State private var button2Opacity: Double = 0
     @State private var showAlert: Bool = false
     @State private var navigateToOnboarding: Bool = false
+    @State private var navigateToHome: Bool = false
     
     // Floating animation states
     @State private var button1Float: CGFloat = 0
@@ -30,8 +31,8 @@ struct AgeCheckView: View {
             Color.white
                 .ignoresSafeArea()
             
-            // AgeCheckView content
-            if !navigateToOnboarding {
+            // AgeCheckView content (only show if onboarding not completed)
+            if !navigateToOnboarding && !navigateToHome && !OnboardingManager.shared.hasCompletedOnboarding {
                 // Centered VStack
                 VStack(spacing: 30) {
                     Spacer()
@@ -53,8 +54,15 @@ struct AgeCheckView: View {
                             button1Pressed = true
                         }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            withAnimation(.easeInOut(duration: 0.4)) {
-                                navigateToOnboarding = true
+                            // Check if onboarding has been completed before
+                            if OnboardingManager.shared.hasCompletedOnboarding {
+                                withAnimation(.easeInOut(duration: 0.4)) {
+                                    navigateToHome = true
+                                }
+                            } else {
+                                withAnimation(.easeInOut(duration: 0.4)) {
+                                    navigateToOnboarding = true
+                                }
                             }
                         }
                     }) {
@@ -133,13 +141,27 @@ struct AgeCheckView: View {
                 .transition(.move(edge: .leading))
             }
             
-            // OnboardingView overlay
-            if navigateToOnboarding {
+            // OnboardingView overlay (only if not completed before)
+            if navigateToOnboarding && !OnboardingManager.shared.hasCompletedOnboarding {
                 OnboardingView()
                     .transition(.move(edge: .trailing))
             }
+            
+            // Navigate directly to home if onboarding already completed
+            if navigateToHome {
+                HomeView()
+                    .transition(.opacity)
+            }
         }
         .onAppear {
+            // If onboarding already completed, skip directly to home
+            if OnboardingManager.shared.hasCompletedOnboarding {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    navigateToHome = true
+                }
+                return
+            }
+            
             // Title fade in animation
             withAnimation(.easeIn(duration: 0.6)) {
                 titleOpacity = 1.0

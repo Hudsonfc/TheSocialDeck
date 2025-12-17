@@ -128,7 +128,7 @@ struct CreateRoomView: View {
         }
         .background(
             NavigationLink(
-                destination: OnlineRoomView(),
+                destination: OnlineGameSelectionScreen(),
                 isActive: $navigateToRoom
             ) {
                 EmptyView()

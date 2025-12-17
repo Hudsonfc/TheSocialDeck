@@ -189,6 +189,12 @@ struct OnboardingView: View {
         .fullScreenCover(isPresented: $navigateToHome) {
             HomeView()
         }
+        .onChange(of: navigateToHome) { newValue in
+            if newValue {
+                // Mark onboarding as completed when navigating to home
+                OnboardingManager.shared.markOnboardingCompleted()
+            }
+        }
     }
     
     private func navigateToPage(_ page: Int) {
