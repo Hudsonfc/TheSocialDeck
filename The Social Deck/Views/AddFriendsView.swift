@@ -224,15 +224,10 @@ struct AddFriendsView: View {
     
     private var noResultsState: some View {
         VStack(spacing: 24) {
-            ZStack {
-                Circle()
-                    .fill(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
-                    .frame(width: 120, height: 120)
-                
-                Image(systemName: "person.slash.fill")
-                    .font(.system(size: 50, weight: .light))
-                    .foregroundColor(Color.gray.opacity(0.5))
-            }
+            Image("woman confused")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 200, height: 200)
             
             VStack(spacing: 12) {
                 Text("No Users Found")

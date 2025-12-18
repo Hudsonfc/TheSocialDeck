@@ -37,15 +37,10 @@ struct FriendsListView: View {
             } else if friendService.friends.isEmpty {
                 // No friends - enhanced empty state
                 VStack(spacing: 28) {
-                    ZStack {
-                        Circle()
-                            .fill(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
-                            .frame(width: 140, height: 140)
-                        
-                        Image(systemName: "person.2.fill")
-                            .font(.system(size: 60, weight: .light))
-                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.4))
-                    }
+                    Image("man crying artwork")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 200, height: 200)
                     
                     VStack(spacing: 12) {
                         Text("No Friends Yet")

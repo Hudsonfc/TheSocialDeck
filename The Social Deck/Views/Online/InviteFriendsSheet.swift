@@ -33,15 +33,10 @@ struct InviteFriendsSheet: View {
                     }
                 } else if friendService.friends.isEmpty {
                     VStack(spacing: 24) {
-                        ZStack {
-                            Circle()
-                                .fill(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
-                                .frame(width: 120, height: 120)
-                            
-                            Image(systemName: "person.2.fill")
-                                .font(.system(size: 50, weight: .light))
-                                .foregroundColor(Color.gray.opacity(0.5))
-                        }
+                        Image("man crying artwork")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 200, height: 200)
                         
                         VStack(spacing: 8) {
                             Text("No Friends Yet")
