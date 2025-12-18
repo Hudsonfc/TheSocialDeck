@@ -21,7 +21,7 @@ struct SignInView: View {
                 .ignoresSafeArea()
             
             ScrollView {
-                VStack(spacing: 32) {
+            VStack(spacing: 32) {
                     // Logo
                     Image("TheSocialDeckLogo")
                         .resizable()
@@ -31,11 +31,11 @@ struct SignInView: View {
                     
                     // Title and subtitle
                     VStack(spacing: 8) {
-                        Text("The Social Deck")
+                Text("The Social Deck")
                             .font(.system(size: 32, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                        
-                        Text("Sign in to continue")
+                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                
+                Text("Sign in to continue")
                             .font(.system(size: 16, weight: .regular, design: .rounded))
                             .foregroundColor(Color.gray)
                     }
@@ -107,11 +107,11 @@ struct SignInView: View {
                                     .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                                 Text("See your wins, games played, and more")
                                     .font(.system(size: 14, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color.gray)
+                    .foregroundColor(Color.gray)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
-                            
-                            Spacer()
+                
+                Spacer()
                         }
                     }
                     .padding(.vertical, 28)
@@ -140,19 +140,19 @@ struct SignInView: View {
                         .padding(.bottom, 40)
                         .transition(.opacity.combined(with: .scale(scale: 0.95)))
                     } else {
-                        // Sign in with Apple Button
-                        SignInWithAppleButton(.signIn) { request in
-                            let nonce = randomNonceString()
-                            currentNonce = nonce
-                            request.requestedScopes = [.fullName, .email]
-                            request.nonce = sha256(nonce)
-                        } onCompletion: { result in
+                // Sign in with Apple Button
+                SignInWithAppleButton(.signIn) { request in
+                    let nonce = randomNonceString()
+                    currentNonce = nonce
+                    request.requestedScopes = [.fullName, .email]
+                    request.nonce = sha256(nonce)
+                } onCompletion: { result in
                             handleSignInResult(result)
-                        }
-                        .signInWithAppleButtonStyle(.black)
-                        .frame(height: 55)
-                        .cornerRadius(12)
-                        .padding(.horizontal, 40)
+                }
+                .signInWithAppleButtonStyle(.black)
+                .frame(height: 55)
+                .cornerRadius(12)
+                .padding(.horizontal, 40)
                         .padding(.top, 20)
                         .padding(.bottom, 40)
                         .transition(.opacity.combined(with: .scale(scale: 0.95)))
@@ -212,15 +212,15 @@ struct SignInView: View {
         var remainingLength = length
         
         while remainingLength > 0 {
-            var random: UInt8 = 0
-            let errorCode = SecRandomCopyBytes(kSecRandomDefault, 1, &random)
+                var random: UInt8 = 0
+                let errorCode = SecRandomCopyBytes(kSecRandomDefault, 1, &random)
             guard errorCode == errSecSuccess else {
-                fatalError("Unable to generate nonce. SecRandomCopyBytes failed with OSStatus \(errorCode)")
-            }
-            
-            if random < charset.count {
-                result.append(charset[Int(random)])
-                remainingLength -= 1
+                    fatalError("Unable to generate nonce. SecRandomCopyBytes failed with OSStatus \(errorCode)")
+                }
+                
+                if random < charset.count {
+                    result.append(charset[Int(random)])
+                    remainingLength -= 1
             }
         }
         

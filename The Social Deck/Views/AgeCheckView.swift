@@ -60,8 +60,8 @@ struct AgeCheckView: View {
                                     navigateToHome = true
                                 }
                             } else {
-                                withAnimation(.easeInOut(duration: 0.4)) {
-                                    navigateToOnboarding = true
+                            withAnimation(.easeInOut(duration: 0.4)) {
+                                navigateToOnboarding = true
                                 }
                             }
                         }

@@ -23,9 +23,15 @@ struct OnlineGamePlaceholder: Identifiable, Equatable {
 
 // Placeholder category for online games (similar to GameCategory)
 struct OnlineGameCategory: Identifiable {
-    let id = UUID()
+    let id: UUID
     let title: String
     let games: [OnlineGamePlaceholder]
+    
+    init(id: UUID = UUID(), title: String, games: [OnlineGamePlaceholder]) {
+        self.id = id
+        self.title = title
+        self.games = games
+    }
 }
 
 struct OnlineGameSelectionScreen: View {
@@ -36,6 +42,7 @@ struct OnlineGameSelectionScreen: View {
     @State private var selectedCategory: String? = nil
     @State private var showCategorySelection = false
     @State private var navigateToRoom = false
+    @State private var searchText: String = ""
     
     // Placeholder categories with games
     let categories: [OnlineGameCategory] = [
@@ -93,31 +100,120 @@ struct OnlineGameSelectionScreen: View {
         )
     ]
     
+    private var filteredCategories: [OnlineGameCategory] {
+        if searchText.isEmpty {
+            return categories
+        }
+        
+        let searchLower = searchText.lowercased()
+        return categories.compactMap { category -> OnlineGameCategory? in
+            let filteredGames = category.games.filter { game in
+                game.title.lowercased().contains(searchLower) ||
+                game.description.lowercased().contains(searchLower)
+            }
+            
+            if filteredGames.isEmpty {
+                return nil
+            }
+            
+            return OnlineGameCategory(
+                id: category.id,
+                title: category.title,
+                games: filteredGames
+            )
+        }
+    }
+    
     var body: some View {
         ZStack {
             // White background
             Color.white
                 .ignoresSafeArea()
             
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 32) {
-                    ForEach(categories, id: \.id) { category in
-                        VStack(alignment: .leading, spacing: 16) {
-                            // Category title
-                            Text(category.title)
-                                .font(.system(size: 22, weight: .bold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                .padding(.horizontal, 40)
-                            
-                            // Horizontal scroll of game cards
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 16) {
-                                    ForEach(category.games) { game in
-                                        OnlineGameCardView(game: game, expandedGame: $expandedGame)
-                                    }
-                                }
-                                .padding(.horizontal, 40)
+            VStack(spacing: 0) {
+                // Search bar
+                HStack(spacing: 12) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .font(.system(size: 18, weight: .medium))
+                    
+                    TextField("Search games...", text: $searchText)
+                        .font(.system(size: 16, design: .rounded))
+                        .autocapitalization(.none)
+                        .autocorrectionDisabled()
+                    
+                    if !searchText.isEmpty {
+                        Button(action: {
+                            HapticManager.shared.lightImpact()
+                            withAnimation(.spring(response: 0.3)) {
+                                searchText = ""
                             }
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(Color.gray.opacity(0.6))
+                                .font(.system(size: 18))
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 14)
+                .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                .cornerRadius(16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color(red: 0xE5/255.0, green: 0xE5/255.0, blue: 0xE5/255.0), lineWidth: 1)
+                )
+                .padding(.horizontal, 40)
+                .padding(.top, 20)
+                .padding(.bottom, 24)
+                
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: 32) {
+                        ForEach(filteredCategories, id: \.id) { category in
+                            VStack(alignment: .leading, spacing: 16) {
+                                // Category title
+                                Text(category.title)
+                                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .padding(.horizontal, 40)
+                                
+                                // Horizontal scroll of game cards
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 16) {
+                                        ForEach(category.games) { game in
+                                            OnlineGameCardView(game: game, expandedGame: $expandedGame)
+                                        }
+                                    }
+                                    .padding(.horizontal, 40)
+                                }
+                            }
+                        }
+                        
+                        // Empty state for search
+                        if !searchText.isEmpty && filteredCategories.isEmpty {
+                            VStack(spacing: 24) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                                        .frame(width: 120, height: 120)
+                                    
+                                    Image(systemName: "magnifyingglass")
+                                        .font(.system(size: 50, weight: .light))
+                                        .foregroundColor(Color.gray.opacity(0.5))
+                                }
+                                
+                                VStack(spacing: 8) {
+                                    Text("No Games Found")
+                                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    
+                                    Text("Try searching with different keywords")
+                                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                                        .foregroundColor(Color.gray)
+                                        .multilineTextAlignment(.center)
+                                }
+                            }
+                            .padding(.top, 60)
                         }
                     }
                 }
@@ -216,6 +312,7 @@ struct OnlineGameCardView: View {
     }
     
     private func expandCard() {
+        HapticManager.shared.lightImpact()
         withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
             expandedGame = game
         }
@@ -286,6 +383,7 @@ struct ExpandedGameOverlay: View {
                     
                     // Select button
                     PrimaryButton(title: "Select") {
+                        HapticManager.shared.mediumImpact()
                         // Close overlay and select game
                         withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                             expandedGame = nil
@@ -390,91 +488,3 @@ struct OnlineCategorySelectionSheet: View {
     }
 }
 
-// MARK: - Selected Game Display Card (for non-host players)
-
-struct SelectedGameDisplayCard: View {
-    let gameType: DeckType
-    let category: String?
-    
-    private var gameTitle: String {
-        switch gameType {
-        case .neverHaveIEver: return "Never Have I Ever"
-        case .truthOrDare: return "Truth or Dare"
-        case .wouldYouRather: return "Would You Rather"
-        case .mostLikelyTo: return "Most Likely To"
-        case .twoTruthsAndALie: return "Two Truths and a Lie"
-        case .popCultureTrivia: return "Pop Culture Trivia"
-        case .historyTrivia: return "History Trivia"
-        case .scienceTrivia: return "Science Trivia"
-        case .sportsTrivia: return "Sports Trivia"
-        case .movieTrivia: return "Movie Trivia"
-        case .musicTrivia: return "Music Trivia"
-        case .truthOrDrink: return "Truth or Drink"
-        case .categoryClash: return "Category Clash"
-        case .spinTheBottle: return "Spin the Bottle"
-        case .storyChain: return "Story Chain"
-        case .memoryMaster: return "Memory Master"
-        case .bluffCall: return "Bluff Call"
-        case .hotPotato: return "Hot Potato"
-        case .rhymeTime: return "Rhyme Time"
-        case .tapDuel: return "Tap Duel"
-        case .whatsMySecret: return "What's My Secret?"
-        case .riddleMeThis: return "Riddle Me This"
-        case .other: return "Game"
-        }
-    }
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Selected Game")
-                .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-            
-            HStack(spacing: 16) {
-                // Game icon
-                ZStack {
-                    Circle()
-                        .fill(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
-                        .frame(width: 60, height: 60)
-                    
-                    Image(systemName: "gamecontroller.fill")
-                        .font(.system(size: 28))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                }
-                
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(gameTitle)
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                    
-                    if let category = category {
-                        HStack(spacing: 6) {
-                            Image(systemName: "tag.fill")
-                                .font(.system(size: 12))
-                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            Text(category)
-                                .font(.system(size: 14, weight: .medium, design: .rounded))
-                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                        }
-                    } else {
-                        Text("Waiting for host to start...")
-                            .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(Color.gray)
-                    }
-                }
-                
-                Spacer()
-            }
-        }
-        .padding(20)
-        .background(Color.white)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
-    }
-}
-
-#Preview {
-    NavigationView {
-        OnlineGameSelectionScreen()
-    }
-}

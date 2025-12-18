@@ -67,6 +67,7 @@ struct OnlineView: View {
                                         .background(Color.red)
                                         .clipShape(Capsule())
                                         .padding(.trailing, 16)
+                                        .transition(.scale.combined(with: .opacity))
                                 }
                             }
                         }
@@ -76,6 +77,7 @@ struct OnlineView: View {
                         .cornerRadius(16)
                     }
                     .padding(.horizontal, 40)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: onlineManager.pendingRoomInvites.count)
                     
                     Spacer()
                         .frame(height: 20)
@@ -96,9 +98,14 @@ struct OnlineView: View {
         }
         .navigationBarBackButtonHidden(true)
         .onAppear {
+            HapticManager.shared.lightImpact()
             Task {
                 await onlineManager.loadPendingRoomInvites()
             }
+        }
+        .refreshable {
+            HapticManager.shared.lightImpact()
+            await onlineManager.loadPendingRoomInvites()
         }
     }
 }

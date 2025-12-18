@@ -112,24 +112,24 @@ class AuthManager: ObservableObject {
             guard let self = self else { return }
             
             Task { @MainActor in
-                if let error = error {
-                    self.errorMessage = "Failed to load profile: \(error.localizedDescription)"
-                    return
-                }
-                
-                guard let document = snapshot, document.exists else {
-                    // Profile doesn't exist, create it
+            if let error = error {
+                self.errorMessage = "Failed to load profile: \(error.localizedDescription)"
+                return
+            }
+            
+            guard let document = snapshot, document.exists else {
+                // Profile doesn't exist, create it
                     // Note: appleUserInfo will be nil on subsequent sign-ins (Apple only provides it once)
                     await self.createProfileIfNeeded(userId: userId, appleUserInfo: nil)
-                    return
-                }
-                
-                do {
-                    self.userProfile = try document.data(as: UserProfile.self)
+                return
+            }
+            
+            do {
+                self.userProfile = try document.data(as: UserProfile.self)
                     // Link Game Center player ID if authenticated with Game Center but not linked yet
                     await self.linkGameCenterIfNeeded()
-                } catch {
-                    self.errorMessage = "Failed to decode profile: \(error.localizedDescription)"
+            } catch {
+                self.errorMessage = "Failed to decode profile: \(error.localizedDescription)"
                 }
             }
         }

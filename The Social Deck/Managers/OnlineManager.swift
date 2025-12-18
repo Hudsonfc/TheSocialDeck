@@ -77,7 +77,22 @@ class OnlineManager: ObservableObject {
         guard let userId = authManager.userProfile?.userId,
               let profile = authManager.userProfile else {
             errorMessage = "You must be signed in to join a room"
+            // Check if session expired
+            if !authManager.isAuthenticated {
+                errorMessage = "Your session has expired. Please sign in again."
+            }
             return
+        }
+        
+        // Check if already in a room
+        if let currentRoom = currentRoom {
+            // If trying to join the same room, that's fine
+            if currentRoom.roomCode.uppercased() == roomCode.uppercased() {
+                return
+            } else {
+                errorMessage = "You're already in a room. Please leave your current room first."
+                return
+            }
         }
         
         isLoading = true
@@ -116,7 +131,12 @@ class OnlineManager: ObservableObject {
             startListeningToRoom(roomCode: normalizedCode)
             
         } catch {
-            errorMessage = "Failed to join room: \(error.localizedDescription)"
+            // Handle session expiry
+            if let nsError = error as NSError?, nsError.code == 401 || error.localizedDescription.contains("authenticated") {
+                errorMessage = "Your session has expired. Please sign in again."
+            } else {
+                errorMessage = "Failed to join room: \(error.localizedDescription)"
+            }
             isConnected = false
         }
         
@@ -299,8 +319,16 @@ class OnlineManager: ObservableObject {
                     }
                     
                 case .failure(let error):
-                    self?.errorMessage = "Room update failed: \(error.localizedDescription)"
-                    self?.isConnected = false
+                    let errorMsg = error.localizedDescription
+                    
+                    // Check if room was deleted
+                    if errorMsg.contains("not found") || errorMsg.contains("Room not found") {
+                        self?.cleanup()
+                        self?.errorMessage = "This room has been deleted or no longer exists"
+                    } else {
+                        self?.errorMessage = "Room update failed: \(errorMsg)"
+                        self?.isConnected = false
+                    }
                 }
             }
         }

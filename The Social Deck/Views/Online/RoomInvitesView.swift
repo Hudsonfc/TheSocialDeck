@@ -59,10 +59,15 @@ struct RoomInvitesView: View {
                     VStack(spacing: 16) {
                         ForEach(onlineManager.pendingRoomInvites) { invite in
                             RoomInviteCard(invite: invite)
+                                .transition(.asymmetric(
+                                    insertion: .move(edge: .trailing).combined(with: .opacity),
+                                    removal: .move(edge: .leading).combined(with: .opacity)
+                                ))
                         }
                     }
                     .padding(.horizontal, 40)
                     .padding(.vertical, 20)
+                    .animation(.spring(response: 0.4, dampingFraction: 0.8), value: onlineManager.pendingRoomInvites.count)
                 }
             }
         }
@@ -114,6 +119,12 @@ struct RoomInviteCard: View {
     @State private var inviterProfile: UserProfile? = nil
     @State private var isLoadingProfile = true
     @State private var isProcessing = false
+    @StateObject private var countdownTimer: CountdownTimer
+    
+    init(invite: RoomInvite) {
+        self.invite = invite
+        _countdownTimer = StateObject(wrappedValue: CountdownTimer(targetDate: invite.expiresAt))
+    }
     
     var body: some View {
         VStack(spacing: 20) {
@@ -134,6 +145,37 @@ struct RoomInviteCard: View {
                         Text("Room: \(invite.roomName)")
                             .font(.system(size: 16, weight: .regular, design: .rounded))
                             .foregroundColor(Color.gray)
+                        
+                        // Expiration countdown
+                        if !countdownTimer.isExpired {
+                            HStack(spacing: 4) {
+                                Image(systemName: "clock.fill")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(Color.orange)
+                                Text("Expires in \(countdownTimer.formattedTime)")
+                                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                                    .foregroundColor(Color.orange)
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(Color.orange.opacity(0.1))
+                            .cornerRadius(8)
+                            .padding(.top, 4)
+                        } else {
+                            HStack(spacing: 4) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(Color.red)
+                                Text("Expired")
+                                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                                    .foregroundColor(Color.red)
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(Color.red.opacity(0.1))
+                            .cornerRadius(8)
+                            .padding(.top, 4)
+                        }
                     }
                 }
             } else if isLoadingProfile {
@@ -161,6 +203,7 @@ struct RoomInviteCard: View {
             // Action buttons
             HStack(spacing: 12) {
                 Button(action: {
+                    HapticManager.shared.lightImpact()
                     Task {
                         await declineInvite()
                     }
@@ -176,6 +219,7 @@ struct RoomInviteCard: View {
                 .disabled(isProcessing)
                 
                 Button(action: {
+                    HapticManager.shared.mediumImpact()
                     Task {
                         await acceptInvite()
                     }
@@ -203,6 +247,10 @@ struct RoomInviteCard: View {
         .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 4)
         .task {
             await loadInviterProfile()
+            countdownTimer.start()
+        }
+        .onDisappear {
+            countdownTimer.stop()
         }
     }
     
@@ -221,8 +269,12 @@ struct RoomInviteCard: View {
     }
     
     private func acceptInvite() async {
-        guard let inviteId = invite.id else { return }
+        guard let inviteId = invite.id, !countdownTimer.isExpired else {
+            HapticManager.shared.error()
+            return
+        }
         isProcessing = true
+        HapticManager.shared.success()
         await onlineManager.acceptRoomInvite(inviteId)
         isProcessing = false
     }

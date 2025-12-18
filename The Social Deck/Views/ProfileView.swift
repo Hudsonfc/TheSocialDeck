@@ -41,8 +41,8 @@ struct ProfileView: View {
                         // Wait a moment then dismiss with smooth animation
                         try? await Task.sleep(nanoseconds: 1_200_000_000) // 1.2 seconds
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                            showAvatarSelection = false
-                        }
+                        showAvatarSelection = false
+                    }
                         // Reset after navigation completes
                         try? await Task.sleep(nanoseconds: 300_000_000) // 0.3 seconds
                         showSaveSuccess = false
@@ -58,9 +58,9 @@ struct ProfileView: View {
                         .foregroundColor(Color.green)
                         .transition(.scale.combined(with: .opacity))
                     } else {
-                        Text("Save")
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    Text("Save")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                             .transition(.scale.combined(with: .opacity))
                     }
                 }
@@ -114,54 +114,54 @@ struct ProfileView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 24) {
-                // Title
-                Text("Your Profile")
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                    .padding(.top, 20)
-                
-                // Avatar Section with edit button
-                VStack(spacing: 16) {
-                        Button(action: {
-                            showAvatarSelection = true
-                        }) {
-                            ZStack {
-                                AvatarView(
-                                    avatarType: authManager.userProfile?.avatarType ?? "person.fill",
-                                    avatarColor: authManager.userProfile?.avatarColor ?? "red",
-                                    size: 120
-                                )
-                                
+                        // Title
+                        Text("Your Profile")
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .padding(.top, 20)
+                        
+                        // Avatar Section with edit button
+                        VStack(spacing: 16) {
+                            Button(action: {
+                                showAvatarSelection = true
+                            }) {
+                                ZStack {
+                                    AvatarView(
+                                        avatarType: authManager.userProfile?.avatarType ?? "person.fill",
+                                        avatarColor: authManager.userProfile?.avatarColor ?? "red",
+                                        size: 120
+                                    )
+                                    
                                 // Edit indicator overlay - pencil icon in white circle
-                                VStack {
-                                    Spacer()
-                                    HStack {
+                                    VStack {
                                         Spacer()
-                                        ZStack {
-                                            Circle()
-                                                .fill(Color.white)
+                                        HStack {
+                                            Spacer()
+                                            ZStack {
+                                                Circle()
+                                                    .fill(Color.white)
                                                 .frame(width: 36, height: 36)
-                                                .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
-                                            
+                                                    .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
+                                                
                                             Image(systemName: "pencil")
-                                                .font(.system(size: 14, weight: .semibold))
-                                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                                    .font(.system(size: 14, weight: .semibold))
+                                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                                         }
                                         .padding(6)
                                     }
                                 }
-                                .frame(width: 120, height: 120)
+                                    .frame(width: 120, height: 120)
+                                }
                             }
+                            .buttonStyle(PlainButtonStyle())
+                            
+                            Text("Tap to change avatar")
+                                .font(.system(size: 12, weight: .regular, design: .rounded))
+                                .foregroundColor(Color.gray)
                         }
-                        .buttonStyle(PlainButtonStyle())
                         
-                    Text("Tap to change avatar")
-                        .font(.system(size: 12, weight: .regular, design: .rounded))
-                        .foregroundColor(Color.gray)
-                }
-                
-                // Username Section
-                VStack(spacing: 12) {
+                        // Username Section
+                                VStack(spacing: 12) {
                     // Username label
                     Text("Username")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
@@ -169,26 +169,26 @@ struct ProfileView: View {
                     
                     ZStack {
                         // Centered username
-                        Text(authManager.userProfile?.username ?? "Player")
-                            .font(.system(size: 26, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                        
+                                    Text(authManager.userProfile?.username ?? "Player")
+                                        .font(.system(size: 26, weight: .bold, design: .rounded))
+                                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    
                         // Pencil button aligned to trailing
                         HStack {
                             Spacer()
-                            Button(action: {
+                                    Button(action: {
                                 showChangeUsername = true
-                            }) {
-                                Image(systemName: "pencil")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                    .padding(10)
-                                    .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                                    .cornerRadius(10)
+                                    }) {
+                                        Image(systemName: "pencil")
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                            .padding(10)
+                                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                                            .cornerRadius(10)
                             }
-                        }
-                    }
-                    .padding(.horizontal, 40)
+                                    }
+                                }
+                                .padding(.horizontal, 40)
                 }
                     
                 // Stats Section
@@ -259,10 +259,10 @@ struct ProfileView: View {
                 // Friends Section
                 VStack(spacing: 16) {
                     // Add Friends Button
-                    Button(action: {
+                        Button(action: {
                         HapticManager.shared.lightImpact()
                         showAddFriends = true
-                    }) {
+                        }) {
                         HStack {
                             Image(systemName: "person.badge.plus")
                                 .font(.system(size: 18, weight: .semibold))
@@ -279,10 +279,10 @@ struct ProfileView: View {
                                 .foregroundColor(.white.opacity(0.7))
                         }
                         .padding(.horizontal, 20)
-                        .padding(.vertical, 16)
-                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                        .cornerRadius(12)
-                    }
+                                .padding(.vertical, 16)
+                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .cornerRadius(12)
+                        }
                     .buttonStyle(PlainButtonStyle())
                     
                     // Added Friends Button
@@ -328,26 +328,26 @@ struct ProfileView: View {
                 // Spacer for spacing
                 Spacer()
                     .frame(height: 40)
-            }
-            .opacity(contentOpacity)
+                    }
+                    .opacity(contentOpacity)
         }
         .onAppear {
             // Animate content appearance smoothly
             withAnimation(.easeInOut(duration: 0.5)) {
                 contentOpacity = 1.0
-            }
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    dismiss()
-                }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                 }
             }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    }
+                }
             
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
@@ -363,17 +363,17 @@ struct ProfileView: View {
                         .frame(width: 44, height: 44)
                 }
             }
-        }
-        .navigationBarBackButtonHidden(true)
+            }
+            .navigationBarBackButtonHidden(true)
             .background(
                 Group {
-                    NavigationLink(
-                        destination: avatarSelectionDestination,
-                        isActive: $showAvatarSelection
-                    ) {
-                        EmptyView()
-                    }
-                    .hidden()
+                NavigationLink(
+                    destination: avatarSelectionDestination,
+                    isActive: $showAvatarSelection
+                ) {
+                    EmptyView()
+                }
+                .hidden()
                     
                     NavigationLink(
                         destination: ChangeUsernameView(),
@@ -400,11 +400,11 @@ struct ProfileView: View {
                     .hidden()
                 }
             )
-        .alert("Error", isPresented: $showError) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text(authManager.errorMessage ?? "An unknown error occurred")
-        }
+            .alert("Error", isPresented: $showError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(authManager.errorMessage ?? "An unknown error occurred")
+            }
         .alert("Sign Out", isPresented: $showSignOutConfirmation) {
             Button("Cancel", role: .cancel) { }
             Button("Sign Out", role: .destructive) {
@@ -413,13 +413,13 @@ struct ProfileView: View {
         } message: {
             Text("Are you sure you want to sign out?")
         }
-        .onChange(of: authManager.errorMessage) { error in
-            if error != nil {
-                showError = true
+            .onChange(of: authManager.errorMessage) { error in
+                if error != nil {
+                    showError = true
+                }
             }
-        }
         .onAppear {
-            Task {
+        Task {
                 try? await friendService.loadFriends()
             }
         }

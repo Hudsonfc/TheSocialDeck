@@ -170,7 +170,7 @@ struct AvatarTypeButton: View {
                         .frame(width: 56, height: 56)
                         .opacity(isSelected ? 1.0 : 0.7)
                 } else {
-                    Image(systemName: avatarType)
+                Image(systemName: avatarType)
                         .font(.system(size: 32, weight: .semibold))
                         .foregroundColor(isSelected ? selectedColor : Color(red: 0x66/255.0, green: 0x66/255.0, blue: 0x66/255.0))
                 }
@@ -208,12 +208,12 @@ struct ColorButton: View {
                             .fill(Color.white.opacity(0.3))
                             .frame(width: 64, height: 64)
                         
-                        Image(systemName: "checkmark")
+                    Image(systemName: "checkmark")
                             .font(.system(size: 22, weight: .bold))
-                            .foregroundColor(.white)
-                    }
-                    
-                    Circle()
+                        .foregroundColor(.white)
+                }
+                
+                Circle()
                         .stroke(Color.white, lineWidth: 3.5)
                         .frame(width: 64, height: 64)
                 } else {
@@ -274,9 +274,9 @@ struct AvatarView: View {
                     .frame(width: size * 0.8, height: size * 0.8)
                     .clipShape(Circle())
             } else {
-                Image(systemName: avatarType)
-                    .font(.system(size: size * 0.5, weight: .medium))
-                    .foregroundColor(.white)
+            Image(systemName: avatarType)
+                .font(.system(size: size * 0.5, weight: .medium))
+                .foregroundColor(.white)
             }
         }
     }

@@ -18,6 +18,7 @@ struct OnlineRoomView: View {
     @State private var showKickConfirmation = false
     @State private var playerToKick: RoomPlayer? = nil
     @State private var toast: ToastMessage? = nil
+    @State private var isLeavingRoom = false
     
     var body: some View {
         Group {
@@ -27,7 +28,7 @@ struct OnlineRoomView: View {
                     Color.white
                         .ignoresSafeArea()
                     
-                    VStack(spacing: 16) {
+                    VStack(spacing: 24) {
                         if onlineManager.isLoading {
                             ProgressView()
                                 .scaleEffect(1.5)
@@ -36,15 +37,53 @@ struct OnlineRoomView: View {
                                 .font(.system(size: 16, weight: .regular, design: .rounded))
                                 .foregroundColor(Color.gray)
                         } else {
-                            Text("Room not found")
-                                .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color.gray)
-                            
-                            Button("Go Back") {
-                                dismiss()
+                            // Enhanced empty state
+                            ZStack {
+                                Circle()
+                                    .fill(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                                    .frame(width: 120, height: 120)
+                                
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .font(.system(size: 50, weight: .light))
+                                    .foregroundColor(Color.orange.opacity(0.6))
                             }
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            
+                            VStack(spacing: 12) {
+                                if let errorMsg = onlineManager.errorMessage, errorMsg.contains("deleted") {
+                                    Text("Room Deleted")
+                                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    
+                                    Text("This room no longer exists.\nThe host may have deleted it.")
+                                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                                        .foregroundColor(Color.gray)
+                                        .multilineTextAlignment(.center)
+                                        .lineSpacing(4)
+                                } else {
+                                    Text("Room Not Found")
+                                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    
+                                    Text("Unable to load this room.\nPlease check your connection and try again.")
+                                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                                        .foregroundColor(Color.gray)
+                                        .multilineTextAlignment(.center)
+                                        .lineSpacing(4)
+                                }
+                            }
+                            
+                            Button(action: {
+                                HapticManager.shared.lightImpact()
+                                dismiss()
+                            }) {
+                                Text("Go Back")
+                                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 32)
+                                    .padding(.vertical, 12)
+                                    .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .cornerRadius(12)
+                            }
                             .padding(.top, 8)
                         }
                     }
@@ -56,11 +95,7 @@ struct OnlineRoomView: View {
         .alert("Leave Room", isPresented: $showLeaveConfirmation) {
             Button("Cancel", role: .cancel) { }
             Button("Leave", role: .destructive) {
-                HapticManager.shared.mediumImpact()
-                Task {
-                    await onlineManager.leaveRoom()
-                    dismiss()
-                }
+                leaveRoomWithAnimation()
             }
         } message: {
             if onlineManager.isHost {
@@ -115,6 +150,19 @@ struct OnlineRoomView: View {
                         .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                 }
             }
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
+                if let room = onlineManager.currentRoom {
+                    Button(action: {
+                        HapticManager.shared.lightImpact()
+                        showShareSheet = true
+                    }) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    }
+                }
+            }
         }
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $showInviteFriends) {
@@ -127,6 +175,15 @@ struct OnlineRoomView: View {
             if count != nil {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                     // Trigger animation
+                }
+            }
+        }
+        .onChange(of: onlineManager.currentRoom) { newRoom in
+            // Handle room deletion
+            if newRoom == nil && onlineManager.errorMessage?.contains("deleted") == true {
+                // Room was deleted, show appropriate message
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    dismiss()
                 }
             }
         }
@@ -145,38 +202,41 @@ struct OnlineRoomView: View {
                     actionButtonsSection
                 }
             }
+            .opacity(isLeavingRoom ? 0.3 : 1.0)
+            .blur(radius: isLeavingRoom ? 3 : 0)
+            
+            if isLeavingRoom {
+                VStack(spacing: 20) {
+                    ProgressView()
+                        .scaleEffect(1.5)
+                        .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    
+                    Text("Leaving room...")
+                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                }
+                .transition(.opacity.combined(with: .scale))
+            }
         }
+        .animation(.easeInOut(duration: 0.3), value: isLeavingRoom)
     }
     
     private var roomCodeHeader: some View {
         VStack(spacing: 16) {
-            HStack(spacing: 12) {
-                VStack(spacing: 8) {
-                    Text("Room Code")
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(Color.gray)
-                    
-                    Text(onlineManager.currentRoom?.roomCode ?? "")
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                        .tracking(4)
-                }
+            VStack(spacing: 12) {
+                Text("Room Code")
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundColor(Color.gray)
                 
-                Button(action: {
-                    HapticManager.shared.lightImpact()
-                    showShareSheet = true
-                }) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                        .frame(width: 44, height: 44)
-                        .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                        .cornerRadius(12)
-                }
+                Text(onlineManager.currentRoom?.roomCode ?? "")
+                    .font(.system(size: 40, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .tracking(6)
+                    .multilineTextAlignment(.center)
             }
-            .padding(.vertical, 16)
-            .padding(.horizontal, 40)
             .frame(maxWidth: .infinity)
+            .padding(.vertical, 24)
+            .padding(.horizontal, 40)
             .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
             .cornerRadius(16)
             
@@ -259,16 +319,18 @@ struct OnlineRoomView: View {
                     
     @ViewBuilder
     private var selectedGameSection: some View {
-        if let room = onlineManager.currentRoom,
-           let gameTypeString = room.selectedGameType,
-           let gameType = DeckType(stringValue: gameTypeString) {
-            SelectedGameDisplayCard(
-                gameType: gameType,
-                category: room.selectedCategory
-            )
-            .padding(.horizontal, 40)
-        } else {
-            noGameSelectedView
+        Group {
+            if let room = onlineManager.currentRoom,
+               let gameTypeString = room.selectedGameType,
+               let gameType = DeckType(stringValue: gameTypeString) {
+                SelectedGameDisplayCard(
+                    gameType: gameType,
+                    category: room.selectedCategory
+                )
+                .padding(EdgeInsets(top: 0, leading: 40, bottom: 0, trailing: 40))
+            } else {
+                noGameSelectedView
+            }
         }
     }
     
@@ -414,6 +476,27 @@ struct OnlineRoomView: View {
         } catch {
             HapticManager.shared.error()
             toast = ToastMessage(message: "Failed to remove player", type: .error)
+        }
+    }
+    
+    private func leaveRoomWithAnimation() {
+        HapticManager.shared.mediumImpact()
+        
+        withAnimation(.easeInOut(duration: 0.3)) {
+            isLeavingRoom = true
+        }
+        
+        Task {
+            await onlineManager.leaveRoom()
+            
+            // Small delay for smooth transition
+            try? await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
+            
+            await MainActor.run {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    dismiss()
+                }
+            }
         }
     }
 }

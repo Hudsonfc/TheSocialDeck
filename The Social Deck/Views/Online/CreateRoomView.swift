@@ -111,14 +111,14 @@ struct CreateRoomView: View {
                                 .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                                 .cornerRadius(16)
                         } else {
-                            Text("Create Room")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 55)
-                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                .cornerRadius(16)
-                        }
+                        Text("Create Room")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 55)
+                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .cornerRadius(16)
+                    }
                     }
                     .disabled(onlineManager.isLoading)
                     .padding(.horizontal, 40)

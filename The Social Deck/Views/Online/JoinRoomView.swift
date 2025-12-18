@@ -15,6 +15,7 @@ struct JoinRoomView: View {
     @State private var showError = false
     @State private var isValidCode: Bool = false
     @State private var validationMessage: String = ""
+    @State private var showErrorRecovery = false
     
     var body: some View {
         ZStack {
@@ -155,8 +156,19 @@ struct JoinRoomView: View {
         )
         .alert("Error", isPresented: $showError) {
             Button("OK", role: .cancel) { }
+            Button("Retry") {
+                Task {
+                    await onlineManager.joinRoom(roomCode: roomCode)
+                    if onlineManager.currentRoom != nil {
+                        HapticManager.shared.success()
+                        navigateToRoom = true
+                    } else if onlineManager.errorMessage != nil {
+                        showError = true
+                    }
+                }
+            }
         } message: {
-            Text(onlineManager.errorMessage ?? "Failed to join room")
+            Text(getErrorMessage(onlineManager.errorMessage))
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -202,6 +214,25 @@ struct JoinRoomView: View {
         }
         
         HapticManager.shared.selection()
+    }
+    
+    private func getErrorMessage(_ error: String?) -> String {
+        guard let error = error else {
+            return "Failed to join room"
+        }
+        
+        // Provide more helpful error messages
+        if error.lowercased().contains("not found") || error.lowercased().contains("room not found") {
+            return "Room not found. Please check the room code and try again."
+        } else if error.lowercased().contains("full") {
+            return "This room is full. The maximum number of players has been reached."
+        } else if error.lowercased().contains("already") {
+            return "You're already in this room or another room. Leave your current room first."
+        } else if error.lowercased().contains("progress") || error.lowercased().contains("in progress") {
+            return "Cannot join room. A game is currently in progress."
+        }
+        
+        return error
     }
 }
 

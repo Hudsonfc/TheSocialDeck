@@ -142,7 +142,7 @@ struct HomeView: View {
                     }
                     .padding(.top, 10)
                     .padding(.trailing, 20)
-                }
+            }
             }
             .navigationBarHidden(true)
             .onAppear {

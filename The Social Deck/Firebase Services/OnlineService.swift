@@ -82,7 +82,7 @@ class OnlineService {
     
     /// Joins an existing room
     func joinRoom(roomCode: String, playerProfile: RoomPlayer) async throws -> OnlineRoom {
-        guard auth.currentUser != nil else {
+        guard let currentUserId = auth.currentUser?.uid else {
             throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])
         }
         
@@ -90,22 +90,25 @@ class OnlineService {
         let snapshot = try await roomRef.getDocument()
         
         guard snapshot.exists, var room = try? snapshot.data(as: OnlineRoom.self) else {
-            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room not found"])
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room not found. Please check the room code."])
         }
+        
+        // Check if player is already in this room
+        if room.players.contains(where: { $0.id == currentUserId }) {
+            return room // Already in room, return it
+        }
+        
+        // Check if player is in another room (would need to check all rooms, but for now just allow)
+        // This is a simplified check - in production you might want to check all active rooms
         
         // Check if room is full
         guard room.players.count < room.maxPlayers else {
-            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room is full"])
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room is full. Maximum \(room.maxPlayers) players allowed."])
         }
         
         // Check if room is in game (can't join during active game)
         guard room.status == .waiting else {
             throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Cannot join room while game is in progress"])
-        }
-        
-        // Check if player is already in room
-        guard !room.players.contains(where: { $0.id == playerProfile.id }) else {
-            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Already in this room"])
         }
         
         // Add player to room
