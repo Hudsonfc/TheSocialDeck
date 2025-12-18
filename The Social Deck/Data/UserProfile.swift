@@ -30,6 +30,9 @@ struct UserProfile: Codable, Identifiable {
     var onlineGamesPlayed: Int
     var onlineGamesWon: Int
     
+    // Activity tracking
+    var lastActiveAt: Date? // Last time user was active in the app
+    
     init(
         id: String? = nil,
         userId: String,
@@ -46,7 +49,8 @@ struct UserProfile: Codable, Identifiable {
         totalCardsSeen: Int = 0,
         favoriteGame: String? = nil,
         onlineGamesPlayed: Int = 0,
-        onlineGamesWon: Int = 0
+        onlineGamesWon: Int = 0,
+        lastActiveAt: Date? = nil
     ) {
         self.id = id
         self.userId = userId
@@ -64,6 +68,7 @@ struct UserProfile: Codable, Identifiable {
         self.favoriteGame = favoriteGame
         self.onlineGamesPlayed = onlineGamesPlayed
         self.onlineGamesWon = onlineGamesWon
+        self.lastActiveAt = lastActiveAt
     }
     
     var winRate: Double {

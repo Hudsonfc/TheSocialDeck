@@ -401,4 +401,55 @@ class OnlineService {
         
         try await roomRef.delete()
     }
+    
+    // MARK: - Player Management
+    
+    /// Kick a player from the room (host only)
+    func kickPlayer(roomCode: String, playerId: String) async throws {
+        let roomRef = db.collection("rooms").document(roomCode)
+        let snapshot = try await roomRef.getDocument()
+        
+        guard snapshot.exists, var room = try? snapshot.data(as: OnlineRoom.self) else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room not found"])
+        }
+        
+        guard let currentUserId = auth.currentUser?.uid, room.hostId == currentUserId else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Only the host can kick players"])
+        }
+        
+        guard playerId != currentUserId else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Cannot kick yourself"])
+        }
+        
+        // Remove player from room
+        room.players.removeAll { $0.id == playerId }
+        
+        // Update room
+        let encoder = Firestore.Encoder()
+        let playersData = try room.players.map { try encoder.encode($0) }
+        try await roomRef.updateData(["players": playersData])
+    }
+    
+    // MARK: - Room Timeout
+    
+    /// Check and clean up inactive rooms (should be called periodically)
+    /// Note: This should ideally be handled by a Cloud Function
+    func cleanupInactiveRooms(inactivityTimeout: TimeInterval = 3600) async throws {
+        // Clean up rooms that have been inactive for more than 1 hour
+        let cutoffDate = Date().addingTimeInterval(-inactivityTimeout)
+        let cutoffTimestamp = Timestamp(date: cutoffDate)
+        
+        let query = db.collection("rooms")
+            .whereField("status", isEqualTo: RoomStatus.waiting.rawValue)
+            .whereField("createdAt", isLessThan: cutoffTimestamp)
+        
+        let snapshot = try await query.getDocuments()
+        
+        for doc in snapshot.documents {
+            // Check if room has no players or is old
+            if let room = try? doc.data(as: OnlineRoom.self), room.players.isEmpty || room.createdAt < cutoffDate {
+                try await doc.reference.delete()
+            }
+        }
+    }
 }

@@ -37,6 +37,13 @@ struct FriendRequest: Codable, Identifiable {
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
+    
+    /// Check if request is expired (30 days)
+    var isExpired: Bool {
+        guard status == .pending else { return false }
+        let expirationDate = Calendar.current.date(byAdding: .day, value: 30, to: createdAt) ?? createdAt
+        return Date() > expirationDate
+    }
 }
 
 // MARK: - Friend Profile (combines UserProfile with friend request info)
@@ -47,14 +54,18 @@ struct FriendProfile: Identifiable, Equatable {
     let avatarType: String
     let avatarColor: String
     let friendRequestId: String? // The friend request document ID
+    let lastActiveAt: Date? // Last active timestamp
+    var isOnline: Bool = false // Online status (updated separately via presence)
     
-    init(profile: UserProfile, friendRequestId: String? = nil) {
+    init(profile: UserProfile, friendRequestId: String? = nil, isOnline: Bool = false) {
         self.id = profile.userId
         self.userId = profile.userId
         self.username = profile.username
         self.avatarType = profile.avatarType
         self.avatarColor = profile.avatarColor
         self.friendRequestId = friendRequestId
+        self.lastActiveAt = profile.lastActiveAt
+        self.isOnline = isOnline
     }
     
     static func == (lhs: FriendProfile, rhs: FriendProfile) -> Bool {

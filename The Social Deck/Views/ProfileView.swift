@@ -20,6 +20,8 @@ struct ProfileView: View {
     @State private var showSignOutConfirmation = false
     @State private var showAddFriends = false
     @State private var showFriendsList = false
+    @StateObject private var friendService = FriendService.shared
+    @State private var toast: ToastMessage? = nil
     
     var avatarSelectionDestination: some View {
         AvatarSelectionView(
@@ -258,6 +260,7 @@ struct ProfileView: View {
                 VStack(spacing: 16) {
                     // Add Friends Button
                     Button(action: {
+                        HapticManager.shared.lightImpact()
                         showAddFriends = true
                     }) {
                         HStack {
@@ -284,6 +287,7 @@ struct ProfileView: View {
                     
                     // Added Friends Button
                     Button(action: {
+                        HapticManager.shared.lightImpact()
                         showFriendsList = true
                     }) {
                         HStack {
@@ -296,6 +300,17 @@ struct ProfileView: View {
                                 .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                             
                             Spacer()
+                            
+                            // Friend count badge
+                            if !friendService.friends.isEmpty {
+                                Text("\(friendService.friends.count)")
+                                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .cornerRadius(12)
+                            }
                             
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 14, weight: .semibold))
@@ -403,6 +418,12 @@ struct ProfileView: View {
                 showError = true
             }
         }
+        .onAppear {
+            Task {
+                try? await friendService.loadFriends()
+            }
+        }
+        .toast($toast)
     }
     
 }

@@ -433,4 +433,24 @@ class OnlineManager: ObservableObject {
         
         isLoading = false
     }
+    
+    // MARK: - Room Management
+    
+    /// Kick a player from the room (host only)
+    func kickPlayer(_ playerId: String) async throws {
+        guard let roomCode = currentRoom?.roomCode else {
+            throw NSError(domain: "OnlineManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Not in a room"])
+        }
+        
+        guard isHost else {
+            throw NSError(domain: "OnlineManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Only the host can kick players"])
+        }
+        
+        guard playerId != authManager.userProfile?.userId else {
+            throw NSError(domain: "OnlineManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Cannot kick yourself"])
+        }
+        
+        try await onlineService.kickPlayer(roomCode: roomCode, playerId: playerId)
+        // Room will update via listener
+    }
 }

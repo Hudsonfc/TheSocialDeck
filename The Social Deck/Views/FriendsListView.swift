@@ -14,6 +14,9 @@ struct FriendsListView: View {
     @State private var showError = false
     @State private var selectedFriend: FriendProfile? = nil
     @State private var showInviteSheet = false
+    @State private var showRemoveConfirmation = false
+    @State private var friendToRemove: FriendProfile? = nil
+    @State private var toast: ToastMessage? = nil
     
     var body: some View {
         ZStack {
@@ -84,14 +87,30 @@ struct FriendsListView: View {
                                 FriendRowView(
                                     friend: friend,
                                     onInvite: {
+                                        HapticManager.shared.lightImpact()
                                         selectedFriend = friend
                                         showInviteSheet = true
+                                    },
+                                    onRemove: {
+                                        friendToRemove = friend
+                                        showRemoveConfirmation = true
                                     }
                                 )
                             }
                         }
                         .padding(.horizontal, 40)
                         .padding(.bottom, 20)
+                    }
+                    .refreshable {
+                        HapticManager.shared.lightImpact()
+                        Task {
+                            do {
+                                try await friendService.loadFriends()
+                                toast = ToastMessage(message: "Friends list refreshed", type: .success)
+                            } catch {
+                                toast = ToastMessage(message: "Failed to refresh", type: .error)
+                            }
+                        }
                     }
                 }
             }
@@ -132,6 +151,35 @@ struct FriendsListView: View {
         } message: {
             Text(friendService.errorMessage ?? "Failed to load friends")
         }
+        .alert("Remove Friend", isPresented: $showRemoveConfirmation) {
+            Button("Cancel", role: .cancel) {
+                friendToRemove = nil
+            }
+            Button("Remove", role: .destructive) {
+                if let friend = friendToRemove {
+                    Task {
+                        await removeFriend(friend)
+                    }
+                }
+                friendToRemove = nil
+            }
+        } message: {
+            if let friend = friendToRemove {
+                Text("Are you sure you want to remove \(friend.username) from your friends list?")
+            }
+        }
+        .toast($toast)
+    }
+    
+    private func removeFriend(_ friend: FriendProfile) async {
+        do {
+            try await friendService.removeFriend(friend.userId)
+            HapticManager.shared.success()
+            toast = ToastMessage(message: "\(friend.username) removed", type: .success)
+        } catch {
+            HapticManager.shared.error()
+            toast = ToastMessage(message: "Failed to remove friend", type: .error)
+        }
     }
 }
 
@@ -140,20 +188,35 @@ struct FriendsListView: View {
 struct FriendRowView: View {
     let friend: FriendProfile
     let onInvite: () -> Void
+    let onRemove: () -> Void
     
     var body: some View {
         HStack(spacing: 16) {
-            // Avatar with shadow
-            ZStack {
-                Circle()
-                    .fill(Color.white)
-                    .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
+            // Avatar with shadow and online indicator
+            ZStack(alignment: .bottomTrailing) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white)
+                        .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
+                    
+                    AvatarView(
+                        avatarType: friend.avatarType,
+                        avatarColor: friend.avatarColor,
+                        size: 56
+                    )
+                }
                 
-                AvatarView(
-                    avatarType: friend.avatarType,
-                    avatarColor: friend.avatarColor,
-                    size: 56
-                )
+                // Online status indicator
+                if friend.isOnline {
+                    Circle()
+                        .fill(Color.green)
+                        .frame(width: 14, height: 14)
+                        .overlay(
+                            Circle()
+                                .stroke(Color.white, lineWidth: 2)
+                        )
+                        .offset(x: -2, y: -2)
+                }
             }
             
             // Friend info
@@ -162,33 +225,64 @@ struct FriendRowView: View {
                     .font(.system(size: 17, weight: .semibold, design: .rounded))
                     .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                 
-                HStack(spacing: 6) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(Color.green)
-                    
-                    Text("Friend")
-                        .font(.system(size: 14, weight: .regular, design: .rounded))
-                        .foregroundColor(Color.green)
+                // Status and activity
+                HStack(spacing: 8) {
+                    if friend.isOnline {
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(Color.green)
+                                .frame(width: 6, height: 6)
+                            Text("Online")
+                                .font(.system(size: 13, weight: .regular, design: .rounded))
+                                .foregroundColor(Color.green)
+                        }
+                    } else if let lastActive = friend.lastActiveAt {
+                        Text("Active \(formatLastActive(lastActive))")
+                            .font(.system(size: 13, weight: .regular, design: .rounded))
+                            .foregroundColor(Color.gray)
+                    } else {
+                        Text("Friend")
+                            .font(.system(size: 13, weight: .regular, design: .rounded))
+                            .foregroundColor(Color.gray)
+                    }
                 }
             }
             
             Spacer()
             
-            // Invite button (only if in a room)
-            if OnlineManager.shared.currentRoom != nil {
-                Button(action: onInvite) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "paperplane.fill")
-                            .font(.system(size: 12, weight: .semibold))
-                        Text("Invite")
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+            // Action buttons
+            HStack(spacing: 8) {
+                // Remove button
+                Button(action: {
+                    HapticManager.shared.lightImpact()
+                    onRemove()
+                }) {
+                    Image(systemName: "person.slash.fill")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(Color.red)
+                        .frame(width: 36, height: 36)
+                        .background(Color.red.opacity(0.1))
+                        .cornerRadius(8)
+                }
+                
+                // Invite button (only if in a room)
+                if OnlineManager.shared.currentRoom != nil {
+                    Button(action: {
+                        HapticManager.shared.lightImpact()
+                        onInvite()
+                    }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "paperplane.fill")
+                                .font(.system(size: 12, weight: .semibold))
+                            Text("Invite")
+                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 10)
+                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .cornerRadius(10)
                     }
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 10)
-                    .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                    .cornerRadius(10)
                 }
             }
         }
@@ -197,6 +291,24 @@ struct FriendRowView: View {
         .background(Color.white)
         .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 3)
+    }
+    
+    private func formatLastActive(_ date: Date) -> String {
+        let now = Date()
+        let timeInterval = now.timeIntervalSince(date)
+        
+        if timeInterval < 60 {
+            return "just now"
+        } else if timeInterval < 3600 {
+            let minutes = Int(timeInterval / 60)
+            return "\(minutes)m ago"
+        } else if timeInterval < 86400 {
+            let hours = Int(timeInterval / 3600)
+            return "\(hours)h ago"
+        } else {
+            let days = Int(timeInterval / 86400)
+            return "\(days)d ago"
+        }
     }
 }
 

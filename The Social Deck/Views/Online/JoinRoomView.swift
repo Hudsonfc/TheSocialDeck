@@ -13,6 +13,8 @@ struct JoinRoomView: View {
     @State private var roomCode: String = ""
     @State private var navigateToRoom = false
     @State private var showError = false
+    @State private var isValidCode: Bool = false
+    @State private var validationMessage: String = ""
     
     var body: some View {
         ZStack {
@@ -46,27 +48,51 @@ struct JoinRoomView: View {
                             .padding(.bottom, 8)
                         
                         // Room Code Input
-                        TextField("Enter Code", text: $roomCode)
-                            .font(.system(size: 18, weight: .medium, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                            .autocapitalization(.allCharacters)
-                            .disableAutocorrection(true)
-                            .textInputAutocapitalization(.characters)
-                            .padding(.horizontal, 20)
-                            .frame(height: 60)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                            .cornerRadius(16)
-                            .padding(.horizontal, 40)
+                        VStack(alignment: .leading, spacing: 8) {
+                            TextField("Enter Code", text: $roomCode)
+                                .font(.system(size: 18, weight: .medium, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .autocapitalization(.allCharacters)
+                                .disableAutocorrection(true)
+                                .textInputAutocapitalization(.characters)
+                                .padding(.horizontal, 20)
+                                .frame(height: 60)
+                                .background(isValidCode && !roomCode.isEmpty ? Color.green.opacity(0.1) : (validationMessage.isEmpty ? Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0) : Color.red.opacity(0.1)))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .stroke(isValidCode && !roomCode.isEmpty ? Color.green : (validationMessage.isEmpty ? Color.clear : Color.red), lineWidth: 2)
+                                )
+                                .cornerRadius(16)
+                                .onChange(of: roomCode) { newValue in
+                                    validateRoomCode(newValue)
+                                }
+                            
+                            if !validationMessage.isEmpty {
+                                Text(validationMessage)
+                                    .font(.system(size: 13, weight: .regular, design: .rounded))
+                                    .foregroundColor(isValidCode ? Color.green : Color.red)
+                                    .padding(.horizontal, 4)
+                            } else if !roomCode.isEmpty {
+                                Text("Room code must be 4 uppercase letters/numbers")
+                                    .font(.system(size: 13, weight: .regular, design: .rounded))
+                                    .foregroundColor(Color.gray)
+                                    .padding(.horizontal, 4)
+                            }
+                        }
+                        .padding(.horizontal, 40)
                     }
                     
                     // Join Button
                     Button(action: {
+                        HapticManager.shared.mediumImpact()
                         Task {
                             await onlineManager.joinRoom(roomCode: roomCode)
                             
                             if onlineManager.currentRoom != nil {
+                                HapticManager.shared.success()
                                 navigateToRoom = true
                             } else if onlineManager.errorMessage != nil {
+                                HapticManager.shared.error()
                                 showError = true
                             }
                         }
@@ -88,7 +114,7 @@ struct JoinRoomView: View {
                                 .cornerRadius(16)
                         }
                     }
-                    .disabled(onlineManager.isLoading || roomCode.isEmpty)
+                    .disabled(onlineManager.isLoading || roomCode.isEmpty || !isValidCode)
                     .padding(.horizontal, 40)
                     
                     // Placeholder Lobby Area
@@ -145,6 +171,37 @@ struct JoinRoomView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+    }
+    
+    private func validateRoomCode(_ code: String) {
+        let uppercaseCode = code.uppercased()
+        let allowedCharacters = CharacterSet.alphanumerics
+        
+        // Update to uppercase
+        if code != uppercaseCode {
+            roomCode = uppercaseCode
+            return
+        }
+        
+        // Check length and characters
+        if code.isEmpty {
+            isValidCode = false
+            validationMessage = ""
+        } else if code.count < 4 {
+            isValidCode = false
+            validationMessage = "Code must be 4 characters"
+        } else if code.count > 4 {
+            isValidCode = false
+            validationMessage = "Code must be exactly 4 characters"
+        } else if code.rangeOfCharacter(from: allowedCharacters.inverted) != nil {
+            isValidCode = false
+            validationMessage = "Code can only contain letters and numbers"
+        } else {
+            isValidCode = true
+            validationMessage = "Valid code format"
+        }
+        
+        HapticManager.shared.selection()
     }
 }
 

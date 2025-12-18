@@ -18,6 +18,9 @@ struct AddFriendsView: View {
     @State private var errorMessage: String = ""
     @State private var selectedTab: Int = 0 // 0 = Search, 1 = Pending
     @State private var searchTask: Task<Void, Never>?
+    @State private var toast: ToastMessage? = nil
+    @State private var showBlockConfirmation = false
+    @State private var userToBlock: UserProfile? = nil
     
     var body: some View {
         ZStack {
@@ -74,6 +77,39 @@ struct AddFriendsView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text(errorMessage)
+        }
+        .alert("Block User", isPresented: $showBlockConfirmation) {
+            Button("Cancel", role: .cancel) {
+                userToBlock = nil
+            }
+            Button("Block", role: .destructive) {
+                if let user = userToBlock {
+                    Task {
+                        await blockUser(user.userId)
+                    }
+                }
+                userToBlock = nil
+            }
+        } message: {
+            if let user = userToBlock {
+                Text("Are you sure you want to block \(user.username)? You won't be able to send friend requests to them.")
+            }
+        }
+        .toast($toast)
+    }
+    
+    private func blockUser(_ userId: String) async {
+        do {
+            try await friendService.blockUser(userId)
+            HapticManager.shared.success()
+            toast = ToastMessage(message: "User blocked", type: .success)
+            // Refresh search to update UI
+            if !searchText.isEmpty {
+                await performSearch(query: searchText)
+            }
+        } catch {
+            HapticManager.shared.error()
+            toast = ToastMessage(message: "Failed to block user", type: .error)
         }
     }
     
@@ -175,7 +211,7 @@ struct AddFriendsView: View {
                     .font(.system(size: 24, weight: .bold, design: .rounded))
                     .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                 
-                Text("Enter a username above to search\nfor friends to add")
+                Text("Enter at least 2 characters to search\nfor friends to add")
                     .font(.system(size: 16, weight: .regular, design: .rounded))
                     .foregroundColor(Color.gray)
                     .multilineTextAlignment(.center)
@@ -198,7 +234,7 @@ struct AddFriendsView: View {
                     .foregroundColor(Color.gray.opacity(0.5))
             }
             
-            VStack(spacing: 8) {
+            VStack(spacing: 12) {
                 Text("No Users Found")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
                     .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
@@ -206,6 +242,11 @@ struct AddFriendsView: View {
                 Text("Try searching with a different username")
                     .font(.system(size: 16, weight: .regular, design: .rounded))
                     .foregroundColor(Color.gray)
+                    .multilineTextAlignment(.center)
+                
+                Text("Make sure you're typing at least 2 characters")
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .foregroundColor(Color.gray.opacity(0.7))
                     .multilineTextAlignment(.center)
             }
         }
@@ -223,6 +264,10 @@ struct AddFriendsView: View {
                             Task {
                                 await sendFriendRequest(to: profile.userId)
                             }
+                        },
+                        onBlock: {
+                            userToBlock = profile
+                            showBlockConfirmation = true
                         }
                     )
                 }
@@ -268,6 +313,17 @@ struct AddFriendsView: View {
                     }
                     .padding(.horizontal, 40)
                     .padding(.vertical, 8)
+                }
+            }
+        }
+        .refreshable {
+            HapticManager.shared.lightImpact()
+            Task {
+                do {
+                    try await friendService.loadPendingRequests()
+                    toast = ToastMessage(message: "Requests refreshed", type: .success)
+                } catch {
+                    toast = ToastMessage(message: "Failed to refresh", type: .error)
                 }
             }
         }
@@ -319,11 +375,14 @@ struct AddFriendsView: View {
     private func sendFriendRequest(to userId: String) async {
         do {
             try await friendService.sendFriendRequest(to: userId)
+            HapticManager.shared.success()
+            toast = ToastMessage(message: "Friend request sent", type: .success)
             // Refresh search to update button state
             if !searchText.isEmpty {
                 await performSearch(query: searchText)
             }
         } catch {
+            HapticManager.shared.error()
             errorMessage = "Failed to send friend request: \(error.localizedDescription)"
             showError = true
         }
@@ -336,8 +395,10 @@ struct UserSearchResultRow: View {
     @StateObject private var friendService = FriendService.shared
     let profile: UserProfile
     let onSendRequest: () -> Void
+    let onBlock: () -> Void
     @State private var requestStatus: String = "" // "pending", "sent", "friend", ""
     @State private var isSending: Bool = false
+    @State private var showMenu = false
     
     var body: some View {
         HStack(spacing: 16) {
@@ -367,15 +428,35 @@ struct UserSearchResultRow: View {
             
             Spacer()
             
-            // Action button
-            Button(action: {
-                guard !isSending && requestStatus != "friend" && requestStatus != "sent" else { return }
-                isSending = true
-                onSendRequest()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    isSending = false
+            // Action buttons
+            HStack(spacing: 8) {
+                // Menu button (block option)
+                Menu {
+                    Button(role: .destructive, action: {
+                        HapticManager.shared.lightImpact()
+                        onBlock()
+                    }) {
+                        Label("Block User", systemImage: "hand.raised.fill")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(Color.gray)
+                        .frame(width: 32, height: 32)
+                        .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                        .cornerRadius(8)
                 }
-            }) {
+                
+                // Add/Send button
+                Button(action: {
+                    guard !isSending && requestStatus != "friend" && requestStatus != "sent" else { return }
+                    HapticManager.shared.lightImpact()
+                    isSending = true
+                    onSendRequest()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        isSending = false
+                    }
+                }) {
                 if isSending {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
@@ -390,6 +471,7 @@ struct UserSearchResultRow: View {
             .background(buttonColor)
             .cornerRadius(10)
             .disabled(requestStatus == "friend" || requestStatus == "sent" || isSending)
+            }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
@@ -458,6 +540,7 @@ struct PendingRequestRow: View {
     @State private var profile: UserProfile? = nil
     @State private var isLoading = true
     @State private var isProcessing = false
+    @State private var toast: ToastMessage? = nil
     
     var body: some View {
         HStack(spacing: 16) {
@@ -491,6 +574,7 @@ struct PendingRequestRow: View {
                 // Action buttons
                 HStack(spacing: 10) {
                     Button(action: {
+                        HapticManager.shared.lightImpact()
                         Task {
                             await rejectRequest()
                         }
@@ -505,6 +589,7 @@ struct PendingRequestRow: View {
                     .disabled(isProcessing)
                     
                     Button(action: {
+                        HapticManager.shared.lightImpact()
                         Task {
                             await acceptRequest()
                         }
@@ -557,8 +642,9 @@ struct PendingRequestRow: View {
         isProcessing = true
         do {
             try await friendService.acceptFriendRequest(requestId)
+            HapticManager.shared.success()
         } catch {
-            // Handle error
+            HapticManager.shared.error()
         }
         isProcessing = false
     }
@@ -568,8 +654,9 @@ struct PendingRequestRow: View {
         isProcessing = true
         do {
             try await friendService.rejectFriendRequest(requestId)
+            HapticManager.shared.lightImpact()
         } catch {
-            // Handle error
+            HapticManager.shared.error()
         }
         isProcessing = false
     }
