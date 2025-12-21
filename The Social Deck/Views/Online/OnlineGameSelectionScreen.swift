@@ -15,6 +15,16 @@ struct OnlineGamePlaceholder: Identifiable, Equatable {
     let imageName: String
     let hasCategories: Bool
     let availableCategories: [String]
+    let gameType: String? // Game type string (e.g., "colorClash")
+    
+    init(title: String, description: String, imageName: String, hasCategories: Bool, availableCategories: [String], gameType: String? = nil) {
+        self.title = title
+        self.description = description
+        self.imageName = imageName
+        self.hasCategories = hasCategories
+        self.availableCategories = availableCategories
+        self.gameType = gameType
+    }
     
     static func == (lhs: OnlineGamePlaceholder, rhs: OnlineGamePlaceholder) -> Bool {
         lhs.id == rhs.id
@@ -49,6 +59,14 @@ struct OnlineGameSelectionScreen: View {
         OnlineGameCategory(
             title: "Multiplayer Games",
             games: [
+                OnlineGamePlaceholder(
+                    title: "Color Clash",
+                    description: "A fast-paced card game where players match colors and numbers. Be the first to empty your hand!",
+                    imageName: "Art 1.4",
+                    hasCategories: false,
+                    availableCategories: [],
+                    gameType: "colorClash"
+                ),
                 OnlineGamePlaceholder(
                     title: "Online Game 1",
                     description: "Placeholder game description for online multiplayer gameplay",
@@ -87,14 +105,16 @@ struct OnlineGameSelectionScreen: View {
                     description: "Placeholder game description for online multiplayer gameplay",
                     imageName: "Art 1.4",
                     hasCategories: true,
-                    availableCategories: ["Casual", "Competitive"]
+                    availableCategories: ["Casual", "Competitive"],
+                    gameType: nil
                 ),
                 OnlineGamePlaceholder(
                     title: "Online Game 6",
                     description: "Placeholder game description for online multiplayer gameplay",
                     imageName: "Art 1.4",
                     hasCategories: false,
-                    availableCategories: []
+                    availableCategories: [],
+                    gameType: nil
                 )
             ]
         )
@@ -260,7 +280,14 @@ struct OnlineGameSelectionScreen: View {
                     onSelect: { category in
                         selectedCategory = category
                         showCategorySelection = false
-                        // TODO: Save game selection to room
+                        // Save game selection to room
+                        if let game = selectedGame, let gameType = game.gameType {
+                            Task {
+                                if let deckType = DeckType(stringValue: gameType) {
+                                    await onlineManager.selectGameType(deckType)
+                                }
+                            }
+                        }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                             navigateToRoom = true
                         }
@@ -269,6 +296,15 @@ struct OnlineGameSelectionScreen: View {
             }
         }
         .onChange(of: selectedGame) { oldValue, newValue in
+            // Save game selection to room
+            if let game = newValue, let gameType = game.gameType {
+                Task {
+                    if let deckType = DeckType(stringValue: gameType) {
+                        await onlineManager.selectGameType(deckType)
+                    }
+                }
+            }
+            
             // If game selected without categories, navigate directly
             if let game = newValue, (!game.hasCategories || game.availableCategories.isEmpty) {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {

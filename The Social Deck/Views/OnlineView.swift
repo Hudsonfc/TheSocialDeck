@@ -79,6 +79,18 @@ struct OnlineView: View {
                     .padding(.horizontal, 40)
                     .animation(.spring(response: 0.3, dampingFraction: 0.7), value: onlineManager.pendingRoomInvites.count)
                     
+                    // Test Color Clash Button (for testing)
+                    NavigationLink(destination: ColorClashTestView()) {
+                        Text("Test Color Clash")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(Color.green)
+                            .cornerRadius(16)
+                    }
+                    .padding(.horizontal, 40)
+                    
                     Spacer()
                         .frame(height: 20)
                 }

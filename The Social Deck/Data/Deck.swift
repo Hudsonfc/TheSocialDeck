@@ -30,6 +30,7 @@ enum DeckType {
     case tapDuel
     case whatsMySecret
     case riddleMeThis
+    case colorClash
     case other
 }
 

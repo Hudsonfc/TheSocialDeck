@@ -37,6 +37,7 @@ struct SelectedGameDisplayCard: View {
         case .tapDuel: return "Tap Duel"
         case .whatsMySecret: return "What's My Secret?"
         case .riddleMeThis: return "Riddle Me This"
+        case .colorClash: return "Color Clash"
         case .other: return "Game"
         }
     }

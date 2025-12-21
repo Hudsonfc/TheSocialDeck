@@ -19,10 +19,23 @@ struct OnlineRoomView: View {
     @State private var playerToKick: RoomPlayer? = nil
     @State private var toast: ToastMessage? = nil
     @State private var isLeavingRoom = false
+    @State private var navigateToGame = false
     
     var body: some View {
         Group {
-            if onlineManager.currentRoom == nil {
+            // Navigate to game if status is inGame
+            if onlineManager.currentRoom?.status == .inGame {
+                NavigationLink(
+                    destination: OnlineGameContainerView(),
+                    isActive: $navigateToGame
+                ) {
+                    EmptyView()
+                }
+                .hidden()
+                .onAppear {
+                    navigateToGame = true
+                }
+            } else if onlineManager.currentRoom == nil {
                 // Loading or error state
                 ZStack {
                     Color.white

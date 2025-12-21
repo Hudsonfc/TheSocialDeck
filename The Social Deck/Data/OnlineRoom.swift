@@ -79,6 +79,7 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
     
     // Game State (when in game)
     var gameStartedAt: Date?
+    var gameState: ColorClashGameState? // For Color Clash game state
     
     init(
         id: String? = nil,
@@ -93,7 +94,8 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         selectedCategory: String? = nil,
         players: [RoomPlayer] = [],
         hostId: String,
-        gameStartedAt: Date? = nil
+        gameStartedAt: Date? = nil,
+        gameState: ColorClashGameState? = nil
     ) {
         self.id = id
         self.roomCode = roomCode
@@ -108,6 +110,7 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         self.players = players
         self.hostId = hostId
         self.gameStartedAt = gameStartedAt
+        self.gameState = gameState
     }
     
     // Helper computed property to get current player count
@@ -155,6 +158,7 @@ extension DeckType {
         case .tapDuel: return "tapDuel"
         case .whatsMySecret: return "whatsMySecret"
         case .riddleMeThis: return "riddleMeThis"
+        case .colorClash: return "colorClash"
         case .other: return "other"
         }
     }
@@ -184,6 +188,7 @@ extension DeckType {
         case "tapDuel": self = .tapDuel
         case "whatsMySecret": self = .whatsMySecret
         case "riddleMeThis": self = .riddleMeThis
+        case "colorClash": self = .colorClash
         case "other": self = .other
         default: return nil
         }

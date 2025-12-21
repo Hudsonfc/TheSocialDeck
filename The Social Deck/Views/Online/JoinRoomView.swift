@@ -51,7 +51,7 @@ struct JoinRoomView: View {
                         // Room Code Input
                         VStack(alignment: .leading, spacing: 8) {
                             TextField("Enter Code", text: $roomCode)
-                                .font(.system(size: 18, weight: .medium, design: .rounded))
+                                        .font(.system(size: 18, weight: .medium, design: .rounded))
                                 .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                                 .autocapitalization(.allCharacters)
                                 .disableAutocorrection(true)
@@ -80,7 +80,7 @@ struct JoinRoomView: View {
                                     .padding(.horizontal, 4)
                             }
                         }
-                        .padding(.horizontal, 40)
+                            .padding(.horizontal, 40)
                     }
                     
                     // Join Button
@@ -106,13 +106,13 @@ struct JoinRoomView: View {
                                 .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                                 .cornerRadius(16)
                         } else {
-                            Text("Join Room")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 55)
+                        Text("Join Room")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 55)
                                 .background(roomCode.isEmpty ? Color.gray : Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                .cornerRadius(16)
+                            .cornerRadius(16)
                         }
                     }
                     .disabled(onlineManager.isLoading || roomCode.isEmpty || !isValidCode)

@@ -237,11 +237,121 @@ class OnlineService {
             throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "All players must be ready and at least 2 players required"])
         }
         
-        // Update room status to inGame and set game started time
-        try await roomRef.updateData([
-            "status": RoomStatus.inGame.rawValue,
-            "gameStartedAt": Timestamp(date: Date())
-        ])
+        // Initialize game state if Color Clash
+        if room.selectedGameType == "colorClash" {
+            let gameState = try initializeColorClashGameState(room: room)
+            try await roomRef.updateData([
+                "status": RoomStatus.inGame.rawValue,
+                "gameStartedAt": Timestamp(date: Date()),
+                "gameState": try Firestore.Encoder().encode(gameState)
+            ])
+        } else {
+            // Update room status to inGame and set game started time
+            try await roomRef.updateData([
+                "status": RoomStatus.inGame.rawValue,
+                "gameStartedAt": Timestamp(date: Date())
+            ])
+        }
+    }
+    
+    // MARK: - Color Clash Game State
+    
+    /// Initialize Color Clash game state
+    private func initializeColorClashGameState(room: OnlineRoom) throws -> ColorClashGameState {
+        // Create and shuffle deck
+        var deck = ColorClashCard.createStandardDeck()
+        deck.shuffle()
+        
+        // Deal 7 cards to each player
+        var playerHands: [String: [ColorClashCard]] = [:]
+        let playerIds = room.players.map { $0.id }
+        
+        for playerId in playerIds {
+            let hand = Array(deck.prefix(7))
+            deck.removeFirst(7)
+            playerHands[playerId] = hand
+        }
+        
+        // Place first card on discard pile (must be a number card, not action/wild)
+        var firstCard: ColorClashCard
+        if let firstCardIndex = deck.firstIndex(where: { $0.type == .number && $0.number != nil }) {
+            firstCard = deck.remove(at: firstCardIndex)
+        } else {
+            // If no number card found, use first card (fallback)
+            guard !deck.isEmpty else {
+                throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Deck is empty"])
+            }
+            firstCard = deck.removeFirst()
+        }
+        
+        let discardPile = [firstCard]
+        
+        // Determine current color
+        let currentColor = firstCard.color ?? firstCard.selectedColor ?? .red
+        
+        // Random burned color
+        let burnedColor = CardColor.allCases.randomElement()
+        
+        // Create game state
+        let gameState = ColorClashGameState(
+            deck: deck,
+            discardPile: discardPile,
+            playerHands: playerHands,
+            currentPlayerId: playerIds[0],
+            playerOrder: playerIds,
+            turnDirection: 1,
+            currentColor: currentColor,
+            burnedColor: burnedColor,
+            turnStartedAt: Date(),
+            turnDuration: 30.0,
+            status: .playing,
+            winnerId: nil,
+            lastCardDeclared: [:],
+            pendingDrawCards: nil,
+            skipNextPlayer: false,
+            lastActionPlayer: nil
+        )
+        
+        return gameState
+    }
+    
+    /// Updates the game state in Firestore
+    func updateGameState(roomCode: String, gameState: ColorClashGameState) async throws {
+        let roomRef = db.collection("rooms").document(roomCode)
+        let encoder = Firestore.Encoder()
+        let gameStateData = try encoder.encode(gameState)
+        try await roomRef.updateData(["gameState": gameStateData])
+    }
+    
+    /// Listens to game state updates in real-time
+    func listenToGameState(roomCode: String, completion: @escaping (Result<ColorClashGameState, Error>) -> Void) -> ListenerRegistration {
+        let roomRef = db.collection("rooms").document(roomCode)
+        
+        return roomRef.addSnapshotListener { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let snapshot = snapshot, snapshot.exists else {
+                completion(.failure(NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room not found"])))
+                return
+            }
+            
+            guard let data = snapshot.data(),
+                  let gameStateData = data["gameState"] as? [String: Any] else {
+                // No game state yet (game not started)
+                return
+            }
+            
+            do {
+                let decoder = Firestore.Decoder()
+                let gameState = try decoder.decode(ColorClashGameState.self, from: gameStateData)
+                completion(.success(gameState))
+            } catch {
+                completion(.failure(error))
+            }
+        }
     }
     
     // MARK: - Room Listening
