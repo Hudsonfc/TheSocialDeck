@@ -17,6 +17,11 @@ struct ColorClashTestView: View {
     @State private var flyingCardOffset: CGSize = .zero
     @State private var flyingCardOpacity: Double = 0
     @State private var newlyDrawnCardId: String?
+    @State private var showCardInfo: Bool = false
+    @State private var isInitialDeal: Bool = true
+    @State private var previousTopCardId: String?
+    @State private var showCardFlip: Bool = false
+    @State private var cardFlipRotation: Double = 0
     
     // Fake players for testing
     private let fakePlayers: [RoomPlayer] = [
@@ -74,6 +79,17 @@ struct ColorClashTestView: View {
                         .clipShape(Circle())
                 }
             }
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    HapticManager.shared.lightImpact()
+                    showCardInfo = true
+                }) {
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 20, weight: .regular))
+                        .foregroundColor(Color(red: 0x66/255.0, green: 0x66/255.0, blue: 0x66/255.0))
+                }
+            }
         }
         .sheet(isPresented: $testManager.showWildColorSelection) {
             WildColorSelectionModal { color in
@@ -81,6 +97,42 @@ struct ColorClashTestView: View {
                     await testManager.selectWildColor(color)
                 }
             }
+        }
+        .sheet(isPresented: $showCardInfo) {
+            ColorClashCardInfoView()
+        }
+        .onAppear {
+            // Trigger initial deal animation
+            if isInitialDeal && !testManager.myHand.isEmpty {
+                // Start with cards hidden
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    // Animate cards appearing one by one
+                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                        isInitialDeal = false
+                    }
+                }
+            }
+            previousTopCardId = testManager.topCard?.id
+        }
+        .onChange(of: testManager.myHand.count) { count in
+            // Reset initial deal if hand becomes empty and then gets cards again
+            if count > 0 && isInitialDeal {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                        isInitialDeal = false
+                    }
+                }
+            }
+        }
+        .onChange(of: testManager.topCard?.id) { newCardId in
+            // Check if card was played by another player (not by us)
+            if let newId = newCardId, newId != previousTopCardId, previousTopCardId != nil {
+                // Another player played a card - show flip animation
+                if let lastPlayer = testManager.lastActionPlayer, lastPlayer != "testUser123" {
+                    triggerCardFlipAnimation()
+                }
+            }
+            previousTopCardId = newCardId
         }
         .onChange(of: testManager.winnerId) { winnerId in
             if winnerId != nil {
@@ -291,8 +343,47 @@ struct ColorClashTestView: View {
         VStack(spacing: 0) {
             // Discard Pile Card
             if let topCard = testManager.topCard {
-                ColorClashCardView(card: topCard, size: .medium)
-                    .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
+                Group {
+                    if showCardFlip {
+                        // Flipping card - show back or front based on rotation
+                        ZStack {
+                            // Card back (visible from 0-90 degrees)
+                            if cardFlipRotation < 90 {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.white)
+                                    .overlay(
+                                        Image("color clash artwork logo")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 60, height: 60)
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color(red: 0xE5/255.0, green: 0xE5/255.0, blue: 0xE5/255.0), lineWidth: 2)
+                                    )
+                                    .frame(width: 100, height: 150)
+                            }
+                            
+                            // Card front (visible from 90-180 degrees)
+                            if cardFlipRotation >= 90 {
+                                ColorClashCardView(card: topCard, size: .medium)
+                                    .rotation3DEffect(
+                                        .degrees(180),
+                                        axis: (x: 0, y: 1, z: 0)
+                                    )
+                            }
+                        }
+                        .rotation3DEffect(
+                            .degrees(cardFlipRotation),
+                            axis: (x: 0, y: 1, z: 0),
+                            perspective: 0.8
+                        )
+                    } else {
+                        // Normal card display (no flip)
+                        ColorClashCardView(card: topCard, size: .medium)
+                    }
+                }
+                .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             } else {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
@@ -424,7 +515,7 @@ struct ColorClashTestView: View {
             // Hand - always visible
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    ForEach(testManager.myHand) { card in
+                    ForEach(Array(testManager.myHand.enumerated()), id: \.element.id) { index, card in
                         let isSelected = selectedCardIds.contains(card.id)
                         
                         ColorClashCardView(
@@ -438,23 +529,20 @@ struct ColorClashTestView: View {
                             }
                         }
                         .opacity(testManager.isMyTurn ? 1.0 : 0.5)
-                        .scaleEffect(isSelected ? 1.04 : (newlyDrawnCardId == card.id ? 1.2 : 1.0))
+                        .scaleEffect(isSelected ? 1.08 : (newlyDrawnCardId == card.id ? 1.2 : (isInitialDeal ? 0 : 1.0)))
                         .offset(
-                            x: newlyDrawnCardId == card.id ? 300 : 0,
-                            y: newlyDrawnCardId == card.id ? -8 : 0
+                            x: newlyDrawnCardId == card.id ? 300 : (isInitialDeal ? -200 : 0),
+                            y: newlyDrawnCardId == card.id ? -8 : (isSelected ? -4 : 0)
                         )
-                        .rotationEffect(.degrees(newlyDrawnCardId == card.id ? 15 : 0))
+                        .rotationEffect(.degrees(newlyDrawnCardId == card.id ? 15 : (isInitialDeal ? -180 : 0)))
                         .zIndex(isSelected ? 10 : (newlyDrawnCardId == card.id ? 5 : 1))
-                        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: isSelected)
+                        .animation(.spring(response: 0.4, dampingFraction: 0.75), value: isSelected)
                         .animation(.easeInOut(duration: 0.5), value: newlyDrawnCardId)
-                        .overlay(
-                            Group {
-                                if isSelected, let cardColor = card.color ?? card.selectedColor {
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(colorForCardColor(cardColor), lineWidth: 2)
-                                        .shadow(color: colorForCardColor(cardColor).opacity(0.3), radius: 6)
-                                }
-                            }
+                        .animation(
+                            isInitialDeal ? 
+                                .spring(response: 0.5, dampingFraction: 0.7).delay(Double(index) * 0.05) :
+                                .default,
+                            value: isInitialDeal
                         )
                     }
                 }
@@ -661,6 +749,29 @@ struct ColorClashTestView: View {
             }
         }
     }
+    
+    private func triggerCardFlipAnimation() {
+        showCardFlip = true
+        cardFlipRotation = 0
+        
+        // Smooth flip animation with spring physics
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            cardFlipRotation = 90
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                cardFlipRotation = 180
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                withAnimation(.easeOut(duration: 0.1)) {
+                    cardFlipRotation = 0
+                    showCardFlip = false
+                }
+            }
+        }
+    }
 }
 
 // MARK: - Test Game Manager
@@ -797,6 +908,9 @@ class TestColorClashGameManager: ObservableObject {
             currentColor = cardColor
         }
         
+        // Process action card effects
+        processActionCard(cardToPlay)
+        
         if myHand.isEmpty {
             winnerId = "testUser123"
             turnTimer?.invalidate()
@@ -806,6 +920,31 @@ class TestColorClashGameManager: ObservableObject {
         }
         
         isLoading = false
+    }
+    
+    private var skipNextPlayer: Bool = false
+    private var pendingDrawCards: Int? = nil
+    private var turnDirection: Int = 1
+    
+    private func processActionCard(_ card: ColorClashCard) {
+        switch card.type {
+        case .skip:
+            skipNextPlayer = true
+        case .reverse:
+            turnDirection *= -1
+            // If only 2 players, reverse acts like skip
+            if playerOrder.count == 2 {
+                skipNextPlayer = true
+            }
+        case .drawTwo:
+            pendingDrawCards = (pendingDrawCards ?? 0) + 2
+            skipNextPlayer = true
+        case .wildDrawFour:
+            pendingDrawCards = (pendingDrawCards ?? 0) + 4
+            skipNextPlayer = true
+        case .wild, .number:
+            break
+        }
     }
     
     func selectWildColor(_ color: CardColor) async {
@@ -819,11 +958,23 @@ class TestColorClashGameManager: ObservableObject {
         guard isMyTurn else { return }
         isLoading = true
         
-        if let card = drawCardFromDeck() {
-            myHand.append(card)
-            playerHands["testUser123"] = myHand
+        // Check if there are pending draw cards (from Draw Two/Four)
+        if let pendingDraw = pendingDrawCards, pendingDraw > 0 {
+            // Draw pending cards
+            for _ in 0..<pendingDraw {
+                if let card = drawCardFromDeck() {
+                    myHand.append(card)
+                }
+            }
+            pendingDrawCards = nil
+        } else {
+            // Draw one card
+            if let card = drawCardFromDeck() {
+                myHand.append(card)
+            }
         }
         
+        playerHands["testUser123"] = myHand
         advanceTurn()
         isLoading = false
     }
@@ -861,8 +1012,21 @@ class TestColorClashGameManager: ObservableObject {
     private func advanceTurn() {
         turnTimer?.invalidate()
         
-        currentPlayerIndex = (currentPlayerIndex + 1) % playerOrder.count
-        currentPlayerId = playerOrder[currentPlayerIndex]
+        // Handle skip - need to skip the next player
+        if skipNextPlayer {
+            skipNextPlayer = false
+            // Move to next player first (this is the skipped player)
+            currentPlayerIndex = (currentPlayerIndex + turnDirection + playerOrder.count) % playerOrder.count
+            currentPlayerId = playerOrder[currentPlayerIndex]
+            // Then move to the player after the skipped one
+            currentPlayerIndex = (currentPlayerIndex + turnDirection + playerOrder.count) % playerOrder.count
+            currentPlayerId = playerOrder[currentPlayerIndex]
+        } else {
+            // Normal turn advance
+            currentPlayerIndex = (currentPlayerIndex + turnDirection + playerOrder.count) % playerOrder.count
+            currentPlayerId = playerOrder[currentPlayerIndex]
+        }
+        
         isMyTurn = (currentPlayerId == "testUser123")
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
@@ -921,6 +1085,9 @@ class TestColorClashGameManager: ObservableObject {
                     currentColor = cardColor
                 }
                 
+                // Process action card effects
+                processActionCard(card)
+                
                 if hand.isEmpty {
                     winnerId = currentPlayerId
                     aiTimer?.invalidate()
@@ -929,10 +1096,22 @@ class TestColorClashGameManager: ObservableObject {
                 }
             }
         } else {
-            if let card = drawCardFromDeck() {
-                hand.append(card)
-                playerHands[currentPlayerId] = hand
+            // Check if there are pending draw cards (from Draw Two/Four)
+            if let pendingDraw = pendingDrawCards, pendingDraw > 0 {
+                // Draw pending cards
+                for _ in 0..<pendingDraw {
+                    if let drawnCard = drawCardFromDeck() {
+                        hand.append(drawnCard)
+                    }
+                }
+                pendingDrawCards = nil
+            } else {
+                // Draw one card
+                if let card = drawCardFromDeck() {
+                    hand.append(card)
+                }
             }
+            playerHands[currentPlayerId] = hand
         }
         
         advanceTurn()

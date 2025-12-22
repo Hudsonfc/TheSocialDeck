@@ -89,7 +89,7 @@ struct ColorClashCardView: View {
                         // Action card or wild
                         switch card.type {
                         case .skip:
-                            Image(systemName: "hand.raised.fill")
+                            Image(systemName: "arrow.right.circle.fill")
                                 .font(.system(size: size.fontSize * 0.7, weight: .bold))
                                 .foregroundColor(cardColor)
                         case .reverse:
@@ -101,19 +101,15 @@ struct ColorClashCardView: View {
                                 .font(.system(size: size.fontSize * 0.8, weight: .black, design: .rounded))
                                 .foregroundColor(cardColor)
                         case .wild:
-                            Text("W")
-                                .font(.system(size: size.fontSize * 0.8, weight: .black, design: .rounded))
-                                .foregroundColor(.white)
-                                .padding(4)
-                                .background(cardColor)
-                                .clipShape(Circle())
+                            Image(systemName: "paintbrush.fill")
+                                .font(.system(size: size.fontSize * 0.7, weight: .bold))
+                                .foregroundColor(cardColor)
                         case .wildDrawFour:
-                            Text("+4")
-                                .font(.system(size: size.fontSize * 0.8, weight: .black, design: .rounded))
-                                .foregroundColor(.white)
-                                .padding(4)
-                                .background(cardColor)
-                                .clipShape(Circle())
+                            Image("color clash artwork logo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: size == .medium ? 50 : 35, height: size == .medium ? 50 : 35)
+                                .opacity(0.9)
                         case .number:
                             EmptyView()
                         }

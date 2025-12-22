@@ -19,6 +19,11 @@ struct OnlineColorClashPlayView: View {
     @State private var flyingCardOffset: CGSize = .zero
     @State private var flyingCardOpacity: Double = 0
     @State private var newlyDrawnCardId: String?
+    @State private var showCardInfo: Bool = false
+    @State private var isInitialDeal: Bool = true
+    @State private var previousTopCardId: String?
+    @State private var showCardFlip: Bool = false
+    @State private var cardFlipRotation: Double = 0
     
     let roomCode: String
     
@@ -75,6 +80,17 @@ struct OnlineColorClashPlayView: View {
                         .clipShape(Circle())
                 }
             }
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    HapticManager.shared.lightImpact()
+                    showCardInfo = true
+                }) {
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 20, weight: .regular))
+                        .foregroundColor(Color(red: 0x66/255.0, green: 0x66/255.0, blue: 0x66/255.0))
+                }
+            }
         }
         .sheet(isPresented: $manager.showWildColorSelection) {
             WildColorSelectionModal { color in
@@ -82,6 +98,44 @@ struct OnlineColorClashPlayView: View {
                     await manager.selectWildColor(color)
                 }
             }
+        }
+        .sheet(isPresented: $showCardInfo) {
+            ColorClashCardInfoView()
+        }
+        .onAppear {
+            // Trigger initial deal animation
+            if isInitialDeal && !manager.myHand.isEmpty {
+                // Start with cards hidden
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    // Animate cards appearing one by one
+                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                        isInitialDeal = false
+                    }
+                }
+            }
+            previousTopCardId = manager.topCard?.id
+        }
+        .onChange(of: manager.myHand.count) { count in
+            // Reset initial deal if hand becomes empty and then gets cards again
+            if count > 0 && isInitialDeal {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                        isInitialDeal = false
+                    }
+                }
+            }
+        }
+        .onChange(of: manager.topCard?.id) { newCardId in
+            // Check if card was played by another player (not by us)
+            if let newId = newCardId, newId != previousTopCardId, previousTopCardId != nil {
+                // Check if it was played by another player
+                if let gameState = manager.gameState,
+                   let lastPlayer = gameState.lastActionPlayer,
+                   lastPlayer != authManager.userProfile?.userId {
+                    triggerCardFlipAnimation()
+                }
+            }
+            previousTopCardId = newCardId
         }
         .onChange(of: manager.winnerId) { winnerId in
             if winnerId != nil {
@@ -302,8 +356,47 @@ struct OnlineColorClashPlayView: View {
         VStack(spacing: 0) {
             // Discard Pile Card
             if let topCard = manager.topCard {
-                ColorClashCardView(card: topCard, size: .medium)
-                    .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
+                Group {
+                    if showCardFlip {
+                        // Flipping card - show back or front based on rotation
+                        ZStack {
+                            // Card back (visible from 0-90 degrees)
+                            if cardFlipRotation < 90 {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.white)
+                                    .overlay(
+                                        Image("color clash artwork logo")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 60, height: 60)
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color(red: 0xE5/255.0, green: 0xE5/255.0, blue: 0xE5/255.0), lineWidth: 2)
+                                    )
+                                    .frame(width: 100, height: 150)
+                            }
+                            
+                            // Card front (visible from 90-180 degrees)
+                            if cardFlipRotation >= 90 {
+                                ColorClashCardView(card: topCard, size: .medium)
+                                    .rotation3DEffect(
+                                        .degrees(180),
+                                        axis: (x: 0, y: 1, z: 0)
+                                    )
+                            }
+                        }
+                        .rotation3DEffect(
+                            .degrees(cardFlipRotation),
+                            axis: (x: 0, y: 1, z: 0),
+                            perspective: 0.8
+                        )
+                    } else {
+                        // Normal card display (no flip)
+                        ColorClashCardView(card: topCard, size: .medium)
+                    }
+                }
+                .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             } else {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
@@ -437,7 +530,7 @@ struct OnlineColorClashPlayView: View {
             // Hand - always visible
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    ForEach(manager.myHand) { card in
+                    ForEach(Array(manager.myHand.enumerated()), id: \.element.id) { index, card in
                         let isSelected = selectedCardIds.contains(card.id)
                         
                         ColorClashCardView(
@@ -451,23 +544,20 @@ struct OnlineColorClashPlayView: View {
                             }
                         }
                         .opacity(manager.isMyTurn ? 1.0 : 0.5)
-                        .scaleEffect(isSelected ? 1.04 : (newlyDrawnCardId == card.id ? 1.2 : 1.0))
+                        .scaleEffect(isSelected ? 1.08 : (newlyDrawnCardId == card.id ? 1.2 : (isInitialDeal ? 0 : 1.0)))
                         .offset(
-                            x: newlyDrawnCardId == card.id ? 300 : 0,
-                            y: newlyDrawnCardId == card.id ? -8 : 0
+                            x: newlyDrawnCardId == card.id ? 300 : (isInitialDeal ? -200 : 0),
+                            y: newlyDrawnCardId == card.id ? -8 : (isSelected ? -4 : 0)
                         )
-                        .rotationEffect(.degrees(newlyDrawnCardId == card.id ? 15 : 0))
+                        .rotationEffect(.degrees(newlyDrawnCardId == card.id ? 15 : (isInitialDeal ? -180 : 0)))
                         .zIndex(isSelected ? 10 : (newlyDrawnCardId == card.id ? 5 : 1))
-                        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: isSelected)
+                        .animation(.spring(response: 0.4, dampingFraction: 0.75), value: isSelected)
                         .animation(.easeInOut(duration: 0.5), value: newlyDrawnCardId)
-                        .overlay(
-                            Group {
-                                if isSelected, let cardColor = card.color ?? card.selectedColor {
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(colorForCardColor(cardColor), lineWidth: 2)
-                                        .shadow(color: colorForCardColor(cardColor).opacity(0.3), radius: 6)
-                                }
-                            }
+                        .animation(
+                            isInitialDeal ? 
+                                .spring(response: 0.5, dampingFraction: 0.7).delay(Double(index) * 0.05) :
+                                .default,
+                            value: isInitialDeal
                         )
                     }
                 }
@@ -687,6 +777,29 @@ struct OnlineColorClashPlayView: View {
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                 newlyDrawnCardId = nil
+            }
+        }
+    }
+    
+    private func triggerCardFlipAnimation() {
+        showCardFlip = true
+        cardFlipRotation = 0
+        
+        // Smooth flip animation with spring physics
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            cardFlipRotation = 90
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                cardFlipRotation = 180
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                withAnimation(.easeOut(duration: 0.1)) {
+                    cardFlipRotation = 0
+                    showCardFlip = false
+                }
             }
         }
     }
