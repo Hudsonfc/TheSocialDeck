@@ -172,8 +172,9 @@ class OnlineColorClashGameManager: ObservableObject {
                 gameState.currentColor = cardColor
             }
             
-            // Track who played this card
+            // Track who played this card and the action type
             gameState.lastActionPlayer = myUserId
+            gameState.lastActionType = .played
             
             // Process action card effects
             processActionCard(cardToPlay, in: &gameState)
@@ -238,6 +239,10 @@ class OnlineColorClashGameManager: ObservableObject {
             
             gameState.playerHands[myUserId] = myHand
             
+            // Track who drew a card and the action type
+            gameState.lastActionPlayer = myUserId
+            gameState.lastActionType = .drew
+            
             // Advance turn
             advanceTurn(in: &gameState)
             
@@ -274,6 +279,10 @@ class OnlineColorClashGameManager: ObservableObject {
         errorMessage = nil
         
         do {
+            // Track who skipped and the action type
+            gameState.lastActionPlayer = myUserId
+            gameState.lastActionType = .skipped
+            
             // Advance turn without drawing or playing
             advanceTurn(in: &gameState)
             

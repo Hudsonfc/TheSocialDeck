@@ -311,7 +311,8 @@ class OnlineService {
             lastCardDeclared: [:],
             pendingDrawCards: nil,
             skipNextPlayer: false,
-            lastActionPlayer: nil
+            lastActionPlayer: nil,
+            lastActionType: nil
         )
         
         return gameState

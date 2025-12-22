@@ -472,14 +472,15 @@ struct ColorClashTestView: View {
                 let isCurrentPlayer = testManager.currentPlayerId == player.id
                 let isMe = player.id == "testUser123"
                 let handCount = testManager.getHandCount(for: player.id)
-                let playedThisCard = testManager.lastActionPlayer == player.id
+                let lastActionPlayer = testManager.lastActionPlayer == player.id ? testManager.lastActionPlayer : nil
+                let lastActionType = lastActionPlayer != nil ? testManager.lastActionType : nil
                 
                 playerAvatarView(
                     player: player,
                     isMe: isMe,
                     isCurrentPlayer: isCurrentPlayer,
                     handCount: handCount,
-                    playedThisCard: playedThisCard
+                    lastActionType: lastActionType
                 )
             } else {
                 // Empty slot - invisible placeholder to maintain position
@@ -495,14 +496,15 @@ struct ColorClashTestView: View {
                 let isCurrentPlayer = testManager.currentPlayerId == player.id
                 let isMe = player.id == "testUser123"
                 let handCount = testManager.getHandCount(for: player.id)
-                let playedThisCard = testManager.lastActionPlayer == player.id
+                let lastActionPlayer = testManager.lastActionPlayer == player.id ? testManager.lastActionPlayer : nil
+                let lastActionType = lastActionPlayer != nil ? testManager.lastActionType : nil
                 
                 playerAvatarView(
                     player: player,
                     isMe: isMe,
                     isCurrentPlayer: isCurrentPlayer,
                     handCount: handCount,
-                    playedThisCard: playedThisCard
+                    lastActionType: lastActionType
                 )
             }
         }
@@ -513,7 +515,7 @@ struct ColorClashTestView: View {
         isMe: Bool,
         isCurrentPlayer: Bool,
         handCount: Int,
-        playedThisCard: Bool
+        lastActionType: PlayerActionType?
     ) -> some View {
         VStack(spacing: 6) {
             ZStack(alignment: .topTrailing) {
@@ -572,8 +574,8 @@ struct ColorClashTestView: View {
                 .lineLimit(1)
                 .frame(width: 80)
             
-            if playedThisCard {
-                Text("Played")
+            if let actionType = lastActionType {
+                Text(actionTypeText(actionType))
                     .font(.system(size: 10, weight: .semibold, design: .rounded))
                     .foregroundColor(.white)
                     .padding(.horizontal, 6)
@@ -593,7 +595,18 @@ struct ColorClashTestView: View {
         }
         .scaleEffect(isCurrentPlayer ? 1.05 : 1.0)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isCurrentPlayer)
-        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: playedThisCard)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: lastActionType)
+    }
+    
+    private func actionTypeText(_ actionType: PlayerActionType) -> String {
+        switch actionType {
+        case .played:
+            return "Played"
+        case .skipped:
+            return "Skipped"
+        case .drew:
+            return "Drew Card"
+        }
     }
     
     private var yourHandArea: some View {
@@ -887,6 +900,7 @@ class TestColorClashGameManager: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var currentPlayerId: String = "testUser123"
     @Published var lastActionPlayer: String? = nil
+    @Published var lastActionType: PlayerActionType? = nil
     
     private var deck: [ColorClashCard] = []
     private var discardPile: [ColorClashCard] = []
@@ -997,6 +1011,7 @@ class TestColorClashGameManager: ObservableObject {
         discardPile.append(cardToPlay)
         topCard = cardToPlay
         lastActionPlayer = "testUser123"
+        lastActionType = .played
         
         if let selectedColor = cardToPlay.selectedColor {
             currentColor = selectedColor
@@ -1071,6 +1086,8 @@ class TestColorClashGameManager: ObservableObject {
         }
         
         playerHands["testUser123"] = myHand
+        lastActionPlayer = "testUser123"
+        lastActionType = .drew
         advanceTurn()
         isLoading = false
     }
@@ -1082,6 +1099,8 @@ class TestColorClashGameManager: ObservableObject {
     func skipTurn() async {
         guard isMyTurn else { return }
         isLoading = true
+        lastActionPlayer = "testUser123"
+        lastActionType = .skipped
         advanceTurn()
         isLoading = false
     }
@@ -1127,6 +1146,7 @@ class TestColorClashGameManager: ObservableObject {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
             self?.lastActionPlayer = nil
+            self?.lastActionType = nil
         }
         
         if isMyTurn {
@@ -1174,6 +1194,7 @@ class TestColorClashGameManager: ObservableObject {
                 discardPile.append(card)
                 topCard = card
                 lastActionPlayer = currentPlayerId
+                lastActionType = .played
                 
                 if let selectedColor = card.selectedColor {
                     currentColor = selectedColor
@@ -1208,6 +1229,8 @@ class TestColorClashGameManager: ObservableObject {
                 }
             }
             playerHands[currentPlayerId] = hand
+            lastActionPlayer = currentPlayerId
+            lastActionType = .drew
         }
         
         advanceTurn()

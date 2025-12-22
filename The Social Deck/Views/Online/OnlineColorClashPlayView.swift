@@ -491,14 +491,15 @@ struct OnlineColorClashPlayView: View {
                 let isCurrentPlayer = gameState.currentPlayerId == playerId
                 let isMe = playerId == authManager.userProfile?.userId
                 let handCount = gameState.handCount(for: playerId)
-                let playedThisCard = gameState.lastActionPlayer == playerId
+                let lastActionPlayer = gameState.lastActionPlayer == playerId ? gameState.lastActionPlayer : nil
+                let lastActionType = lastActionPlayer != nil ? gameState.lastActionType : nil
                 
                 playerAvatarView(
                     player: player,
                     isMe: isMe,
                     isCurrentPlayer: isCurrentPlayer,
                     handCount: handCount,
-                    playedThisCard: playedThisCard
+                    lastActionType: lastActionType
                 )
             } else {
                 // Empty slot - invisible placeholder to maintain position
@@ -515,14 +516,15 @@ struct OnlineColorClashPlayView: View {
                     let isCurrentPlayer = gameState.currentPlayerId == playerId
                     let isMe = playerId == authManager.userProfile?.userId
                     let handCount = gameState.handCount(for: playerId)
-                    let playedThisCard = gameState.lastActionPlayer == playerId
+                    let lastActionPlayer = gameState.lastActionPlayer == playerId ? gameState.lastActionPlayer : nil
+                    let lastActionType = lastActionPlayer != nil ? gameState.lastActionType : nil
                     
                     playerAvatarView(
                         player: player,
                         isMe: isMe,
                         isCurrentPlayer: isCurrentPlayer,
                         handCount: handCount,
-                        playedThisCard: playedThisCard
+                        lastActionType: lastActionType
                     )
                 }
             }
@@ -534,7 +536,7 @@ struct OnlineColorClashPlayView: View {
         isMe: Bool,
         isCurrentPlayer: Bool,
         handCount: Int,
-        playedThisCard: Bool
+        lastActionType: PlayerActionType?
     ) -> some View {
         VStack(spacing: 6) {
             ZStack(alignment: .topTrailing) {
@@ -593,8 +595,8 @@ struct OnlineColorClashPlayView: View {
                 .lineLimit(1)
                 .frame(width: 80)
             
-            if playedThisCard {
-                Text("Played")
+            if let actionType = lastActionType {
+                Text(actionTypeText(actionType))
                     .font(.system(size: 10, weight: .semibold, design: .rounded))
                     .foregroundColor(.white)
                     .padding(.horizontal, 6)
@@ -614,7 +616,18 @@ struct OnlineColorClashPlayView: View {
         }
         .scaleEffect(isCurrentPlayer ? 1.05 : 1.0)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isCurrentPlayer)
-        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: playedThisCard)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: lastActionType)
+    }
+    
+    private func actionTypeText(_ actionType: PlayerActionType) -> String {
+        switch actionType {
+        case .played:
+            return "Played"
+        case .skipped:
+            return "Skipped"
+        case .drew:
+            return "Drew Card"
+        }
     }
     
     private var yourHandArea: some View {

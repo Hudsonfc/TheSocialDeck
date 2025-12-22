@@ -16,6 +16,14 @@ enum GameStatus: String, Codable, Equatable {
     case finished = "finished"
 }
 
+// MARK: - Action Type
+
+enum PlayerActionType: String, Codable, Equatable {
+    case played = "played"
+    case skipped = "skipped"
+    case drew = "drew"
+}
+
 // MARK: - Color Clash Game State
 
 struct ColorClashGameState: Codable, Equatable {
@@ -34,7 +42,8 @@ struct ColorClashGameState: Codable, Equatable {
     var lastCardDeclared: [String: Bool] // Player ID -> has declared last card
     var pendingDrawCards: Int? // Number of cards to draw (from Draw Two/Four)
     var skipNextPlayer: Bool
-    var lastActionPlayer: String? // Who played the last card
+    var lastActionPlayer: String? // Who performed the last action
+    var lastActionType: PlayerActionType? // Type of last action (played, skipped, drew)
     
     init(
         deck: [ColorClashCard] = [],
@@ -52,7 +61,8 @@ struct ColorClashGameState: Codable, Equatable {
         lastCardDeclared: [String: Bool] = [:],
         pendingDrawCards: Int? = nil,
         skipNextPlayer: Bool = false,
-        lastActionPlayer: String? = nil
+        lastActionPlayer: String? = nil,
+        lastActionType: PlayerActionType? = nil
     ) {
         self.deck = deck
         self.discardPile = discardPile
@@ -70,6 +80,7 @@ struct ColorClashGameState: Codable, Equatable {
         self.pendingDrawCards = pendingDrawCards
         self.skipNextPlayer = skipNextPlayer
         self.lastActionPlayer = lastActionPlayer
+        self.lastActionType = lastActionType
     }
     
     /// Get the top card from the discard pile
