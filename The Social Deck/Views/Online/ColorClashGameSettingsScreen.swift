@@ -165,24 +165,36 @@ struct ColorClashGameSettingsScreen: View {
                     .padding(.horizontal, 40)
                     
                     // Create Room button
-                    PrimaryButton(title: onlineManager.isLoading ? "Creating Room..." : "Create Room") {
-                        HapticManager.shared.mediumImpact()
-                        Task {
-                            await onlineManager.createRoom(
-                                roomName: game.title,
-                                maxPlayers: maxPlayers,
-                                isPrivate: false,
-                                gameType: game.gameType
-                            )
-                            
-                            if onlineManager.currentRoom != nil {
-                                navigateToRoom = true
-                            } else if onlineManager.errorMessage != nil {
-                                showError = true
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            HapticManager.shared.mediumImpact()
+                            Task {
+                                await onlineManager.createRoom(
+                                    roomName: game.title,
+                                    maxPlayers: maxPlayers,
+                                    isPrivate: false,
+                                    gameType: game.gameType
+                                )
+                                
+                                if onlineManager.currentRoom != nil {
+                                    navigateToRoom = true
+                                } else if onlineManager.errorMessage != nil {
+                                    showError = true
+                                }
                             }
+                        }) {
+                            Text(onlineManager.isLoading ? "Creating Room..." : "Create Room")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 40)
+                                .padding(.vertical, 16)
+                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .cornerRadius(16)
                         }
+                        .disabled(onlineManager.isLoading)
+                        Spacer()
                     }
-                    .disabled(onlineManager.isLoading)
                     .padding(.horizontal, 40)
                     .padding(.top, 8)
                     .padding(.bottom, 40)
