@@ -10,10 +10,31 @@ import SwiftUI
 struct OnlineGameContainerView: View {
     @StateObject private var onlineManager = OnlineManager.shared
     @StateObject private var authManager = AuthManager.shared
+    @State private var showWalkthrough = false
+    @State private var showLoadingScreen = false
+    @State private var hasShownLoading = false
+    @AppStorage("colorClashShowWalkthrough") private var showWalkthroughPreference = false
     
     var body: some View {
         Group {
-            if let room = onlineManager.currentRoom,
+            if showWalkthrough && showWalkthroughPreference {
+                ColorClashWalkthroughView(showCloseButton: false)
+                    .onDisappear {
+                        // After walkthrough is dismissed, show loading screen
+                        showLoadingScreen = true
+                    }
+            } else if showLoadingScreen && !hasShownLoading {
+                ColorClashLoadingScreen()
+                    .onAppear {
+                        // Show loading screen for 3 seconds, then proceed to game
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                            withAnimation {
+                                hasShownLoading = true
+                                showLoadingScreen = false
+                            }
+                        }
+                    }
+            } else if let room = onlineManager.currentRoom,
                let gameType = room.selectedGameType,
                let myUserId = authManager.userProfile?.userId {
                 
@@ -39,6 +60,15 @@ struct OnlineGameContainerView: View {
                         .font(.system(size: 16, weight: .regular, design: .rounded))
                         .foregroundColor(.gray)
                 }
+            }
+        }
+        .onAppear {
+            // Show walkthrough first if preference is enabled
+            if showWalkthroughPreference {
+                showWalkthrough = true
+            } else {
+                // Skip walkthrough, go straight to loading
+                showLoadingScreen = true
             }
         }
     }

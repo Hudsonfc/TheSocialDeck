@@ -42,6 +42,25 @@ struct SelectedGameDisplayCard: View {
         }
     }
     
+    private var gameArtwork: String? {
+        switch gameType {
+        case .colorClash: return "color clash artwork logo"
+        case .categoryClash: return "CC artwork"
+        case .bluffCall: return "BC artwork"
+        case .hotPotato: return "HP artwork"
+        case .memoryMaster: return "MM artwork"
+        case .rhymeTime: return "RT artwork"
+        case .storyChain: return "SC artwork"
+        case .whatsMySecret: return "WMS artwork"
+        case .riddleMeThis: return "RMT artwork"
+        case .neverHaveIEver: return "NHIE artwork"
+        case .truthOrDrink: return "TOD artwork"
+        case .spinTheBottle: return "STB artwork"
+        case .tapDuel: return "TD artwork"
+        default: return nil
+        }
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Selected Game")
@@ -49,15 +68,25 @@ struct SelectedGameDisplayCard: View {
                 .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
             
             HStack(spacing: 16) {
-                // Game icon
-                ZStack {
-                    Circle()
-                        .fill(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                // Game artwork
+                if let artwork = gameArtwork {
+                    Image(artwork)
+                        .resizable()
+                        .scaledToFill()
                         .frame(width: 60, height: 60)
-                    
-                    Image(systemName: "gamecontroller.fill")
-                        .font(.system(size: 28))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .clipped()
+                        .cornerRadius(12)
+                } else {
+                    // Fallback to controller icon if no artwork
+                    ZStack {
+                        Circle()
+                            .fill(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                            .frame(width: 60, height: 60)
+                        
+                        Image(systemName: "gamecontroller.fill")
+                            .font(.system(size: 28))
+                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    }
                 }
                 
                 VStack(alignment: .leading, spacing: 6) {

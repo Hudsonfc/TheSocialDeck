@@ -22,8 +22,11 @@ struct ColorClashTestView: View {
     @State private var previousTopCardId: String?
     @State private var showCardFlip: Bool = false
     @State private var cardFlipRotation: Double = 0
+    @State private var showWalkthrough: Bool = false // Skip walkthrough for direct game testing
+    @State private var showLoadingScreen: Bool = false
+    @State private var hasShownLoading: Bool = false
     
-    // Fake players for testing
+    // Fake players for testing (4 players)
     private let fakePlayers: [RoomPlayer] = [
         RoomPlayer(id: "testUser123", username: "You", avatarType: "avatar 1", avatarColor: "blue", isReady: true, isHost: true),
         RoomPlayer(id: "player1", username: "Alex", avatarType: "avatar 2", avatarColor: "red", isReady: true),
@@ -66,6 +69,7 @@ struct ColorClashTestView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
+        .toolbar(showWalkthrough ? .hidden : .visible)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
@@ -151,7 +155,7 @@ struct ColorClashTestView: View {
     
     private var gameView: some View {
         GeometryReader { geometry in
-            ZStack(alignment: .topTrailing) {
+            ZStack {
                 // Main game content - takes full width and stays centered
                 VStack(spacing: 0) {
                     // Title at the top
@@ -231,11 +235,8 @@ struct ColorClashTestView: View {
                 }
                 .frame(maxWidth: .infinity)
                 
-                // Player profiles overlay on the right - doesn't affect main content width
-                playerAvatarsList
-                    .frame(width: 100)
-                    .padding(.trailing, 16)
-                    .padding(.top, 60)
+                // Player profiles - mirrored layout when more than 3 players
+                playerProfilesLayout
             }
         }
     }
@@ -393,6 +394,101 @@ struct ColorClashTestView: View {
         }
     }
     
+    private var playerProfilesLayout: some View {
+        GeometryReader { geometry in
+            let centerY = geometry.size.height / 2 - 140 // Move up by 140 pixels
+            let slotSpacing: CGFloat = 90 // Fixed spacing between slot centers (reduced to bring top/bottom closer to middle)
+            let rightColumnX = geometry.size.width - 116 // 100 width + 16 padding
+            let leftColumnX: CGFloat = 16 // 16 padding
+            
+            ZStack {
+                // Right column - 3 fixed slots
+                // Top slot (index 0)
+                playerSlotView(
+                    player: fakePlayers.count > 0 ? fakePlayers[0] : nil,
+                    slotIndex: 0,
+                    centerY: centerY,
+                    slotSpacing: slotSpacing
+                )
+                .position(x: rightColumnX + 50, y: centerY - slotSpacing)
+                
+                // Middle slot (index 1)
+                playerSlotView(
+                    player: fakePlayers.count > 1 ? fakePlayers[1] : nil,
+                    slotIndex: 1,
+                    centerY: centerY,
+                    slotSpacing: slotSpacing
+                )
+                .position(x: rightColumnX + 50, y: centerY)
+                
+                // Bottom slot (index 2)
+                playerSlotView(
+                    player: fakePlayers.count > 2 ? fakePlayers[2] : nil,
+                    slotIndex: 2,
+                    centerY: centerY,
+                    slotSpacing: slotSpacing
+                )
+                .position(x: rightColumnX + 50, y: centerY + slotSpacing)
+                
+                // Left column - 3 fixed slots
+                // Top slot (index 3)
+                playerSlotView(
+                    player: fakePlayers.count > 3 ? fakePlayers[3] : nil,
+                    slotIndex: 3,
+                    centerY: centerY,
+                    slotSpacing: slotSpacing
+                )
+                .position(x: leftColumnX + 50, y: centerY - slotSpacing)
+                
+                // Middle slot (index 4)
+                playerSlotView(
+                    player: fakePlayers.count > 4 ? fakePlayers[4] : nil,
+                    slotIndex: 4,
+                    centerY: centerY,
+                    slotSpacing: slotSpacing
+                )
+                .position(x: leftColumnX + 50, y: centerY)
+                
+                // Bottom slot (index 5)
+                playerSlotView(
+                    player: fakePlayers.count > 5 ? fakePlayers[5] : nil,
+                    slotIndex: 5,
+                    centerY: centerY,
+                    slotSpacing: slotSpacing
+                )
+                .position(x: leftColumnX + 50, y: centerY + slotSpacing)
+            }
+        }
+    }
+    
+    private func playerSlotView(
+        player: RoomPlayer?,
+        slotIndex: Int,
+        centerY: CGFloat,
+        slotSpacing: CGFloat
+    ) -> some View {
+        Group {
+            if let player = player {
+                let isCurrentPlayer = testManager.currentPlayerId == player.id
+                let isMe = player.id == "testUser123"
+                let handCount = testManager.getHandCount(for: player.id)
+                let playedThisCard = testManager.lastActionPlayer == player.id
+                
+                playerAvatarView(
+                    player: player,
+                    isMe: isMe,
+                    isCurrentPlayer: isCurrentPlayer,
+                    handCount: handCount,
+                    playedThisCard: playedThisCard
+                )
+            } else {
+                // Empty slot - invisible placeholder to maintain position
+                Color.clear
+                    .frame(width: 100, height: 90)
+            }
+        }
+    }
+    
     private var playerAvatarsList: some View {
         VStack(spacing: 16) {
             ForEach(fakePlayers) { player in
@@ -529,18 +625,18 @@ struct ColorClashTestView: View {
                             }
                         }
                         .opacity(testManager.isMyTurn ? 1.0 : 0.5)
-                        .scaleEffect(isSelected ? 1.08 : (newlyDrawnCardId == card.id ? 1.2 : (isInitialDeal ? 0 : 1.0)))
+                        .scaleEffect(isSelected ? 1.08 : (newlyDrawnCardId == card.id ? 1.2 : 1.0))
                         .offset(
-                            x: newlyDrawnCardId == card.id ? 300 : (isInitialDeal ? -200 : 0),
+                            x: newlyDrawnCardId == card.id ? 300 : (isInitialDeal ? -CGFloat(index) * 72 : 0),
                             y: newlyDrawnCardId == card.id ? -8 : (isSelected ? -4 : 0)
                         )
-                        .rotationEffect(.degrees(newlyDrawnCardId == card.id ? 15 : (isInitialDeal ? -180 : 0)))
+                        .rotationEffect(.degrees(newlyDrawnCardId == card.id ? 15 : 0))
                         .zIndex(isSelected ? 10 : (newlyDrawnCardId == card.id ? 5 : 1))
                         .animation(.spring(response: 0.4, dampingFraction: 0.75), value: isSelected)
                         .animation(.easeInOut(duration: 0.5), value: newlyDrawnCardId)
                         .animation(
                             isInitialDeal ? 
-                                .spring(response: 0.5, dampingFraction: 0.7).delay(Double(index) * 0.05) :
+                                .spring(response: 0.6, dampingFraction: 0.75).delay(Double(index) * 0.08) :
                                 .default,
                             value: isInitialDeal
                         )
@@ -590,10 +686,10 @@ struct ColorClashTestView: View {
                         .opacity(testManager.isLoading ? 0.6 : 1.0)
                         .padding(.horizontal, 40)
                         .transition(.asymmetric(
-                            insertion: .move(edge: .bottom).combined(with: .opacity).combined(with: .scale(scale: 0.95)),
-                            removal: .move(edge: .bottom).combined(with: .opacity).combined(with: .scale(scale: 0.95))
+                            insertion: .scale(scale: 0.8).combined(with: .opacity),
+                            removal: .scale(scale: 0.9).combined(with: .opacity)
                         ))
-                        .animation(.spring(response: 0.4, dampingFraction: 0.85), value: selectedCardIds.count > 0)
+                        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: selectedCardIds.count)
                     }
                     
                     HStack(spacing: 12) {

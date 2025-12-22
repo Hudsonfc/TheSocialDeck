@@ -20,6 +20,8 @@ struct OnlineRoomView: View {
     @State private var toast: ToastMessage? = nil
     @State private var isLeavingRoom = false
     @State private var navigateToGame = false
+    @State private var showGameSelection = false
+    @AppStorage("colorClashShowWalkthrough") private var showWalkthroughPreference = false
     
     var body: some View {
         Group {
@@ -336,14 +338,51 @@ struct OnlineRoomView: View {
             if let room = onlineManager.currentRoom,
                let gameTypeString = room.selectedGameType,
                let gameType = DeckType(stringValue: gameTypeString) {
-                SelectedGameDisplayCard(
-                    gameType: gameType,
-                    category: room.selectedCategory
-                )
-                .padding(EdgeInsets(top: 0, leading: 40, bottom: 0, trailing: 40))
+                VStack(spacing: 16) {
+                    ZStack(alignment: .topTrailing) {
+                        SelectedGameDisplayCard(
+                            gameType: gameType,
+                            category: room.selectedCategory
+                        )
+                        .padding(EdgeInsets(top: 0, leading: 40, bottom: 0, trailing: 40))
+                        
+                        // Change game button (host only, when waiting)
+                        if onlineManager.isHost, room.status == .waiting {
+                            Button(action: {
+                                HapticManager.shared.lightImpact()
+                                showGameSelection = true
+                            }) {
+                                Text("Change")
+                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Color.white)
+                                    .cornerRadius(8)
+                                    .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                            }
+                            .padding(.top, 24)
+                            .padding(.trailing, 52)
+                        }
+                    }
+                    
+                    // Walkthrough toggle (host only, when Color Clash is selected)
+                    if onlineManager.isHost,
+                       gameTypeString == "colorClash",
+                       room.status == .waiting {
+                        walkthroughToggle
+                            .padding(.horizontal, 40)
+                    }
+                }
             } else {
                 noGameSelectedView
             }
+        }
+        .sheet(isPresented: $showGameSelection) {
+            OnlineGameSelectionScreen(isChangingGame: true)
+                .onDisappear {
+                    // Sheet dismissed - room will update via listener if game was changed
+                }
         }
     }
     
@@ -393,6 +432,24 @@ struct OnlineRoomView: View {
         }
         .padding(.horizontal, 40)
         .padding(.bottom, 30)
+    }
+    
+    private var walkthroughToggle: some View {
+        HStack {
+            Text("Show Walkthrough to Players")
+                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+            
+            Spacer()
+            
+            Toggle("", isOn: $showWalkthroughPreference)
+                .labelsHidden()
+                .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+        }
+        .padding(16)
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
     }
     
     private var shouldShowStartGameButton: Bool {

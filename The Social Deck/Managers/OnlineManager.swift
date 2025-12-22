@@ -28,7 +28,7 @@ class OnlineManager: ObservableObject {
     // MARK: - Room Lifecycle
     
     /// Creates a new room
-    func createRoom(roomName: String, maxPlayers: Int, isPrivate: Bool) async {
+    func createRoom(roomName: String, maxPlayers: Int, isPrivate: Bool, gameType: String? = nil) async {
         guard let userId = authManager.userProfile?.userId,
               let profile = authManager.userProfile else {
             errorMessage = "You must be signed in to create a room"
@@ -55,7 +55,8 @@ class OnlineManager: ObservableObject {
                 maxPlayers: maxPlayers,
                 isPrivate: isPrivate,
                 createdBy: userId,
-                playerProfile: player
+                playerProfile: player,
+                gameType: gameType
             )
             
             currentRoom = room

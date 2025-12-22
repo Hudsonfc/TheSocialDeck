@@ -25,8 +25,8 @@ struct OnlineView: View {
                         .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                         .padding(.top, 20)
                     
-                    // Create Room Button
-                    NavigationLink(destination: CreateRoomView()) {
+                    // Create Room Button - Navigate to Game Selection
+                    NavigationLink(destination: OnlineGameSelectionScreen()) {
                         Text("Create Room")
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.white)

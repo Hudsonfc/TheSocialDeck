@@ -52,7 +52,8 @@ class OnlineService {
         maxPlayers: Int,
         isPrivate: Bool,
         createdBy: String,
-        playerProfile: RoomPlayer
+        playerProfile: RoomPlayer,
+        gameType: String? = nil
     ) async throws -> OnlineRoom {
         guard let currentUser = auth.currentUser, currentUser.uid == createdBy else {
             throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])
@@ -68,6 +69,7 @@ class OnlineService {
             status: .waiting,
             maxPlayers: maxPlayers,
             isPrivate: isPrivate,
+            selectedGameType: gameType,
             players: [playerProfile],
             hostId: createdBy
         )

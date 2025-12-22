@@ -61,24 +61,31 @@ struct ColorClashCardInfoView: View {
                     )
                     
                     // Wild Draw Four Card
-                    cardTypeSection(
+                    cardTypeSectionWithImage(
                         title: "Wild Draw Four",
                         description: "Choose the active color. The next player must draw 4 cards and skip their turn.",
-                        icon: "plus.circle.fill",
+                        imageName: "color clash artwork logo",
                         color: Color(red: 0x1E/255.0, green: 0x1E/255.0, blue: 0x1E/255.0)
                     )
                     
                     // Game Rules Section
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 16) {
                         Text("Game Rules")
-                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
                             .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .padding(.bottom, 4)
                         
-                        ruleItem("Match the color or number of the current card")
-                        ruleItem("If you can't play, draw a card")
-                        ruleItem("First to empty your hand wins")
-                        ruleItem("Declare 'Last Card' when you have one card left")
-                        ruleItem("Wild cards can be played anytime")
+                        VStack(alignment: .leading, spacing: 14) {
+                            ruleItem("Match the color or number of the current card")
+                            ruleItem("If you can't play, draw a card")
+                            ruleItem("First to empty your hand wins")
+                            ruleItem("Declare 'Last Card' when you have one card left")
+                            ruleItem("Wild cards can be played anytime")
+                        }
+                        .padding(20)
+                        .background(Color.white)
+                        .cornerRadius(12)
+                        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
                     }
                     .padding(.top, 8)
                 }
@@ -148,15 +155,49 @@ struct ColorClashCardInfoView: View {
         .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
     
+    private func cardTypeSectionWithImage(title: String, description: String, imageName: String, color: Color) -> some View {
+        HStack(alignment: .top, spacing: 16) {
+            // Image icon
+            Image(imageName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 50, height: 50)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                
+                Text(description)
+                    .font(.system(size: 15, weight: .regular, design: .rounded))
+                    .foregroundColor(Color(red: 0x66/255.0, green: 0x66/255.0, blue: 0x66/255.0))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            
+            Spacer()
+        }
+        .padding(16)
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
+    }
+    
     private func ruleItem(_ text: String) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(Color(red: 0x4C/255.0, green: 0xAF/255.0, blue: 0x50/255.0))
+        HStack(alignment: .top, spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(Color(red: 0x4C/255.0, green: 0xAF/255.0, blue: 0x50/255.0).opacity(0.15))
+                    .frame(width: 24, height: 24)
+                
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(Color(red: 0x4C/255.0, green: 0xAF/255.0, blue: 0x50/255.0))
+            }
             
             Text(text)
-                .font(.system(size: 15, weight: .regular, design: .rounded))
+                .font(.system(size: 16, weight: .medium, design: .rounded))
                 .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                .fixedSize(horizontal: false, vertical: true)
             
             Spacer()
         }

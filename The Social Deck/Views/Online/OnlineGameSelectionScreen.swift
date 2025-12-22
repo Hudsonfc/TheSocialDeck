@@ -16,14 +16,18 @@ struct OnlineGamePlaceholder: Identifiable, Equatable {
     let hasCategories: Bool
     let availableCategories: [String]
     let gameType: String? // Game type string (e.g., "colorClash")
+    let minPlayers: Int
+    let maxPlayers: Int
     
-    init(title: String, description: String, imageName: String, hasCategories: Bool, availableCategories: [String], gameType: String? = nil) {
+    init(title: String, description: String, imageName: String, hasCategories: Bool, availableCategories: [String], gameType: String? = nil, minPlayers: Int = 2, maxPlayers: Int = 8) {
         self.title = title
         self.description = description
         self.imageName = imageName
         self.hasCategories = hasCategories
         self.availableCategories = availableCategories
         self.gameType = gameType
+        self.minPlayers = minPlayers
+        self.maxPlayers = maxPlayers
     }
     
     static func == (lhs: OnlineGamePlaceholder, rhs: OnlineGamePlaceholder) -> Bool {
@@ -53,6 +57,11 @@ struct OnlineGameSelectionScreen: View {
     @State private var showCategorySelection = false
     @State private var navigateToRoom = false
     @State private var searchText: String = ""
+    let isChangingGame: Bool
+    
+    init(isChangingGame: Bool = false) {
+        self.isChangingGame = isChangingGame
+    }
     
     // Placeholder categories with games
     let categories: [OnlineGameCategory] = [
@@ -62,38 +71,48 @@ struct OnlineGameSelectionScreen: View {
                 OnlineGamePlaceholder(
                     title: "Color Clash",
                     description: "A fast-paced card game where players match colors and numbers. Be the first to empty your hand!",
-                    imageName: "Art 1.4",
+                    imageName: "color clash artwork logo",
                     hasCategories: false,
                     availableCategories: [],
-                    gameType: "colorClash"
+                    gameType: "colorClash",
+                    minPlayers: 2,
+                    maxPlayers: 6
                 ),
                 OnlineGamePlaceholder(
                     title: "Online Game 1",
                     description: "Placeholder game description for online multiplayer gameplay",
                     imageName: "Art 1.4",
                     hasCategories: true,
-                    availableCategories: ["Quick", "Standard", "Extended"]
+                    availableCategories: ["Quick", "Standard", "Extended"],
+                    minPlayers: 2,
+                    maxPlayers: 8
                 ),
                 OnlineGamePlaceholder(
                     title: "Online Game 2",
                     description: "Placeholder game description for online multiplayer gameplay",
                     imageName: "Art 1.4",
                     hasCategories: false,
-                    availableCategories: []
+                    availableCategories: [],
+                    minPlayers: 2,
+                    maxPlayers: 8
                 ),
                 OnlineGamePlaceholder(
                     title: "Online Game 3",
                     description: "Placeholder game description for online multiplayer gameplay",
                     imageName: "Art 1.4",
                     hasCategories: true,
-                    availableCategories: ["Easy", "Medium", "Hard"]
+                    availableCategories: ["Easy", "Medium", "Hard"],
+                    minPlayers: 2,
+                    maxPlayers: 8
                 ),
                 OnlineGamePlaceholder(
                     title: "Online Game 4",
                     description: "Placeholder game description for online multiplayer gameplay",
                     imageName: "Art 1.4",
                     hasCategories: false,
-                    availableCategories: []
+                    availableCategories: [],
+                    minPlayers: 2,
+                    maxPlayers: 8
                 )
             ]
         ),
@@ -106,7 +125,9 @@ struct OnlineGameSelectionScreen: View {
                     imageName: "Art 1.4",
                     hasCategories: true,
                     availableCategories: ["Casual", "Competitive"],
-                    gameType: nil
+                    gameType: nil,
+                    minPlayers: 2,
+                    maxPlayers: 8
                 ),
                 OnlineGamePlaceholder(
                     title: "Online Game 6",
@@ -114,7 +135,9 @@ struct OnlineGameSelectionScreen: View {
                     imageName: "Art 1.4",
                     hasCategories: false,
                     availableCategories: [],
-                    gameType: nil
+                    gameType: nil,
+                    minPlayers: 2,
+                    maxPlayers: 8
                 )
             ]
         )
@@ -277,21 +300,30 @@ struct OnlineGameSelectionScreen: View {
                 OnlineCategorySelectionSheet(
                     game: game,
                     selectedCategory: $selectedCategory,
-                    onSelect: { category in
-                        selectedCategory = category
-                        showCategorySelection = false
-                        // Save game selection to room
-                        if let game = selectedGame, let gameType = game.gameType {
-                            Task {
-                                if let deckType = DeckType(stringValue: gameType) {
-                                    await onlineManager.selectGameType(deckType)
+                        onSelect: { category in
+                            selectedCategory = category
+                            showCategorySelection = false
+                            // Save game selection to room
+                            if let game = selectedGame, let gameType = game.gameType {
+                                Task {
+                                    if let deckType = DeckType(stringValue: gameType) {
+                                        await onlineManager.selectGameType(deckType)
+                                        
+                                        // If changing game, dismiss after selection
+                                        if isChangingGame {
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                                dismiss()
+                                            }
+                                        } else {
+                                            // Creating new room, navigate to it
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                                navigateToRoom = true
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            navigateToRoom = true
-                        }
-                    }
                 )
             }
         }
@@ -301,12 +333,23 @@ struct OnlineGameSelectionScreen: View {
                 Task {
                     if let deckType = DeckType(stringValue: gameType) {
                         await onlineManager.selectGameType(deckType)
+                        
+                        // If changing game (not creating new room), dismiss the sheet
+                        if isChangingGame {
+                            if !game.hasCategories || game.availableCategories.isEmpty {
+                                // No categories, dismiss immediately
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                    dismiss()
+                                }
+                            }
+                            // If has categories, will dismiss after category selection
+                        }
                     }
                 }
             }
             
-            // If game selected without categories, navigate directly
-            if let game = newValue, (!game.hasCategories || game.availableCategories.isEmpty) {
+            // If creating new room and game selected without categories, navigate to room
+            if !isChangingGame, let game = newValue, (!game.hasCategories || game.availableCategories.isEmpty) {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     navigateToRoom = true
                 }
@@ -363,6 +406,15 @@ struct ExpandedGameOverlay: View {
     @Binding var selectedGame: OnlineGamePlaceholder?
     @Binding var selectedCategory: String?
     @Binding var showCategorySelection: Bool
+    @State private var navigateToRoom = false
+    
+    init(game: OnlineGamePlaceholder, expandedGame: Binding<OnlineGamePlaceholder?>, selectedGame: Binding<OnlineGamePlaceholder?>, selectedCategory: Binding<String?>, showCategorySelection: Binding<Bool>) {
+        self.game = game
+        self._expandedGame = expandedGame
+        self._selectedGame = selectedGame
+        self._selectedCategory = selectedCategory
+        self._showCategorySelection = showCategorySelection
+    }
     
     var body: some View {
         ZStack {
@@ -417,27 +469,37 @@ struct ExpandedGameOverlay: View {
                         .padding(.horizontal, 40)
                         .padding(.bottom, 24)
                     
-                    // Select button
-                    PrimaryButton(title: "Select") {
+                    // Continue to Settings button
+                    Button(action: {
                         HapticManager.shared.mediumImpact()
-                        // Close overlay and select game
+                        // Close overlay
                         withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                             expandedGame = nil
                         }
+                        // Navigate to settings screen
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            selectedGame = game
-                            selectedCategory = nil
-                            
-                            // Show category selection if game has categories
-                            if game.hasCategories && !game.availableCategories.isEmpty {
-                                showCategorySelection = true
-                            }
-                            // If no categories, onChange will handle navigation
+                            navigateToRoom = true
                         }
+                    }) {
+                        Text("Continue")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 55)
+                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .cornerRadius(16)
                     }
                     .padding(.horizontal, 40)
-                    .padding(.top, 8)
                     .padding(.bottom, 40)
+                    .background(
+                        NavigationLink(
+                            destination: ColorClashGameSettingsScreen(game: game),
+                            isActive: $navigateToRoom
+                        ) {
+                            EmptyView()
+                        }
+                        .hidden()
+                    )
                 }
             }
         }

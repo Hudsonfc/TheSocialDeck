@@ -154,7 +154,7 @@ struct OnlineColorClashPlayView: View {
     
     private var gameView: some View {
         GeometryReader { geometry in
-            ZStack(alignment: .topTrailing) {
+            ZStack {
                 // Main game content - takes full width and stays centered
                 VStack(spacing: 0) {
                     // Title at the top
@@ -234,12 +234,9 @@ struct OnlineColorClashPlayView: View {
                 }
                 .frame(maxWidth: .infinity)
                 
-                // Player profiles overlay on the right - doesn't affect main content width
+                // Player profiles - mirrored layout when more than 3 players
                 if let gameState = manager.gameState {
-                    playerAvatarsList(gameState: gameState)
-                        .frame(width: 100)
-                        .padding(.trailing, 16)
-                        .padding(.top, 60)
+                    playerProfilesLayout(gameState: gameState)
                 }
             }
         }
@@ -406,6 +403,111 @@ struct OnlineColorClashPlayView: View {
         }
     }
     
+    private func playerProfilesLayout(gameState: ColorClashGameState) -> some View {
+        let playerIds = gameState.playerOrder
+        
+        return GeometryReader { geometry in
+            let centerY = geometry.size.height / 2 - 140 // Move up by 140 pixels
+            let slotSpacing: CGFloat = 90 // Fixed spacing between slot centers (reduced to bring top/bottom closer to middle)
+            let rightColumnX = geometry.size.width - 116 // 100 width + 16 padding
+            let leftColumnX: CGFloat = 16 // 16 padding
+            
+            ZStack {
+                // Right column - 3 fixed slots
+                // Top slot (index 0)
+                playerSlotView(
+                    playerId: playerIds.count > 0 ? playerIds[0] : nil,
+                    gameState: gameState,
+                    slotIndex: 0,
+                    centerY: centerY,
+                    slotSpacing: slotSpacing
+                )
+                .position(x: rightColumnX + 50, y: centerY - slotSpacing)
+                
+                // Middle slot (index 1)
+                playerSlotView(
+                    playerId: playerIds.count > 1 ? playerIds[1] : nil,
+                    gameState: gameState,
+                    slotIndex: 1,
+                    centerY: centerY,
+                    slotSpacing: slotSpacing
+                )
+                .position(x: rightColumnX + 50, y: centerY)
+                
+                // Bottom slot (index 2)
+                playerSlotView(
+                    playerId: playerIds.count > 2 ? playerIds[2] : nil,
+                    gameState: gameState,
+                    slotIndex: 2,
+                    centerY: centerY,
+                    slotSpacing: slotSpacing
+                )
+                .position(x: rightColumnX + 50, y: centerY + slotSpacing)
+                
+                // Left column - 3 fixed slots
+                // Top slot (index 3)
+                playerSlotView(
+                    playerId: playerIds.count > 3 ? playerIds[3] : nil,
+                    gameState: gameState,
+                    slotIndex: 3,
+                    centerY: centerY,
+                    slotSpacing: slotSpacing
+                )
+                .position(x: leftColumnX + 50, y: centerY - slotSpacing)
+                
+                // Middle slot (index 4)
+                playerSlotView(
+                    playerId: playerIds.count > 4 ? playerIds[4] : nil,
+                    gameState: gameState,
+                    slotIndex: 4,
+                    centerY: centerY,
+                    slotSpacing: slotSpacing
+                )
+                .position(x: leftColumnX + 50, y: centerY)
+                
+                // Bottom slot (index 5)
+                playerSlotView(
+                    playerId: playerIds.count > 5 ? playerIds[5] : nil,
+                    gameState: gameState,
+                    slotIndex: 5,
+                    centerY: centerY,
+                    slotSpacing: slotSpacing
+                )
+                .position(x: leftColumnX + 50, y: centerY + slotSpacing)
+            }
+        }
+    }
+    
+    private func playerSlotView(
+        playerId: String?,
+        gameState: ColorClashGameState,
+        slotIndex: Int,
+        centerY: CGFloat,
+        slotSpacing: CGFloat
+    ) -> some View {
+        Group {
+            if let playerId = playerId,
+               let player = onlineManager.currentRoom?.players.first(where: { $0.id == playerId }) {
+                let isCurrentPlayer = gameState.currentPlayerId == playerId
+                let isMe = playerId == authManager.userProfile?.userId
+                let handCount = gameState.handCount(for: playerId)
+                let playedThisCard = gameState.lastActionPlayer == playerId
+                
+                playerAvatarView(
+                    player: player,
+                    isMe: isMe,
+                    isCurrentPlayer: isCurrentPlayer,
+                    handCount: handCount,
+                    playedThisCard: playedThisCard
+                )
+            } else {
+                // Empty slot - invisible placeholder to maintain position
+                Color.clear
+                    .frame(width: 100, height: 90)
+            }
+        }
+    }
+    
     private func playerAvatarsList(gameState: ColorClashGameState) -> some View {
         VStack(spacing: 16) {
             ForEach(gameState.playerOrder, id: \.self) { playerId in
@@ -544,18 +646,18 @@ struct OnlineColorClashPlayView: View {
                             }
                         }
                         .opacity(manager.isMyTurn ? 1.0 : 0.5)
-                        .scaleEffect(isSelected ? 1.08 : (newlyDrawnCardId == card.id ? 1.2 : (isInitialDeal ? 0 : 1.0)))
+                        .scaleEffect(isSelected ? 1.08 : (newlyDrawnCardId == card.id ? 1.2 : 1.0))
                         .offset(
-                            x: newlyDrawnCardId == card.id ? 300 : (isInitialDeal ? -200 : 0),
+                            x: newlyDrawnCardId == card.id ? 300 : (isInitialDeal ? -CGFloat(index) * 72 : 0),
                             y: newlyDrawnCardId == card.id ? -8 : (isSelected ? -4 : 0)
                         )
-                        .rotationEffect(.degrees(newlyDrawnCardId == card.id ? 15 : (isInitialDeal ? -180 : 0)))
+                        .rotationEffect(.degrees(newlyDrawnCardId == card.id ? 15 : 0))
                         .zIndex(isSelected ? 10 : (newlyDrawnCardId == card.id ? 5 : 1))
                         .animation(.spring(response: 0.4, dampingFraction: 0.75), value: isSelected)
                         .animation(.easeInOut(duration: 0.5), value: newlyDrawnCardId)
                         .animation(
                             isInitialDeal ? 
-                                .spring(response: 0.5, dampingFraction: 0.7).delay(Double(index) * 0.05) :
+                                .spring(response: 0.6, dampingFraction: 0.75).delay(Double(index) * 0.08) :
                                 .default,
                             value: isInitialDeal
                         )
@@ -602,13 +704,13 @@ struct OnlineColorClashPlayView: View {
                             )
                         }
                         .disabled(manager.isLoading)
+                        .transition(.asymmetric(
+                            insertion: .scale(scale: 0.8).combined(with: .opacity),
+                            removal: .scale(scale: 0.9).combined(with: .opacity)
+                        ))
+                        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: selectedCardIds.count)
                         .opacity(manager.isLoading ? 0.6 : 1.0)
                         .padding(.horizontal, 40)
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .bottom).combined(with: .opacity).combined(with: .scale(scale: 0.95)),
-                            removal: .move(edge: .bottom).combined(with: .opacity).combined(with: .scale(scale: 0.95))
-                        ))
-                        .animation(.spring(response: 0.4, dampingFraction: 0.85), value: selectedCardIds.count > 0)
                     }
                     
                     HStack(spacing: 12) {

@@ -14,12 +14,12 @@ struct PrimaryButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .font(.system(size: 18, weight: .semibold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                .cornerRadius(12)
+                .cornerRadius(16)
         }
     }
 }
