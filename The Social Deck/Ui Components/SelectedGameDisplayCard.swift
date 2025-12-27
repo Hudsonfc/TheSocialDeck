@@ -38,6 +38,7 @@ struct SelectedGameDisplayCard: View {
         case .whatsMySecret: return "What's My Secret?"
         case .riddleMeThis: return "Riddle Me This"
         case .colorClash: return "Color Clash"
+        case .flip21: return "Flip 21"
         case .other: return "Game"
         }
     }
@@ -57,6 +58,7 @@ struct SelectedGameDisplayCard: View {
         case .truthOrDrink: return "TOD artwork"
         case .spinTheBottle: return "STB artwork"
         case .tapDuel: return "TD artwork"
+        case .flip21: return "Art 1.4"
         default: return nil
         }
     }

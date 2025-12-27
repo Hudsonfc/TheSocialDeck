@@ -91,6 +91,18 @@ struct OnlineView: View {
                     }
                     .padding(.horizontal, 40)
                     
+                    // Test Flip 21 Button (for testing)
+                    NavigationLink(destination: Flip21TestView()) {
+                        Text("Test Flip 21")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(Color.blue)
+                            .cornerRadius(16)
+                    }
+                    .padding(.horizontal, 40)
+                    
                     Spacer()
                         .frame(height: 20)
                 }

@@ -239,13 +239,20 @@ class OnlineService {
             throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "All players must be ready and at least 2 players required"])
         }
         
-        // Initialize game state if Color Clash
+        // Initialize game state based on game type
         if room.selectedGameType == "colorClash" {
             let gameState = try initializeColorClashGameState(room: room)
             try await roomRef.updateData([
                 "status": RoomStatus.inGame.rawValue,
                 "gameStartedAt": Timestamp(date: Date()),
                 "gameState": try Firestore.Encoder().encode(gameState)
+            ])
+        } else if room.selectedGameType == "flip21" {
+            let gameState = try initializeFlip21GameState(room: room)
+            try await roomRef.updateData([
+                "status": RoomStatus.inGame.rawValue,
+                "gameStartedAt": Timestamp(date: Date()),
+                "flip21GameState": try Firestore.Encoder().encode(gameState)
             ])
         } else {
             // Update room status to inGame and set game started time
@@ -350,6 +357,92 @@ class OnlineService {
             do {
                 let decoder = Firestore.Decoder()
                 let gameState = try decoder.decode(ColorClashGameState.self, from: gameStateData)
+                completion(.success(gameState))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    // MARK: - Flip 21 Game State
+    
+    /// Initialize Flip 21 game state
+    private func initializeFlip21GameState(room: OnlineRoom) throws -> Flip21GameState {
+        // Create and shuffle deck
+        var deck = Flip21Card.createStandardDeck()
+        deck.shuffle()
+        
+        let playerIds = room.players.map { $0.id }
+        var playerHands: [String: [Flip21Card]] = [:]
+        var playerStatuses: [String: PlayerRoundStatus] = [:]
+        
+        // Deal 1 card to each player (revealed to themselves)
+        for playerId in playerIds {
+            var hand: [Flip21Card] = []
+            guard !deck.isEmpty else { break }
+            var card = deck.removeFirst()
+            card.isRevealed = true // Revealed immediately for players to see
+            hand.append(card)
+            playerHands[playerId] = hand
+            playerStatuses[playerId] = .active
+        }
+        
+        // Deal 1 face-up card to dealer
+        var dealerHand: [Flip21Card] = []
+        if !deck.isEmpty {
+            var dealerCard = deck.removeFirst()
+            dealerCard.isRevealed = true
+            dealerHand = [dealerCard]
+        }
+        
+        // Create game state
+        let gameState = Flip21GameState(
+            deck: deck,
+            dealerHand: dealerHand,
+            playerHands: playerHands,
+            playerStatuses: playerStatuses,
+            playerOrder: playerIds,
+            currentPlayerIndex: 0,
+            roundStatus: .playerTurns,
+            roundNumber: 1,
+            scores: [:]
+        )
+        
+        return gameState
+    }
+    
+    /// Updates the Flip 21 game state in Firestore
+    func updateFlip21GameState(roomCode: String, gameState: Flip21GameState) async throws {
+        let roomRef = db.collection("rooms").document(roomCode)
+        let encoder = Firestore.Encoder()
+        let gameStateData = try encoder.encode(gameState)
+        try await roomRef.updateData(["flip21GameState": gameStateData])
+    }
+    
+    /// Listens to Flip 21 game state updates in real-time
+    func listenToFlip21GameState(roomCode: String, completion: @escaping (Result<Flip21GameState, Error>) -> Void) -> ListenerRegistration {
+        let roomRef = db.collection("rooms").document(roomCode)
+        
+        return roomRef.addSnapshotListener { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let snapshot = snapshot, snapshot.exists else {
+                completion(.failure(NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room not found"])))
+                return
+            }
+            
+            guard let data = snapshot.data(),
+                  let gameStateData = data["flip21GameState"] as? [String: Any] else {
+                // No game state yet (game not started)
+                return
+            }
+            
+            do {
+                let decoder = Firestore.Decoder()
+                let gameState = try decoder.decode(Flip21GameState.self, from: gameStateData)
                 completion(.success(gameState))
             } catch {
                 completion(.failure(error))

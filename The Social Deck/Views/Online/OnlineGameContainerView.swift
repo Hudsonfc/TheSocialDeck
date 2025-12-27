@@ -17,30 +17,42 @@ struct OnlineGameContainerView: View {
     
     var body: some View {
         Group {
-            if showWalkthrough && showWalkthroughPreference {
-                ColorClashWalkthroughView(showCloseButton: false)
-                    .onDisappear {
-                        // After walkthrough is dismissed, show loading screen
-                        showLoadingScreen = true
-                    }
-            } else if showLoadingScreen && !hasShownLoading {
-                ColorClashLoadingScreen()
-                    .onAppear {
-                        // Show loading screen for 3 seconds, then proceed to game
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                            withAnimation {
-                                hasShownLoading = true
-                                showLoadingScreen = false
-                            }
-                        }
-                    }
-            } else if let room = onlineManager.currentRoom,
+            if let room = onlineManager.currentRoom,
                let gameType = room.selectedGameType,
                let myUserId = authManager.userProfile?.userId {
                 
                 switch gameType {
                 case "colorClash":
-                    OnlineColorClashPlayView(roomCode: room.roomCode, myUserId: myUserId)
+                    // Color Clash specific walkthrough/loading
+                    Group {
+                        if showWalkthrough && showWalkthroughPreference {
+                            ColorClashWalkthroughView(showCloseButton: false)
+                                .onDisappear {
+                                    showLoadingScreen = true
+                                }
+                        } else if showLoadingScreen && !hasShownLoading {
+                            ColorClashLoadingScreen()
+                                .onAppear {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                                        withAnimation {
+                                            hasShownLoading = true
+                                            showLoadingScreen = false
+                                        }
+                                    }
+                                }
+                        } else {
+                            OnlineColorClashPlayView(roomCode: room.roomCode, myUserId: myUserId)
+                        }
+                    }
+                    .onAppear {
+                        if showWalkthroughPreference {
+                            showWalkthrough = true
+                        } else {
+                            showLoadingScreen = true
+                        }
+                    }
+                case "flip21":
+                    OnlineFlip21PlayView(roomCode: room.roomCode, myUserId: myUserId)
                 default:
                     // Placeholder for other games
                     VStack(spacing: 24) {
@@ -60,15 +72,6 @@ struct OnlineGameContainerView: View {
                         .font(.system(size: 16, weight: .regular, design: .rounded))
                         .foregroundColor(.gray)
                 }
-            }
-        }
-        .onAppear {
-            // Show walkthrough first if preference is enabled
-            if showWalkthroughPreference {
-                showWalkthrough = true
-            } else {
-                // Skip walkthrough, go straight to loading
-                showLoadingScreen = true
             }
         }
     }

@@ -79,6 +79,16 @@ struct OnlineGameSelectionScreen: View {
                     maxPlayers: 6
                 ),
                 OnlineGamePlaceholder(
+                    title: "Flip 21",
+                    description: "A classic card game where players compete against the dealer. Get as close to 21 as possible without going over!",
+                    imageName: "Art 1.4",
+                    hasCategories: false,
+                    availableCategories: [],
+                    gameType: "flip21",
+                    minPlayers: 2,
+                    maxPlayers: 8
+                ),
+                OnlineGamePlaceholder(
                     title: "Online Game 1",
                     description: "Placeholder game description for online multiplayer gameplay",
                     imageName: "Art 1.4",
@@ -469,16 +479,20 @@ struct ExpandedGameOverlay: View {
                         .padding(.horizontal, 40)
                         .padding(.bottom, 24)
                     
-                    // Continue to Settings button
+                    // Continue button
                     Button(action: {
                         HapticManager.shared.mediumImpact()
+                        // Set selected game to trigger onChange handler
+                        selectedGame = game
                         // Close overlay
                         withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                             expandedGame = nil
                         }
-                        // Navigate to settings screen
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            navigateToRoom = true
+                        // For Color Clash, navigate to settings; for others, onChange will handle navigation
+                        if game.gameType == "colorClash" {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                navigateToRoom = true
+                            }
                         }
                     }) {
                         Text("Continue")
@@ -492,13 +506,17 @@ struct ExpandedGameOverlay: View {
                     .padding(.horizontal, 40)
                     .padding(.bottom, 40)
                     .background(
-                        NavigationLink(
-                            destination: ColorClashGameSettingsScreen(game: game),
-                            isActive: $navigateToRoom
-                        ) {
-                            EmptyView()
+                        Group {
+                            if game.gameType == "colorClash" {
+                                NavigationLink(
+                                    destination: ColorClashGameSettingsScreen(game: game),
+                                    isActive: $navigateToRoom
+                                ) {
+                                    EmptyView()
+                                }
+                                .hidden()
+                            }
                         }
-                        .hidden()
                     )
                 }
             }

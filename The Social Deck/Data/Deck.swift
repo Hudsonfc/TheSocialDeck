@@ -31,6 +31,7 @@ enum DeckType {
     case whatsMySecret
     case riddleMeThis
     case colorClash
+    case flip21
     case other
 }
 
