@@ -20,8 +20,6 @@ struct HomeView: View {
     @State private var button3Opacity: Double = 0
     @State private var button4Offset: CGFloat = 50
     @State private var button4Opacity: Double = 0
-    @State private var testOnboardingOffset: CGFloat = 50
-    @State private var testOnboardingOpacity: Double = 0
     
     var body: some View {
         NavigationStack {
@@ -42,12 +40,15 @@ struct HomeView: View {
                     // Featured Deck Card
                     VStack(spacing: 15) {
                         // Deck Image
-                        Image("Art 1.4")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 320, height: 200)
-                            .clipped()
-                            .cornerRadius(16, corners: [.topLeft, .topRight])
+                        NavigationLink(destination: WhatsNewView()) {
+                            Image("Art 1.4")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 320, height: 200)
+                                .clipped()
+                                .cornerRadius(16, corners: [.topLeft, .topRight])
+                        }
+                        .buttonStyle(PlainButtonStyle())
                         
                         HStack {
                             VStack(alignment: .leading, spacing: 5) {
@@ -96,19 +97,6 @@ struct HomeView: View {
                             opacity: button2Opacity,
                             destination: SettingsView()
                         )
-                        
-                        // Test Onboarding Button
-                        NavigationLink(destination: OnboardingView()) {
-                            Text("Test Onboarding")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                .cornerRadius(16)
-                        }
-                        .offset(y: testOnboardingOffset)
-                        .opacity(testOnboardingOpacity)
                         
                         // Online Button (Hidden for first version)
                         NavigationButton(
@@ -162,6 +150,12 @@ struct HomeView: View {
                     .hidden()
                 }
             }
+            .overlay(alignment: .bottomTrailing) {
+                // Share Button
+                ShareButton()
+                    .padding(.trailing, 20)
+                    .padding(.bottom, 20)
+            }
             .navigationBarHidden(true)
             .onAppear {
                 startAnimations()
@@ -200,19 +194,12 @@ struct HomeView: View {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
-                testOnboardingOffset = 0
-                testOnboardingOpacity = 1.0
-            }
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
                 button3Offset = 0
                 button3Opacity = 1.0
             }
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
                 button4Offset = 0
                 button4Opacity = 1.0
@@ -261,6 +248,28 @@ struct RoundedCorner: Shape {
             cornerRadii: CGSize(width: radius, height: radius)
         )
         return Path(path.cgPath)
+    }
+}
+
+// Share Button Component
+struct ShareButton: View {
+    @State private var showShareSheet = false
+    
+    var body: some View {
+        Button(action: {
+            showShareSheet = true
+        }) {
+            Image(systemName: "square.and.arrow.up")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(width: 56, height: 56)
+                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                .clipShape(Circle())
+                .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
+        }
+        .sheet(isPresented: $showShareSheet) {
+            ShareSheet(activityItems: ["Playing card games on The Social Deck ♠️ Pass & play with friends — no accounts needed."])
+        }
     }
 }
 
