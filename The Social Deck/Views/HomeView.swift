@@ -20,6 +20,8 @@ struct HomeView: View {
     @State private var button3Opacity: Double = 0
     @State private var button4Offset: CGFloat = 50
     @State private var button4Opacity: Double = 0
+    @State private var testOnboardingOffset: CGFloat = 50
+    @State private var testOnboardingOpacity: Double = 0
     
     var body: some View {
         NavigationStack {
@@ -87,29 +89,44 @@ struct HomeView: View {
                             destination: PlayView()
                         )
                         
-                        // Online Button
-                        NavigationButton(
-                            title: "Online",
-                            offset: button2Offset,
-                            opacity: button2Opacity,
-                            destination: OnlineView()
-                        )
-                        
-                        // Profile Button
-                        NavigationButton(
-                            title: "Profile",
-                            offset: button3Offset,
-                            opacity: button3Opacity,
-                            destination: ProfileView()
-                        )
-                        
-                        // Settings Button
+                        // Settings Button (moved directly under Play)
                         NavigationButton(
                             title: "Settings",
-                            offset: button4Offset,
-                            opacity: button4Opacity,
+                            offset: button2Offset,
+                            opacity: button2Opacity,
                             destination: SettingsView()
                         )
+                        
+                        // Test Onboarding Button
+                        NavigationLink(destination: OnboardingView()) {
+                            Text("Test Onboarding")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .cornerRadius(16)
+                        }
+                        .offset(y: testOnboardingOffset)
+                        .opacity(testOnboardingOpacity)
+                        
+                        // Online Button (Hidden for first version)
+                        NavigationButton(
+                            title: "Online",
+                            offset: button3Offset,
+                            opacity: button3Opacity,
+                            destination: OnlineView()
+                        )
+                        .hidden()
+                        
+                        // Profile Button (Hidden for first version)
+                        NavigationButton(
+                            title: "Profile",
+                            offset: button4Offset,
+                            opacity: button4Opacity,
+                            destination: ProfileView()
+                        )
+                        .hidden()
                     }
                     .padding(.horizontal, 40)
                     .padding(.bottom, 30)
@@ -131,7 +148,7 @@ struct HomeView: View {
             }
             }
             .overlay(alignment: .topTrailing) {
-                // User Avatar Button in top right
+                // User Avatar Button in top right (Hidden for first version)
                 if authManager.isAuthenticated {
                     NavigationLink(destination: ProfileView()) {
                         AvatarView(
@@ -142,7 +159,8 @@ struct HomeView: View {
                     }
                     .padding(.top, 10)
                     .padding(.trailing, 20)
-            }
+                    .hidden()
+                }
             }
             .navigationBarHidden(true)
             .onAppear {
@@ -182,12 +200,19 @@ struct HomeView: View {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                testOnboardingOffset = 0
+                testOnboardingOpacity = 1.0
+            }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
                 button3Offset = 0
                 button3Opacity = 1.0
             }
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
                 button4Offset = 0
                 button4Opacity = 1.0

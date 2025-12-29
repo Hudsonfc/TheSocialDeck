@@ -48,6 +48,7 @@ struct OnlineFlip21PlayView: View {
                             .frame(height: geometry.size.height * 0.25)
                             .padding(.top, 20)
                             .padding(.horizontal, 20)
+                            .padding(.bottom, 24)
                         
                         // Other players status (middle)
                         otherPlayersStatus
@@ -156,7 +157,15 @@ struct OnlineFlip21PlayView: View {
     // MARK: - Dealer Area
     
     private var dealerArea: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 8) {
+            // Dealer avatar - centered above "DEALER" text, right below "Round 1"
+            Image("Flip21 Dealer")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 50, height: 50)
+                .opacity(0.8)
+                .clipped()
+            
             Text("DEALER")
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundColor(.white.opacity(0.6))

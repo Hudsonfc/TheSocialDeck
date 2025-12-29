@@ -20,6 +20,19 @@ struct Flip21TestView: View {
     @State private var displayedDealerHandValue: Int = 0
     @State private var visibleResultPlayerIds: Set<String> = []
     
+    // Loading/Entry Experience
+    @State private var showGameStartingScreen: Bool = true
+    @State private var countdownNumber: Int = 3
+    @State private var isDealingCards: Bool = false
+    
+    // Round Flow
+    @State private var turnTimerRemaining: Int = 0
+    @State private var turnTimer: Timer?
+    
+    // Game Over
+    @State private var showGameOverScreen: Bool = false
+    @State private var gameWinnerId: String? = nil
+    
     // Mock players for testing
     private let fakePlayers: [RoomPlayer] = [
         RoomPlayer(id: "testUser123", username: "You", avatarType: "avatar 1", avatarColor: "blue", isReady: true, isHost: true),
@@ -45,6 +58,7 @@ struct Flip21TestView: View {
                             .frame(height: geometry.size.height * 0.25)
                             .padding(.top, 20)
                             .padding(.horizontal, 20)
+                            .padding(.bottom, 24)
                         
                         // Other players status (middle)
                         otherPlayersStatus
@@ -65,20 +79,32 @@ struct Flip21TestView: View {
                 }
             }
             
+            // Game starting screen
+            if showGameStartingScreen {
+                gameStartingScreen
+            }
+            
+            // Loading screen between rounds
+            if isDealingCards {
+                dealingCardsScreen
+            }
+            
             // Round results overlay
             if let roundResults = testManager.roundResults, testManager.roundStatus == .finished {
-                roundResultsOverlay(results: roundResults)
+                if showGameOverScreen {
+                    gameOverScreen(winnerId: gameWinnerId)
+                } else {
+                    roundResultsOverlay(results: roundResults)
+                }
             }
         }
         .navigationBarHidden(true)
         .onAppear {
-            testManager.setupTestGame()
-            initializeCardRotations()
-            // Initialize dealer hand value
-            if !testManager.dealerHand.isEmpty {
-                dealerHandValue = testManager.dealerHand.calculateValue()
-                displayedDealerHandValue = dealerHandValue
-            }
+            startGameSequence()
+        }
+        .onDisappear {
+            turnTimer?.invalidate()
+            turnTimer = nil
         }
         .onChange(of: testManager.myHand) { oldValue, newValue in
             handleHandChange(oldHand: oldValue, newHand: newValue)
@@ -102,9 +128,91 @@ struct Flip21TestView: View {
             // Animate round results appearing one by one
             if let newResults = newValue, testManager.roundStatus == .finished {
                 animateRoundResults(results: newResults)
+                // Check if game is over after a short delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    checkGameOver()
+                }
             } else {
                 visibleResultPlayerIds.removeAll()
             }
+        }
+        .onChange(of: testManager.roundStatus) { oldValue, newValue in
+            if newValue == .playerTurns && testManager.isMyTurn {
+                startTurnTimer()
+            } else {
+                turnTimer?.invalidate()
+            }
+        }
+    }
+    
+    // MARK: - Helper Functions
+    
+    private var remainingPlayersCount: Int {
+        fakePlayers.filter { !testManager.isPlayerEliminated($0.id) }.count
+    }
+    
+    private func startGameSequence() {
+        showGameStartingScreen = true
+        countdownNumber = 3
+        startCountdown()
+    }
+    
+    private func startCountdown() {
+        // Countdown: 3, 2, 1
+        if countdownNumber > 0 {
+            HapticManager.shared.lightImpact()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                countdownNumber -= 1
+                if countdownNumber > 0 {
+                    startCountdown()
+                } else {
+                    // Countdown finished, show dealing screen
+                    showGameStartingScreen = false
+                    isDealingCards = true
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        testManager.setupTestGame()
+                        initializeCardRotations()
+                        if !testManager.dealerHand.isEmpty {
+                            dealerHandValue = testManager.dealerHand.calculateValue()
+                            displayedDealerHandValue = dealerHandValue
+                        }
+                        isDealingCards = false
+                        startTurnTimer()
+                    }
+                }
+            }
+        }
+    }
+    
+    private func startTurnTimer() {
+        turnTimer?.invalidate()
+        turnTimerRemaining = 60 // 60 seconds per turn
+        
+        turnTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak testManager] timer in
+            guard let testManager = testManager else {
+                timer.invalidate()
+                return
+            }
+            
+            if testManager.isMyTurn && testManager.roundStatus == .playerTurns {
+                turnTimerRemaining -= 1
+                if turnTimerRemaining <= 0 {
+                    timer.invalidate()
+                    // Auto-lock if time runs out (optional - can be removed if not desired)
+                }
+            } else {
+                timer.invalidate()
+            }
+        }
+    }
+    
+    private func checkGameOver() {
+        if remainingPlayersCount <= 1 {
+            // Game over - find winner
+            let remainingPlayers = fakePlayers.filter { !testManager.isPlayerEliminated($0.id) }
+            gameWinnerId = remainingPlayers.first?.id
+            showGameOverScreen = true
         }
     }
     
@@ -130,10 +238,24 @@ struct Flip21TestView: View {
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundColor(.white)
                 
-                if testManager.myScore > 0 {
-                    Text("Wins: \(testManager.myScore)")
+                HStack(spacing: 8) {
+                    if testManager.myScore > 0 {
+                        Text("Wins: \(testManager.myScore)")
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                    
+                    Text("Players: \(remainingPlayersCount)")
                         .font(.system(size: 12, weight: .regular, design: .rounded))
                         .foregroundColor(.white.opacity(0.7))
+                }
+                
+                // Turn timer
+                if testManager.isMyTurn && testManager.roundStatus == .playerTurns && turnTimerRemaining > 0 {
+                    Text("\(turnTimerRemaining)s")
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .foregroundColor(turnTimerRemaining <= 10 ? Color(red: 0xFF/255.0, green: 0x44/255.0, blue: 0x44/255.0) : .white.opacity(0.6))
+                        .monospacedDigit()
                 }
             }
             
@@ -151,7 +273,14 @@ struct Flip21TestView: View {
     // MARK: - Dealer Area
     
     private var dealerArea: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 8) {
+            // Dealer avatar - centered above "DEALER" text, right below "Round 1"
+            Image("Flip21 Dealer")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 50, height: 50)
+                .opacity(0.8)
+            
             Text("DEALER")
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundColor(.white.opacity(0.6))
@@ -278,7 +407,18 @@ struct Flip21TestView: View {
                 // Next round button - only show to winners
                 if testManager.didPlayerWinRound("testUser123") {
                     Button(action: {
-                        testManager.startNextRound()
+                        // Show loading screen, then start next round
+                        isDealingCards = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                            testManager.startNextRound()
+                            initializeCardRotations()
+                            if !testManager.dealerHand.isEmpty {
+                                dealerHandValue = testManager.dealerHand.calculateValue()
+                                displayedDealerHandValue = dealerHandValue
+                            }
+                            isDealingCards = false
+                            startTurnTimer()
+                        }
                     }) {
                         Text("NEXT ROUND")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
@@ -329,6 +469,177 @@ struct Flip21TestView: View {
         }
     }
     
+    // MARK: - Game Starting Screen
+    
+    private var gameStartingScreen: some View {
+        ZStack {
+            Color.black.opacity(0.9)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 32) {
+                Text("Flip 21")
+                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                
+                // Player avatars
+                HStack(spacing: 20) {
+                    ForEach(fakePlayers, id: \.id) { player in
+                        VStack(spacing: 8) {
+                            AvatarView(
+                                avatarType: player.avatarType,
+                                avatarColor: player.avatarColor,
+                                size: 60
+                            )
+                            Text(player.username)
+                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                    }
+                }
+                .padding(.vertical, 20)
+                
+                // Countdown
+                Text("\(countdownNumber)")
+                    .font(.system(size: 72, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .scaleEffect(countdownNumber == 3 ? 1.2 : (countdownNumber == 2 ? 1.1 : 1.0))
+                    .animation(.spring(response: 0.3, dampingFraction: 0.6), value: countdownNumber)
+            }
+        }
+    }
+    
+    // MARK: - Dealing Cards Screen
+    
+    private var dealingCardsScreen: some View {
+        ZStack {
+            Color.black.opacity(0.8)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 24) {
+                LoadingIndicator()
+                
+                Text("Dealing Cards...")
+                    .font(.system(size: 24, weight: .semibold, design: .rounded))
+                    .foregroundColor(.white)
+            }
+        }
+    }
+    
+    // MARK: - Game Over Screen
+    
+    private func gameOverScreen(winnerId: String?) -> some View {
+        ZStack {
+            Color.black.opacity(0.95)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 32) {
+                // Winner announcement
+                VStack(spacing: 20) {
+                    if let winnerId = winnerId, let winner = fakePlayers.first(where: { $0.id == winnerId }) {
+                        Text("Winner!")
+                            .font(.system(size: 48, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                        
+                        AvatarView(
+                            avatarType: winner.avatarType,
+                            avatarColor: winner.avatarColor,
+                            size: 120
+                        )
+                        
+                        Text(winner.username)
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                    } else {
+                        Text("Game Over")
+                            .font(.system(size: 48, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                    }
+                }
+                
+                // Final scoreboard
+                VStack(spacing: 16) {
+                    Text("Final Scores")
+                        .font(.system(size: 24, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white.opacity(0.9))
+                    
+                    ForEach(fakePlayers.sorted(by: { (testManager.scores[$0.id] ?? 0) > (testManager.scores[$1.id] ?? 0) }), id: \.id) { player in
+                        HStack {
+                            AvatarView(
+                                avatarType: player.avatarType,
+                                avatarColor: player.avatarColor,
+                                size: 40
+                            )
+                            
+                            Text(player.username)
+                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                .foregroundColor(.white)
+                            
+                            Spacer()
+                            
+                            Text("\(testManager.scores[player.id] ?? 0) wins")
+                                .font(.system(size: 18, weight: .medium, design: .rounded))
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(12)
+                    }
+                }
+                .padding(.horizontal, 40)
+                
+                // Game statistics
+                VStack(spacing: 8) {
+                    Text("Total Rounds: \(testManager.roundNumber)")
+                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                        .foregroundColor(.white.opacity(0.7))
+                }
+                
+                // Action buttons
+                VStack(spacing: 16) {
+                    Button(action: {
+                        // Play again - reset game completely
+                        turnTimer?.invalidate()
+                        turnTimer = nil
+                        showGameOverScreen = false
+                        gameWinnerId = nil
+                        visibleResultPlayerIds.removeAll()
+                        testManager.resetGame()
+                        initializeCardRotations()
+                        if !testManager.dealerHand.isEmpty {
+                            dealerHandValue = testManager.dealerHand.calculateValue()
+                            displayedDealerHandValue = dealerHandValue
+                        }
+                        startGameSequence()
+                    }) {
+                        Text("Play Again")
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                            .background(Color(red: 0x1A/255.0, green: 0x8A/255.0, blue: 0x5A/255.0))
+                            .cornerRadius(12)
+                    }
+                    
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Text("Back to Lobby")
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                            .background(Color.white.opacity(0.2))
+                            .cornerRadius(12)
+                    }
+                }
+                .padding(.horizontal, 40)
+                .padding(.top, 20)
+            }
+            .padding(.vertical, 40)
+        }
+    }
+    
     // MARK: - Round Results Overlay
     
     private func roundResultsOverlay(results: [String: RoundResult]) -> some View {
@@ -365,7 +676,18 @@ struct Flip21TestView: View {
                 // Show Next Round button only to winners (in the overlay)
                 if testManager.didPlayerWinRound("testUser123") {
                     Button(action: {
-                        testManager.startNextRound()
+                        // Show loading screen, then start next round
+                        isDealingCards = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                            testManager.startNextRound()
+                            initializeCardRotations()
+                            if !testManager.dealerHand.isEmpty {
+                                dealerHandValue = testManager.dealerHand.calculateValue()
+                                displayedDealerHandValue = dealerHandValue
+                            }
+                            isDealingCards = false
+                            startTurnTimer()
+                        }
                     }) {
                         Text("NEXT ROUND")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
@@ -592,11 +914,11 @@ class TestFlip21GameManager: ObservableObject {
     @Published var currentPlayerId: String = "testUser123"
     @Published var playerHands: [String: [Flip21Card]] = [:]
     @Published var playerStatuses: [String: PlayerRoundStatus] = [:]
+    @Published var scores: [String: Int] = [:]
     
     private var deck: [Flip21Card] = []
     private var playerIds = ["testUser123", "player1", "player2"] // Now mutable for elimination
     private var currentPlayerIndex: Int = 0
-    private var scores: [String: Int] = [:]
     private var isProcessingAITurn: Bool = false
     private var eliminatedPlayers: Set<String> = []
     
@@ -609,16 +931,24 @@ class TestFlip21GameManager: ObservableObject {
         dealInitialCards()
         
         roundStatus = .playerTurns
+        // Always start with the user (testUser123) as the first player
         currentPlayerIndex = 0
-        currentPlayerId = playerIds[0]
-        isMyTurn = (currentPlayerId == "testUser123")
+        currentPlayerId = "testUser123"
+        isMyTurn = true
         
-        // If first player is AI, start their turn
-        if !isMyTurn {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                self.simulateAIPlayerTurn()
-            }
-        }
+        // User must manually click hit or lock - no auto-advancing
+    }
+    
+    func resetGame() {
+        // Reset everything for a fresh game
+        scores = [:]
+        eliminatedPlayers = []
+        playerIds = ["testUser123", "player1", "player2"]
+        roundNumber = 1
+        myScore = 0
+        roundResults = nil
+        roundStatus = .dealing
+        setupTestGame()
     }
     
     func hit() {
@@ -685,12 +1015,18 @@ class TestFlip21GameManager: ObservableObject {
         dealInitialCards()
         
         roundStatus = .playerTurns
-        currentPlayerIndex = 0
-        currentPlayerId = playerIds[0]
-        isMyTurn = (currentPlayerId == "testUser123")
-        
-        // If first player is AI, start their turn
-        if !isMyTurn {
+        // Always start with the user (testUser123) as the first player if they're still in the game
+        if let userIndex = playerIds.firstIndex(of: "testUser123") {
+            currentPlayerIndex = userIndex
+            currentPlayerId = "testUser123"
+            isMyTurn = true
+            // User must manually click hit or lock - no auto-advancing
+        } else {
+            // User was eliminated, start with first remaining player
+            currentPlayerIndex = 0
+            currentPlayerId = playerIds[0]
+            isMyTurn = false
+            // If first player is AI, start their turn
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 self.simulateAIPlayerTurn()
             }
@@ -795,7 +1131,13 @@ class TestFlip21GameManager: ObservableObject {
     
     private func simulateAIPlayerTurn() {
         // Prevent multiple AI turns from running simultaneously
-        guard !isProcessingAITurn else { return }
+        guard !isProcessingAITurn else { 
+            // If already processing, wait a bit and try again
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.simulateAIPlayerTurn()
+            }
+            return 
+        }
         isProcessingAITurn = true
         
         guard let hand = playerHands[currentPlayerId], !hand.isEmpty else {
@@ -840,6 +1182,8 @@ class TestFlip21GameManager: ObservableObject {
         
         guard !deck.isEmpty else {
             isProcessingAITurn = false
+            // If deck is truly empty after reshuffle, player should lock
+            playerStatuses[currentPlayerId] = .locked
             advanceToNextPlayer()
             return
         }
@@ -847,24 +1191,27 @@ class TestFlip21GameManager: ObservableObject {
         var drawnCard = deck.removeFirst()
         drawnCard.isRevealed = true
         
-        if var hand = playerHands[currentPlayerId] {
-            hand.append(drawnCard)
-            playerHands[currentPlayerId] = hand
-            
-            // Check if busted
-            if hand.isBusted() {
-                playerStatuses[currentPlayerId] = .busted
-                isProcessingAITurn = false
-                advanceToNextPlayer()
-            } else {
-                // Continue AI turn - make another decision after a delay
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                    self.simulateAIPlayerTurn()
-                }
-            }
-        } else {
+        guard var hand = playerHands[currentPlayerId] else {
+            // Hand doesn't exist, advance to next player
             isProcessingAITurn = false
             advanceToNextPlayer()
+            return
+        }
+        
+        hand.append(drawnCard)
+        playerHands[currentPlayerId] = hand
+        
+        // Check if busted
+        if hand.isBusted() {
+            playerStatuses[currentPlayerId] = .busted
+            isProcessingAITurn = false
+            advanceToNextPlayer()
+        } else {
+            // Continue AI turn - make another decision after a delay
+            isProcessingAITurn = false // Reset flag before recursive call
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                self.simulateAIPlayerTurn()
+            }
         }
     }
     

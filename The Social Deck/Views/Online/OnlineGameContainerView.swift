@@ -25,23 +25,23 @@ struct OnlineGameContainerView: View {
                 case "colorClash":
                     // Color Clash specific walkthrough/loading
                     Group {
-                        if showWalkthrough && showWalkthroughPreference {
-                            ColorClashWalkthroughView(showCloseButton: false)
-                                .onDisappear {
-                                    showLoadingScreen = true
-                                }
-                        } else if showLoadingScreen && !hasShownLoading {
-                            ColorClashLoadingScreen()
-                                .onAppear {
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                                        withAnimation {
-                                            hasShownLoading = true
-                                            showLoadingScreen = false
-                                        }
-                                    }
-                                }
+            if showWalkthrough && showWalkthroughPreference {
+                ColorClashWalkthroughView(showCloseButton: false)
+                    .onDisappear {
+                        showLoadingScreen = true
+                    }
+            } else if showLoadingScreen && !hasShownLoading {
+                ColorClashLoadingScreen()
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                            withAnimation {
+                                hasShownLoading = true
+                                showLoadingScreen = false
+                            }
+                        }
+                    }
                         } else {
-                            OnlineColorClashPlayView(roomCode: room.roomCode, myUserId: myUserId)
+                    OnlineColorClashPlayView(roomCode: room.roomCode, myUserId: myUserId)
                         }
                     }
                     .onAppear {

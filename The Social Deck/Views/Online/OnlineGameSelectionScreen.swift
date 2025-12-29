@@ -490,8 +490,8 @@ struct ExpandedGameOverlay: View {
                         }
                         // For Color Clash, navigate to settings; for others, onChange will handle navigation
                         if game.gameType == "colorClash" {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                navigateToRoom = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            navigateToRoom = true
                             }
                         }
                     }) {
@@ -508,13 +508,13 @@ struct ExpandedGameOverlay: View {
                     .background(
                         Group {
                             if game.gameType == "colorClash" {
-                                NavigationLink(
-                                    destination: ColorClashGameSettingsScreen(game: game),
-                                    isActive: $navigateToRoom
-                                ) {
-                                    EmptyView()
-                                }
-                                .hidden()
+                        NavigationLink(
+                            destination: ColorClashGameSettingsScreen(game: game),
+                            isActive: $navigateToRoom
+                        ) {
+                            EmptyView()
+                        }
+                        .hidden()
                             }
                         }
                     )
