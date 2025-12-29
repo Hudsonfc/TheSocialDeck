@@ -18,9 +18,11 @@ struct OnboardingView: View {
     @State private var buttonOffset: CGFloat = 50
     @State private var buttonOpacity: Double = 0
     
-    // Page 2 animation states
-    @State private var page2IconOpacity: Double = 0
+    // Page 2 animation states (now for Pass & Play - needs two icons)
+    @State private var page2IconOpacity: Double = 0  // left icon
     @State private var page2IconScale: CGFloat = 0.8
+    @State private var page2RightIconOpacity: Double = 0  // right icon
+    @State private var page2RightIconScale: CGFloat = 0.8
     @State private var page2TitleOpacity: Double = 0
     @State private var page2DescriptionOpacity: Double = 0
     @State private var page2ButtonOffset: CGFloat = 50
@@ -77,11 +79,13 @@ struct OnboardingView: View {
                     ))
                 }
                 
-                // Page 2
+                // Page 2 - Pass & Play (swapped from page 3)
                 if currentPage == 2 {
-                    OnboardingPage2(
-                        iconOpacity: $page2IconOpacity,
-                        iconScale: $page2IconScale,
+                    OnboardingPage3(
+                        leftIconOpacity: $page2IconOpacity,
+                        leftIconScale: $page2IconScale,
+                        rightIconOpacity: $page2RightIconOpacity,
+                        rightIconScale: $page2RightIconScale,
                         titleOpacity: $page2TitleOpacity,
                         descriptionOpacity: $page2DescriptionOpacity,
                         buttonOffset: $page2ButtonOffset,
@@ -99,13 +103,11 @@ struct OnboardingView: View {
                     ))
                 }
                 
-                // Page 3
+                // Page 3 - Pick a deck (swapped from page 2)
                 if currentPage == 3 {
-                    OnboardingPage3(
-                        leftIconOpacity: $page3LeftIconOpacity,
-                        leftIconScale: $page3LeftIconScale,
-                        rightIconOpacity: $page3RightIconOpacity,
-                        rightIconScale: $page3RightIconScale,
+                    OnboardingPage2(
+                        iconOpacity: $page3LeftIconOpacity,
+                        iconScale: $page3LeftIconScale,
                         titleOpacity: $page3TitleOpacity,
                         descriptionOpacity: $page3DescriptionOpacity,
                         buttonOffset: $page3ButtonOffset,
@@ -253,8 +255,11 @@ struct OnboardingView: View {
     }
     
     private func resetPage2Animations() {
-        page2IconOpacity = 0
+        // Reset for Pass & Play page (now page 2, uses two icons)
+        page2IconOpacity = 0  // left icon
         page2IconScale = 0.8
+        page2RightIconOpacity = 0  // right icon
+        page2RightIconScale = 0.8
         page2TitleOpacity = 0
         page2DescriptionOpacity = 0
         page2ButtonOffset = 50
@@ -262,10 +267,19 @@ struct OnboardingView: View {
     }
     
     private func startPage2Animations() {
-        // Icon fade + scale animation
+        // Pass & Play page animations (now page 2, uses two icons)
+        // Left icon fade + scale animation
         withAnimation(.spring(response: 0.8, dampingFraction: 0.7)) {
             page2IconOpacity = 1.0
             page2IconScale = 1.0
+        }
+        
+        // Right icon fade + scale animation (slight delay)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            withAnimation(.spring(response: 0.8, dampingFraction: 0.7)) {
+                page2RightIconOpacity = 1.0
+                page2RightIconScale = 1.0
+            }
         }
         
         // Title fade in
@@ -292,10 +306,9 @@ struct OnboardingView: View {
     }
     
     private func resetPage3Animations() {
-        page3LeftIconOpacity = 0
+        // Reset for Pick a deck page (now page 3, uses single icon)
+        page3LeftIconOpacity = 0  // single icon
         page3LeftIconScale = 0.8
-        page3RightIconOpacity = 0
-        page3RightIconScale = 0.8
         page3TitleOpacity = 0
         page3DescriptionOpacity = 0
         page3ButtonOffset = 50
@@ -303,18 +316,11 @@ struct OnboardingView: View {
     }
     
     private func startPage3Animations() {
-        // Left icon fade + scale animation
+        // Pick a deck page animations (now page 3, uses single icon)
+        // Icon fade + scale animation
         withAnimation(.spring(response: 0.8, dampingFraction: 0.7)) {
             page3LeftIconOpacity = 1.0
             page3LeftIconScale = 1.0
-        }
-        
-        // Right icon fade + scale animation (slight delay)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-            withAnimation(.spring(response: 0.8, dampingFraction: 0.7)) {
-                page3RightIconOpacity = 1.0
-                page3RightIconScale = 1.0
-            }
         }
         
         // Title fade in
@@ -527,7 +533,7 @@ struct OnboardingPage3: View {
         VStack(spacing: 30) {
             Spacer()
             
-            // Icon row - person.3.fill and wifi
+            // Icon row - person.3.fill and arrow.right.circle.fill (passing)
             HStack(spacing: 60) {
                 Image(systemName: "person.3.fill")
                     .font(.system(size: 60))
@@ -535,7 +541,7 @@ struct OnboardingPage3: View {
                     .opacity(leftIconOpacity)
                     .scaleEffect(leftIconScale)
                 
-                Image(systemName: "wifi")
+                Image(systemName: "arrow.right.circle.fill")
                     .font(.system(size: 60))
                     .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                     .opacity(rightIconOpacity)
@@ -543,7 +549,7 @@ struct OnboardingPage3: View {
             }
             
             // Title
-            Text("Play in person or online.")
+            Text("Pass & Play with Friends")
                 .font(.system(size: 32, weight: .bold, design: .rounded))
                 .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                 .opacity(titleOpacity)
@@ -551,7 +557,7 @@ struct OnboardingPage3: View {
                 .padding(.horizontal, 40)
             
             // Description
-            Text("Use decks on your own, with friends in the same room, or sync with others using online rooms.")
+            Text("Gather around and pass the device. Everyone takes turns, making it easy to play together in the same room.")
                 .font(.system(size: 16, weight: .regular, design: .rounded))
                 .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                 .opacity(descriptionOpacity)
