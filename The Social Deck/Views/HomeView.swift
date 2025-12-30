@@ -25,6 +25,20 @@ struct HomeView: View {
     @State private var settingsButtonPressed = false
     @State private var currentSlideIndex = 0
     @State private var slideshowTimer: Timer?
+    @State private var currentQuote: String = ""
+    @State private var gameOfTheDay: GameOfTheDayInfo = GameOfTheDayManager.shared.getTodaysGame()
+    
+    // Curated quotes for The Social Deck
+    private let quotes = [
+        "The game is just the excuse.",
+        "Good cards. Better company.",
+        "One table. One deck. Everyone in.",
+        "Shuffle the deck. Start the moment.",
+        "No phones. Just cards.",
+        "Laughs guaranteed. Rules optional.",
+        "Every card is a conversation.",
+        "Less scrolling. More shuffling."
+    ]
     
     var body: some View {
         NavigationStack {
@@ -46,33 +60,50 @@ struct HomeView: View {
                     VStack(spacing: 15) {
                         // Hero Banner
                         ZStack {
-                            NavigationLink(destination: WhatsNewView()) {
-                                TabView(selection: $currentSlideIndex) {
-                                    // Welcome Card Slide (Index 0)
+                            TabView(selection: $currentSlideIndex) {
+                                // Welcome Card Slide (Index 0)
+                                NavigationLink(destination: WhatsNewView()) {
                                     HeroWelcomeSlide()
-                                        .tag(0)
-                                    
-                                    // Why We Built Slide (Index 1)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                .tag(0)
+                                
+                                // Why We Built Slide (Index 1)
+                                NavigationLink(destination: WhatsNewView()) {
                                     HeroWhyWeBuiltSlide()
-                                        .tag(1)
                                 }
-                                .tabViewStyle(.page(indexDisplayMode: .never))
-                                .frame(width: 320, height: 200)
-                                .cornerRadius(16, corners: [.topLeft, .topRight])
-                                .onAppear {
-                                    startSlideshow()
+                                .buttonStyle(PlainButtonStyle())
+                                .tag(1)
+                                
+                                // Quote Slide (Index 2)
+                                NavigationLink(destination: WhatsNewView()) {
+                                    HeroQuoteSlide(quote: currentQuote)
                                 }
-                                .onDisappear {
-                                    stopSlideshow()
+                                .buttonStyle(PlainButtonStyle())
+                                .tag(2)
+                                
+                                // Game of the Day Slide (Index 3)
+                                NavigationLink(destination: Play2View()) {
+                                    HeroGameOfTheDaySlide(game: gameOfTheDay)
                                 }
+                                .buttonStyle(PlainButtonStyle())
+                                .tag(3)
                             }
-                            .buttonStyle(PlainButtonStyle())
+                            .tabViewStyle(.page(indexDisplayMode: .never))
+                            .frame(width: 320, height: 200)
+                            .cornerRadius(16, corners: [.topLeft, .topRight])
+                            .onAppear {
+                                startSlideshow()
+                            }
+                            .onDisappear {
+                                stopSlideshow()
+                            }
                             
                             // Slide Counter
                             VStack {
                                 Spacer()
                                 HStack(spacing: 6) {
-                                    ForEach(0..<2, id: \.self) { index in
+                                    ForEach(0..<4, id: \.self) { index in
                                         Circle()
                                             .fill(index == currentSlideIndex ? Color.white : Color.white.opacity(0.4))
                                             .frame(width: 6, height: 6)
@@ -218,6 +249,10 @@ struct HomeView: View {
             .navigationBarHidden(true)
             .onAppear {
                 startAnimations()
+                // Select random quote
+                currentQuote = quotes.randomElement() ?? quotes[0]
+                // Get today's game of the day
+                gameOfTheDay = GameOfTheDayManager.shared.getTodaysGame()
             }
         }
     }
@@ -226,7 +261,7 @@ struct HomeView: View {
         stopSlideshow() // Stop any existing timer
         slideshowTimer = Timer.scheduledTimer(withTimeInterval: 6.0, repeats: true) { _ in
             withAnimation(.easeInOut(duration: 0.6)) {
-                currentSlideIndex = (currentSlideIndex + 1) % 2
+                currentSlideIndex = (currentSlideIndex + 1) % 4
             }
         }
     }
@@ -445,6 +480,112 @@ struct HeroWhyWeBuiltSlide: View {
                 .padding(.leading, 20)
                 .padding(.trailing, 20)
                 .padding(.vertical, 20)
+            }
+        }
+        .frame(width: 320, height: 200)
+        .cornerRadius(16, corners: [.topLeft, .topRight])
+    }
+}
+
+// Hero Banner Quote Slide
+struct HeroQuoteSlide: View {
+    let quote: String
+    
+    var body: some View {
+        ZStack {
+            // Warm off-white background
+            Color(red: 0xFD/255.0, green: 0xFB/255.0, blue: 0xF8/255.0)
+            
+            VStack(spacing: 12) {
+                // Quote Content
+                VStack(spacing: 8) {
+                    // Quotation mark accent
+                    Text("\u{201C}")
+                        .font(.system(size: 32, weight: .bold, design: .serif))
+                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.5))
+                        .frame(height: 20)
+                    
+                    // Quote text
+                    Text(quote)
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.8)
+                        .padding(.horizontal, 32)
+                    
+                    // Signature
+                    Text("- thesocialdeck")
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .padding(.top, 8)
+                }
+                
+                Spacer()
+            }
+            .padding(.vertical, 32)
+        }
+        .frame(width: 320, height: 200)
+        .cornerRadius(16, corners: [.topLeft, .topRight])
+    }
+}
+
+// Hero Banner Game of the Day Slide
+struct HeroGameOfTheDaySlide: View {
+    let game: GameOfTheDayInfo
+    
+    var body: some View {
+        ZStack {
+            // Gradient background
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0),
+                    Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.9)
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            
+            HStack(spacing: 16) {
+                // Game Image
+                Image(game.imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 100, height: 140)
+                    .cornerRadius(12)
+                    .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
+                    .padding(.leading, 20)
+                
+                // Game Info
+                VStack(alignment: .leading, spacing: 8) {
+                    // Badge
+                    Text("GAME OF THE DAY")
+                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                        .foregroundColor(Color.white.opacity(0.9))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.white.opacity(0.2))
+                        .cornerRadius(4)
+                    
+                    // Game Title
+                    Text(game.title)
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .foregroundColor(Color.white)
+                        .lineLimit(2)
+                    
+                    // Game Description
+                    Text(game.description)
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                        .foregroundColor(Color.white.opacity(0.9))
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                    
+                    Spacer()
+                }
+                .padding(.trailing, 20)
+                .padding(.top, 16)
+                
+                Spacer()
             }
         }
         .frame(width: 320, height: 200)

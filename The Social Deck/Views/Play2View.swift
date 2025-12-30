@@ -282,6 +282,10 @@ struct Play2View: View {
                     HStack(spacing: 24) {
                         ForEach(categories, id: \.self) { category in
                             CategoryTab(title: category, isSelected: selectedCategory == category)
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .scale(scale: 0.8)).combined(with: .move(edge: .leading)),
+                                    removal: .opacity.combined(with: .scale(scale: 0.8)).combined(with: .move(edge: .leading))
+                                ))
                                 .onTapGesture {
                                     if selectedCategory != category {
                                         withAnimation(.easeInOut(duration: 0.3)) {
@@ -298,6 +302,7 @@ struct Play2View: View {
                     }
                     .padding(.horizontal, 40)
                 }
+                .animation(.spring(response: 0.4, dampingFraction: 0.8), value: categories)
                 .padding(.top, 20)
                 .padding(.bottom, 16)
                 

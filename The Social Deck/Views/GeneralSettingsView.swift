@@ -10,8 +10,6 @@ import SwiftUI
 struct GeneralSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("hapticsEnabled") private var hapticsEnabled = true
-    @AppStorage("soundEffectsEnabled") private var soundEffectsEnabled = true
-    @AppStorage("animationsEnabled") private var animationsEnabled = true
     @AppStorage("shuffleCardsEnabled") private var shuffleCardsEnabled = true
     
     var body: some View {
@@ -49,34 +47,6 @@ struct GeneralSettingsView: View {
                                 description: "Vibration feedback for interactions"
                             ) {
                                 Toggle("", isOn: $hapticsEnabled)
-                                    .labelsHidden()
-                                    .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            }
-                            
-                            Divider()
-                                .padding(.leading, 56)
-                            
-                            // Sound Effects Toggle
-                            SettingsRow(
-                                icon: "speaker.wave.2.fill",
-                                title: "Sound Effects",
-                                description: "Audio feedback during gameplay"
-                            ) {
-                                Toggle("", isOn: $soundEffectsEnabled)
-                                    .labelsHidden()
-                                    .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            }
-                            
-                            Divider()
-                                .padding(.leading, 56)
-                            
-                            // Animations Toggle
-                            SettingsRow(
-                                icon: "sparkles",
-                                title: "Animations",
-                                description: "Smooth transitions and effects"
-                            ) {
-                                Toggle("", isOn: $animationsEnabled)
                                     .labelsHidden()
                                     .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                             }
