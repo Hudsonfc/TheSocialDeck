@@ -14,6 +14,7 @@ struct PopCultureTriviaEndView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showConfetti: Bool = false
     @State private var navigateToHomeView: Bool = false
+    @State private var navigateToPlayAgain: Bool = false
     
     private var scorePercentage: Int {
         guard manager.cards.count > 0 else { return 0 }
@@ -71,16 +72,37 @@ struct PopCultureTriviaEndView: View {
                 
                 Spacer()
                 
-                // Home button
+                // Play Again button
                 Button(action: {
-                    navigateToHomeView = true
+                    HapticManager.shared.lightImpact()
+                    navigateToPlayAgain = true
                 }) {
-                    Text("Home")
+                    Text("Play Again")
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 18)
                         .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .cornerRadius(16)
+                }
+                .padding(.horizontal, 40)
+                .padding(.bottom, 16)
+                
+                // Home button
+                Button(action: {
+                    HapticManager.shared.lightImpact()
+                    navigateToHomeView = true
+                }) {
+                    Text("Home")
+                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 18)
+                        .background(Color.white)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0), lineWidth: 2)
+                        )
                         .cornerRadius(16)
                 }
                 .padding(.horizontal, 40)
@@ -92,6 +114,14 @@ struct PopCultureTriviaEndView: View {
             NavigationLink(
                 destination: HomeView(),
                 isActive: $navigateToHomeView
+            ) {
+                EmptyView()
+            }
+        )
+        .background(
+            NavigationLink(
+                destination: PopCultureTriviaCategorySelectionView(deck: deck),
+                isActive: $navigateToPlayAgain
             ) {
                 EmptyView()
             }

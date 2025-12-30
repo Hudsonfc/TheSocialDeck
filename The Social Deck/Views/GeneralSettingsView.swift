@@ -12,6 +12,7 @@ struct GeneralSettingsView: View {
     @AppStorage("hapticsEnabled") private var hapticsEnabled = true
     @AppStorage("soundEffectsEnabled") private var soundEffectsEnabled = true
     @AppStorage("animationsEnabled") private var animationsEnabled = true
+    @AppStorage("shuffleCardsEnabled") private var shuffleCardsEnabled = true
     
     var body: some View {
         ZStack {
@@ -76,6 +77,20 @@ struct GeneralSettingsView: View {
                                 description: "Smooth transitions and effects"
                             ) {
                                 Toggle("", isOn: $animationsEnabled)
+                                    .labelsHidden()
+                                    .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            }
+                            
+                            Divider()
+                                .padding(.leading, 56)
+                            
+                            // Shuffle Cards Toggle
+                            SettingsRow(
+                                icon: "shuffle",
+                                title: "Shuffle Cards",
+                                description: "Randomize card order in games"
+                            ) {
+                                Toggle("", isOn: $shuffleCardsEnabled)
                                     .labelsHidden()
                                     .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                             }

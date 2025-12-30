@@ -76,13 +76,12 @@ struct HistoryTriviaSetupView: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
                     
-                    // Game artwork
+                    // Game artwork - regular card image
                     Image(deck.imageName)
                         .resizable()
-                        .scaledToFill()
-                        .frame(width: 200, height: 200)
-                        .clipped()
-                        .cornerRadius(100)
+                        .scaledToFit()
+                        .frame(width: 160, height: 220)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
                         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     
                     // Selected categories chips

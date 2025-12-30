@@ -16,6 +16,7 @@ struct GameCategory {
 
 struct PlayView: View {
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var favoritesManager = FavoritesManager.shared
     @State private var expandedDeck: Deck? = nil
     @State private var navigateToCategorySelection: Deck? = nil
     @State private var navigateToPlayView: Deck? = nil
@@ -96,6 +97,15 @@ struct PlayView: View {
             ]
         )
     ]
+    
+    // Get all favorite decks
+    private var favoriteDecks: [Deck] {
+        var allDecks: [Deck] = []
+        for category in categories {
+            allDecks.append(contentsOf: category.decks)
+        }
+        return allDecks.filter { favoritesManager.isFavorite($0.type) }
+    }
     
     // Helper computed properties to break up complex expressions
     @ViewBuilder
@@ -299,6 +309,32 @@ struct PlayView: View {
             
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 32) {
+                    // Favorites Section
+                    if !favoriteDecks.isEmpty {
+                        VStack(alignment: .leading, spacing: 16) {
+                            // Favorites title with heart icon
+                            HStack(spacing: 8) {
+                                Image(systemName: "heart.fill")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                Text("Favorites")
+                                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            }
+                            .padding(.horizontal, 40)
+                            
+                            // Horizontal scroll of favorite deck cards
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 16) {
+                                    ForEach(favoriteDecks) { deck in
+                                        CardFlipView(deck: deck, expandedDeck: $expandedDeck)
+                                    }
+                                }
+                                .padding(.horizontal, 40)
+                            }
+                        }
+                    }
+                    
                     ForEach(categories, id: \.id) { category in
                         VStack(alignment: .leading, spacing: 16) {
                             // Category title
@@ -363,6 +399,7 @@ struct ExpandedDeckOverlay: View {
     @Binding var navigateToRhymeTimeSetup: Deck?
     @Binding var navigateToTapDuelSetup: Deck?
     @Binding var navigateToRiddleMeThisSetup: Deck?
+    @ObservedObject private var favoritesManager = FavoritesManager.shared
     
     var body: some View {
         ZStack {
@@ -372,9 +409,23 @@ struct ExpandedDeckOverlay: View {
             
             ScrollView {
                 VStack(spacing: 24) {
-                    // Close button - minimalist
+                    // Top bar with favorite and close buttons
                     HStack {
+                        // Favorite button
+                        Button(action: {
+                            favoritesManager.toggleFavorite(deck.type)
+                        }) {
+                            Image(systemName: favoritesManager.isFavorite(deck.type) ? "heart.fill" : "heart")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundColor(favoritesManager.isFavorite(deck.type) ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .frame(width: 44, height: 44)
+                                .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                                .clipShape(Circle())
+                        }
+                        
                         Spacer()
+                        
+                        // Close button
                         Button(action: {
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                                 expandedDeck = nil

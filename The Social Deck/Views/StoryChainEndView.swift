@@ -11,6 +11,7 @@ struct StoryChainEndView: View {
     let deck: Deck
     let storySentences: [StorySentence]
     @State private var navigateToHome: Bool = false
+    @State private var navigateToPlayAgain: Bool = false
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -94,16 +95,37 @@ struct StoryChainEndView: View {
                 }
                 .padding(.horizontal, 40)
                 
-                // Back to Home button
+                // Play Again button
                 Button(action: {
-                    navigateToHome = true
+                    HapticManager.shared.lightImpact()
+                    navigateToPlayAgain = true
                 }) {
-                    Text("Back to Home")
+                    Text("Play Again")
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 18)
                         .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .cornerRadius(12)
+                }
+                .padding(.horizontal, 40)
+                .padding(.bottom, 16)
+                
+                // Back to Home button
+                Button(action: {
+                    HapticManager.shared.lightImpact()
+                    navigateToHome = true
+                }) {
+                    Text("Home")
+                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 18)
+                        .background(Color.white)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0), lineWidth: 2)
+                        )
                         .cornerRadius(12)
                 }
                 .padding(.horizontal, 40)
@@ -119,6 +141,14 @@ struct StoryChainEndView: View {
                 EmptyView()
             }
         )
+        .background(
+            NavigationLink(
+                destination: StoryChainSetupView(deck: deck),
+                isActive: $navigateToPlayAgain
+            ) {
+                EmptyView()
+            }
+        )
     }
 }
 
@@ -127,7 +157,7 @@ struct StoryChainEndView: View {
         StoryChainEndView(
             deck: Deck(
                 title: "Story Chain",
-                description: "Build a story together or drink when you can't continue.",
+                description: "Add one sentence to continue the story. Pass the phone and watch the chaos unfold.",
                 numberOfCards: 145,
                 estimatedTime: "15-25 min",
                 imageName: "SC artwork",

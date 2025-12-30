@@ -38,13 +38,12 @@ struct StoryChainSetupView: View {
                 Spacer()
                 
                 VStack(spacing: 32) {
-                    // Game artwork
+                    // Game artwork - regular card image
                     Image(deck.imageName)
                         .resizable()
-                        .scaledToFill()
-                        .frame(width: 200, height: 200)
-                        .clipped()
-                        .cornerRadius(100)
+                        .scaledToFit()
+                        .frame(width: 160, height: 220)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
                         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     
                     // Players section
@@ -166,7 +165,7 @@ struct StoryChainSetupView: View {
         StoryChainSetupView(
             deck: Deck(
                 title: "Story Chain",
-                description: "Build a story together or drink when you can't continue.",
+                description: "Add one sentence to continue the story. Pass the phone and watch the chaos unfold.",
                 numberOfCards: 145,
                 estimatedTime: "15-25 min",
                 imageName: "SC artwork",

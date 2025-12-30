@@ -221,24 +221,24 @@ class BluffCallGameManager: ObservableObject {
         if groupDecision == .callBluff {
             if playerToldTruth {
                 // Group called bluff but player was telling truth
-                return "\(currentPlayer) was telling the truth! Everyone who called the bluff drinks!"
+                return "\(currentPlayer) was telling the truth! Everyone who called the bluff loses!"
             } else {
                 // Group correctly called the bluff
-                return "You caught \(currentPlayer) in a lie! \(currentPlayer) drinks extra!"
+                return "You caught \(currentPlayer) in a lie! \(currentPlayer) got exposed!"
             }
         } else {
             // Group believed
             if playerToldTruth {
                 // Player was telling truth, group believed correctly
-                return "\(currentPlayer) was telling the truth and you believed them! No one drinks."
+                return "\(currentPlayer) was telling the truth and you believed them! Well played."
             } else {
                 // Player was lying, group believed incorrectly
-                return "\(currentPlayer) was lying and you believed them! Everyone who believed drinks!"
+                return "\(currentPlayer) was lying and you believed them! Everyone who believed loses!"
             }
         }
     }
     
-    func getWhoDrinks() -> String {
+    func getWhoLoses() -> String {
         guard let card = currentCard,
               let playerAnswer = playerAnswer,
               let groupDecision = groupDecision,
@@ -250,15 +250,15 @@ class BluffCallGameManager: ObservableObject {
         
         if groupDecision == .callBluff {
             if playerToldTruth {
-                return "Everyone drinks (except \(currentPlayer))"
+                return "Everyone loses (except \(currentPlayer))"
             } else {
-                return "\(currentPlayer) drinks extra"
+                return "\(currentPlayer) got caught!"
             }
         } else {
             if playerToldTruth {
-                return "No one drinks"
+                return "No one loses"
             } else {
-                return "Everyone drinks (except \(currentPlayer))"
+                return "Everyone got fooled (except \(currentPlayer))"
             }
         }
     }

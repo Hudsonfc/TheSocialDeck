@@ -16,6 +16,7 @@ struct WhatsMySecretEndView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showConfetti: Bool = false
     @State private var navigateToHomeView: Bool = false
+    @State private var navigateToPlayAgain: Bool = false
     
     var body: some View {
         ZStack {
@@ -84,9 +85,30 @@ struct WhatsMySecretEndView: View {
                 
                 Spacer()
                 
+                // Play Again button
+                PrimaryButton(title: "Play Again") {
+                    HapticManager.shared.lightImpact()
+                    navigateToPlayAgain = true
+                }
+                .padding(.horizontal, 40)
+                .padding(.bottom, 16)
+                
                 // Home button
-                PrimaryButton(title: "Home") {
+                Button(action: {
+                    HapticManager.shared.lightImpact()
                     navigateToHomeView = true
+                }) {
+                    Text("Home")
+                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 18)
+                        .background(Color.white)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0), lineWidth: 2)
+                        )
+                        .cornerRadius(16)
                 }
                 .padding(.horizontal, 40)
                 .padding(.bottom, 50)
@@ -97,6 +119,14 @@ struct WhatsMySecretEndView: View {
             NavigationLink(
                 destination: HomeView(),
                 isActive: $navigateToHomeView
+            ) {
+                EmptyView()
+            }
+        )
+        .background(
+            NavigationLink(
+                destination: WhatsMySecretSetupView(deck: deck),
+                isActive: $navigateToPlayAgain
             ) {
                 EmptyView()
             }

@@ -82,13 +82,12 @@ struct BluffCallSetupView: View {
                 
                 ScrollView {
                     VStack(spacing: 32) {
-                            // Game artwork
+                            // Game artwork - regular card image
                         Image(deck.imageName)
                             .resizable()
-                            .scaledToFill()
-                            .frame(width: 200, height: 200)
-                            .clipped()
-                            .cornerRadius(100)
+                            .scaledToFit()
+                            .frame(width: 160, height: 220)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
                             .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                             .padding(.top, 20)
                     
@@ -280,7 +279,7 @@ struct BluffCallSetupView: View {
         BluffCallSetupView(
             deck: Deck(
                 title: "Bluff Call",
-                description: "Call out bluffs or take a drink when caught.",
+                description: "Convince the group your answer is true, or call their bluff!",
                 numberOfCards: 300,
                 estimatedTime: "15-20 min",
                 imageName: "Art 1.4",

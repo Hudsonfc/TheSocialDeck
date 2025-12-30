@@ -20,12 +20,9 @@ struct HomeView: View {
     @State private var button3Opacity: Double = 0
     @State private var button4Offset: CGFloat = 50
     @State private var button4Opacity: Double = 0
-    @State private var button5Offset: CGFloat = 50
-    @State private var button5Opacity: Double = 0
     @State private var featuredPlayButtonPressed = false
     @State private var mainPlayButtonPressed = false
     @State private var settingsButtonPressed = false
-    @State private var play2ButtonPressed = false
     @State private var currentSlideIndex = 0
     @State private var slideshowTimer: Timer?
     
@@ -96,7 +93,7 @@ struct HomeView: View {
                             Spacer()
                             
                             // Play Button
-                            NavigationLink(destination: PlayView()) {
+                            NavigationLink(destination: Play2View()) {
                                 Text("Play")
                                     .font(.system(size: 16, weight: .semibold))
                                     .foregroundColor(.white)
@@ -145,7 +142,7 @@ struct HomeView: View {
                             title: "Play",
                             offset: button1Offset,
                             opacity: button1Opacity,
-                            destination: PlayView(),
+                            destination: Play2View(),
                             isPressed: $mainPlayButtonPressed
                         )
                         
@@ -156,15 +153,6 @@ struct HomeView: View {
                             opacity: button2Opacity,
                             destination: SettingsView(),
                             isPressed: $settingsButtonPressed
-                        )
-                        
-                        // Play 2.0 Button
-                        NavigationButton(
-                            title: "Play 2.0",
-                            offset: button5Offset,
-                            opacity: button5Opacity,
-                            destination: Play2View(),
-                            isPressed: $play2ButtonPressed
                         )
                         
                         // Online Button (Hidden for first version)
@@ -279,19 +267,12 @@ struct HomeView: View {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
-                button5Offset = 0
-                button5Opacity = 1.0
-            }
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
                 button3Offset = 0
                 button3Opacity = 1.0
             }
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
                 button4Offset = 0
                 button4Opacity = 1.0

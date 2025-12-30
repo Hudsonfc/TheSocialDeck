@@ -14,6 +14,15 @@ struct SettingsView: View {
     @State private var whatsNewButtonPressed = false
     @State private var feedbackButtonPressed = false
     
+    // App version info
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+    }
+    
+    private var buildNumber: String {
+        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+    }
+    
     var body: some View {
         ZStack {
             // White background
@@ -65,6 +74,17 @@ struct SettingsView: View {
                     .padding(.horizontal, 40)
                     }
                     
+                // App Version
+                VStack(spacing: 4) {
+                    Text("The Social Deck")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    Text("Version \(appVersion) (\(buildNumber))")
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                        .foregroundColor(Color(red: 0xB0/255.0, green: 0xB0/255.0, blue: 0xB0/255.0))
+                }
+                .padding(.bottom, 16)
+                
                 // Bottom buttons - Privacy Policy and Terms of Service
                 HStack(spacing: 24) {
                     NavigationLink(destination: PrivacyPolicyView()) {

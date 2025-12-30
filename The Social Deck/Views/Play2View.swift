@@ -9,6 +9,7 @@ import SwiftUI
 
 struct Play2View: View {
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var favoritesManager = FavoritesManager.shared
     @State private var currentCardIndex = 0
     @State private var selectedCategory = "Classic Games"
     @State private var navigateToCategorySelection: Deck? = nil
@@ -16,8 +17,24 @@ struct Play2View: View {
     @State private var cardOffset: CGFloat = 0
     @State private var isDragging = false
     
-    // All category names
-    let categories = ["Classic Games", "Social Deck Games", "Trivia", "Party Games"]
+    // All category names (Favorites shown dynamically when items exist)
+    var categories: [String] {
+        var cats = ["Classic Games", "Social Deck Games", "Trivia", "Party Games"]
+        if !favoriteDecks.isEmpty {
+            cats.insert("Favorites", at: 0)
+        }
+        return cats
+    }
+    
+    // Get all decks
+    private var allDecks: [Deck] {
+        classicGamesDecks + socialDeckGamesDecks + triviaGamesDecks + partyGamesDecks
+    }
+    
+    // Get favorite decks
+    private var favoriteDecks: [Deck] {
+        allDecks.filter { favoritesManager.isFavorite($0.type) }
+    }
     
     // Classic Games decks with 2.0 artwork
     let classicGamesDecks: [Deck] = [
@@ -185,7 +202,7 @@ struct Play2View: View {
     let partyGamesDecks: [Deck] = [
         Deck(
             title: "Category Clash",
-            description: "The phone shows a category. Players take turns naming something that fits. You hesitate, repeat an answer, or freeze? You drink.",
+            description: "Name items in a category before time runs out! Hesitate or repeat an answer and you're out.",
             numberOfCards: 250,
             estimatedTime: "15-20 min",
             imageName: "CC 2.0",
@@ -225,7 +242,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Bluff Call",
-            description: "One player sees a prompt and must convince the group their answer is true. The group decides whether to believe them or call the bluff.",
+            description: "Convince the group your answer is true, or call their bluff!",
             numberOfCards: 300,
             estimatedTime: "15-20 min",
             imageName: "BC 2.0",
@@ -238,6 +255,8 @@ struct Play2View: View {
     // Current decks based on selected category
     var currentDecks: [Deck] {
         switch selectedCategory {
+        case "Favorites":
+            return favoriteDecks
         case "Classic Games":
             return classicGamesDecks
         case "Social Deck Games":
@@ -480,6 +499,7 @@ struct GameCardView: View {
     let onSelect: () -> Void
     let allowInteraction: Bool
     @State private var flipDegrees: Double = 0
+    @ObservedObject private var favoritesManager = FavoritesManager.shared
     
     // Card dimensions based on actual image ratio (420 x 577)
     private let imageAspectRatio: CGFloat = 420.0 / 577.0
@@ -498,36 +518,51 @@ struct GameCardView: View {
     var body: some View {
         ZStack {
             // Back of card (description and select button) - behind front
-            VStack(spacing: 20) {
-                Spacer()
-                
-                Text(deck.title)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                    .multilineTextAlignment(.center)
-                
-                Text(deck.description)
-                    .font(.system(size: 15, weight: .regular, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-                    .padding(.horizontal, 24)
-                
-                Button(action: {
-                    HapticManager.shared.lightImpact()
-                    onSelect()
-                }) {
-                    Text("Select")
-                        .font(.system(size: 18, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white)
-                        .frame(width: 180)
-                        .padding(.vertical, 14)
-                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                        .cornerRadius(14)
+            ZStack(alignment: .topTrailing) {
+                VStack(spacing: 20) {
+                    Spacer()
+                    
+                    Text(deck.title)
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .multilineTextAlignment(.center)
+                    
+                    Text(deck.description)
+                        .font(.system(size: 15, weight: .regular, design: .rounded))
+                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
+                        .padding(.horizontal, 24)
+                    
+                    Button(action: {
+                        HapticManager.shared.lightImpact()
+                        onSelect()
+                    }) {
+                        Text("Select")
+                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            .foregroundColor(.white)
+                            .frame(width: 180)
+                            .padding(.vertical, 14)
+                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .cornerRadius(14)
+                    }
+                    .padding(.top, 12)
+                    
+                    Spacer()
                 }
-                .padding(.top, 12)
                 
-                Spacer()
+                // Favorite button - top right
+                Button(action: {
+                    favoritesManager.toggleFavorite(deck.type)
+                }) {
+                    Image(systemName: favoritesManager.isFavorite(deck.type) ? "heart.fill" : "heart")
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(favoritesManager.isFavorite(deck.type) ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .frame(width: 40, height: 40)
+                        .background(Color(red: 0xF5/255.0, green: 0xF5/255.0, blue: 0xF5/255.0))
+                        .clipShape(Circle())
+                }
+                .padding(16)
             }
             .frame(width: cardWidth, height: cardHeight)
             .background(Color.white)

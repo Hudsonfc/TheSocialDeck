@@ -119,7 +119,7 @@ struct CategoryClashPlayView: View {
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                                 .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                             
-                            Text("Take turns naming items. Hesitate, repeat, or freeze? Drink!")
+                            Text("Take turns naming items. Hesitate, repeat, or freeze? You're out!")
                                 .font(.system(size: 15, weight: .regular, design: .rounded))
                                 .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                                 .multilineTextAlignment(.center)

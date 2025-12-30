@@ -275,7 +275,7 @@ struct StoryChainPlayView: View {
             manager: StoryChainGameManager(
                 deck: Deck(
                     title: "Story Chain",
-                    description: "Build a story together or drink when you can't continue.",
+                    description: "Add one sentence to continue the story. Pass the phone and watch the chaos unfold.",
                     numberOfCards: 145,
                     estimatedTime: "15-25 min",
                     imageName: "SC artwork",
@@ -287,7 +287,7 @@ struct StoryChainPlayView: View {
             ),
             deck: Deck(
                 title: "Story Chain",
-                description: "Build a story together or drink when you can't continue.",
+                description: "Add one sentence to continue the story. Pass the phone and watch the chaos unfold.",
                 numberOfCards: 125,
                 estimatedTime: "15-25 min",
                 imageName: "Art 1.4",

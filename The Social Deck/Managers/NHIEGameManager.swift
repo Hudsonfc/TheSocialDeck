@@ -14,21 +14,26 @@ class NHIEGameManager: ObservableObject {
     @Published var isFlipped: Bool = false
     @Published var isFinished: Bool = false
     
+    // Check if shuffle is enabled in settings
+    private var shouldShuffle: Bool {
+        UserDefaults.standard.object(forKey: "shuffleCardsEnabled") as? Bool ?? true
+    }
+    
     init(deck: Deck, selectedCategories: [String], cardCount: Int = 0) {
         // If cardCount is 0, use all available cards
         if cardCount == 0 {
         let filteredCards = deck.cards.filter { card in
             selectedCategories.contains(card.category)
         }
-            self.cards = filteredCards.shuffled()
+            self.cards = shouldShuffle ? filteredCards.shuffled() : filteredCards
             return
         }
         
-        // Group cards by category and shuffle each category
+        // Group cards by category and optionally shuffle each category
         var cardsByCategory: [String: [Card]] = [:]
         for category in selectedCategories {
             let categoryCards = deck.cards.filter { $0.category == category }
-            cardsByCategory[category] = categoryCards.shuffled()
+            cardsByCategory[category] = shouldShuffle ? categoryCards.shuffled() : categoryCards
         }
         
         // Calculate how many cards per category (round up to ensure we have enough)
@@ -43,8 +48,10 @@ class NHIEGameManager: ObservableObject {
             }
         }
         
-        // Shuffle the final result to mix categories
-        distributedCards = distributedCards.shuffled()
+        // Optionally shuffle the final result to mix categories
+        if shouldShuffle {
+            distributedCards = distributedCards.shuffled()
+        }
         
         // Trim to exact cardCount if we have more than requested
         if distributedCards.count > cardCount {

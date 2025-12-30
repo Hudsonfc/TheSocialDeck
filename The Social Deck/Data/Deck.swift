@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum DeckType {
+enum DeckType: String {
     case neverHaveIEver
     case truthOrDare
     case wouldYouRather

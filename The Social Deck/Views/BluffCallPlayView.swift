@@ -720,7 +720,7 @@ struct RevealView: View {
                         
                         // Consequences Section
                         VStack(spacing: 12) {
-                            Text("Who Drinks?")
+                            Text("Results")
                                 .font(.system(size: 18, weight: .bold, design: .rounded))
                                 .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                             
@@ -733,14 +733,14 @@ struct RevealView: View {
                                     // No one got it wrong
                                     if playerToldTruth {
                                         // Player told truth and everyone believed correctly
-                                        Text("No one drinks")
+                                        Text("Everyone guessed right!")
                                             .font(.system(size: 18, weight: .bold, design: .rounded))
                                             .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                                             .multilineTextAlignment(.center)
                                             .padding(.horizontal, 24)
                                     } else {
                                         // Player lied and everyone called bluff correctly
-                                        Text("\(manager.currentPlayer) drinks extra")
+                                        Text("\(manager.currentPlayer) got caught!")
                                             .font(.system(size: 18, weight: .bold, design: .rounded))
                                             .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                                             .multilineTextAlignment(.center)
@@ -748,19 +748,19 @@ struct RevealView: View {
                                     }
                                 } else {
                                     // Show players who got it wrong
-                                    Text("\(wrongPlayers.joined(separator: ", ")) drinks")
+                                    Text("\(wrongPlayers.joined(separator: ", ")) got fooled!")
                                         .font(.system(size: 18, weight: .bold, design: .rounded))
                                         .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                                         .multilineTextAlignment(.center)
                                         .padding(.horizontal, 24)
                                     
-                                    // If player lied and everyone called bluff, player also drinks extra
+                                    // If player lied and everyone called bluff, player also loses
                                     if !playerToldTruth {
                                         let allCalledBluff = manager.votingPlayers.allSatisfy { 
                                             manager.getPlayerVote($0) == .callBluff 
                                         }
                                         if allCalledBluff {
-                                            Text("\(manager.currentPlayer) drinks extra")
+                                            Text("\(manager.currentPlayer) got exposed!")
                                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                                                 .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                                                 .multilineTextAlignment(.center)
@@ -777,7 +777,7 @@ struct RevealView: View {
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 24)
                                 
-                                Text(manager.getWhoDrinks())
+                                Text(manager.getWhoLoses())
                                     .font(.system(size: 18, weight: .bold, design: .rounded))
                                     .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                                     .multilineTextAlignment(.center)

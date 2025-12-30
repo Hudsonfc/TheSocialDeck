@@ -69,13 +69,12 @@ struct CategoryClashSetupView: View {
                 Spacer()
                 
                 VStack(spacing: 32) {
-                    // Game artwork
+                    // Game artwork - regular card image
                     Image(deck.imageName)
                         .resizable()
-                        .scaledToFill()
-                        .frame(width: 200, height: 200)
-                        .clipped()
-                        .cornerRadius(100)
+                        .scaledToFit()
+                        .frame(width: 160, height: 220)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
                         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     
                     // Selected categories chips
@@ -187,7 +186,7 @@ struct CategoryClashSetupView: View {
         CategoryClashSetupView(
             deck: Deck(
                 title: "Category Clash",
-                description: "The phone shows a category (like \"types of beers\" or \"things that are red\"). Players take turns naming something that fits. You hesitate, repeat an answer, or freeze? You drink. The pace gets faster each round, turning it into a hilarious pressure game.",
+                description: "Name items in a category before time runs out! Hesitate or repeat an answer and you're out.",
                 numberOfCards: 250,
                 estimatedTime: "15-20 min",
                 imageName: "CC artwork",
