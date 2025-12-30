@@ -9,6 +9,11 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @State private var generalButtonPressed = false
+    @State private var helpButtonPressed = false
+    @State private var whatsNewButtonPressed = false
+    @State private var feedbackButtonPressed = false
+    
     var body: some View {
         ZStack {
             // White background
@@ -17,52 +22,41 @@ struct SettingsView: View {
             
             VStack(spacing: 0) {
                 ScrollView {
-                    VStack(spacing: 24) {
+                    VStack(spacing: 20) {
                         // Title
                         Text("Settings")
                             .font(.system(size: 32, weight: .bold, design: .rounded))
                             .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                             .padding(.top, 20)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         
                         // General Settings Button
-                        NavigationLink(destination: GeneralSettingsView()) {
-                            Text("General")
-                                .font(.system(size: 18, weight: .regular, design: .rounded))
-                                .foregroundColor(.white)
-                                .frame(width: UIScreen.main.bounds.width * 0.85, height: 60)
-                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                .cornerRadius(16)
-                        }
+                        SettingsNavigationButton(
+                            title: "General",
+                            destination: GeneralSettingsView(),
+                            isPressed: $generalButtonPressed
+                        )
                         
                         // Help / FAQ Button
-                        NavigationLink(destination: HelpFAQView()) {
-                            Text("Help / FAQ")
-                                .font(.system(size: 18, weight: .regular, design: .rounded))
-                                .foregroundColor(.white)
-                                .frame(width: UIScreen.main.bounds.width * 0.85, height: 60)
-                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                .cornerRadius(16)
-                        }
+                        SettingsNavigationButton(
+                            title: "Help / FAQ",
+                            destination: HelpFAQView(),
+                            isPressed: $helpButtonPressed
+                        )
                         
                         // What's New Button
-                        NavigationLink(destination: WhatsNewView()) {
-                            Text("What's New")
-                                .font(.system(size: 18, weight: .regular, design: .rounded))
-                                .foregroundColor(.white)
-                                .frame(width: UIScreen.main.bounds.width * 0.85, height: 60)
-                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                .cornerRadius(16)
-                        }
+                        SettingsNavigationButton(
+                            title: "What's New",
+                            destination: WhatsNewView(),
+                            isPressed: $whatsNewButtonPressed
+                        )
                         
                         // Feedback Button
-                        NavigationLink(destination: FeedbackView()) {
-                            Text("Feedback")
-                                .font(.system(size: 18, weight: .regular, design: .rounded))
-                                .foregroundColor(.white)
-                                .frame(width: UIScreen.main.bounds.width * 0.85, height: 60)
-                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                .cornerRadius(16)
-                        }
+                        SettingsNavigationButton(
+                            title: "Feedback",
+                            destination: FeedbackView(),
+                            isPressed: $feedbackButtonPressed
+                        )
                         
                         // Spacer to push bottom buttons down
                         Spacer()
@@ -96,6 +90,7 @@ struct SettingsView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
+                    HapticManager.shared.lightImpact()
                     dismiss()
                 }) {
                     Image(systemName: "chevron.left")
@@ -105,6 +100,38 @@ struct SettingsView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+    }
+}
+
+struct SettingsNavigationButton<Destination: View>: View {
+    let title: String
+    let destination: Destination
+    @Binding var isPressed: Bool
+    
+    var body: some View {
+        NavigationLink(destination: destination) {
+            Text(title)
+                .font(.system(size: 18, weight: .regular, design: .rounded))
+                .foregroundColor(.white)
+                .frame(width: UIScreen.main.bounds.width * 0.85, height: 60)
+                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                .cornerRadius(16)
+        }
+        .scaleEffect(isPressed ? 0.97 : 1.0)
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    withAnimation(.easeInOut(duration: 0.1)) {
+                        isPressed = true
+                    }
+                    HapticManager.shared.lightImpact()
+                }
+                .onEnded { _ in
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        isPressed = false
+                    }
+                }
+        )
     }
 }
 

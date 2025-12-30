@@ -32,6 +32,13 @@ struct PrivacyPolicyView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 8)
                     
+                    // Last Updated
+                    Text("Last Updated: \(DateFormatter.monthYear.string(from: Date()))")
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top, 4)
+                    
                     // Content Card
                     VStack(spacing: 0) {
                         // Introduction
@@ -149,6 +156,14 @@ struct PrivacyPolicyView: View {
         }
         .navigationBarBackButtonHidden(true)
     }
+}
+
+extension DateFormatter {
+    static let monthYear: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM yyyy"
+        return formatter
+    }()
 }
 
 struct PolicySection: View {

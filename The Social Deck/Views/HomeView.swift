@@ -20,6 +20,11 @@ struct HomeView: View {
     @State private var button3Opacity: Double = 0
     @State private var button4Offset: CGFloat = 50
     @State private var button4Opacity: Double = 0
+    @State private var featuredPlayButtonPressed = false
+    @State private var mainPlayButtonPressed = false
+    @State private var settingsButtonPressed = false
+    @State private var currentSlideIndex = 0
+    @State private var slideshowTimer: Timer?
     
     var body: some View {
         NavigationStack {
@@ -39,16 +44,44 @@ struct HomeView: View {
                     
                     // Featured Deck Card
                     VStack(spacing: 15) {
-                        // Deck Image
-                        NavigationLink(destination: WhatsNewView()) {
-                            Image("Art 1.4")
-                                .resizable()
-                                .scaledToFill()
+                        // Hero Banner
+                        ZStack {
+                            NavigationLink(destination: WhatsNewView()) {
+                                TabView(selection: $currentSlideIndex) {
+                                    // Welcome Card Slide (Index 0)
+                                    HeroWelcomeSlide()
+                                        .tag(0)
+                                    
+                                    // Why We Built Slide (Index 1)
+                                    HeroWhyWeBuiltSlide()
+                                        .tag(1)
+                                }
+                                .tabViewStyle(.page(indexDisplayMode: .never))
                                 .frame(width: 320, height: 200)
-                                .clipped()
                                 .cornerRadius(16, corners: [.topLeft, .topRight])
+                                .onAppear {
+                                    startSlideshow()
+                                }
+                                .onDisappear {
+                                    stopSlideshow()
+                                }
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            
+                            // Slide Counter
+                            VStack {
+                                Spacer()
+                                HStack(spacing: 6) {
+                                    ForEach(0..<2, id: \.self) { index in
+                                        Circle()
+                                            .fill(index == currentSlideIndex ? Color.white : Color.white.opacity(0.4))
+                                            .frame(width: 6, height: 6)
+                                    }
+                                }
+                                .padding(.bottom, 12)
+                            }
                         }
-                        .buttonStyle(PlainButtonStyle())
+                        .frame(width: 320, height: 200)
                         
                         HStack {
                             VStack(alignment: .leading, spacing: 5) {
@@ -69,6 +102,21 @@ struct HomeView: View {
                                     .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                                     .cornerRadius(20)
                             }
+                            .scaleEffect(featuredPlayButtonPressed ? 0.95 : 1.0)
+                            .simultaneousGesture(
+                                DragGesture(minimumDistance: 0)
+                                    .onChanged { _ in
+                                        withAnimation(.easeInOut(duration: 0.1)) {
+                                            featuredPlayButtonPressed = true
+                                        }
+                                        HapticManager.shared.lightImpact()
+                                    }
+                                    .onEnded { _ in
+                                        withAnimation(.easeInOut(duration: 0.1)) {
+                                            featuredPlayButtonPressed = false
+                                        }
+                                    }
+                            )
                         }
                         .padding(.horizontal, 20)
                         .padding(.bottom, 20)
@@ -80,6 +128,13 @@ struct HomeView: View {
                     .opacity(featuredCardOpacity)
                     .padding(.horizontal, 40)
                     
+                    // Separator
+                    Rectangle()
+                        .fill(Color(red: 0xE1/255.0, green: 0xE1/255.0, blue: 0xE1/255.0))
+                        .frame(height: 1)
+                        .padding(.horizontal, 40)
+                        .padding(.vertical, 8)
+                    
                     // Main Buttons
                     VStack(spacing: 16) {
                         // Play Button
@@ -87,7 +142,8 @@ struct HomeView: View {
                             title: "Play",
                             offset: button1Offset,
                             opacity: button1Opacity,
-                            destination: PlayView()
+                            destination: PlayView(),
+                            isPressed: $mainPlayButtonPressed
                         )
                         
                         // Settings Button (moved directly under Play)
@@ -95,7 +151,8 @@ struct HomeView: View {
                             title: "Settings",
                             offset: button2Offset,
                             opacity: button2Opacity,
-                            destination: SettingsView()
+                            destination: SettingsView(),
+                            isPressed: $settingsButtonPressed
                         )
                         
                         // Online Button (Hidden for first version)
@@ -103,7 +160,8 @@ struct HomeView: View {
                             title: "Online",
                             offset: button3Offset,
                             opacity: button3Opacity,
-                            destination: OnlineView()
+                            destination: OnlineView(),
+                            isPressed: .constant(false)
                         )
                         .hidden()
                         
@@ -112,7 +170,8 @@ struct HomeView: View {
                             title: "Profile",
                             offset: button4Offset,
                             opacity: button4Opacity,
-                            destination: ProfileView()
+                            destination: ProfileView(),
+                            isPressed: .constant(false)
                         )
                         .hidden()
                     }
@@ -161,6 +220,20 @@ struct HomeView: View {
                 startAnimations()
             }
         }
+    }
+    
+    private func startSlideshow() {
+        stopSlideshow() // Stop any existing timer
+        slideshowTimer = Timer.scheduledTimer(withTimeInterval: 6.0, repeats: true) { _ in
+            withAnimation(.easeInOut(duration: 0.6)) {
+                currentSlideIndex = (currentSlideIndex + 1) % 2
+            }
+        }
+    }
+    
+    private func stopSlideshow() {
+        slideshowTimer?.invalidate()
+        slideshowTimer = nil
     }
     
     private func startAnimations() {
@@ -214,6 +287,7 @@ struct NavigationButton<Destination: View>: View {
     let offset: CGFloat
     let opacity: Double
     let destination: Destination
+    @Binding var isPressed: Bool
     
     var body: some View {
         NavigationLink(destination: destination) {
@@ -225,8 +299,23 @@ struct NavigationButton<Destination: View>: View {
                 .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                 .cornerRadius(16)
         }
+        .scaleEffect(isPressed ? 0.96 : 1.0)
         .offset(y: offset)
         .opacity(opacity)
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    withAnimation(.easeInOut(duration: 0.1)) {
+                        isPressed = true
+                    }
+                    HapticManager.shared.lightImpact()
+                }
+                .onEnded { _ in
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        isPressed = false
+                    }
+                }
+        )
     }
 }
 
@@ -254,22 +343,112 @@ struct RoundedCorner: Shape {
 // Share Button Component
 struct ShareButton: View {
     @State private var showShareSheet = false
+    @State private var isPressed = false
     
     var body: some View {
         Button(action: {
             showShareSheet = true
+            HapticManager.shared.lightImpact()
         }) {
             Image(systemName: "square.and.arrow.up")
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(.white)
-                .frame(width: 56, height: 56)
-                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                .font(.system(size: 18, weight: .medium))
+                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                .frame(width: 44, height: 44)
+                .background(Color.white)
                 .clipShape(Circle())
-                .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
+                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
         }
+        .scaleEffect(isPressed ? 0.92 : 1.0)
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    withAnimation(.easeInOut(duration: 0.1)) {
+                        isPressed = true
+                    }
+                    HapticManager.shared.lightImpact()
+                }
+                .onEnded { _ in
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        isPressed = false
+                    }
+                }
+        )
         .sheet(isPresented: $showShareSheet) {
             ShareSheet(activityItems: ["Playing card games on The Social Deck ♠️ Pass & play with friends — no accounts needed."])
         }
+    }
+}
+
+// Hero Banner Welcome Slide
+struct HeroWelcomeSlide: View {
+    var body: some View {
+        ZStack {
+            // Background with red accent at top
+            VStack(spacing: 0) {
+                Rectangle()
+                    .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .frame(height: 4)
+                
+                Color.white
+            }
+            
+            VStack(spacing: 16) {
+                Text("Welcome to")
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                
+                Text("The Social Deck")
+                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                
+                Text("Pass & play with friends")
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+            .padding(.top, 8)
+        }
+        .frame(width: 320, height: 200)
+        .cornerRadius(16, corners: [.topLeft, .topRight])
+    }
+}
+
+// Hero Banner Why We Built Slide
+struct HeroWhyWeBuiltSlide: View {
+    var body: some View {
+        ZStack {
+            // Light gray background
+            Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0)
+            
+            HStack(spacing: 0) {
+                // Red accent bar on the left
+                Rectangle()
+                    .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .frame(width: 4)
+                
+                VStack(alignment: .leading, spacing: 14) {
+                    Text("Why We Built")
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    
+                    Text("The Social Deck")
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    
+                    Text("To bring people together through fun card games and create lasting memories with friends.")
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(Color(red: 0x5A/255.0, green: 0x5A/255.0, blue: 0x5A/255.0))
+                        .lineSpacing(4)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(.leading, 20)
+                .padding(.trailing, 20)
+                .padding(.vertical, 20)
+            }
+        }
+        .frame(width: 320, height: 200)
+        .cornerRadius(16, corners: [.topLeft, .topRight])
     }
 }
 

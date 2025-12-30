@@ -71,6 +71,7 @@ struct HelpFAQView: View {
                         .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 12)
+                        .padding(.bottom, 24)
                     
                     // FAQ Items Container
                     VStack(spacing: 0) {
