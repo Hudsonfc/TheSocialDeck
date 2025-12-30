@@ -21,13 +21,13 @@ struct SettingsView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                ScrollView {
+            ScrollView {
                     VStack(spacing: 20) {
-                        // Title
-                        Text("Settings")
-                            .font(.system(size: 32, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                            .padding(.top, 20)
+                    // Title
+                    Text("Settings")
+                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .padding(.top, 20)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         
                         // General Settings Button
@@ -63,8 +63,8 @@ struct SettingsView: View {
                             .frame(height: 40)
                     }
                     .padding(.horizontal, 40)
-                }
-                
+                    }
+                    
                 // Bottom buttons - Privacy Policy and Terms of Service
                 HStack(spacing: 24) {
                     NavigationLink(destination: PrivacyPolicyView()) {
@@ -82,7 +82,7 @@ struct SettingsView: View {
                     }
                 }
                 .padding(.horizontal, 40)
-                .padding(.bottom, 30)
+                        .padding(.bottom, 30)
                 .frame(maxWidth: .infinity)
             }
         }
