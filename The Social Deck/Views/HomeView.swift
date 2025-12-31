@@ -98,6 +98,18 @@ struct HomeView: View {
                             .onDisappear {
                                 stopSlideshow()
                             }
+                            .simultaneousGesture(
+                                // Allow wrapping from last slide to first
+                                DragGesture(minimumDistance: 30, coordinateSpace: .local)
+                                    .onEnded { value in
+                                        // Right swipe on last slide wraps to first
+                                        if currentSlideIndex == 3 && value.translation.width > 80 {
+                                            withAnimation(.easeInOut(duration: 0.3)) {
+                                                currentSlideIndex = 0
+                                            }
+                                        }
+                                    }
+                            )
                             
                             // Slide Counter
                             VStack {
@@ -105,7 +117,7 @@ struct HomeView: View {
                                 HStack(spacing: 6) {
                                     ForEach(0..<4, id: \.self) { index in
                                         Circle()
-                                            .fill(index == currentSlideIndex ? Color.white : Color.white.opacity(0.4))
+                                            .fill(index == currentSlideIndex ? Color.black : Color.black.opacity(0.4))
                                             .frame(width: 6, height: 6)
                                     }
                                 }
