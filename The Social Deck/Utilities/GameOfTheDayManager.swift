@@ -34,6 +34,7 @@ class GameOfTheDayManager {
         GameOfTheDayInfo(title: "Tap Duel", description: "Fast head-to-head reaction game. Wait for GO, then tap first to win!", imageName: "TD 2.0", type: .tapDuel),
         GameOfTheDayInfo(title: "What's My Secret?", description: "One player gets a secret rule to follow. Can the group figure out what it is?", imageName: "WMS 2.0", type: .whatsMySecret),
         GameOfTheDayInfo(title: "Riddle Me This", description: "Solve riddles quickly! The first player to say the correct answer wins the round.", imageName: "RMT 2.0", type: .riddleMeThis),
+        GameOfTheDayInfo(title: "Act It Out", description: "Act out prompts silently while others guess! First to guess correctly wins the round.", imageName: "AIO 2.0", type: .actItOut),
         
         // Trivia Games
         GameOfTheDayInfo(title: "Pop Culture Trivia", description: "Test your knowledge of movies, music, and celebrities.", imageName: "pop culture 2.0", type: .popCultureTrivia),

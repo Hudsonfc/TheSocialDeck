@@ -11,13 +11,9 @@ struct TapDuelLoadingView: View {
     let deck: Deck
     let player1Name: String
     let player2Name: String
+    
     @State private var navigateToPlay: Bool = false
-    @State private var logoOpacity: Double = 0
-    @State private var logoScale: CGFloat = 0.7
-    @State private var logoRotation: Double = 0
-    @State private var logoBounce: CGFloat = 0
-    @State private var hasNavigated: Bool = false
-    @Environment(\.dismiss) private var dismiss
+    @State private var progress: Double = 0
     
     var body: some View {
         ZStack {
@@ -25,71 +21,47 @@ struct TapDuelLoadingView: View {
             Color.white
                 .ignoresSafeArea()
             
-            VStack(spacing: 0) {
+            VStack(spacing: 32) {
                 Spacer()
                 
-                // The Social Deck Logo with bouncy animations
-                Image("TheSocialDeckLogo")
+                // Game artwork
+                Image(deck.imageName)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 70, height: 70)
-                    .opacity(logoOpacity)
-                    .scaleEffect(logoScale)
-                    .rotationEffect(.degrees(logoRotation))
-                    .offset(y: logoBounce)
+                    .frame(width: 200, height: 275)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 8)
+                
+                // Loading text
+                VStack(spacing: 12) {
+                    Text("Get Ready!")
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    
+                    Text("Preparing your game...")
+                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                }
+                
+                // Progress bar
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                        .frame(height: 8)
+                    
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .frame(width: 200 * progress, height: 8)
+                        .animation(.easeInOut(duration: 0.3), value: progress)
+                }
+                .frame(width: 200)
                 
                 Spacer()
             }
         }
         .navigationBarHidden(true)
         .onAppear {
-            // If we've already navigated (meaning we came back from PlayView), dismiss immediately
-            if hasNavigated {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                    dismiss()
-                }
-                return
-            }
-            
-            // Logo animation: fade in with bouncy scale up
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.5)) {
-                logoOpacity = 1.0
-                logoScale = 1.1
-            }
-            
-            // Bounce back after initial scale
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.4)) {
-                    logoScale = 1.0
-                }
-            }
-            
-            // Continuous bouncy scale animation
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.5).repeatForever(autoreverses: true)) {
-                    logoScale = 1.15
-                }
-            }
-            
-            // Bouncy vertical movement
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                withAnimation(.spring(response: 0.8, dampingFraction: 0.6).repeatForever(autoreverses: true)) {
-                    logoBounce = -8
-                }
-            }
-            
-            // Slow continuous rotation animation
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                withAnimation(.linear(duration: 3.0).repeatForever(autoreverses: false)) {
-                    logoRotation = 360
-                }
-            }
-            
-            // Navigate after short delay (1.5 seconds total)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                hasNavigated = true
-                navigateToPlay = true
-            }
+            startLoading()
         }
         .background(
             NavigationLink(
@@ -102,5 +74,28 @@ struct TapDuelLoadingView: View {
                 EmptyView()
             }
         )
+    }
+    
+    private func startLoading() {
+        // Animate progress bar
+        withAnimation(.easeInOut(duration: 0.5)) {
+            progress = 0.3
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation(.easeInOut(duration: 0.4)) {
+                progress = 0.6
+            }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                progress = 1.0
+            }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.3) {
+            navigateToPlay = true
+        }
     }
 }

@@ -131,6 +131,16 @@ struct Play2View: View {
             type: .riddleMeThis,
             cards: allRiddleMeThisCards,
             availableCategories: []
+        ),
+        Deck(
+            title: "Act It Out",
+            description: "Act out prompts silently while others guess! First to guess correctly wins the round.",
+            numberOfCards: 300,
+            estimatedTime: "15-30 min",
+            imageName: "AIO 2.0",
+            type: .actItOut,
+            cards: allActItOutCards,
+            availableCategories: ["Actions & Verbs", "Animals", "Emotions & Expressions", "Daily Activities", "Sports & Activities", "Objects & Tools", "Food & Cooking", "Famous Concepts", "Movie Genres", "Nature & Weather"]
         )
     ]
     
@@ -448,6 +458,8 @@ struct Play2View: View {
                 WhatsMySecretSetupView(deck: deck)
             case .riddleMeThis:
                 RiddleMeThisSetupView(deck: deck)
+            case .actItOut:
+                ActItOutCategorySelectionView(deck: deck)
             // Trivia Games
             case .popCultureTrivia:
                 PopCultureTriviaCategorySelectionView(deck: deck)

@@ -161,6 +161,7 @@ extension DeckType {
         case .tapDuel: return "tapDuel"
         case .whatsMySecret: return "whatsMySecret"
         case .riddleMeThis: return "riddleMeThis"
+        case .actItOut: return "actItOut"
         case .colorClash: return "colorClash"
         case .flip21: return "flip21"
         case .other: return "other"
@@ -192,6 +193,7 @@ extension DeckType {
         case "tapDuel": self = .tapDuel
         case "whatsMySecret": self = .whatsMySecret
         case "riddleMeThis": self = .riddleMeThis
+        case "actItOut": self = .actItOut
         case "colorClash": self = .colorClash
         case "flip21": self = .flip21
         case "other": self = .other

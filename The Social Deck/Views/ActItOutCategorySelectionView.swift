@@ -1,0 +1,171 @@
+//
+//  ActItOutCategorySelectionView.swift
+//  The Social Deck
+//
+//  Created by Hudson Ferreira on 12/31/24.
+//
+
+import SwiftUI
+
+struct ActItOutCategorySelectionView: View {
+    let deck: Deck
+    @State private var selectedCategories: Set<String> = []
+    @State private var navigateToSetup: Bool = false
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        ZStack {
+            // White background
+            Color.white
+                .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Back button at top left
+                HStack {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 40)
+                .padding(.top, 20)
+                
+                ScrollView {
+                    VStack(spacing: 0) {
+                        // Game artwork - regular card image
+                        Image(deck.imageName)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 160, height: 220)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                            .padding(.top, 20)
+                            .padding(.bottom, 32)
+                        
+                        // Title
+                        Text("Select Categories")
+                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .padding(.bottom, 8)
+                        
+                        Text("Choose which types of prompts to include")
+                            .font(.system(size: 14, weight: .regular, design: .rounded))
+                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .padding(.bottom, 24)
+                        
+                        // Category buttons
+                        VStack(spacing: 12) {
+                            ForEach(deck.availableCategories, id: \.self) { category in
+                                CategoryButton(
+                                    title: category,
+                                    isSelected: selectedCategories.contains(category),
+                                    cardCount: deck.cards.filter { $0.category == category }.count
+                                ) {
+                                    if selectedCategories.contains(category) {
+                                        selectedCategories.remove(category)
+                                    } else {
+                                        selectedCategories.insert(category)
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 24)
+                        
+                        // Select All button
+                        Button(action: {
+                            if selectedCategories.count == deck.availableCategories.count {
+                                selectedCategories.removeAll()
+                            } else {
+                                selectedCategories = Set(deck.availableCategories)
+                            }
+                        }) {
+                            Text(selectedCategories.count == deck.availableCategories.count ? "Deselect All" : "Select All")
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        }
+                        .padding(.bottom, 24)
+                        
+                        // Continue button
+                        PrimaryButton(title: "Continue") {
+                            HapticManager.shared.lightImpact()
+                            navigateToSetup = true
+                        }
+                        .padding(.horizontal, 40)
+                        .disabled(selectedCategories.isEmpty)
+                        .opacity(selectedCategories.isEmpty ? 0.5 : 1.0)
+                        .padding(.bottom, 40)
+                    }
+                }
+            }
+        }
+        .navigationBarHidden(true)
+        .background(
+            NavigationLink(
+                destination: ActItOutSetupView(
+                    deck: deck,
+                    selectedCategories: Array(selectedCategories)
+                ),
+                isActive: $navigateToSetup
+            ) {
+                EmptyView()
+            }
+        )
+    }
+}
+
+// Category button component
+struct CategoryButton: View {
+    let title: String
+    let isSelected: Bool
+    let cardCount: Int
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(isSelected ? .white : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    
+                    Text("\(cardCount) prompts")
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                        .foregroundColor(isSelected ? .white.opacity(0.8) : Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                }
+                
+                Spacer()
+                
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 24))
+                    .foregroundColor(isSelected ? .white : Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .background(isSelected ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+            .cornerRadius(12)
+        }
+    }
+}
+
+#Preview {
+    NavigationView {
+        ActItOutCategorySelectionView(
+            deck: Deck(
+                title: "Act It Out",
+                description: "Act out prompts silently!",
+                numberOfCards: 300,
+                estimatedTime: "15-30 min",
+                imageName: "AIO 2.0",
+                type: .actItOut,
+                cards: allActItOutCards,
+                availableCategories: ["Actions & Verbs", "Animals", "Emotions & Expressions", "Daily Activities", "Sports & Activities", "Objects & Tools", "Food & Cooking", "Famous Concepts", "Movie Genres", "Nature & Weather"]
+            )
+        )
+    }
+}
+

@@ -1,19 +1,40 @@
 //
-//  ScienceTriviaLoadingView.swift
+//  ActItOutLoadingView.swift
 //  The Social Deck
 //
-//  Created by Hudson Ferreira on 11/23/25.
+//  Created by Hudson Ferreira on 12/31/24.
 //
 
 import SwiftUI
 
-struct ScienceTriviaLoadingView: View {
+struct ActItOutLoadingView: View {
     let deck: Deck
     let selectedCategories: [String]
+    let players: [String]
     let cardCount: Int
+    let timerEnabled: Bool
+    let timerDuration: Int
     
     @State private var navigateToPlay: Bool = false
     @State private var progress: Double = 0
+    @StateObject private var manager: ActItOutGameManager
+    
+    init(deck: Deck, selectedCategories: [String], players: [String], cardCount: Int, timerEnabled: Bool, timerDuration: Int) {
+        self.deck = deck
+        self.selectedCategories = selectedCategories
+        self.players = players
+        self.cardCount = cardCount
+        self.timerEnabled = timerEnabled
+        self.timerDuration = timerDuration
+        self._manager = StateObject(wrappedValue: ActItOutGameManager(
+            deck: deck,
+            selectedCategories: selectedCategories,
+            players: players,
+            cardCount: cardCount,
+            timerEnabled: timerEnabled,
+            timerDuration: timerDuration
+        ))
+    }
     
     var body: some View {
         ZStack {
@@ -65,8 +86,8 @@ struct ScienceTriviaLoadingView: View {
         }
         .background(
             NavigationLink(
-                destination: ScienceTriviaPlayView(
-                    manager: ScienceTriviaGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: cardCount),
+                destination: ActItOutPlayView(
+                    manager: manager,
                     deck: deck,
                     selectedCategories: selectedCategories
                 ),
@@ -100,3 +121,26 @@ struct ScienceTriviaLoadingView: View {
         }
     }
 }
+
+#Preview {
+    NavigationView {
+        ActItOutLoadingView(
+            deck: Deck(
+                title: "Act It Out",
+                description: "Act out prompts silently!",
+                numberOfCards: 300,
+                estimatedTime: "15-30 min",
+                imageName: "AIO 2.0",
+                type: .actItOut,
+                cards: allActItOutCards,
+                availableCategories: ["Actions & Verbs", "Animals"]
+            ),
+            selectedCategories: ["Actions & Verbs", "Animals"],
+            players: ["Player 1", "Player 2"],
+            cardCount: 20,
+            timerEnabled: true,
+            timerDuration: 60
+        )
+    }
+}
+
