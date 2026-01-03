@@ -17,6 +17,8 @@ struct ActItOutLoadingView: View {
     
     @State private var navigateToPlay: Bool = false
     @State private var progress: Double = 0
+    @State private var hasStartedLoading: Bool = false
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var manager: ActItOutGameManager
     
     init(deck: Deck, selectedCategories: [String], players: [String], cardCount: Int, timerEnabled: Bool, timerDuration: Int) {
@@ -79,10 +81,34 @@ struct ActItOutLoadingView: View {
                 
                 Spacer()
             }
+            
+            // X button to exit
+            VStack {
+                HStack {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .frame(width: 44, height: 44)
+                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .clipShape(Circle())
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 40)
+                .padding(.top, 20)
+                Spacer()
+            }
         }
         .navigationBarHidden(true)
         .onAppear {
-            startLoading()
+            // Only start loading if we haven't started yet (prevents re-triggering when coming back from PlayView)
+            if !hasStartedLoading {
+                hasStartedLoading = true
+                startLoading()
+            }
         }
         .background(
             NavigationLink(

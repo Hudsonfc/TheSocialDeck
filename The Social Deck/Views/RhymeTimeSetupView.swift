@@ -13,6 +13,7 @@ struct RhymeTimeSetupView: View {
     @State private var players: [String] = []
     @State private var newPlayerName: String = ""
     @State private var navigateToPlay: Bool = false
+    @State private var timerDuration: Double = 10
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -122,7 +123,23 @@ struct RhymeTimeSetupView: View {
                             }
                         }
                         .padding(.horizontal, 40)
-                        .padding(.bottom, players.count > 3 ? 20 : 32)
+                        .padding(.bottom, 20)
+                        
+                        // Timer duration section
+                        VStack(spacing: 12) {
+                            Text("Timer Duration")
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            
+                            Text("\(Int(timerDuration)) seconds per turn")
+                                .font(.system(size: 14, weight: .medium, design: .rounded))
+                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            
+                            Slider(value: $timerDuration, in: 5...20, step: 1)
+                                .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .padding(.horizontal, 40)
+                        }
+                        .padding(.bottom, 24)
                         
                         // Start Game button
                         PrimaryButton(title: "Start Game") {
@@ -149,7 +166,8 @@ struct RhymeTimeSetupView: View {
             NavigationLink(
                 destination: RhymeTimeLoadingView(
                     deck: deck,
-                    players: players
+                    players: players,
+                    timerDuration: Int(timerDuration)
                 ),
                 isActive: $navigateToPlay
             ) {

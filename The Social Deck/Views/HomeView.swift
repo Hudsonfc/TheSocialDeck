@@ -474,10 +474,19 @@ struct HeroWhyWeBuiltSlide: View {
                     .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                     .frame(width: 4)
                 
+                HStack(alignment: .top, spacing: 12) {
                 VStack(alignment: .leading, spacing: 14) {
+                        HStack(spacing: 8) {
                     Text("Why We Built")
                         .font(.system(size: 16, weight: .bold, design: .rounded))
                         .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            
+                            // Logo on the right side of "Why We Built" text
+                            Image("TheSocialDeckLogo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 24, height: 24)
+                        }
                     
                     Text("The Social Deck")
                         .font(.system(size: 28, weight: .bold, design: .rounded))
@@ -488,6 +497,9 @@ struct HeroWhyWeBuiltSlide: View {
                         .foregroundColor(Color(red: 0x5A/255.0, green: 0x5A/255.0, blue: 0x5A/255.0))
                         .lineSpacing(4)
                         .fixedSize(horizontal: false, vertical: true)
+                    }
+                    
+                    Spacer()
                 }
                 .padding(.leading, 20)
                 .padding(.trailing, 20)

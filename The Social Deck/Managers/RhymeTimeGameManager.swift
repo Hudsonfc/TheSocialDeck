@@ -21,7 +21,7 @@ class RhymeTimeGameManager: ObservableObject {
     @Published var roundComplete: Bool = false
     
     private var timer: Timer?
-    private let turnDuration: TimeInterval = 10.0 // 10 seconds per turn
+    private var turnDuration: TimeInterval = 10.0 // Default 10 seconds per turn
     private var cards: [Card] = []
     private var currentCardIndex: Int = 0
     
@@ -34,13 +34,16 @@ class RhymeTimeGameManager: ObservableObject {
     
     @Published var gamePhase: GamePhase = .waitingToStart
     
-    init(deck: Deck, players: [String]) {
+    init(deck: Deck, players: [String], timerDuration: Int = 10) {
         // Randomize player order
         if players.isEmpty {
             self.players = ["Player 1"]
         } else {
             self.players = players.shuffled()
         }
+        
+        // Set timer duration
+        self.turnDuration = TimeInterval(timerDuration)
         
         // Get cards from deck
         self.cards = deck.cards.isEmpty ? [] : deck.cards.shuffled()

@@ -166,7 +166,7 @@ struct MLTPlayView: View {
         .background(
             Group {
                 NavigationLink(
-                    destination: MLTEndView(deck: deck, selectedCategories: selectedCategories),
+                    destination: MLTEndView(deck: deck, selectedCategories: selectedCategories, cardsPlayed: manager.cards.count),
                     isActive: $showEndView
                 ) {
                     EmptyView()
@@ -194,7 +194,7 @@ struct MLTPlayView: View {
             }
         }
         .onChange(of: manager.isFinished) { oldValue, newValue in
-            if newValue && manager.isFlipped {
+            if newValue {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     showEndView = true
                 }

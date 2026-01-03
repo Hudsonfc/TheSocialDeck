@@ -15,6 +15,7 @@ class HotPotatoGameManager: ObservableObject {
     @Published var isGameActive: Bool = false
     @Published var timerExpired: Bool = false
     @Published var roundNumber: Int = 1
+    @Published var totalRounds: Int = 5
     @Published var loser: String? = nil
     @Published var heatLevel: Double = 0.0 // 0.0 to 1.0, represents how close to expiration
     @Published var passCount: Int = 0
@@ -151,7 +152,7 @@ class HotPotatoGameManager: ObservableObject {
     
     @Published var gamePhase: GamePhase = .waitingToStart
     
-    init(players: [String], perksEnabled: Bool = true) {
+    init(players: [String], perksEnabled: Bool = true, totalRounds: Int = 5) {
         // Randomize player order
         if players.isEmpty {
             self.players = ["Player 1"]
@@ -159,6 +160,11 @@ class HotPotatoGameManager: ObservableObject {
             self.players = players.shuffled()
         }
         self.perksEnabled = perksEnabled
+        self.totalRounds = totalRounds
+    }
+    
+    var isGameComplete: Bool {
+        return roundNumber > totalRounds
     }
     
     var currentPlayer: String {

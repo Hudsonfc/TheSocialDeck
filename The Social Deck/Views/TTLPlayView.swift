@@ -172,7 +172,7 @@ struct TTLPlayView: View {
         .background(
             Group {
                 NavigationLink(
-                    destination: TTLEndView(deck: deck, selectedCategories: selectedCategories),
+                    destination: TTLEndView(deck: deck, selectedCategories: selectedCategories, cardsPlayed: manager.cards.count),
                     isActive: $showEndView
                 ) {
                     EmptyView()
@@ -204,7 +204,7 @@ struct TTLPlayView: View {
             }
         }
         .onChange(of: manager.isFinished) { oldValue, newValue in
-            if newValue && manager.isFlipped {
+            if newValue {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     showEndView = true
                 }

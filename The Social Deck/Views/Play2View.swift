@@ -105,7 +105,7 @@ struct Play2View: View {
         Deck(
             title: "Tap Duel",
             description: "Fast head-to-head reaction game. Wait for GO, then tap first to win!",
-            numberOfCards: 0,
+            numberOfCards: 999,
             estimatedTime: "2-5 min",
             imageName: "TD 2.0",
             type: .tapDuel,
@@ -149,7 +149,7 @@ struct Play2View: View {
         Deck(
             title: "Pop Culture Trivia",
             description: "Test your knowledge of movies, music, and celebrities.",
-            numberOfCards: 20,
+            numberOfCards: 1200,
             estimatedTime: "10-15 min",
             imageName: "pop culture 2.0",
             type: .popCultureTrivia,
@@ -159,7 +159,7 @@ struct Play2View: View {
         Deck(
             title: "History Trivia",
             description: "Challenge yourself with historical facts and events.",
-            numberOfCards: 20,
+            numberOfCards: 620,
             estimatedTime: "10-15 min",
             imageName: "History 2.0",
             type: .historyTrivia,
@@ -169,7 +169,7 @@ struct Play2View: View {
         Deck(
             title: "Science Trivia",
             description: "Explore the world of science and discovery.",
-            numberOfCards: 20,
+            numberOfCards: 640,
             estimatedTime: "10-15 min",
             imageName: "science 2.0",
             type: .scienceTrivia,
@@ -179,7 +179,7 @@ struct Play2View: View {
         Deck(
             title: "Sports Trivia",
             description: "Show off your sports knowledge.",
-            numberOfCards: 20,
+            numberOfCards: 920,
             estimatedTime: "10-15 min",
             imageName: "sports 2.0",
             type: .sportsTrivia,
@@ -189,7 +189,7 @@ struct Play2View: View {
         Deck(
             title: "Movie Trivia",
             description: "Test your movie knowledge with film questions.",
-            numberOfCards: 20,
+            numberOfCards: 600,
             estimatedTime: "10-15 min",
             imageName: "movies 2.0",
             type: .movieTrivia,
@@ -199,7 +199,7 @@ struct Play2View: View {
         Deck(
             title: "Music Trivia",
             description: "Guess songs, artists, and music facts.",
-            numberOfCards: 20,
+            numberOfCards: 600,
             estimatedTime: "10-15 min",
             imageName: "music 2.0",
             type: .musicTrivia,
@@ -210,6 +210,16 @@ struct Play2View: View {
     
     // Party Games decks with 2.0 artwork (excluding Truth or Drink)
     let partyGamesDecks: [Deck] = [
+        Deck(
+            title: "Act Natural",
+            description: "One player doesn't know the secret word — can they blend in and figure it out before getting caught?",
+            numberOfCards: 150,
+            estimatedTime: "10-20 min",
+            imageName: "AN 2.0",
+            type: .actNatural,
+            cards: [],
+            availableCategories: []
+        ),
         Deck(
             title: "Category Clash",
             description: "Name items in a category before time runs out! Hesitate or repeat an answer and you're out.",
@@ -474,6 +484,8 @@ struct Play2View: View {
             case .musicTrivia:
                 MusicTriviaCategorySelectionView(deck: deck)
             // Party Games
+            case .actNatural:
+                ActNaturalLoadingView(deck: deck)
             case .categoryClash:
                 CategoryClashCategorySelectionView(deck: deck)
             case .spinTheBottle:
@@ -595,6 +607,8 @@ struct GameCardView: View {
             // Front of card (image) - uses exact image aspect ratio
             Image(deck.imageName)
                 .resizable()
+                .interpolation(.high)
+                .antialiased(true)
                 .aspectRatio(imageAspectRatio, contentMode: .fit)
                 .frame(width: cardWidth, height: cardHeight)
                 .clipShape(RoundedRectangle(cornerRadius: 20))

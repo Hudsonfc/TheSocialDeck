@@ -33,7 +33,7 @@ struct PlayView: View {
             decks: [
                 Deck(title: "Hot Potato", description: "Pass the phone quickly as the heat builds! The player holding it when time expires loses. Watch out for random perks that can help or hurt!", numberOfCards: 50, estimatedTime: "10-15 min", imageName: "HP artwork", type: .hotPotato, cards: [], availableCategories: []),
                 Deck(title: "Rhyme Time", description: "Say a word that rhymes with the base word before time runs out! Repeat a rhyme or hesitate and you lose.", numberOfCards: 40, estimatedTime: "10-15 min", imageName: "RT artwork", type: .rhymeTime, cards: allRhymeTimeCards, availableCategories: ["Easy", "Medium", "Hard"]),
-                Deck(title: "Tap Duel", description: "Fast head-to-head reaction game. Wait for GO, then tap first to win! Tap too early and you lose.", numberOfCards: 0, estimatedTime: "2-5 min", imageName: "TD artwork", type: .tapDuel, cards: [], availableCategories: []),
+                Deck(title: "Tap Duel", description: "Fast head-to-head reaction game. Wait for GO, then tap first to win! Tap too early and you lose.", numberOfCards: 999, estimatedTime: "2-5 min", imageName: "TD artwork", type: .tapDuel, cards: [], availableCategories: []),
                 Deck(title: "What's My Secret?", description: "One player gets a secret rule to follow. Can the group figure out what it is before time runs out?", numberOfCards: 75, estimatedTime: "5-10 min", imageName: "WMS artwork", type: .whatsMySecret, cards: allWhatsMySecretCards, availableCategories: ["Party", "Wild", "Social", "Actions", "Behavior"]),
                 Deck(title: "Riddle Me This", description: "Solve riddles quickly! The first player to say the correct answer wins the round. Wrong answers lock you out.", numberOfCards: 71, estimatedTime: "5-10 min", imageName: "RMT artwork", type: .riddleMeThis, cards: allRiddleMeThisCards, availableCategories: [])
             ]
@@ -77,17 +77,18 @@ struct PlayView: View {
         GameCategory(
             title: "Trivia Games",
             decks: [
-                Deck(title: "Pop Culture Trivia", description: "Test your knowledge of movies, music, and celebrities.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Pop Culture Art", type: .popCultureTrivia, cards: allPopCultureTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
-                Deck(title: "History Trivia", description: "Challenge yourself with historical facts and events.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "History Art", type: .historyTrivia, cards: allHistoryTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
-                Deck(title: "Science Trivia", description: "Explore the world of science and discovery.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Science Art", type: .scienceTrivia, cards: allScienceTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
-                Deck(title: "Sports Trivia", description: "Show off your sports knowledge.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Sports Art", type: .sportsTrivia, cards: allSportsTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
-                Deck(title: "Movie Trivia", description: "Test your movie knowledge with film questions.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Movies Art", type: .movieTrivia, cards: allMovieTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
-                Deck(title: "Music Trivia", description: "Guess songs, artists, and music facts.", numberOfCards: 20, estimatedTime: "10-15 min", imageName: "Music Art", type: .musicTrivia, cards: allMusicTriviaCards, availableCategories: ["Easy", "Medium", "Hard"])
+                Deck(title: "Pop Culture Trivia", description: "Test your knowledge of movies, music, and celebrities.", numberOfCards: 1200, estimatedTime: "10-15 min", imageName: "Pop Culture Art", type: .popCultureTrivia, cards: allPopCultureTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
+                Deck(title: "History Trivia", description: "Challenge yourself with historical facts and events.", numberOfCards: 620, estimatedTime: "10-15 min", imageName: "History Art", type: .historyTrivia, cards: allHistoryTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
+                Deck(title: "Science Trivia", description: "Explore the world of science and discovery.", numberOfCards: 640, estimatedTime: "10-15 min", imageName: "Science Art", type: .scienceTrivia, cards: allScienceTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
+                Deck(title: "Sports Trivia", description: "Show off your sports knowledge.", numberOfCards: 920, estimatedTime: "10-15 min", imageName: "Sports Art", type: .sportsTrivia, cards: allSportsTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
+                Deck(title: "Movie Trivia", description: "Test your movie knowledge with film questions.", numberOfCards: 600, estimatedTime: "10-15 min", imageName: "Movies Art", type: .movieTrivia, cards: allMovieTriviaCards, availableCategories: ["Easy", "Medium", "Hard"]),
+                Deck(title: "Music Trivia", description: "Guess songs, artists, and music facts.", numberOfCards: 600, estimatedTime: "10-15 min", imageName: "Music Art", type: .musicTrivia, cards: allMusicTriviaCards, availableCategories: ["Easy", "Medium", "Hard"])
             ]
         ),
         GameCategory(
             title: "Party Games",
             decks: [
+                Deck(title: "Act Natural", description: "One player doesn't know the secret word — can they blend in and figure it out before getting caught?", numberOfCards: 150, estimatedTime: "10-20 min", imageName: "AN 2.0", type: .actNatural, cards: [], availableCategories: []),
                 Deck(title: "Truth or Drink", description: "A question appears on the screen — answer honestly or take a drink.", numberOfCards: 480, estimatedTime: "15-20 min", imageName: "TOD artwork 2", type: .truthOrDrink, cards: allTruthOrDrinkCards, availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends", "Work", "Family"]),
                 Deck(title: "Category Clash", description: "The phone shows a category (like \"types of beers\" or \"things that are red\"). Players take turns naming something that fits. You hesitate, repeat an answer, or freeze? You drink. The pace gets faster each round, turning it into a hilarious pressure game.", numberOfCards: 250, estimatedTime: "15-20 min", imageName: "CC artwork", type: .categoryClash, cards: allCategoryClashCards, availableCategories: ["Food & Drink", "Pop Culture", "General", "Sports & Activities", "Animals & Nature"]),
                 Deck(title: "Spin the Bottle", description: "Tap to spin and let the bottle decide everyone's fate. No strategy, no mercy, just pure chaos. If it points at you… well, take it up with the bottle.", numberOfCards: 40, estimatedTime: "20-30 min", imageName: "STB artwork", type: .spinTheBottle, cards: [], availableCategories: []),
@@ -153,6 +154,8 @@ struct PlayView: View {
                 BluffCallCategorySelectionView(deck: deck)
             case .whatsMySecret:
                 WhatsMySecretSetupView(deck: deck)
+            case .actNatural:
+                ActNaturalLoadingView(deck: deck)
             default:
                 EmptyView()
             }
@@ -445,6 +448,8 @@ struct ExpandedDeckOverlay: View {
                     // Deck artwork
                     Image(deck.imageName)
                         .resizable()
+                        .interpolation(.high)
+                        .antialiased(true)
                         .scaledToFill()
                         .frame(width: 260, height: 260)
                         .clipped()

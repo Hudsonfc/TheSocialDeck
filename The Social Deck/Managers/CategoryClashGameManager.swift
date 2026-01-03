@@ -13,8 +13,17 @@ class CategoryClashGameManager: ObservableObject {
     @Published var currentIndex: Int = 0
     @Published var isFinished: Bool = false
     @Published var currentRound: Int = 1
+    @Published var timerEnabled: Bool = false
+    @Published var timerDuration: Int = 30
+    @Published var timeRemaining: Double = 30.0
+    @Published var isTimerExpired: Bool = false
     
-    init(deck: Deck, selectedCategories: [String], cardCount: Int = 0) {
+    private var timer: Timer?
+    
+    init(deck: Deck, selectedCategories: [String], cardCount: Int = 0, timerEnabled: Bool = false, timerDuration: Int = 30) {
+        self.timerEnabled = timerEnabled
+        self.timerDuration = timerDuration
+        self.timeRemaining = Double(timerDuration)
         // If cardCount is 0, use all available cards
         if cardCount == 0 {
             let filteredCards = deck.cards.filter { card in
@@ -93,6 +102,44 @@ class CategoryClashGameManager: ObservableObject {
         // Start with 30 seconds, reduce by 5 seconds each round
         // Round 1 (index 0-4): 30s, Round 2 (index 5-9): 25s, Round 3 (index 10-14): 20s, etc.
         return max(10, 30 - (currentRound - 1) * 5)
+    }
+    
+    // Timer methods
+    func startTimer() {
+        guard timerEnabled else { return }
+        
+        timeRemaining = Double(timerDuration)
+        isTimerExpired = false
+        
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] timer in
+            guard let self = self else {
+                timer.invalidate()
+                return
+            }
+            
+            self.timeRemaining -= 0.1
+            
+            if self.timeRemaining <= 0 {
+                self.timeRemaining = 0
+                self.isTimerExpired = true
+                timer.invalidate()
+            }
+        }
+    }
+    
+    func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    func resetTimer() {
+        timeRemaining = Double(timerDuration)
+        isTimerExpired = false
+    }
+    
+    deinit {
+        timer?.invalidate()
     }
 }
 

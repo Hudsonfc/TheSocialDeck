@@ -171,7 +171,7 @@ struct WYRPlayView: View {
         .background(
             Group {
                 NavigationLink(
-                    destination: WYREndView(deck: deck, selectedCategories: selectedCategories),
+                    destination: WYREndView(deck: deck, selectedCategories: selectedCategories, cardsPlayed: manager.cards.count),
                     isActive: $showEndView
                 ) {
                     EmptyView()
@@ -206,7 +206,7 @@ struct WYRPlayView: View {
             }
         }
         .onChange(of: manager.isFinished) { oldValue, newValue in
-            if newValue && manager.isFlipped {
+            if newValue {
                 // Automatically navigate to end view when game is finished
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     showEndView = true

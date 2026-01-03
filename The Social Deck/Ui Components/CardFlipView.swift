@@ -31,6 +31,8 @@ struct CardFlipView: View {
             // Placeholder artwork
             Image(deck.imageName)
                 .resizable()
+                .interpolation(.high)
+                .antialiased(true)
                 .scaledToFill()
                 .frame(width: 140, height: 140)
                 .clipped()

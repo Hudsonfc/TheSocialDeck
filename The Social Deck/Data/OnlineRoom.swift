@@ -162,6 +162,7 @@ extension DeckType {
         case .whatsMySecret: return "whatsMySecret"
         case .riddleMeThis: return "riddleMeThis"
         case .actItOut: return "actItOut"
+        case .actNatural: return "actNatural"
         case .colorClash: return "colorClash"
         case .flip21: return "flip21"
         case .other: return "other"

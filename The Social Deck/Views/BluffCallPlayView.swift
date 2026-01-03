@@ -112,7 +112,7 @@ struct BluffCallPlayView: View {
         .background(
             Group {
                 NavigationLink(
-                    destination: BluffCallEndView(deck: deck, selectedCategories: selectedCategories),
+                    destination: BluffCallEndView(deck: deck, selectedCategories: selectedCategories, roundsPlayed: manager.cards.count),
                     isActive: $showEndView
                 ) {
                     EmptyView()

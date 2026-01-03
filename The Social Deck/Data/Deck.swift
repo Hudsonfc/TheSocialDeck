@@ -31,6 +31,7 @@ enum DeckType: String {
     case whatsMySecret
     case riddleMeThis
     case actItOut
+    case actNatural
     case colorClash
     case flip21
     case other

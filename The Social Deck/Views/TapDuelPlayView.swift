@@ -558,7 +558,7 @@ struct FalseStartView: View {
             deck: Deck(
                 title: "Tap Duel",
                 description: "Fast reaction game",
-                numberOfCards: 0,
+                numberOfCards: 999,
                 estimatedTime: "2-5 min",
                 imageName: "TD artwork",
                 type: .tapDuel,

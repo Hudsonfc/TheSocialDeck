@@ -150,8 +150,12 @@ struct OnboardingView: View {
             .gesture(
                 DragGesture()
                     .onChanged { value in
-                        // Only allow left swipe (negative translation)
+                        // Allow swiping in both directions
                         if value.translation.width < 0 && currentPage < totalPages {
+                            // Swiping left (next)
+                            dragOffset = value.translation.width
+                        } else if value.translation.width > 0 && currentPage > 1 {
+                            // Swiping right (previous)
                             dragOffset = value.translation.width
                         }
                     }
@@ -161,6 +165,9 @@ struct OnboardingView: View {
                         if value.translation.width < -threshold && currentPage < totalPages {
                             // Swipe left - go to next page
                             navigateToPage(currentPage + 1)
+                        } else if value.translation.width > threshold && currentPage > 1 {
+                            // Swipe right - go to previous page
+                            navigateToPreviousPage(currentPage - 1)
                         } else {
                             // Snap back
                             withAnimation(.spring()) {
@@ -169,6 +176,27 @@ struct OnboardingView: View {
                         }
                     }
             )
+            
+            // Skip button (only show on pages 1-3)
+            if currentPage < totalPages {
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            navigateToHome = true
+                        }) {
+                            Text("Skip")
+                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 10)
+                        }
+                    }
+                    .padding(.top, 16)
+                    .padding(.trailing, 20)
+                    Spacer()
+                }
+            }
         }
         .onAppear {
             if currentPage == 1 {
@@ -177,7 +205,10 @@ struct OnboardingView: View {
         }
         .onChange(of: currentPage) { oldValue, newPage in
             dragOffset = 0
-            if newPage == 2 {
+            if newPage == 1 {
+                resetPage1Animations()
+                startPage1Animations()
+            } else if newPage == 2 {
                 resetPage2Animations()
                 startPage2Animations()
             } else if newPage == 3 {
@@ -206,7 +237,12 @@ struct OnboardingView: View {
         }
         
         // Trigger page-specific animations
-        if page == 2 {
+        if page == 1 {
+            resetPage1Animations()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                startPage1Animations()
+            }
+        } else if page == 2 {
             resetPage2Animations()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 startPage2Animations()
@@ -222,6 +258,40 @@ struct OnboardingView: View {
                 startPage4Animations()
             }
         }
+    }
+    
+    private func navigateToPreviousPage(_ page: Int) {
+        withAnimation(.easeInOut(duration: 0.4)) {
+            currentPage = page
+            dragOffset = 0
+        }
+        
+        // Trigger page-specific animations for going back
+        if page == 1 {
+            resetPage1Animations()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                startPage1Animations()
+            }
+        } else if page == 2 {
+            resetPage2Animations()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                startPage2Animations()
+            }
+        } else if page == 3 {
+            resetPage3Animations()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                startPage3Animations()
+            }
+        }
+    }
+    
+    private func resetPage1Animations() {
+        logoOpacity = 0
+        logoScale = 0.8
+        titleOpacity = 0
+        subtitleOpacity = 0
+        buttonOffset = 50
+        buttonOpacity = 0
     }
     
     private func startPage1Animations() {

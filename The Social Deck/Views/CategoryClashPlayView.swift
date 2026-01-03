@@ -94,6 +94,35 @@ struct CategoryClashPlayView: View {
                             .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                             .padding(.horizontal, 40)
                         
+                        // Timer display (if enabled)
+                        if manager.timerEnabled {
+                            ZStack {
+                                Circle()
+                                    .stroke(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0), lineWidth: 8)
+                                    .frame(width: 80, height: 80)
+                                
+                                Circle()
+                                    .trim(from: 0, to: manager.timeRemaining / Double(manager.timerDuration))
+                                    .stroke(
+                                        manager.timeRemaining <= 5 ? Color.red : Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0),
+                                        style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                                    )
+                                    .frame(width: 80, height: 80)
+                                    .rotationEffect(.degrees(-90))
+                                    .animation(.linear(duration: 0.1), value: manager.timeRemaining)
+                                
+                                Text("\(Int(manager.timeRemaining))")
+                                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                                    .foregroundColor(manager.timeRemaining <= 5 ? .red : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            }
+                            
+                            if manager.isTimerExpired {
+                                Text("Time's Up!")
+                                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                                    .foregroundColor(.red)
+                            }
+                        }
+                        
                         // Category card - large and prominent
                         VStack(spacing: 20) {
                             Text(currentCard.text)
@@ -170,7 +199,7 @@ struct CategoryClashPlayView: View {
         .background(
             Group {
                 NavigationLink(
-                    destination: CategoryClashEndView(deck: deck, selectedCategories: selectedCategories),
+                    destination: CategoryClashEndView(deck: deck, selectedCategories: selectedCategories, roundsPlayed: manager.cards.count),
                     isActive: $showEndView
                 ) {
                     EmptyView()
@@ -184,8 +213,18 @@ struct CategoryClashPlayView: View {
                 }
             }
         )
+        .onAppear {
+            // Start timer for first category if enabled
+            if manager.timerEnabled {
+                manager.startTimer()
+            }
+        }
+        .onDisappear {
+            manager.stopTimer()
+        }
         .onChange(of: manager.isFinished) { oldValue, newValue in
             if newValue {
+                manager.stopTimer()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     showEndView = true
                 }
@@ -228,6 +267,9 @@ struct CategoryClashPlayView: View {
     private func nextCategory() {
         isTransitioning = true
         
+        // Stop timer before transition
+        manager.stopTimer()
+        
         // Slide current category left out of screen
         withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
             categoryOffset = -500
@@ -242,6 +284,12 @@ struct CategoryClashPlayView: View {
             
             // Now change the category
             manager.nextCategory()
+            
+            // Reset and start timer for new category
+            if manager.timerEnabled && !manager.isFinished {
+                manager.resetTimer()
+                manager.startTimer()
+            }
             
             // Small delay to ensure the view has updated
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {

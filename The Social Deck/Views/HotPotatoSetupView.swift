@@ -15,6 +15,7 @@ struct HotPotatoSetupView: View {
     @State private var navigateToPlay: Bool = false
     @State private var perksEnabled: Bool = true
     @State private var showPerksBreakdown: Bool = false
+    @State private var numberOfRounds: Double = 5
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -126,6 +127,22 @@ struct HotPotatoSetupView: View {
                         .padding(.horizontal, 40)
                         .padding(.bottom, players.count > 3 ? 20 : 32)
                         
+                        // Number of rounds section
+                        VStack(spacing: 12) {
+                            Text("Number of Rounds")
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            
+                            Text("\(Int(numberOfRounds)) rounds")
+                                .font(.system(size: 14, weight: .medium, design: .rounded))
+                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            
+                            Slider(value: $numberOfRounds, in: 1...15, step: 1)
+                                .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 20)
+                        
                         // Perks toggle
                         VStack(spacing: 12) {
                             HStack {
@@ -200,7 +217,8 @@ struct HotPotatoSetupView: View {
                     destination: HotPotatoLoadingView(
                         deck: deck,
                         players: players,
-                        perksEnabled: perksEnabled
+                        perksEnabled: perksEnabled,
+                        numberOfRounds: Int(numberOfRounds)
                     ),
                     isActive: $navigateToPlay
                 ) {

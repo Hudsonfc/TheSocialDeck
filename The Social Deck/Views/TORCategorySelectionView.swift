@@ -20,77 +20,89 @@ struct TORCategorySelectionView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Top section with back button and title
-                VStack(spacing: 20) {
-                    HStack {
-                        Button(action: {
-                            dismiss()
-                        }) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                        }
-                        Spacer()
-                    }
-                    .padding(.horizontal, 40)
-                    .padding(.top, 20)
-                    
-                    VStack(spacing: 8) {
-                        Text("Select Categories")
-                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                // Back button at top left
+                HStack {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                        
-                        Text("Choose one or more categories")
-                            .font(.system(size: 15, weight: .regular, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                     }
-                    .padding(.horizontal, 40)
-                    .padding(.bottom, 8)
-                }
-                
-                Spacer()
-                
-                // Category grid
-                ScrollView {
-                    VStack(spacing: 12) {
-                        ForEach(deck.availableCategories, id: \.self) { category in
-                            CategoryTile(
-                                category: category,
-                                isSelected: selectedCategories.contains(category),
-                                onTap: {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                        if selectedCategories.contains(category) {
-                                            selectedCategories.remove(category)
-                                        } else {
-                                            selectedCategories.insert(category)
-                                        }
-                                    }
-                                }
-                            )
-                        }
-                    }
-                    .padding(.horizontal, 40)
-                    .padding(.vertical, 20)
-                }
-                
-                // Continue button at bottom
-                VStack(spacing: 12) {
-                    if !selectedCategories.isEmpty {
-                        Text("\(selectedCategories.count) \(selectedCategories.count == 1 ? "category" : "categories") selected")
-                            .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                    }
-                    
-                    PrimaryButton(title: "Continue") {
-                        if !selectedCategories.isEmpty {
-                            navigateToSetup = true
-                        }
-                    }
-                    .disabled(selectedCategories.isEmpty)
-                    .opacity(selectedCategories.isEmpty ? 0.5 : 1.0)
+                    Spacer()
                 }
                 .padding(.horizontal, 40)
-                .padding(.bottom, 40)
+                .padding(.top, 20)
+                
+                ScrollView {
+                    VStack(spacing: 0) {
+                        // Game artwork
+                        Image(deck.imageName)
+                            .resizable()
+                            .interpolation(.high)
+                            .antialiased(true)
+                            .scaledToFit()
+                            .frame(width: 160, height: 220)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                            .padding(.top, 20)
+                            .padding(.bottom, 32)
+                        
+                        // Title
+                        Text("Select Categories")
+                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .padding(.bottom, 8)
+                        
+                        Text("Choose which types of prompts to include")
+                            .font(.system(size: 14, weight: .regular, design: .rounded))
+                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .padding(.bottom, 24)
+                        
+                        // Category buttons
+                        VStack(spacing: 12) {
+                            ForEach(deck.availableCategories, id: \.self) { category in
+                                CategoryButton(
+                                    title: category,
+                                    isSelected: selectedCategories.contains(category),
+                                    cardCount: deck.cards.filter { $0.category == category }.count
+                                ) {
+                                    if selectedCategories.contains(category) {
+                                        selectedCategories.remove(category)
+                                    } else {
+                                        selectedCategories.insert(category)
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 24)
+                        
+                        // Select All button
+                        Button(action: {
+                            if selectedCategories.count == deck.availableCategories.count {
+                                selectedCategories.removeAll()
+                            } else {
+                                selectedCategories = Set(deck.availableCategories)
+                            }
+                        }) {
+                            Text(selectedCategories.count == deck.availableCategories.count ? "Deselect All" : "Select All")
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        }
+                        .padding(.bottom, 24)
+                        
+                        // Continue button
+                        PrimaryButton(title: "Continue") {
+                            HapticManager.shared.lightImpact()
+                            navigateToSetup = true
+                        }
+                        .padding(.horizontal, 40)
+                        .disabled(selectedCategories.isEmpty)
+                        .opacity(selectedCategories.isEmpty ? 0.5 : 1.0)
+                        .padding(.bottom, 40)
+                    }
+                }
             }
         }
         .navigationBarHidden(true)

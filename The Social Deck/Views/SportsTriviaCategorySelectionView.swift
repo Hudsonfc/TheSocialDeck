@@ -20,64 +20,73 @@ struct SportsTriviaCategorySelectionView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Top section with back button and title
-                VStack(spacing: 20) {
-                    HStack {
-                        Button(action: {
-                            dismiss()
-                        }) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                        }
-                        Spacer()
-                    }
-                    .padding(.horizontal, 40)
-                    .padding(.top, 20)
-                    
-                    VStack(spacing: 8) {
-                        Text("Select Difficulty")
-                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                // Back button at top left
+                HStack {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 40)
+                .padding(.top, 20)
+                
+                ScrollView {
+                    VStack(spacing: 0) {
+                        // Game artwork
+                        Image(deck.imageName)
+                            .resizable()
+                            .interpolation(.high)
+                            .antialiased(true)
+                            .scaledToFit()
+                            .frame(width: 160, height: 220)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                            .padding(.top, 20)
+                            .padding(.bottom, 32)
                         
-                        Text("Choose one difficulty level")
-                            .font(.system(size: 15, weight: .regular, design: .rounded))
+                        // Title
+                        Text("Select Difficulty")
+                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .padding(.bottom, 8)
+                        
+                        Text("Choose your challenge level")
+                            .font(.system(size: 14, weight: .regular, design: .rounded))
                             .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                    }
-                    .padding(.horizontal, 40)
-                    .padding(.bottom, 8)
-                }
-                
-                Spacer()
-                
-                // Difficulty buttons - take up majority of space
-                VStack(spacing: 20) {
-                    ForEach(deck.availableCategories, id: \.self) { category in
-                        DifficultyButton(
-                            category: category,
-                            isSelected: selectedCategory == category,
-                            onTap: {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                    selectedCategory = category
-                                }
+                            .padding(.bottom, 24)
+                        
+                        // Difficulty buttons
+                        VStack(spacing: 12) {
+                            ForEach(deck.availableCategories, id: \.self) { category in
+                                DifficultyButton(
+                                    category: category,
+                                    isSelected: selectedCategory == category,
+                                    onTap: {
+                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                            selectedCategory = category
+                                        }
+                                    }
+                                )
                             }
-                        )
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 24)
+                        
+                        // Continue button
+                        PrimaryButton(title: "Continue") {
+                            HapticManager.shared.lightImpact()
+                            navigateToSetup = true
+                        }
+                        .padding(.horizontal, 40)
+                        .disabled(selectedCategory == nil)
+                        .opacity(selectedCategory == nil ? 0.5 : 1.0)
+                        .padding(.bottom, 40)
                     }
                 }
-                .padding(.horizontal, 40)
-                
-                Spacer()
-                
-                // Continue button at bottom
-                PrimaryButton(title: "Continue") {
-                    if selectedCategory != nil {
-                        navigateToSetup = true
-                    }
-                }
-                .disabled(selectedCategory == nil)
-                .opacity(selectedCategory == nil ? 0.5 : 1.0)
-                .padding(.horizontal, 40)
-                .padding(.bottom, 50)
             }
         }
         .navigationBarHidden(true)

@@ -140,7 +140,7 @@ struct TapDuelSetupView: View {
             deck: Deck(
                 title: "Tap Duel",
                 description: "Fast head-to-head reaction game",
-                numberOfCards: 0,
+                numberOfCards: 999,
                 estimatedTime: "2-5 min",
                 imageName: "TD artwork",
                 type: .tapDuel,

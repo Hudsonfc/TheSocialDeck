@@ -11,6 +11,8 @@ struct CategoryClashSetupView: View {
     let deck: Deck
     let selectedCategories: [String]
     @State private var navigateToPlay: Bool = false
+    @State private var timerEnabled: Bool = false
+    @State private var timerDuration: Double = 30
     @Environment(\.dismiss) private var dismiss
     
     // Calculate max cards available from selected categories
@@ -150,6 +152,43 @@ struct CategoryClashSetupView: View {
                         .padding(.horizontal, 20)
                     }
                     
+                    // Timer Toggle Section
+                    VStack(spacing: 12) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Timer")
+                                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                
+                                Text("Add urgency with a countdown timer")
+                                    .font(.system(size: 12, weight: .regular, design: .rounded))
+                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            }
+                            
+                            Spacer()
+                            
+                            Toggle("", isOn: $timerEnabled)
+                                .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        }
+                        
+                        if timerEnabled {
+                            VStack(spacing: 8) {
+                                Text("\(Int(timerDuration)) seconds per category")
+                                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                
+                                Slider(value: $timerDuration, in: 15...60, step: 5)
+                                    .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            }
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 16)
+                    .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                    .cornerRadius(16)
+                    .animation(.easeInOut(duration: 0.2), value: timerEnabled)
+                    
                     // Start Game button
                     PrimaryButton(title: "Start Game") {
                         navigateToPlay = true
@@ -171,7 +210,9 @@ struct CategoryClashSetupView: View {
                 destination: CategoryClashLoadingView(
                     deck: deck,
                     selectedCategories: selectedCategories,
-                    cardCount: Int(selectedCardCount)
+                    cardCount: Int(selectedCardCount),
+                    timerEnabled: timerEnabled,
+                    timerDuration: Int(timerDuration)
                 ),
                 isActive: $navigateToPlay
             ) {
