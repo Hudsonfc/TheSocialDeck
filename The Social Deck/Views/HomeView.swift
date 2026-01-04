@@ -309,8 +309,8 @@ struct HomeView: View {
     
     private func startTooltipTimer() {
         stopTooltipTimer() // Stop any existing timer
-        // Show tooltip after 1 minute
-        tooltipTimer = Timer.scheduledTimer(withTimeInterval: 60.0, repeats: true) { _ in
+        // Show tooltip after 2 minutes
+        tooltipTimer = Timer.scheduledTimer(withTimeInterval: 120.0, repeats: true) { _ in
             showShareTooltip = true
         }
     }

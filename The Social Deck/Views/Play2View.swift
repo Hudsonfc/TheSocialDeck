@@ -16,6 +16,8 @@ struct Play2View: View {
     @State private var cardFlippedStates: [Bool] = Array(repeating: false, count: 10) // Max 10 cards per category
     @State private var cardOffset: CGFloat = 0
     @State private var isDragging = false
+    @AppStorage("hasSeenWelcomeView") private var hasSeenWelcomeView: Bool = false
+    @State private var showWelcomeView: Bool = false
     
     // All category names (Favorites shown dynamically when items exist)
     var categories: [String] {
@@ -426,6 +428,25 @@ struct Play2View: View {
                 )
             ) {
                 EmptyView()
+            }
+        }
+        .overlay {
+            // Welcome View for first-time users
+            if showWelcomeView {
+                WelcomeView(isPresented: $showWelcomeView)
+            }
+        }
+        .onAppear {
+            // Show welcome view on first time
+            if !hasSeenWelcomeView {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    showWelcomeView = true
+                }
+            }
+        }
+        .onChange(of: showWelcomeView) { oldValue, newValue in
+            if !newValue && !hasSeenWelcomeView {
+                hasSeenWelcomeView = true
             }
         }
         .navigationBarTitleDisplayMode(.inline)
