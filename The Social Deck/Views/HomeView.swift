@@ -29,6 +29,8 @@ struct HomeView: View {
     @State private var gameOfTheDay: GameOfTheDayInfo = GameOfTheDayManager.shared.getTodaysGame()
     @State private var showShareTooltip: Bool = false
     @State private var tooltipTimer: Timer?
+    @AppStorage("hasSeenRateUsView") private var hasSeenRateUsView: Bool = false
+    @State private var showRateUsView: Bool = false
     
     // Curated quotes for The Social Deck
     private let quotes = [
@@ -286,9 +288,21 @@ struct HomeView: View {
                 
                 // Start timer to show tooltip every minute
                 startTooltipTimer()
+                
+                // Show rate us view for new users after onboarding
+                if OnboardingManager.shared.hasCompletedOnboarding && !hasSeenRateUsView {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        showRateUsView = true
+                    }
+                }
             }
             .onDisappear {
                 stopTooltipTimer()
+            }
+            .onChange(of: showRateUsView) { oldValue, newValue in
+                if !newValue && !hasSeenRateUsView {
+                    hasSeenRateUsView = true
+                }
             }
         }
     }
