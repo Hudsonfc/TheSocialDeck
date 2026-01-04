@@ -137,18 +137,15 @@ struct ActNaturalEndView: View {
     }
     
     private func playAgain() {
-        manager.playAgain()
-        manager.startGame()
-        // Navigate back to reveal view
-        dismiss()
-        dismiss()
         HapticManager.shared.mediumImpact()
+        manager.resetGame()
+        navigateToSetup = true
     }
     
     private func newGame() {
+        HapticManager.shared.mediumImpact()
         manager.resetGame()
         navigateToSetup = true
-        HapticManager.shared.mediumImpact()
     }
 }
 

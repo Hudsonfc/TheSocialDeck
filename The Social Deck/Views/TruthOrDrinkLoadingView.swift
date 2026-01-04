@@ -15,6 +15,7 @@ struct TruthOrDrinkLoadingView: View {
     @State private var navigateToPlay: Bool = false
     @State private var progress: Double = 0
     @State private var hasStartedLoading: Bool = false
+    @State private var isDismissing: Bool = false
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -65,10 +66,11 @@ struct TruthOrDrinkLoadingView: View {
             VStack {
                 HStack {
                     Button(action: {
+                        isDismissing = true
                         dismiss()
                     }) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 18, weight: .medium))
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                             .frame(width: 44, height: 44)
                             .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
@@ -83,10 +85,16 @@ struct TruthOrDrinkLoadingView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
-            // Only start loading if we haven't started yet (prevents re-triggering when coming back from PlayView)
-            if !hasStartedLoading {
+            // Only start loading if we haven't started yet and we're not dismissing
+            if !hasStartedLoading && !isDismissing {
                 hasStartedLoading = true
-            startLoading()
+                startLoading()
+            }
+        }
+        .onDisappear {
+            // Cancel navigation if we're dismissing
+            if isDismissing {
+                navigateToPlay = false
             }
         }
         .background(
@@ -122,7 +130,10 @@ struct TruthOrDrinkLoadingView: View {
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.3) {
-            navigateToPlay = true
+            // Only navigate if we're not dismissing
+            if !isDismissing {
+                navigateToPlay = true
+            }
         }
     }
 }

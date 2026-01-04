@@ -27,6 +27,8 @@ struct HomeView: View {
     @State private var slideshowTimer: Timer?
     @State private var currentQuote: String = ""
     @State private var gameOfTheDay: GameOfTheDayInfo = GameOfTheDayManager.shared.getTodaysGame()
+    @State private var showShareTooltip: Bool = false
+    @State private var tooltipTimer: Timer?
     
     // Curated quotes for The Social Deck
     private let quotes = [
@@ -253,10 +255,21 @@ struct HomeView: View {
                 }
             }
             .overlay(alignment: .bottomTrailing) {
-                // Share Button
-                ShareButton()
-                    .padding(.trailing, 20)
-                    .padding(.bottom, 20)
+                ZStack(alignment: .bottomTrailing) {
+                    // Share Button Tooltip
+                    if showShareTooltip {
+                        ShareButtonTooltip(onDismiss: {
+                            showShareTooltip = false
+                        })
+                        .padding(.trailing, 80)
+                        .padding(.bottom, 20)
+                    }
+                    
+                    // Share Button
+                    ShareButton()
+                        .padding(.trailing, 20)
+                        .padding(.bottom, 20)
+                }
             }
             .navigationBarHidden(true)
             .onAppear {
@@ -265,6 +278,17 @@ struct HomeView: View {
                 currentQuote = quotes.randomElement() ?? quotes[0]
                 // Get today's game of the day
                 gameOfTheDay = GameOfTheDayManager.shared.getTodaysGame()
+                
+                // Show tooltip on first load
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    showShareTooltip = true
+                }
+                
+                // Start timer to show tooltip every minute
+                startTooltipTimer()
+            }
+            .onDisappear {
+                stopTooltipTimer()
             }
         }
     }
@@ -281,6 +305,19 @@ struct HomeView: View {
     private func stopSlideshow() {
         slideshowTimer?.invalidate()
         slideshowTimer = nil
+    }
+    
+    private func startTooltipTimer() {
+        stopTooltipTimer() // Stop any existing timer
+        // Show tooltip after 1 minute
+        tooltipTimer = Timer.scheduledTimer(withTimeInterval: 60.0, repeats: true) { _ in
+            showShareTooltip = true
+        }
+    }
+    
+    private func stopTooltipTimer() {
+        tooltipTimer?.invalidate()
+        tooltipTimer = nil
     }
     
     private func startAnimations() {
@@ -384,6 +421,60 @@ struct RoundedCorner: Shape {
             cornerRadii: CGSize(width: radius, height: radius)
         )
         return Path(path.cgPath)
+    }
+}
+
+// Share Button Tooltip Component
+struct ShareButtonTooltip: View {
+    let onDismiss: () -> Void
+    @State private var scale: CGFloat = 0
+    @State private var arrowOffset: CGFloat = 0
+    
+    var body: some View {
+        HStack(spacing: 8) {
+            Text("Share our deck with others here!")
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color.white)
+                .cornerRadius(12)
+                .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
+            
+            // Arrow pointing to the right with animation
+            Image(systemName: "arrow.right")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                .offset(x: arrowOffset)
+        }
+        .scaleEffect(scale)
+        .onAppear {
+            // Reset state
+            scale = 0
+            arrowOffset = 0
+            
+            // Bounce in animation
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+                scale = 1.0
+            }
+            
+            // Arrow animation (bounce left and right)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                withAnimation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true)) {
+                    arrowOffset = 4
+                }
+            }
+            
+            // Auto-dismiss after 5 seconds
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    scale = 0
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    onDismiss()
+                }
+            }
+        }
     }
 }
 

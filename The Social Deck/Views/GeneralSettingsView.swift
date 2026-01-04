@@ -11,6 +11,7 @@ struct GeneralSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("hapticsEnabled") private var hapticsEnabled = true
     @AppStorage("shuffleCardsEnabled") private var shuffleCardsEnabled = true
+    @AppStorage("swipeNavigationEnabled") private var swipeNavigationEnabled = false
     
     var body: some View {
         ZStack {
@@ -61,6 +62,20 @@ struct GeneralSettingsView: View {
                                 description: "Randomize card order in games"
                             ) {
                                 Toggle("", isOn: $shuffleCardsEnabled)
+                                    .labelsHidden()
+                                    .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            }
+                            
+                            Divider()
+                                .padding(.leading, 56)
+                            
+                            // Swipe Navigation Toggle
+                            SettingsRow(
+                                icon: "hand.draw.fill",
+                                title: "Swipe Navigation",
+                                description: "Swipe left/right to navigate cards instead of using Next button (only for some games)"
+                            ) {
+                                Toggle("", isOn: $swipeNavigationEnabled)
                                     .labelsHidden()
                                     .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                             }

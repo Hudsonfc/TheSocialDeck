@@ -108,7 +108,7 @@ struct ColorClashCardInfoView: View {
                     Button(action: {
                         dismiss()
                     }) {
-                        Image(systemName: "xmark")
+                        Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                             .frame(width: 32, height: 32)

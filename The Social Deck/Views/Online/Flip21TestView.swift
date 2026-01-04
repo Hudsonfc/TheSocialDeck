@@ -223,8 +223,8 @@ struct Flip21TestView: View {
             Button(action: {
                 dismiss()
             }) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .semibold))
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.white)
                     .frame(width: 44, height: 44)
                     .background(Color.white.opacity(0.1))

@@ -12,6 +12,7 @@ struct TTLPlayView: View {
     let deck: Deck
     let selectedCategories: [String]
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("swipeNavigationEnabled") private var swipeNavigationEnabled = false
     @State private var cardRotation: Double = 0
     @State private var showEndView: Bool = false
     @State private var navigateToHome: Bool = false
@@ -21,6 +22,7 @@ struct TTLPlayView: View {
     @State private var cardOffset: CGFloat = 0
     @State private var isTransitioning: Bool = false
     @State private var selectedStatement: Int? = nil // 1, 2, or 3
+    @State private var dragOffset: CGFloat = 0
     
     var body: some View {
         ZStack {
@@ -34,8 +36,8 @@ struct TTLPlayView: View {
                     Button(action: {
                         dismiss()
                     }) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 18, weight: .medium))
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                             .frame(width: 44, height: 44)
                             .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
@@ -119,43 +121,75 @@ struct TTLPlayView: View {
                         axis: (x: 0, y: 1, z: 0),
                         perspective: 0.5
                     )
-                    .offset(x: cardOffset)
+                    .offset(x: cardOffset + dragOffset)
                     .id(currentCard.id)
                     .onTapGesture {
                         if !isTransitioning && !manager.isFlipped {
                             toggleCard()
                         }
                     }
+                    .gesture(
+                        swipeNavigationEnabled ? DragGesture()
+                            .onChanged { value in
+                                if !isTransitioning {
+                                    dragOffset = value.translation.width
+                                }
+                            }
+                            .onEnded { value in
+                                if !isTransitioning {
+                                    let swipeThreshold: CGFloat = 100
+                                    if value.translation.width > swipeThreshold && manager.canGoBack {
+                                        // Swipe right - go to previous
+                                        previousCard()
+                                    } else if value.translation.width < -swipeThreshold && !manager.isFinished && selectedStatement != nil {
+                                        // Swipe left - go to next (only if statement selected)
+                                        nextCard()
+                                    }
+                                    dragOffset = 0
+                                }
+                            } : nil
+                    )
                     .padding(.bottom, 32)
                 }
                 
                 Spacer()
                 
-                // Next button - only show when a statement is selected
+                // Next button or swipe instruction - only show when a statement is selected
                 if manager.isFlipped && selectedStatement != nil {
-                    Button(action: {
-                        if manager.isFinished {
-                            showEndView = true
-                        } else {
-                            nextCard()
+                    if swipeNavigationEnabled {
+                        // Swipe instruction text
+                        Text("Swipe right to go to next card or left to go to previous card")
+                            .font(.system(size: 14, weight: .regular, design: .rounded))
+                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                            .padding(.bottom, 40)
+                    } else {
+                        // Next button
+                        Button(action: {
+                            if manager.isFinished {
+                                showEndView = true
+                            } else {
+                                nextCard()
+                            }
+                        }) {
+                            Text(manager.isFinished ? "Finish" : "Next")
+                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .cornerRadius(12)
                         }
-                    }) {
-                        Text(manager.isFinished ? "Finish" : "Next")
-                            .font(.system(size: 18, weight: .semibold, design: .rounded))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            .cornerRadius(12)
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 40)
+                        .opacity(nextButtonOpacity)
+                        .offset(y: nextButtonOffset)
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .bottom).combined(with: .opacity),
+                            removal: .move(edge: .bottom).combined(with: .opacity)
+                        ))
                     }
-                    .padding(.horizontal, 40)
-                    .padding(.bottom, 40)
-                    .opacity(nextButtonOpacity)
-                    .offset(y: nextButtonOffset)
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .bottom).combined(with: .opacity),
-                        removal: .move(edge: .bottom).combined(with: .opacity)
-                    ))
                 }
             }
             .animation(.spring(response: 0.5, dampingFraction: 0.8), value: manager.isFlipped)
