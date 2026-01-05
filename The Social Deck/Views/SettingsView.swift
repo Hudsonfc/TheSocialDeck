@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import StoreKit
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -13,6 +14,7 @@ struct SettingsView: View {
     @State private var helpButtonPressed = false
     @State private var whatsNewButtonPressed = false
     @State private var feedbackButtonPressed = false
+    @State private var rateUsButtonPressed = false
     
     // App version info
     private var appVersion: String {
@@ -67,6 +69,28 @@ struct SettingsView: View {
                             isPressed: $feedbackButtonPressed
                         )
                         
+                        // Rate Us Button
+                        Button(action: {
+                            withAnimation(.easeInOut(duration: 0.1)) {
+                                rateUsButtonPressed = true
+                            }
+                            HapticManager.shared.mediumImpact()
+                            requestReview()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                                withAnimation(.easeInOut(duration: 0.15)) {
+                                    rateUsButtonPressed = false
+                                }
+                            }
+                        }) {
+                            Text("Rate Us")
+                                .font(.system(size: 18, weight: .regular, design: .rounded))
+                                .foregroundColor(.white)
+                                .frame(width: UIScreen.main.bounds.width * 0.85, height: 60)
+                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .cornerRadius(16)
+                        }
+                        .scaleEffect(rateUsButtonPressed ? 0.97 : 1.0)
+                        
                         // Spacer to push bottom buttons down
                         Spacer()
                             .frame(height: 40)
@@ -120,6 +144,12 @@ struct SettingsView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+    }
+    
+    private func requestReview() {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            SKStoreReviewController.requestReview(in: windowScene)
+        }
     }
 }
 

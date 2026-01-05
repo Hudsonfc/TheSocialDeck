@@ -18,6 +18,8 @@ struct Play2View: View {
     @State private var isDragging = false
     @AppStorage("hasSeenWelcomeView") private var hasSeenWelcomeView: Bool = false
     @State private var showWelcomeView: Bool = false
+    @State private var searchText: String = ""
+    @State private var isSearching: Bool = false
     
     // All category names (Favorites shown dynamically when items exist)
     var categories: [String] {
@@ -274,8 +276,23 @@ struct Play2View: View {
         )
     ]
     
-    // Current decks based on selected category
+    // Filtered decks based on search
+    var filteredDecks: [Deck] {
+        if searchText.isEmpty {
+            return []
+        }
+        let searchLower = searchText.lowercased()
+        return allDecks.filter { deck in
+            deck.title.lowercased().contains(searchLower) ||
+            deck.description.lowercased().contains(searchLower)
+        }
+    }
+    
+    // Current decks based on selected category or search
     var currentDecks: [Deck] {
+        if !searchText.isEmpty {
+            return filteredDecks
+        }
         switch selectedCategory {
         case "Favorites":
             return favoriteDecks
@@ -299,39 +316,110 @@ struct Play2View: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Category Tabs
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 24) {
-                        ForEach(categories, id: \.self) { category in
-                            CategoryTab(title: category, isSelected: selectedCategory == category)
-                                .transition(.asymmetric(
-                                    insertion: .opacity.combined(with: .scale(scale: 0.8)).combined(with: .move(edge: .leading)),
-                                    removal: .opacity.combined(with: .scale(scale: 0.8)).combined(with: .move(edge: .leading))
-                                ))
-                                .onTapGesture {
-                                    if selectedCategory != category {
-                                        withAnimation(.easeInOut(duration: 0.3)) {
-                                            selectedCategory = category
-                                            currentCardIndex = 0
-                                            cardOffset = 0
-                                            // Reset flipped states when switching category
-                                            cardFlippedStates = Array(repeating: false, count: 10)
-                                        }
-                                        HapticManager.shared.lightImpact()
-                                    }
+                // Search Bar
+                HStack(spacing: 12) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        
+                        TextField("Search games...", text: $searchText)
+                            .font(.system(size: 16, weight: .regular, design: .rounded))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .onChange(of: searchText) { oldValue, newValue in
+                                withAnimation {
+                                    currentCardIndex = 0
+                                    cardOffset = 0
+                                    cardFlippedStates = Array(repeating: false, count: 10)
                                 }
+                            }
+                        
+                        if !searchText.isEmpty {
+                            Button(action: {
+                                withAnimation {
+                                    searchText = ""
+                                    currentCardIndex = 0
+                                    cardOffset = 0
+                                }
+                                HapticManager.shared.lightImpact()
+                            }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.system(size: 18, weight: .medium))
+                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            }
                         }
                     }
-                    .padding(.horizontal, 40)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                    .cornerRadius(16)
                 }
-                .animation(.spring(response: 0.4, dampingFraction: 0.8), value: categories)
+                .padding(.horizontal, 40)
                 .padding(.top, 20)
                 .padding(.bottom, 16)
                 
+                // Category Tabs (hidden when searching)
+                if searchText.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 24) {
+                            ForEach(categories, id: \.self) { category in
+                                CategoryTab(title: category, isSelected: selectedCategory == category)
+                                    .transition(.asymmetric(
+                                        insertion: .opacity.combined(with: .scale(scale: 0.8)).combined(with: .move(edge: .leading)),
+                                        removal: .opacity.combined(with: .scale(scale: 0.8)).combined(with: .move(edge: .leading))
+                                    ))
+                                    .onTapGesture {
+                                        if selectedCategory != category {
+                                            withAnimation(.easeInOut(duration: 0.3)) {
+                                                selectedCategory = category
+                                                currentCardIndex = 0
+                                                cardOffset = 0
+                                                // Reset flipped states when switching category
+                                                cardFlippedStates = Array(repeating: false, count: 10)
+                                            }
+                                            HapticManager.shared.lightImpact()
+                                        }
+                                    }
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                    }
+                    .animation(.spring(response: 0.4, dampingFraction: 0.8), value: categories)
+                    .padding(.bottom, 16)
+                } else {
+                    // Search results count
+                    if !filteredDecks.isEmpty {
+                        Text("\(filteredDecks.count) game\(filteredDecks.count == 1 ? "" : "s") found")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .padding(.bottom, 16)
+                    }
+                }
+                
                 // Card Deck - Simple horizontal scroll with current card only
                 ZStack {
+                    // Empty state for search
+                    if !searchText.isEmpty && filteredDecks.isEmpty {
+                        VStack(spacing: 24) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 50, weight: .light))
+                                .foregroundColor(Color(red: 0xD0/255.0, green: 0xD0/255.0, blue: 0xD0/255.0))
+                            
+                            VStack(spacing: 8) {
+                                Text("No Games Found")
+                                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                
+                                Text("Try searching with different keywords")
+                                    .font(.system(size: 16, weight: .regular, design: .rounded))
+                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                    .multilineTextAlignment(.center)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
                     // Current card
-                    if currentCardIndex < currentDecks.count {
+                    else if !currentDecks.isEmpty && currentCardIndex < currentDecks.count {
                         GameCardView(
                             deck: currentDecks[currentCardIndex],
                             isFlipped: $cardFlippedStates[currentCardIndex],
@@ -401,22 +489,26 @@ struct Play2View: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .clipped() // Hide cards when they slide off screen
                 
-                // Placeholder text under cards
-                Text("Tap card to flip and see details")
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                    .foregroundColor(Color(red: 0xB0/255.0, green: 0xB0/255.0, blue: 0xB0/255.0))
-                    .padding(.top, 16)
-                
-                // Card Counter
-                HStack(spacing: 8) {
-                    ForEach(0..<currentDecks.count, id: \.self) { index in
-                        Circle()
-                            .fill(index == currentCardIndex ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0))
-                            .frame(width: 8, height: 8)
-                    }
+                // Placeholder text under cards (hidden when searching)
+                if searchText.isEmpty {
+                    Text("Tap card to flip and see details")
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(Color(red: 0xB0/255.0, green: 0xB0/255.0, blue: 0xB0/255.0))
+                        .padding(.top, 16)
                 }
-                .padding(.top, 8)
-                .padding(.bottom, 30)
+                
+                // Card Counter (hidden when searching with no results)
+                if !currentDecks.isEmpty && !(!searchText.isEmpty && filteredDecks.isEmpty) {
+                    HStack(spacing: 8) {
+                        ForEach(0..<currentDecks.count, id: \.self) { index in
+                            Circle()
+                                .fill(index == currentCardIndex ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0))
+                                .frame(width: 8, height: 8)
+                        }
+                    }
+                    .padding(.top, 8)
+                    .padding(.bottom, 30)
+                }
             }
             
             // Navigation link for category selection
@@ -542,6 +634,48 @@ struct CategoryTab: View {
     }
 }
 
+// Favorite Button Component with Animation
+struct FavoriteButton: View {
+    let deck: Deck
+    @ObservedObject private var favoritesManager = FavoritesManager.shared
+    @State private var isAnimating: Bool = false
+    @State private var scale: CGFloat = 1.0
+    
+    var isFavorite: Bool {
+        favoritesManager.isFavorite(deck.type)
+    }
+    
+    var body: some View {
+        Button(action: {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                scale = 1.3
+                isAnimating = true
+            }
+            
+            favoritesManager.toggleFavorite(deck.type)
+            HapticManager.shared.lightImpact()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                    scale = 1.0
+                }
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                isAnimating = false
+            }
+        }) {
+            Image(systemName: isFavorite ? "heart.fill" : "heart")
+                .font(.system(size: 20, weight: .medium))
+                .foregroundColor(isFavorite ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                .frame(width: 40, height: 40)
+                .background(isFavorite ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.1) : Color(red: 0xF5/255.0, green: 0xF5/255.0, blue: 0xF5/255.0))
+                .clipShape(Circle())
+                .scaleEffect(scale)
+        }
+    }
+}
+
 // Game Card View Component
 struct GameCardView: View {
     let deck: Deck
@@ -602,17 +736,8 @@ struct GameCardView: View {
                 }
                 
                 // Favorite button - top right
-                Button(action: {
-                    favoritesManager.toggleFavorite(deck.type)
-                }) {
-                    Image(systemName: favoritesManager.isFavorite(deck.type) ? "heart.fill" : "heart")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(favoritesManager.isFavorite(deck.type) ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                        .frame(width: 40, height: 40)
-                        .background(Color(red: 0xF5/255.0, green: 0xF5/255.0, blue: 0xF5/255.0))
-                        .clipShape(Circle())
-                }
-                .padding(16)
+                FavoriteButton(deck: deck)
+                    .padding(16)
             }
             .frame(width: cardWidth, height: cardHeight)
             .background(Color.white)
