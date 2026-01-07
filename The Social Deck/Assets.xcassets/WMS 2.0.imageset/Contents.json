@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "whats my secret 2.0-2.png",
+      "filename" : "whats my secret.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "whats my secret 2.0-2 1.png",
+      "filename" : "whats my secret 1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "whats my secret 2.0-2 2.png",
+      "filename" : "whats my secret 2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

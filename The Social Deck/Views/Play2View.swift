@@ -360,31 +360,31 @@ struct Play2View: View {
                 
                 // Category Tabs (hidden when searching)
                 if searchText.isEmpty {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 24) {
-                            ForEach(categories, id: \.self) { category in
-                                CategoryTab(title: category, isSelected: selectedCategory == category)
-                                    .transition(.asymmetric(
-                                        insertion: .opacity.combined(with: .scale(scale: 0.8)).combined(with: .move(edge: .leading)),
-                                        removal: .opacity.combined(with: .scale(scale: 0.8)).combined(with: .move(edge: .leading))
-                                    ))
-                                    .onTapGesture {
-                                        if selectedCategory != category {
-                                            withAnimation(.easeInOut(duration: 0.3)) {
-                                                selectedCategory = category
-                                                currentCardIndex = 0
-                                                cardOffset = 0
-                                                // Reset flipped states when switching category
-                                                cardFlippedStates = Array(repeating: false, count: 10)
-                                            }
-                                            HapticManager.shared.lightImpact()
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 24) {
+                        ForEach(categories, id: \.self) { category in
+                            CategoryTab(title: category, isSelected: selectedCategory == category)
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .scale(scale: 0.8)).combined(with: .move(edge: .leading)),
+                                    removal: .opacity.combined(with: .scale(scale: 0.8)).combined(with: .move(edge: .leading))
+                                ))
+                                .onTapGesture {
+                                    if selectedCategory != category {
+                                        withAnimation(.easeInOut(duration: 0.3)) {
+                                            selectedCategory = category
+                                            currentCardIndex = 0
+                                            cardOffset = 0
+                                            // Reset flipped states when switching category
+                                            cardFlippedStates = Array(repeating: false, count: 10)
                                         }
+                                        HapticManager.shared.lightImpact()
                                     }
-                            }
+                                }
                         }
-                        .padding(.horizontal, 40)
                     }
-                    .animation(.spring(response: 0.4, dampingFraction: 0.8), value: categories)
+                    .padding(.horizontal, 40)
+                }
+                .animation(.spring(response: 0.4, dampingFraction: 0.8), value: categories)
                     .padding(.bottom, 16)
                 } else {
                     // Search results count
@@ -392,7 +392,7 @@ struct Play2View: View {
                         Text("\(filteredDecks.count) game\(filteredDecks.count == 1 ? "" : "s") found")
                             .font(.system(size: 14, weight: .medium, design: .rounded))
                             .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                            .padding(.bottom, 16)
+                .padding(.bottom, 16)
                     }
                 }
                 
@@ -491,23 +491,23 @@ struct Play2View: View {
                 
                 // Placeholder text under cards (hidden when searching)
                 if searchText.isEmpty {
-                    Text("Tap card to flip and see details")
-                        .font(.system(size: 14, weight: .regular, design: .rounded))
-                        .foregroundColor(Color(red: 0xB0/255.0, green: 0xB0/255.0, blue: 0xB0/255.0))
-                        .padding(.top, 16)
+                Text("Tap card to flip and see details")
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .foregroundColor(Color(red: 0xB0/255.0, green: 0xB0/255.0, blue: 0xB0/255.0))
+                    .padding(.top, 16)
                 }
                 
                 // Card Counter (hidden when searching with no results)
                 if !currentDecks.isEmpty && !(!searchText.isEmpty && filteredDecks.isEmpty) {
-                    HStack(spacing: 8) {
-                        ForEach(0..<currentDecks.count, id: \.self) { index in
-                            Circle()
-                                .fill(index == currentCardIndex ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0))
-                                .frame(width: 8, height: 8)
-                        }
+                HStack(spacing: 8) {
+                    ForEach(0..<currentDecks.count, id: \.self) { index in
+                        Circle()
+                            .fill(index == currentCardIndex ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0))
+                            .frame(width: 8, height: 8)
                     }
-                    .padding(.top, 8)
-                    .padding(.bottom, 30)
+                }
+                .padding(.top, 8)
+                .padding(.bottom, 30)
                 }
             }
             
@@ -737,7 +737,7 @@ struct GameCardView: View {
                 
                 // Favorite button - top right
                 FavoriteButton(deck: deck)
-                    .padding(16)
+                .padding(16)
             }
             .frame(width: cardWidth, height: cardHeight)
             .background(Color.white)

@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "TOD 2.0.png",
+      "filename" : "truth2.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "TOD 2.0 1.png",
+      "filename" : "truth2 1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "TOD 2.0 2.png",
+      "filename" : "truth2 2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

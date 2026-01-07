@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "riddle me this 2.0-2.png",
+      "filename" : "riddle me this.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "riddle me this 2.0-2 1.png",
+      "filename" : "riddle me this 1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "riddle me this 2.0-2 2.png",
+      "filename" : "riddle me this 2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
