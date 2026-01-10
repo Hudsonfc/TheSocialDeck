@@ -18,8 +18,8 @@ struct StoryChainPlayView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -30,9 +30,9 @@ struct StoryChainPlayView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     
@@ -42,9 +42,9 @@ struct StoryChainPlayView: View {
                     }) {
                         Image(systemName: "house.fill")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     .padding(.leading, 12)
@@ -62,11 +62,11 @@ struct StoryChainPlayView: View {
                             HStack(spacing: 8) {
                                 Image(systemName: "person.fill")
                                     .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .foregroundColor(Color.buttonBackground)
                                 
                                 Text(manager.currentPlayer)
                                     .font(.system(size: 20, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                             }
                             .padding(.horizontal, 20)
                             .padding(.vertical, 12)
@@ -75,7 +75,7 @@ struct StoryChainPlayView: View {
                                     .fill(Color(red: 0xFF/255.0, green: 0xF4/255.0, blue: 0xF4/255.0))
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 12)
-                                            .stroke(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0), lineWidth: 2)
+                                            .stroke(Color.buttonBackground, lineWidth: 2)
                                     )
                             )
                             
@@ -93,7 +93,7 @@ struct StoryChainPlayView: View {
                 if !manager.isFinished {
                     Text(deck.title)
                         .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                         .padding(.horizontal, 40)
                         .padding(.bottom, 24)
                 }
@@ -110,13 +110,13 @@ struct StoryChainPlayView: View {
                             
                             Text(manager.startingSentence)
                                 .font(.system(size: 18, weight: .medium, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(.primaryText)
                                 .multilineTextAlignment(.center)
                                 .lineSpacing(6)
                         }
                         .padding(.horizontal, 20)
                         .padding(.vertical, 20)
-                        .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                        .background(Color.secondaryBackground)
                         .cornerRadius(12)
                         .padding(.horizontal, 40)
                         .padding(.bottom, 20)
@@ -130,13 +130,13 @@ struct StoryChainPlayView: View {
                             
                             Text(lastSentence.text)
                                 .font(.system(size: 18, weight: .medium, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(.primaryText)
                                 .multilineTextAlignment(.center)
                                 .lineSpacing(6)
                         }
                         .padding(.horizontal, 20)
                         .padding(.vertical, 20)
-                        .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                        .background(Color.secondaryBackground)
                         .cornerRadius(12)
                         .padding(.horizontal, 40)
                         .padding(.bottom, 20)
@@ -150,7 +150,7 @@ struct StoryChainPlayView: View {
                             ForEach(manager.storySentences) { storySentence in
                                 Text(storySentence.text)
                                     .font(.system(size: 16, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                                     .lineSpacing(6)
                                     .padding(.horizontal, 4)
                             }
@@ -174,9 +174,10 @@ struct StoryChainPlayView: View {
                         
                         TextField("Continue the story...", text: $manager.currentSentence, axis: .vertical)
                             .font(.system(size: 16, weight: .regular, design: .rounded))
+                            .foregroundColor(.primaryText)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 14)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .cornerRadius(12)
                             .focused($isTextFieldFocused)
                             .lineLimit(3...6)
@@ -199,7 +200,7 @@ struct StoryChainPlayView: View {
                             .background(
                                 manager.currentSentence.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                                 ? Color.gray
-                                : Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+                                : Color.buttonBackground
                             )
                             .cornerRadius(12)
                         }
@@ -221,7 +222,7 @@ struct StoryChainPlayView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 18)
-                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .background(Color.buttonBackground)
                         .cornerRadius(12)
                     }
                     .padding(.horizontal, 40)

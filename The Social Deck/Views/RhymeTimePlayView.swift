@@ -17,8 +17,8 @@ struct RhymeTimePlayView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -29,9 +29,9 @@ struct RhymeTimePlayView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     
@@ -41,9 +41,9 @@ struct RhymeTimePlayView: View {
                     }) {
                         Image(systemName: "house.fill")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     .padding(.leading, 12)
@@ -53,7 +53,7 @@ struct RhymeTimePlayView: View {
                     // Round indicator
                     Text("Round \(manager.roundNumber)")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
                 .padding(.horizontal, 40)
                 .padding(.top, 20)
@@ -123,7 +123,7 @@ struct RhymeTimeWaitingToStartView: View {
         VStack(spacing: 32) {
             Text("Ready to start?")
                 .font(.system(size: 28, weight: .bold, design: .rounded))
-                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                .foregroundColor(.primaryText)
             
             Text("Say a word that rhymes with the base word before time runs out!")
                 .font(.system(size: 16, weight: .regular, design: .rounded))
@@ -169,25 +169,25 @@ struct RhymeTimeActiveGameView: View {
                 
                 Text(manager.baseWord.uppercased())
                     .font(.system(size: 48, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
             }
             
             // Timer display
             VStack(spacing: 12) {
                 Text("\(manager.currentPlayer)'s turn")
                     .font(.system(size: 20, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                 
                 // Circular timer
                 ZStack {
                     Circle()
-                        .stroke(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0), lineWidth: 12)
+                        .stroke(Color.tertiaryBackground, lineWidth: 12)
                         .frame(width: 120, height: 120)
                     
                     Circle()
                         .trim(from: 0, to: CGFloat(manager.timeRemaining / 10.0))
                         .stroke(
-                            manager.timeRemaining < 3.0 ? Color.red : Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0),
+                            manager.timeRemaining < 3.0 ? Color.red : Color.buttonBackground,
                             style: StrokeStyle(lineWidth: 12, lineCap: .round)
                         )
                         .frame(width: 120, height: 120)
@@ -212,10 +212,10 @@ struct RhymeTimeActiveGameView: View {
                             ForEach(manager.usedRhymes, id: \.self) { rhyme in
                                 Text(rhyme.capitalized)
                                     .font(.system(size: 14, weight: .medium, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 6)
-                                    .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                                    .background(Color.tertiaryBackground)
                                     .cornerRadius(16)
                             }
                         }
@@ -232,9 +232,10 @@ struct RhymeTimeActiveGameView: View {
                 
                 TextField("Enter your rhyme", text: $rhymeInput)
                     .font(.system(size: 18, weight: .medium, design: .rounded))
+                    .foregroundColor(.primaryText)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 14)
-                    .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                    .background(Color.tertiaryBackground)
                     .cornerRadius(12)
                     .autocapitalization(.none)
                     .disableAutocorrection(true)
@@ -328,7 +329,7 @@ struct RhymeTimeRoundCompleteView: View {
             VStack(spacing: 16) {
                 Text("Round Complete!")
                     .font(.system(size: 36, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                 
                 Text("Everyone found a rhyme!")
                     .font(.system(size: 18, weight: .medium, design: .rounded))
@@ -362,23 +363,23 @@ struct RhymeTimeTimerExpiredView: View {
             // Friendly visual
             ZStack {
                 Circle()
-                    .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.1))
+                    .fill(Color.buttonBackground.opacity(0.1))
                     .frame(width: 200, height: 200)
                 
                 Image(systemName: "timer")
                     .font(.system(size: 60, weight: .medium))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
             }
             
             VStack(spacing: 16) {
                 Text("Time's Up!")
                     .font(.system(size: 36, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                 
                 if let loser = manager.loser {
                     Text("\(loser) was holding the phone!")
                         .font(.system(size: 22, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
                 }

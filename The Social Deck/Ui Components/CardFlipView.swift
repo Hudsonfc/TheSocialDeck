@@ -41,13 +41,13 @@ struct CardFlipView: View {
             // Deck title
             Text(deck.title)
                 .font(.system(size: 14, weight: .regular, design: .rounded))
-                .foregroundColor(Color.gray)
+                .foregroundColor(.secondaryText)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .frame(width: 140)
         }
         .frame(width: 140, height: 180)
-        .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+        .background(Color.tertiaryBackground)
         .cornerRadius(16)
     }
     
@@ -94,7 +94,7 @@ struct CardFlipView: View {
                 )
             }
             .padding()
-            .background(Color.gray.opacity(0.1))
+            .background(Color.secondaryBackground)
         }
     }
     

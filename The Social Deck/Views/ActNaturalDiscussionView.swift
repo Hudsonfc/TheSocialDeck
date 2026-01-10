@@ -16,8 +16,8 @@ struct ActNaturalDiscussionView: View {
     
     var body: some View {
         ZStack {
-            // Background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             if showReveal {
@@ -47,9 +47,9 @@ struct ActNaturalDiscussionView: View {
                 }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                 }
                 
@@ -64,23 +64,23 @@ struct ActNaturalDiscussionView: View {
             VStack(spacing: 32) {
                 // Icon
                 ZStack {
-                    Circle()
-                        .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.1))
-                        .frame(width: 100, height: 100)
+                Circle()
+                    .fill(Color.buttonBackground.opacity(0.1))
+                    .frame(width: 100, height: 100)
                     
                     Image(systemName: "bubble.left.and.bubble.right.fill")
                         .font(.system(size: 40, weight: .medium))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .foregroundColor(Color.buttonBackground)
                 }
                 
                 VStack(spacing: 16) {
                     Text("Discussion Time!")
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                     
                     Text("Talk about the word without saying it directly. The unknown player(s) will try to blend in!")
                         .font(.system(size: 16, weight: .regular, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
                         .padding(.horizontal, 24)
@@ -90,7 +90,7 @@ struct ActNaturalDiscussionView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Tips for Discussion")
                         .font(.system(size: 18, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                     
                     tipRow(icon: "lightbulb.fill", text: "Give clues without being too obvious")
                     tipRow(icon: "eye.fill", text: "Watch for suspicious reactions")
@@ -98,7 +98,7 @@ struct ActNaturalDiscussionView: View {
                     tipRow(icon: "clock.fill", text: "Take your time — no rush!")
                 }
                 .padding(20)
-                .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                .background(Color.secondaryBackground)
                 .cornerRadius(20)
                 .padding(.horizontal, 24)
                 
@@ -106,11 +106,11 @@ struct ActNaturalDiscussionView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "person.2.fill")
                         .font(.system(size: 14))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .foregroundColor(Color.buttonBackground)
                     
                     Text("\(manager.unknownCount) unknown player\(manager.unknownCount > 1 ? "s" : "") among \(manager.players.count) players")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                 }
             }
             
@@ -128,7 +128,7 @@ struct ActNaturalDiscussionView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 56)
-                    .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .background(Color.buttonBackground)
                     .cornerRadius(16)
             }
             .padding(.horizontal, 24)
@@ -146,11 +146,11 @@ struct ActNaturalDiscussionView: View {
                 VStack(spacing: 16) {
                     Text("The Word Was")
                         .font(.system(size: 18, weight: .medium, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                     
                     Text(manager.secretWord?.word ?? "???")
                         .font(.system(size: 44, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                     
                     if let category = manager.secretWord?.category {
                         Text(category)
@@ -158,13 +158,13 @@ struct ActNaturalDiscussionView: View {
                             .foregroundColor(.white)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 6)
-                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .background(Color.buttonBackground)
                             .cornerRadius(20)
                     }
                 }
                 .padding(32)
                 .frame(maxWidth: .infinity)
-                .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                .background(Color.secondaryBackground)
                 .cornerRadius(24)
                 .padding(.horizontal, 24)
                 
@@ -172,13 +172,13 @@ struct ActNaturalDiscussionView: View {
                 VStack(spacing: 16) {
                     Text("The Unknown\(manager.unknownCount > 1 ? "s Were" : " Was")")
                         .font(.system(size: 18, weight: .medium, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                     
                     ForEach(manager.unknownPlayers) { player in
                         HStack(spacing: 12) {
                             ZStack {
                                 Circle()
-                                    .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .fill(Color.buttonBackground)
                                     .frame(width: 44, height: 44)
                                 
                                 Image(systemName: "questionmark")
@@ -188,13 +188,13 @@ struct ActNaturalDiscussionView: View {
                             
                             Text(player.name)
                                 .font(.system(size: 24, weight: .bold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(.primaryText)
                         }
                     }
                 }
                 .padding(24)
                 .frame(maxWidth: .infinity)
-                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.1))
+                .background(Color.buttonBackground.opacity(0.1))
                 .cornerRadius(24)
                 .padding(.horizontal, 24)
             }
@@ -225,12 +225,12 @@ struct ActNaturalDiscussionView: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 16))
-                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                .foregroundColor(Color.buttonBackground)
                 .frame(width: 24)
             
             Text(text)
                 .font(.system(size: 14, weight: .regular, design: .rounded))
-                .foregroundColor(Color(red: 0x5A/255.0, green: 0x5A/255.0, blue: 0x5A/255.0))
+                .foregroundColor(.secondaryText)
         }
     }
 }

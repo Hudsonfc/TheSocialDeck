@@ -18,94 +18,67 @@ struct RhymeTimeSetupView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Back button at top left
+                // Header
                 HStack {
                     Button(action: {
                         dismiss()
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
+                            .frame(width: 44, height: 44)
+                            .background(Color.tertiaryBackground)
+                            .clipShape(Circle())
                     }
+                    
                     Spacer()
+                    
+                    Text("\(players.count)/12 Players")
+                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                        .foregroundColor(.secondaryText)
                 }
-                .padding(.horizontal, 40)
+                .padding(.horizontal, 24)
                 .padding(.top, 20)
                 
                 ScrollView {
                     VStack(spacing: 0) {
-                        // Game artwork - regular card image
+                        // Game artwork
                         Image(deck.imageName)
                             .resizable()
+                            .interpolation(.high)
+                            .antialiased(true)
                             .scaledToFit()
-                            .frame(width: 160, height: 220)
+                            .frame(width: 120, height: 165)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                            .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
                             .padding(.top, 20)
-                            .padding(.bottom, players.count > 3 ? 20 : 32)
+                        
+                        // Title
+                        Text("Add Players")
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .foregroundColor(.primaryText)
+                            .padding(.top, 20)
+                        
+                        Text("Minimum 2 players required")
+                            .font(.system(size: 14, weight: .regular, design: .rounded))
+                            .foregroundColor(.secondaryText)
+                            .padding(.top, 4)
                         
                         // Players section
-                        VStack(spacing: players.count > 3 ? 12 : 16) {
-                            VStack(spacing: 8) {
-                                Text("Add Players")
-                                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                
-                                Text("Enter each player's name and tap the + button to add them to the game.")
-                                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                                    .multilineTextAlignment(.center)
-                                    .lineSpacing(4)
-                                    .padding(.horizontal, 20)
-                            }
-                            
-                            // Player list
-                            if players.isEmpty {
-                                Text("No players added yet")
-                                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                                    .padding(.vertical, 20)
-                            } else {
-                                ScrollView {
-                                    VStack(spacing: players.count > 3 ? 8 : 12) {
-                                        ForEach(Array(players.enumerated()), id: \.offset) { index, player in
-                                            HStack {
-                                                Text(player)
-                                                    .font(.system(size: 16, weight: .medium, design: .rounded))
-                                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                                
-                                                Spacer()
-                                                
-                                                Button(action: {
-                                                    players.remove(at: index)
-                                                }) {
-                                                    Image(systemName: "xmark.circle.fill")
-                                                        .font(.system(size: 20))
-                                                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                                }
-                                            }
-                                            .padding(.horizontal, 20)
-                                            .padding(.vertical, players.count > 3 ? 12 : 14)
-                                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                                            .cornerRadius(12)
-                                        }
-                                    }
-                                }
-                                .frame(maxHeight: players.count > 3 ? 180 : 200)
-                            }
-                            
-                            // Add player input
+                        VStack(spacing: 0) {
+                            // Name input
                             HStack(spacing: 12) {
-                                TextField("Player name", text: $newPlayerName)
-                                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                                TextField("Enter player name", text: $newPlayerName)
+                                    .font(.system(size: 16, weight: .regular, design: .rounded))
+                                    .foregroundColor(.primaryText)
                                     .padding(.horizontal, 16)
-                                    .padding(.vertical, 12)
-                                    .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                                    .padding(.vertical, 14)
+                                    .background(Color.secondaryBackground)
                                     .cornerRadius(12)
                                     .autocapitalization(.words)
                                     .disableAutocorrection(true)
@@ -116,33 +89,95 @@ struct RhymeTimeSetupView: View {
                                 Button(action: {
                                     addPlayer()
                                 }) {
-                                    Image(systemName: "plus.circle.fill")
-                                        .font(.system(size: 32))
-                                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 18, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .frame(width: 50, height: 50)
+                                        .background(
+                                            players.count < 12 && !newPlayerName.trimmingCharacters(in: .whitespaces).isEmpty
+                                                ? Color.primaryAccent
+                                                : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
+                                        )
+                                        .cornerRadius(12)
                                 }
+                                .disabled(players.count >= 12 || newPlayerName.trimmingCharacters(in: .whitespaces).isEmpty)
                             }
+                            .padding(.horizontal, 24)
+                            .padding(.top, 24)
+                            
+                            // Players list
+                            ScrollView {
+                                VStack(spacing: 8) {
+                                    ForEach(Array(players.enumerated()), id: \.offset) { index, player in
+                                        HStack {
+                                            Text("\(index + 1).")
+                                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                                .foregroundColor(.secondaryText)
+                                                .frame(width: 30, alignment: .leading)
+                                            
+                                            Text(player)
+                                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                                                .foregroundColor(.primaryText)
+                                            
+                                            Spacer()
+                                            
+                                            Button(action: {
+                                                players.remove(at: index)
+                                            }) {
+                                                Image(systemName: "xmark.circle.fill")
+                                                    .font(.system(size: 20))
+                                                    .foregroundColor(Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0))
+                                            }
+                                        }
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 12)
+                                        .background(Color.secondaryBackground)
+                                        .cornerRadius(12)
+                                    }
+                                }
+                                .padding(.horizontal, 24)
+                            }
+                            .padding(.top, 16)
                         }
-                        .padding(.horizontal, 40)
-                        .padding(.bottom, 20)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 32)
                         
                         // Timer duration section
                         VStack(spacing: 12) {
                             Text("Timer Duration")
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(.primaryText)
                             
                             Text("\(Int(timerDuration)) seconds per turn")
                                 .font(.system(size: 14, weight: .medium, design: .rounded))
-                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .foregroundColor(Color.primaryAccent)
                             
                             Slider(value: $timerDuration, in: 5...20, step: 1)
-                                .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .tint(Color.primaryAccent)
                                 .padding(.horizontal, 40)
                         }
-                        .padding(.bottom, 24)
+                        .padding(.bottom, 32)
+                        
+                        // Tips section
+                        if players.count >= 2 {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Tips")
+                                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                                    .foregroundColor(.primaryText)
+                                
+                                tipRow(icon: "music.note", text: "Say a word that rhymes with the base word")
+                                tipRow(icon: "timer", text: "You have limited time per turn")
+                                tipRow(icon: "xmark.circle.fill", text: "Can't repeat rhymes already used")
+                            }
+                            .padding(16)
+                            .background(Color.secondaryBackground)
+                            .cornerRadius(12)
+                            .padding(.horizontal, 24)
+                            .padding(.bottom, 12)
+                        }
                         
                         // Start Game button
-                        PrimaryButton(title: "Start Game") {
+                        Button(action: {
                             // Add haptic feedback
                             let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
                             impactFeedback.impactOccurred()
@@ -151,12 +186,22 @@ struct RhymeTimeSetupView: View {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                                 navigateToPlay = true
                             }
+                        }) {
+                            Text("Start Game")
+                                .font(.system(size: 18, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 56)
+                                .background(
+                                    players.count >= 2
+                                        ? Color.primaryAccent
+                                        : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
+                                )
+                                .cornerRadius(16)
                         }
-                        .padding(.horizontal, 40)
-                        .padding(.top, players.count > 3 ? 16 : 20)
-                        .disabled(players.isEmpty)
-                        .opacity(players.isEmpty ? 0.5 : 1.0)
-                        .padding(.bottom, players.count > 3 ? 32 : 40)
+                        .disabled(players.count < 2)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 40)
                     }
                 }
             }
@@ -181,9 +226,23 @@ struct RhymeTimeSetupView: View {
         // Validate: not empty, not duplicate, and reasonable length
         if !trimmedName.isEmpty 
             && !players.contains(trimmedName) 
-            && trimmedName.count <= 30 {
+            && trimmedName.count <= 30
+            && players.count < 12 {
             players.append(trimmedName)
             newPlayerName = ""
+        }
+    }
+    
+    private func tipRow(icon: String, text: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 14))
+                .foregroundColor(Color.primaryAccent)
+                .frame(width: 20)
+            
+            Text(text)
+                .font(.system(size: 14, weight: .regular, design: .rounded))
+                .foregroundColor(.secondaryText)
         }
     }
 }

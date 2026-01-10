@@ -17,7 +17,7 @@ struct ActNaturalEndView: View {
     var body: some View {
         ZStack {
             // Background
-            Color.white
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -30,9 +30,9 @@ struct ActNaturalEndView: View {
                     }) {
                         Image(systemName: "house.fill")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                 }
@@ -51,16 +51,16 @@ struct ActNaturalEndView: View {
                         .scaledToFit()
                         .frame(width: 160, height: 220)
                         .clipShape(RoundedRectangle(cornerRadius: 20))
-                        .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 8)
+                        .shadow(color: Color.cardShadowColor, radius: 15, x: 0, y: 8)
                     
                     VStack(spacing: 12) {
                         Text("Great Game!")
                             .font(.system(size: 32, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                         
                         Text("Did you guess the unknown player(s)?")
                             .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                     }
                     
                     // Game summary
@@ -70,7 +70,7 @@ struct ActNaturalEndView: View {
                         summaryRow(label: "Word", value: manager.secretWord?.word ?? "—")
                     }
                     .padding(20)
-                    .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                    .background(Color.secondaryBackground)
                     .cornerRadius(20)
                     .padding(.horizontal, 24)
                 }
@@ -85,17 +85,17 @@ struct ActNaturalEndView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
-                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .background(Color.buttonBackground)
                             .cornerRadius(16)
                     }
                     
                     Button(action: newGame) {
                         Text("New Players")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .foregroundColor(Color.buttonBackground)
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
-                            .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                            .background(Color.secondaryBackground)
                             .cornerRadius(16)
                     }
                 }
@@ -126,13 +126,13 @@ struct ActNaturalEndView: View {
         HStack {
             Text(label)
                 .font(.system(size: 16, weight: .regular, design: .rounded))
-                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                .foregroundColor(.secondaryText)
             
             Spacer()
             
             Text(value)
                 .font(.system(size: 16, weight: .semibold, design: .rounded))
-                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                .foregroundColor(.primaryText)
         }
     }
     

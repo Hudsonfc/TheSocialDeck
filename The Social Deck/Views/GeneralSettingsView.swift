@@ -15,8 +15,8 @@ struct GeneralSettingsView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             ScrollView {
@@ -24,7 +24,7 @@ struct GeneralSettingsView: View {
                     // Title
                     Text("General Settings")
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                         .padding(.top, 20)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
@@ -35,7 +35,7 @@ struct GeneralSettingsView: View {
                             // Section Header
                             Text("Preferences")
                                 .font(.system(size: 13, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                .foregroundColor(.secondaryText)
                                 .textCase(.uppercase)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.top, 32)
@@ -49,10 +49,11 @@ struct GeneralSettingsView: View {
                             ) {
                                 Toggle("", isOn: $hapticsEnabled)
                                     .labelsHidden()
-                                    .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .tint(Color.primaryAccent)
                             }
                             
                             Divider()
+                                .background(Color.borderColor)
                                 .padding(.leading, 56)
                             
                             // Shuffle Cards Toggle
@@ -63,10 +64,11 @@ struct GeneralSettingsView: View {
                             ) {
                                 Toggle("", isOn: $shuffleCardsEnabled)
                                     .labelsHidden()
-                                    .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .tint(Color.primaryAccent)
                             }
                             
                             Divider()
+                                .background(Color.borderColor)
                                 .padding(.leading, 56)
                             
                             // Swipe Navigation Toggle
@@ -77,7 +79,7 @@ struct GeneralSettingsView: View {
                             ) {
                                 Toggle("", isOn: $swipeNavigationEnabled)
                                     .labelsHidden()
-                                    .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .tint(Color.primaryAccent)
                             }
                         }
                     }
@@ -97,7 +99,7 @@ struct GeneralSettingsView: View {
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
             }
         }
@@ -116,18 +118,18 @@ struct SettingsRow<Content: View>: View {
             // Icon
             Image(systemName: icon)
                 .font(.system(size: 20))
-                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                .foregroundColor(Color.primaryAccent)
                 .frame(width: 28, height: 28)
             
             // Title and Description
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.system(size: 17, weight: .regular, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                 
                 Text(description)
                     .font(.system(size: 13, weight: .regular, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(.secondaryText)
             }
             
             Spacer()

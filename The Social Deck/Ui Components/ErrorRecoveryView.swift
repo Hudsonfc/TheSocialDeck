@@ -33,11 +33,11 @@ struct ErrorRecoveryView: View {
             VStack(spacing: 12) {
                 Text("Error")
                     .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                 
                 Text(errorMessage)
                     .font(.system(size: 16, weight: .regular, design: .rounded))
-                    .foregroundColor(Color.gray)
+                    .foregroundColor(.secondaryText)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
             }
@@ -50,10 +50,10 @@ struct ErrorRecoveryView: View {
                     }) {
                         Text("Cancel")
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color.gray)
+                            .foregroundColor(.secondaryText)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
-                            .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                            .background(Color.secondaryBackground)
                             .cornerRadius(12)
                     }
                 }
@@ -67,7 +67,7 @@ struct ErrorRecoveryView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .background(Color.buttonBackground)
                         .cornerRadius(12)
                 }
             }

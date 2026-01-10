@@ -16,8 +16,8 @@ struct StoryChainEndView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -30,9 +30,9 @@ struct StoryChainEndView: View {
                     }) {
                         Image(systemName: "house.fill")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                 }
@@ -48,24 +48,24 @@ struct StoryChainEndView: View {
                         .scaledToFit()
                         .frame(width: 80, height: 110)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+                        .shadow(color: Color.shadowColor, radius: 8, x: 0, y: 4)
                     
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Great Game!")
                             .font(.system(size: 24, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                         
                         Text("Your story is complete!")
                             .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                         
                         // Story stats
                         Text("\(storySentences.count) sentences")
                             .font(.system(size: 12, weight: .medium, design: .rounded))
-                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .foregroundColor(Color.buttonBackground)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 4)
-                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.1))
+                            .background(Color.buttonBackground.opacity(0.1))
                             .cornerRadius(8)
                     }
                     
@@ -84,25 +84,25 @@ struct StoryChainEndView: View {
                                 if let author = sentence.author {
                                     Text(author)
                                         .font(.system(size: 12, weight: .semibold, design: .rounded))
-                                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                        .foregroundColor(Color.buttonBackground)
                                         .textCase(.uppercase)
                                 } else {
                                     Text("Starting Line")
                                         .font(.system(size: 12, weight: .semibold, design: .rounded))
-                                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                        .foregroundColor(.secondaryText)
                                         .textCase(.uppercase)
                                 }
                                 
                                 // Sentence text
                                 Text(sentence.text)
                                     .font(.system(size: 16, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                                     .lineSpacing(4)
                             }
                             .padding(.horizontal, 16)
                             .padding(.vertical, 12)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                            .background(Color.secondaryBackground)
                             .cornerRadius(12)
                         }
                     }
@@ -121,7 +121,7 @@ struct StoryChainEndView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
-                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .background(Color.buttonBackground)
                             .cornerRadius(16)
                     }
                     
@@ -131,10 +131,10 @@ struct StoryChainEndView: View {
                     }) {
                         Text("Home")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .foregroundColor(Color.buttonBackground)
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
-                            .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                            .background(Color.secondaryBackground)
                             .cornerRadius(16)
                     }
                 }

@@ -16,8 +16,8 @@ struct ActNaturalRevealView: View {
     
     var body: some View {
         ZStack {
-            // Background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             if let currentPlayer = manager.currentPlayer {
@@ -51,9 +51,9 @@ struct ActNaturalRevealView: View {
                 }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                 }
                 
@@ -61,7 +61,7 @@ struct ActNaturalRevealView: View {
                 
                 Text("\(manager.currentPlayerIndex + 1) of \(manager.players.count)")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(.secondaryText)
             }
             .padding(.horizontal, 24)
             .padding(.top, 20)
@@ -82,15 +82,15 @@ struct ActNaturalRevealView: View {
             VStack(spacing: 16) {
                 Text("Pass to")
                     .font(.system(size: 18, weight: .regular, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(.secondaryText)
                 
                 Text(player.name)
                     .font(.system(size: 36, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                 
                 Text("Make sure no one else can see the screen")
                     .font(.system(size: 14, weight: .regular, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(.secondaryText)
                     .multilineTextAlignment(.center)
             }
             .padding(.top, 40)
@@ -109,7 +109,7 @@ struct ActNaturalRevealView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 56)
-                    .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .background(Color.buttonBackground)
                     .cornerRadius(16)
             }
             .padding(.horizontal, 24)
@@ -126,7 +126,7 @@ struct ActNaturalRevealView: View {
                 
                 Text("\(manager.currentPlayerIndex + 1) of \(manager.players.count)")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(.secondaryText)
             }
             .padding(.horizontal, 24)
             .padding(.top, 20)
@@ -150,7 +150,7 @@ struct ActNaturalRevealView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 56)
-                    .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .background(Color.buttonBackground)
                     .cornerRadius(16)
             }
             .padding(.horizontal, 24)
@@ -164,39 +164,39 @@ struct ActNaturalRevealView: View {
             // Icon
             ZStack {
                 Circle()
-                    .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.1))
+                    .fill(Color.buttonBackground.opacity(0.1))
                     .frame(width: 120, height: 120)
                 
                 Image(systemName: "questionmark")
                     .font(.system(size: 50, weight: .bold))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
             }
             
             VStack(spacing: 12) {
                 Text("Act Natural")
                     .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
                 
                 Text("You are the Unknown")
                     .font(.system(size: 20, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
             }
             
             // Card with instructions
             VStack(spacing: 16) {
                 Text("You do NOT know the word")
                     .font(.system(size: 18, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                 
                 Text("Listen carefully to others and try to figure out what the word is. Blend in and act like you know it!")
                     .font(.system(size: 16, weight: .regular, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(.secondaryText)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
             }
             .padding(24)
-            .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
-            .cornerRadius(20)
+                    .background(Color.secondaryBackground)
+                    .cornerRadius(20)
             .padding(.horizontal, 24)
         }
     }
@@ -218,18 +218,18 @@ struct ActNaturalRevealView: View {
             VStack(spacing: 12) {
                 Text("You Know the Word")
                     .font(.system(size: 20, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                 
                 Text("The secret word is:")
                     .font(.system(size: 16, weight: .regular, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(.secondaryText)
             }
             
             // Word card
             VStack(spacing: 8) {
                 Text(manager.secretWord?.word ?? "???")
                     .font(.system(size: 40, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                 
                 if let category = manager.secretWord?.category {
                     Text(category)
@@ -237,20 +237,20 @@ struct ActNaturalRevealView: View {
                         .foregroundColor(.white)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 6)
-                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                        .cornerRadius(20)
+                    .background(Color.buttonBackground)
+                    .cornerRadius(20)
                 }
             }
             .padding(32)
             .frame(maxWidth: .infinity)
-            .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+            .background(Color.secondaryBackground)
             .cornerRadius(20)
             .padding(.horizontal, 24)
             
             // Hint
             Text("Try to identify the unknown player(s)!")
                 .font(.system(size: 14, weight: .regular, design: .rounded))
-                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                .foregroundColor(.secondaryText)
         }
     }
     

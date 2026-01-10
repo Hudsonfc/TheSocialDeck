@@ -16,23 +16,23 @@ struct FeedbackView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             ScrollView {
                 VStack(spacing: 0) {
                     // Title
-                    Text("Feedback")
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        Text("Feedback")
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                            .foregroundColor(.primaryText)
                         .padding(.top, 20)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
                     // Subtitle
                     Text("We'd love to hear from you! Your feedback helps us improve The Social Deck and create a better experience for everyone. Whether you have a suggestion, found a bug, or just want to share your thoughts, we're all ears. Please describe your feedback in detail below.")
                         .font(.system(size: 16, weight: .regular, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                         .lineSpacing(4)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 16)
@@ -41,14 +41,14 @@ struct FeedbackView: View {
                     VStack(alignment: .leading, spacing: 20) {
                         Text("Your Message")
                             .font(.system(size: 17, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .padding(.top, 40)
                         
                         ZStack(alignment: .topLeading) {
                             if feedbackMessage.isEmpty {
                                 Text("Share your thoughts, report issues, or suggest improvements...")
                                     .font(.system(size: 16, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0))
+                                    .foregroundColor(.tertiaryText)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 20)
                                     .allowsHitTesting(false)
@@ -56,17 +56,17 @@ struct FeedbackView: View {
                             
                             TextEditor(text: $feedbackMessage)
                                 .font(.system(size: 16, weight: .regular, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(.primaryText)
                                 .frame(minHeight: 200)
                                 .scrollContentBackground(.hidden)
                                 .lineSpacing(4)
                         }
                         .padding(4)
-                        .background(Color(red: 0xF9/255.0, green: 0xF9/255.0, blue: 0xF9/255.0))
+                        .background(Color.secondaryBackground)
                         .cornerRadius(16)
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
-                                .stroke(feedbackMessage.isEmpty ? Color(red: 0xE1/255.0, green: 0xE1/255.0, blue: 0xE1/255.0) : Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0), lineWidth: feedbackMessage.isEmpty ? 1 : 2)
+                                .stroke(feedbackMessage.isEmpty ? Color.borderColor : Color.buttonBackground, lineWidth: feedbackMessage.isEmpty ? 1 : 2)
                         )
                     }
                     .padding(.top, 32)
@@ -103,7 +103,7 @@ struct FeedbackView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 18)
-                        .background(feedbackMessage.isEmpty ? Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0) : Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .background(feedbackMessage.isEmpty ? Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0) : Color.buttonBackground)
                         .cornerRadius(16)
                     }
                     .disabled(feedbackMessage.isEmpty)
@@ -150,11 +150,11 @@ struct FeedbackView: View {
                         VStack(spacing: 12) {
                             Text("Thank You!")
                                 .font(.system(size: 28, weight: .bold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(.primaryText)
                             
                             Text("Your feedback has been received. Thank you for helping us improve!")
                                 .font(.system(size: 16, weight: .regular, design: .rounded))
-                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                .foregroundColor(.secondaryText)
                                 .multilineTextAlignment(.center)
                                 .lineSpacing(4)
                         }
@@ -170,14 +170,14 @@ struct FeedbackView: View {
                                 .foregroundColor(.white)
                                 .frame(width: 120)
                                 .padding(.vertical, 14)
-                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .background(Color.buttonBackground)
                                 .cornerRadius(16)
                         }
                     }
                     .padding(32)
-                    .background(Color.white)
+                    .background(Color.cardBackground)
                     .cornerRadius(24)
-                    .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
+                    .shadow(color: Color.cardShadowColor, radius: 20, x: 0, y: 10)
                     .padding(.horizontal, 40)
                     .transition(.scale(scale: 0.8).combined(with: .opacity))
                 }
@@ -193,7 +193,7 @@ struct FeedbackView: View {
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
             }
         }

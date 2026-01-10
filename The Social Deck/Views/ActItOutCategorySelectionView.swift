@@ -15,8 +15,8 @@ struct ActItOutCategorySelectionView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -27,7 +27,7 @@ struct ActItOutCategorySelectionView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                     }
                     Spacer()
                 }
@@ -42,19 +42,19 @@ struct ActItOutCategorySelectionView: View {
                             .scaledToFit()
                             .frame(width: 160, height: 220)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                            .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
                             .padding(.top, 20)
                             .padding(.bottom, 32)
                         
                         // Title
                         Text("Select Categories")
                             .font(.system(size: 24, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .padding(.bottom, 8)
                         
                         Text("Choose which types of prompts to include")
                             .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                             .padding(.bottom, 24)
                         
                         // Category buttons
@@ -86,7 +86,7 @@ struct ActItOutCategorySelectionView: View {
                         }) {
                             Text(selectedCategories.count == deck.availableCategories.count ? "Deselect All" : "Select All")
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .foregroundColor(.primaryAccent)
                         }
                         .padding(.bottom, 24)
                         
@@ -131,22 +131,22 @@ struct CategoryButton: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(isSelected ? .white : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(isSelected ? .white : .primaryText)
                     
                     Text("\(cardCount) prompts")
                         .font(.system(size: 12, weight: .regular, design: .rounded))
-                        .foregroundColor(isSelected ? .white.opacity(0.8) : Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(isSelected ? .white.opacity(0.8) : .secondaryText)
                 }
                 
                 Spacer()
                 
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 24))
-                    .foregroundColor(isSelected ? .white : Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(isSelected ? .white : .primaryAccent)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
-            .background(isSelected ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+            .background(isSelected ? .primaryAccent : Color.tertiaryBackground)
             .cornerRadius(12)
         }
     }

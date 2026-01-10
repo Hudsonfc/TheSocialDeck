@@ -25,8 +25,8 @@ struct MLTPlayView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -37,9 +37,9 @@ struct MLTPlayView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     
@@ -49,9 +49,9 @@ struct MLTPlayView: View {
                     }) {
                         Image(systemName: "house.fill")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     .padding(.leading, 12)
@@ -67,10 +67,10 @@ struct MLTPlayView: View {
                                 Text("Previous")
                                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                             }
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .cornerRadius(20)
                         }
                         .padding(.leading, 12)
@@ -82,7 +82,7 @@ struct MLTPlayView: View {
                     if let currentCard = manager.currentCard() {
                         Text("\(manager.currentIndex + 1) / \(manager.cards.count)")
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                     }
                 }
                 .padding(.horizontal, 40)
@@ -94,7 +94,7 @@ struct MLTPlayView: View {
                 // "Most Likely To" label
                 Text("Most Likely To")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
                     .padding(.bottom, 32)
                 
                 // Card
@@ -172,7 +172,7 @@ struct MLTPlayView: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 16)
-                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .background(Color.buttonBackground)
                                 .cornerRadius(12)
                         }
                         .padding(.horizontal, 40)
@@ -343,7 +343,7 @@ struct MLTCardFrontView: View {
             VStack {
                 Image(systemName: "questionmark.circle.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
                     .padding(.bottom, 20)
                 
                 Text("Tap to reveal")
@@ -376,11 +376,11 @@ struct MLTCardBackView: View {
             VStack(spacing: 16) {
                 Text("Most Likely To")
                     .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
                 
                 Text(displayText)
                     .font(.system(size: 24, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
                     .lineSpacing(4)

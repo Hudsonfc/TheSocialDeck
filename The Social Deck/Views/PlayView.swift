@@ -301,8 +301,8 @@ struct PlayView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             ScrollView(.vertical, showsIndicators: false) {
@@ -314,10 +314,10 @@ struct PlayView: View {
                             HStack(spacing: 8) {
                                 Image(systemName: "heart.fill")
                                     .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .foregroundColor(.primaryAccent)
                                 Text("Favorites")
                                     .font(.system(size: 22, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                             }
                             .padding(.horizontal, 40)
                             
@@ -338,7 +338,7 @@ struct PlayView: View {
                             // Category title
                             Text(category.title)
                                 .font(.system(size: 22, weight: .bold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(.primaryText)
                                 .padding(.horizontal, 40)
                             
                             // Horizontal scroll of deck cards
@@ -377,7 +377,7 @@ struct PlayView: View {
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
             }
         }
@@ -401,8 +401,8 @@ struct ExpandedDeckOverlay: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             ScrollView {
@@ -415,9 +415,9 @@ struct ExpandedDeckOverlay: View {
                         }) {
                             Image(systemName: favoritesManager.isFavorite(deck.type) ? "heart.fill" : "heart")
                                 .font(.system(size: 18, weight: .medium))
-                                .foregroundColor(favoritesManager.isFavorite(deck.type) ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(favoritesManager.isFavorite(deck.type) ? .primaryAccent : .primaryText)
                                 .frame(width: 44, height: 44)
-                                .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                                .background(Color.tertiaryBackground)
                                 .clipShape(Circle())
                         }
                         
@@ -431,9 +431,9 @@ struct ExpandedDeckOverlay: View {
                         }) {
                             Image(systemName: "chevron.left")
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(.primaryText)
                                 .frame(width: 44, height: 44)
-                                .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                                .background(Color.tertiaryBackground)
                                 .clipShape(Circle())
                         }
                     }
@@ -449,12 +449,12 @@ struct ExpandedDeckOverlay: View {
                         .frame(width: 260, height: 260)
                         .clipped()
                         .cornerRadius(16)
-                        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+                        .shadow(color: Color.shadowColor, radius: 8, x: 0, y: 4)
                     
                     // Deck title
                     Text(deck.title)
                         .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
                         .padding(.top, 8)

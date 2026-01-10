@@ -19,7 +19,7 @@ enum ToastType {
         case .error:
             return Color.red
         case .info:
-            return Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+            return Color.primaryAccent
         }
     }
     
@@ -51,15 +51,15 @@ struct ToastView: View {
                 
                 Text(message)
                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                 
                 Spacer()
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
-            .background(Color.white)
+            .background(Color.cardBackground)
             .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.15), radius: 12, x: 0, y: 4)
+            .shadow(color: Color.cardShadowColor, radius: 12, x: 0, y: 4)
             .padding(.horizontal, 40)
             .padding(.bottom, 40)
         }

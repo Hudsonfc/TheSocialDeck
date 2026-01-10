@@ -20,8 +20,8 @@ struct CategoryClashPlayView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -32,9 +32,9 @@ struct CategoryClashPlayView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     
@@ -44,9 +44,9 @@ struct CategoryClashPlayView: View {
                     }) {
                         Image(systemName: "house.fill")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     .padding(.leading, 12)
@@ -62,10 +62,10 @@ struct CategoryClashPlayView: View {
                                 Text("Previous")
                                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                             }
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .cornerRadius(20)
                             .fixedSize()
                         }
@@ -77,7 +77,7 @@ struct CategoryClashPlayView: View {
                     // Progress indicator
                     Text("\(manager.gamePosition + 1) / \(manager.cards.count)")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
                 .padding(.horizontal, 40)
                 .padding(.top, 20)
@@ -91,20 +91,20 @@ struct CategoryClashPlayView: View {
                         // Game title
                         Text(deck.title)
                             .font(.system(size: 28, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .padding(.horizontal, 40)
                         
                         // Timer display (if enabled)
                         if manager.timerEnabled {
                             ZStack {
                                 Circle()
-                                    .stroke(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0), lineWidth: 8)
+                                    .stroke(Color.tertiaryBackground, lineWidth: 8)
                                     .frame(width: 80, height: 80)
                                 
                                 Circle()
                                     .trim(from: 0, to: manager.timeRemaining / Double(manager.timerDuration))
                                     .stroke(
-                                        manager.timeRemaining <= 5 ? Color.red : Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0),
+                                        manager.timeRemaining <= 5 ? Color.red : Color.buttonBackground,
                                         style: StrokeStyle(lineWidth: 8, lineCap: .round)
                                     )
                                     .frame(width: 80, height: 80)
@@ -113,7 +113,7 @@ struct CategoryClashPlayView: View {
                                 
                                 Text("\(Int(manager.timeRemaining))")
                                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                                    .foregroundColor(manager.timeRemaining <= 5 ? .red : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(manager.timeRemaining <= 5 ? .red : .primaryText)
                             }
                             
                             if manager.isTimerExpired {
@@ -138,7 +138,7 @@ struct CategoryClashPlayView: View {
                         .background(
                             RoundedRectangle(cornerRadius: 24)
                                 .fill(Color.white)
-                                .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 8)
+                                .shadow(color: Color.cardShadowColor, radius: 15, x: 0, y: 8)
                         )
                         .padding(.horizontal, 40)
                         
@@ -146,7 +146,7 @@ struct CategoryClashPlayView: View {
                         VStack(spacing: 12) {
                             Text("Pass the phone around")
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(.primaryText)
                             
                             Text("Take turns naming items. Hesitate, repeat, or freeze? You're out!")
                                 .font(.system(size: 15, weight: .regular, design: .rounded))
@@ -180,7 +180,7 @@ struct CategoryClashPlayView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 18)
-                    .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .background(Color.buttonBackground)
                     .cornerRadius(12)
                 }
                 .padding(.horizontal, 40)

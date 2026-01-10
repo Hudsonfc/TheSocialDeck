@@ -17,8 +17,8 @@ struct TapDuelPlayView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -29,9 +29,9 @@ struct TapDuelPlayView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     
@@ -41,9 +41,9 @@ struct TapDuelPlayView: View {
                     }) {
                         Image(systemName: "house.fill")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     .padding(.leading, 12)
@@ -53,7 +53,7 @@ struct TapDuelPlayView: View {
                     // Round indicator
                     Text("Round \(manager.roundNumber)")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
                 .padding(.horizontal, 40)
                 .padding(.top, 20)
@@ -125,7 +125,7 @@ struct ReadyView: View {
                         .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                     Text("\(manager.leftSideScore)")
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
                 
                 Text("VS")
@@ -138,7 +138,7 @@ struct ReadyView: View {
                         .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                     Text("\(manager.rightSideScore)")
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
             }
             .padding(.top, 40)
@@ -146,7 +146,7 @@ struct ReadyView: View {
             VStack(spacing: 12) {
                 Text("Get Ready!")
                     .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                 
                 Text("Place your finger on your side of the screen. Wait for GO!")
                     .font(.system(size: 16, weight: .regular, design: .rounded))
@@ -186,7 +186,7 @@ struct GameView: View {
                     ZStack {
                         // Flash effect when tapped
                         if leftSideFlash {
-                            Color.white
+                            Color.appBackground
                                 .ignoresSafeArea()
                                 .transition(.opacity)
                         }
@@ -226,7 +226,7 @@ struct GameView: View {
                     ZStack {
                         // Flash effect when tapped
                         if rightSideFlash {
-                            Color.white
+                            Color.appBackground
                                 .ignoresSafeArea()
                                 .transition(.opacity)
                         }
@@ -273,7 +273,7 @@ struct GameView: View {
                 if manager.gamePhase == .goSignal {
                     ZStack {
                         // Flash effect background with pulse
-                        Color.white
+                        Color.appBackground
                             .opacity(manager.goSignalOpacity * 0.95)
                             .ignoresSafeArea()
                         
@@ -356,7 +356,7 @@ struct FinishedView: View {
             VStack(spacing: 16) {
                 Text("Winner!")
                     .font(.system(size: 36, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                 
                 if let winner = manager.winner {
                     Text(winner)
@@ -373,7 +373,7 @@ struct FinishedView: View {
                         .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                     Text("\(manager.leftSideScore)")
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
                 
                 Text("VS")
@@ -386,7 +386,7 @@ struct FinishedView: View {
                         .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                     Text("\(manager.rightSideScore)")
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
             }
             .padding(.top, 8)
@@ -414,10 +414,10 @@ struct FinishedView: View {
                 }) {
                     Text("Swap Sides & Rematch")
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .foregroundColor(Color.buttonBackground)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                        .background(Color.tertiaryBackground)
                         .cornerRadius(12)
                 }
             }
@@ -438,12 +438,12 @@ struct FalseStartView: View {
             // False start visual
             ZStack {
                 Circle()
-                    .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.1))
+                    .fill(Color.buttonBackground.opacity(0.1))
                     .frame(width: 200, height: 200)
                 
                 Image(systemName: "xmark.circle.fill")
                     .font(.system(size: 60, weight: .medium))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
                     .scaleEffect(xmarkScale)
                     .offset(x: shakeOffset)
             }
@@ -465,12 +465,12 @@ struct FalseStartView: View {
             VStack(spacing: 16) {
                 Text("False Start!")
                     .font(.system(size: 36, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                 
                 if let falseStartPlayer = manager.falseStartPlayer {
                     Text("\(falseStartPlayer) tapped too early!")
                         .font(.system(size: 22, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .foregroundColor(Color.buttonBackground)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
                     
@@ -497,7 +497,7 @@ struct FalseStartView: View {
                         .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                     Text("\(manager.leftSideScore)")
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
                 
                 Text("VS")
@@ -510,7 +510,7 @@ struct FalseStartView: View {
                         .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                     Text("\(manager.rightSideScore)")
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
             }
             .padding(.top, 8)
@@ -538,10 +538,10 @@ struct FalseStartView: View {
                 }) {
                     Text("Swap Sides & Rematch")
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .foregroundColor(Color.buttonBackground)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                        .background(Color.tertiaryBackground)
                         .cornerRadius(12)
                 }
             }

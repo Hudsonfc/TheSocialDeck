@@ -12,8 +12,8 @@ struct TermsOfServiceView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             ScrollView {
@@ -21,14 +21,14 @@ struct TermsOfServiceView: View {
                     // Title
                     Text("Terms of Service")
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                         .padding(.top, 20)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
                     // Version header
                     Text("The Social Deck – Version 1.0")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 8)
                     
@@ -50,6 +50,7 @@ struct TermsOfServiceView: View {
                         )
                         
                         Divider()
+                            .background(Color.borderColor)
                             .padding(.horizontal, 24)
                             .padding(.vertical, 8)
                         
@@ -64,6 +65,7 @@ struct TermsOfServiceView: View {
                         )
                         
                         Divider()
+                            .background(Color.borderColor)
                             .padding(.horizontal, 24)
                             .padding(.vertical, 8)
                         
@@ -76,6 +78,7 @@ struct TermsOfServiceView: View {
                         )
                         
                         Divider()
+                            .background(Color.borderColor)
                             .padding(.horizontal, 24)
                             .padding(.vertical, 8)
                         
@@ -88,6 +91,7 @@ struct TermsOfServiceView: View {
                         )
                         
                         Divider()
+                            .background(Color.borderColor)
                             .padding(.horizontal, 24)
                             .padding(.vertical, 8)
                         
@@ -100,6 +104,7 @@ struct TermsOfServiceView: View {
                         )
                         
                         Divider()
+                            .background(Color.borderColor)
                             .padding(.horizontal, 24)
                             .padding(.vertical, 8)
                         
@@ -112,6 +117,7 @@ struct TermsOfServiceView: View {
                         )
                         
                         Divider()
+                            .background(Color.borderColor)
                             .padding(.horizontal, 24)
                             .padding(.vertical, 8)
                         
@@ -126,13 +132,13 @@ struct TermsOfServiceView: View {
                     .padding(.top, 32)
                     .padding(.horizontal, 24)
                     .padding(.vertical, 24)
-                    .background(Color.white)
+                    .background(Color.secondaryBackground)
                     .cornerRadius(16)
                     .overlay(
                         RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color(red: 0xE1/255.0, green: 0xE1/255.0, blue: 0xE1/255.0), lineWidth: 1)
+                            .stroke(Color.borderColor, lineWidth: 1)
                     )
-                    .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
+                    .shadow(color: Color.shadowColor, radius: 8, x: 0, y: 2)
                     
                     Spacer()
                         .frame(height: 40)
@@ -148,7 +154,7 @@ struct TermsOfServiceView: View {
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
             }
         }

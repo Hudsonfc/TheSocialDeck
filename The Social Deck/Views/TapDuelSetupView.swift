@@ -17,63 +17,69 @@ struct TapDuelSetupView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Back button at top left
+                // Header
                 HStack {
                     Button(action: {
                         dismiss()
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
+                            .frame(width: 44, height: 44)
+                            .background(Color.tertiaryBackground)
+                            .clipShape(Circle())
                     }
+                    
                     Spacer()
                 }
-                .padding(.horizontal, 40)
+                .padding(.horizontal, 24)
                 .padding(.top, 20)
                 
                 ScrollView {
                     VStack(spacing: 0) {
-                        // Game artwork - regular card image
+                        // Game artwork
                         Image(deck.imageName)
                             .resizable()
+                            .interpolation(.high)
+                            .antialiased(true)
                             .scaledToFit()
-                            .frame(width: 160, height: 220)
+                            .frame(width: 120, height: 165)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                            .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
                             .padding(.top, 20)
-                            .padding(.bottom, 32)
+                        
+                        // Title
+                        Text("Enter Player Names")
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .foregroundColor(.primaryText)
+                            .padding(.top, 20)
+                        
+                        Text("Two players required")
+                            .font(.system(size: 14, weight: .regular, design: .rounded))
+                            .foregroundColor(.secondaryText)
+                            .padding(.top, 4)
+                        
+                        Spacer()
                         
                         // Players section
-                        VStack(spacing: 24) {
-                            VStack(spacing: 8) {
-                                Text("Enter Player Names")
-                                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                
-                                Text("Two players will share the phone. Enter both names to start.")
-                                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                                    .multilineTextAlignment(.center)
-                                    .lineSpacing(4)
-                                    .padding(.horizontal, 20)
-                            }
-                            
+                        VStack(spacing: 20) {
                             // Player 1 input
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Player 1 (Left Side)")
                                     .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                                 
                                 TextField("Enter name", text: $player1Name)
-                                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                                    .font(.system(size: 16, weight: .regular, design: .rounded))
+                                    .foregroundColor(.primaryText)
                                     .padding(.horizontal, 16)
-                                    .padding(.vertical, 12)
-                                    .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                                    .padding(.vertical, 14)
+                                    .background(Color.secondaryBackground)
                                     .cornerRadius(12)
                                     .autocapitalization(.words)
                                     .disableAutocorrection(true)
@@ -83,23 +89,44 @@ struct TapDuelSetupView: View {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Player 2 (Right Side)")
                                     .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                                 
                                 TextField("Enter name", text: $player2Name)
-                                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                                    .font(.system(size: 16, weight: .regular, design: .rounded))
+                                    .foregroundColor(.primaryText)
                                     .padding(.horizontal, 16)
-                                    .padding(.vertical, 12)
-                                    .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                                    .padding(.vertical, 14)
+                                    .background(Color.secondaryBackground)
                                     .cornerRadius(12)
                                     .autocapitalization(.words)
                                     .disableAutocorrection(true)
                             }
                         }
-                        .padding(.horizontal, 40)
-                        .padding(.bottom, 32)
+                        .padding(.horizontal, 24)
+                        .padding(.top, 32)
+                        
+                        Spacer()
+                        
+                        // Tips section
+                        if !player1Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !player2Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Tips")
+                                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                                    .foregroundColor(.primaryText)
+                                
+                                tipRow(icon: "hand.tap.fill", text: "Tap your side when you see GO")
+                                tipRow(icon: "trophy.fill", text: "First to tap wins the round")
+                                tipRow(icon: "arrow.left.arrow.right", text: "Best of multiple rounds")
+                            }
+                            .padding(16)
+                            .background(Color.secondaryBackground)
+                            .cornerRadius(12)
+                            .padding(.horizontal, 24)
+                            .padding(.bottom, 12)
+                        }
                         
                         // Start Game button
-                        PrimaryButton(title: "Start Game") {
+                        Button(action: {
                             // Add haptic feedback
                             let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
                             impactFeedback.impactOccurred()
@@ -108,11 +135,21 @@ struct TapDuelSetupView: View {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                                 navigateToPlay = true
                             }
+                        }) {
+                            Text("Start Game")
+                                .font(.system(size: 18, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 56)
+                                .background(
+                                    !player1Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !player2Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                                        ? Color.primaryAccent
+                                        : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
+                                )
+                                .cornerRadius(16)
                         }
-                        .padding(.horizontal, 40)
-                        .padding(.top, 20)
                         .disabled(player1Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || player2Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                        .opacity((player1Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || player2Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) ? 0.5 : 1.0)
+                        .padding(.horizontal, 24)
                         .padding(.bottom, 40)
                     }
                 }
@@ -131,6 +168,19 @@ struct TapDuelSetupView: View {
                 EmptyView()
             }
         )
+    }
+    
+    private func tipRow(icon: String, text: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 14))
+                .foregroundColor(Color.primaryAccent)
+                .frame(width: 20)
+            
+            Text(text)
+                .font(.system(size: 14, weight: .regular, design: .rounded))
+                .foregroundColor(.secondaryText)
+        }
     }
 }
 

@@ -19,8 +19,8 @@ struct HotPotatoPlayView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -31,9 +31,9 @@ struct HotPotatoPlayView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     
@@ -43,9 +43,9 @@ struct HotPotatoPlayView: View {
                     }) {
                         Image(systemName: "house.fill")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     .padding(.leading, 12)
@@ -55,7 +55,7 @@ struct HotPotatoPlayView: View {
                     // Round indicator
                     Text("Round \(manager.roundNumber)")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
                 .padding(.horizontal, 40)
                 .padding(.top, 20)
@@ -135,7 +135,7 @@ struct HotPotatoPlayView: View {
                             VStack(spacing: 8) {
                                 Text(perk.rawValue)
                                     .font(.system(size: 26, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                                 
                                 Text(perk.description)
                                     .font(.system(size: 17, weight: .medium, design: .rounded))
@@ -185,8 +185,8 @@ struct HotPotatoPlayView: View {
                         .padding(.vertical, 32)
                         .background(
                             RoundedRectangle(cornerRadius: 24)
-                                .fill(Color.white)
-                                .shadow(color: Color.black.opacity(0.15), radius: 20, x: 0, y: 10)
+                                .fill(Color.appBackground)
+                                .shadow(color: Color.cardShadowColor, radius: 20, x: 0, y: 10)
                         )
                         .padding(.horizontal, 32)
                         .transition(.scale(scale: 0.9).combined(with: .opacity))
@@ -267,7 +267,7 @@ struct ChoosePlayerView: View {
         VStack(spacing: 32) {
             Text("Choose Who to Pass To")
                 .font(.system(size: 28, weight: .bold, design: .rounded))
-                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                .foregroundColor(.primaryText)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
             
@@ -294,9 +294,9 @@ struct ChoosePlayerView: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 18)
-                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .background(Color.buttonBackground)
                                 .cornerRadius(12)
-                                .shadow(color: Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.3), radius: 8, x: 0, y: 4)
+                                .shadow(color: Color.buttonBackground.opacity(0.3), radius: 8, x: 0, y: 4)
                         }
                     }
                 }
@@ -314,7 +314,7 @@ struct WaitingToStartView: View {
         VStack(spacing: 32) {
             Text("Ready to start?")
                 .font(.system(size: 28, weight: .bold, design: .rounded))
-                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                .foregroundColor(.primaryText)
             
             Text("Pass the phone quickly when the round starts!")
                 .font(.system(size: 16, weight: .regular, design: .rounded))
@@ -368,7 +368,7 @@ struct ActiveGameView: View {
                     ZStack(alignment: .leading) {
                         // Background
                         RoundedRectangle(cornerRadius: 8)
-                            .fill(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .fill(Color.tertiaryBackground)
                             .frame(height: 12)
                         
                         // Heat fill
@@ -378,7 +378,7 @@ struct ActiveGameView: View {
                                     gradient: Gradient(colors: [
                                         Color(red: 0xFF/255.0, green: 0x8C/255.0, blue: 0x42/255.0),
                                         Color(red: 0xFF/255.0, green: 0x45/255.0, blue: 0x00/255.0),
-                                        Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+                                        Color.buttonBackground
                                     ]),
                                     startPoint: .leading,
                                     endPoint: .trailing
@@ -466,7 +466,7 @@ struct ActiveGameView: View {
                 
                 Text(manager.currentPlayer)
                     .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                     .transition(.scale.combined(with: .opacity))
                 
                 // Pass counter
@@ -572,12 +572,12 @@ struct TimerExpiredView: View {
             // Friendly visual with animation
             ZStack {
                 Circle()
-                    .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.1))
+                    .fill(Color.buttonBackground.opacity(0.1))
                     .frame(width: 200, height: 200)
                 
                 Image(systemName: "timer")
                     .font(.system(size: 60, weight: .medium))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
             }
             .scaleEffect(1.0)
             .onAppear {
@@ -589,12 +589,12 @@ struct TimerExpiredView: View {
             VStack(spacing: 16) {
                 Text("Time's Up!")
                     .font(.system(size: 36, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                 
                 if let loser = manager.loser {
                     Text("\(loser) was holding the phone!")
                         .font(.system(size: 22, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
                 }
@@ -613,7 +613,7 @@ struct TimerExpiredView: View {
                             VStack(spacing: 4) {
                                 Text("\(manager.passCount)")
                                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                                 Text("Passes")
                                     .font(.system(size: 12, weight: .medium, design: .rounded))
                                     .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))

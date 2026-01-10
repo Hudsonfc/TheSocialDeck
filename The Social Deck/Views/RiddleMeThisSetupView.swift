@@ -20,8 +20,8 @@ struct RiddleMeThisSetupView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -32,7 +32,7 @@ struct RiddleMeThisSetupView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                     }
                     Spacer()
                 }
@@ -48,7 +48,7 @@ struct RiddleMeThisSetupView: View {
                                 .scaledToFit()
                                 .frame(width: 160, height: 220)
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                                .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
                                 .padding(.top, 20)
                                 .padding(.bottom, 32)
                             
@@ -56,12 +56,12 @@ struct RiddleMeThisSetupView: View {
                             VStack(spacing: 16) {
                                 Text("How to Play")
                                     .font(.system(size: 20, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                                 
                                 VStack(spacing: 12) {
                                     Text("Read the riddle out loud to the group. Players race to say the correct answer. Tap 'Show Answer' when ready to reveal the solution.")
                                         .font(.system(size: 14, weight: .regular, design: .rounded))
-                                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                        .foregroundColor(.secondaryText)
                                         .multilineTextAlignment(.center)
                                         .lineSpacing(4)
                                     
@@ -69,33 +69,33 @@ struct RiddleMeThisSetupView: View {
                                     VStack(alignment: .leading, spacing: 8) {
                                         Text("Tips")
                                             .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                            .foregroundColor(.primaryText)
                                         
                                         HStack(alignment: .top, spacing: 8) {
                                             Text("•")
                                                 .font(.system(size: 14, weight: .regular))
-                                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                                .foregroundColor(Color.primaryAccent)
                                             Text("Tap the card to flip it and reveal the riddle")
                                                 .font(.system(size: 13, weight: .regular, design: .rounded))
-                                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                                .foregroundColor(.secondaryText)
                                         }
                                         
                                         HStack(alignment: .top, spacing: 8) {
                                             Text("•")
                                                 .font(.system(size: 14, weight: .regular))
-                                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                                .foregroundColor(Color.primaryAccent)
                                             Text("You can flip the card back and forth as many times as needed")
                                                 .font(.system(size: 13, weight: .regular, design: .rounded))
-                                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                                .foregroundColor(.secondaryText)
                                         }
                                         
                                         HStack(alignment: .top, spacing: 8) {
                                             Text("•")
                                                 .font(.system(size: 14, weight: .regular))
-                                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                                .foregroundColor(Color.primaryAccent)
                                             Text("Take your time - there's no timer!")
                                                 .font(.system(size: 13, weight: .regular, design: .rounded))
-                                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                                .foregroundColor(.secondaryText)
                                         }
                                     }
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -109,24 +109,24 @@ struct RiddleMeThisSetupView: View {
                             VStack(spacing: 12) {
                                 Text("Number of Riddles")
                                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                    .foregroundColor(.secondaryText)
                                 
                                 VStack(spacing: 8) {
                                     Text("\(Int(selectedCardCount)) riddle\(Int(selectedCardCount) == 1 ? "" : "s")")
                                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                        .foregroundColor(.primaryText)
                                     
                                     Slider(value: $selectedCardCount, in: Double(minCards)...Double(min(maxCards, deck.numberOfCards)), step: 1)
-                                        .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                        .tint(Color.primaryAccent)
                                     
                                     HStack {
                                         Text("\(minCards)")
                                             .font(.system(size: 12, weight: .regular, design: .rounded))
-                                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                            .foregroundColor(.secondaryText)
                                         Spacer()
                                         Text("\(min(maxCards, deck.numberOfCards))")
                                             .font(.system(size: 12, weight: .regular, design: .rounded))
-                                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                            .foregroundColor(.secondaryText)
                                     }
                                 }
                                 .padding(.horizontal, 20)

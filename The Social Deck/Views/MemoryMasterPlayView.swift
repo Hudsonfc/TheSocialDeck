@@ -43,8 +43,8 @@ struct MemoryMasterPlayView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -55,9 +55,9 @@ struct MemoryMasterPlayView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     
@@ -66,9 +66,9 @@ struct MemoryMasterPlayView: View {
                     }) {
                         Image(systemName: "house.fill")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     .padding(.leading, 12)
@@ -83,7 +83,7 @@ struct MemoryMasterPlayView: View {
                             Text(formatTime(manager.elapsedTime))
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                         }
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                         
                         HStack(spacing: 4) {
                             Image(systemName: "arrow.triangle.2.circlepath")
@@ -101,7 +101,7 @@ struct MemoryMasterPlayView: View {
                 // Game title
                 Text("Memory Master")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
                     .padding(.bottom, 8)
                 
                 // Preview phase message
@@ -303,8 +303,8 @@ struct MemoryCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                .fill(Color.tertiaryBackground)
+                .shadow(color: Color.shadowColor, radius: 4, x: 0, y: 2)
             
             let fontSize = cardSize?.width ?? 80
             Image(systemName: "questionmark")
@@ -327,7 +327,7 @@ struct MemoryCardBackView: View {
         ZStack {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                .shadow(color: Color.shadowColor, radius: 4, x: 0, y: 2)
             
             // Display a symbol or number based on pairId
             // Using emoji for visual variety

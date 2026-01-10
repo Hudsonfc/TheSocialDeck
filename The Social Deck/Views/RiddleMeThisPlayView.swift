@@ -22,8 +22,8 @@ struct RiddleMeThisPlayView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -34,9 +34,9 @@ struct RiddleMeThisPlayView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     
@@ -46,9 +46,9 @@ struct RiddleMeThisPlayView: View {
                     }) {
                         Image(systemName: "house.fill")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     .padding(.leading, 12)
@@ -58,7 +58,7 @@ struct RiddleMeThisPlayView: View {
                     // Round indicator
                     Text("Round \(manager.roundNumber)")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
                 .padding(.horizontal, 40)
                 .padding(.top, 20)
@@ -229,13 +229,13 @@ struct SolutionView: View {
                     
                     Text("Correct Answer!")
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
                 .padding(.bottom, 24)
             } else {
                 Text("Answer Revealed")
                     .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                     .padding(.bottom, 24)
             }
             
@@ -302,11 +302,11 @@ struct RiddleCardBackView: View {
             VStack(spacing: 20) {
                 Image(systemName: "questionmark.circle.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
                 
                 Text(text)
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
             }
         }
     }
@@ -328,7 +328,7 @@ struct RiddleCardAnswerView: View {
                 VStack(spacing: 16) {
                     Text("Answer")
                         .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .foregroundColor(Color.buttonBackground)
                         .padding(.top, 40)
                     
                     Text(answer)

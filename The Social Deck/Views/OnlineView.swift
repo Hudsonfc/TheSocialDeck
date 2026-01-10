@@ -13,8 +13,8 @@ struct OnlineView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             ScrollView {
@@ -22,7 +22,7 @@ struct OnlineView: View {
                     // Title
                     Text("Online Play")
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                         .padding(.top, 20)
                     
                     // Create Room Button - Navigate to Game Selection
@@ -32,7 +32,7 @@ struct OnlineView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .background(Color.buttonBackground)
                             .cornerRadius(16)
                     }
                     .padding(.horizontal, 40)
@@ -44,7 +44,7 @@ struct OnlineView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .background(Color.buttonBackground)
                             .cornerRadius(16)
                     }
                     .padding(.horizontal, 40)
@@ -116,7 +116,7 @@ struct OnlineView: View {
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
             }
         }

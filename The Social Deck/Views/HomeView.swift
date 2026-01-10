@@ -47,8 +47,8 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // White background
-                Color.white
+                // Adaptive background
+                Color.appBackground
                     .ignoresSafeArea()
                 
                 ScrollView {
@@ -56,7 +56,7 @@ struct HomeView: View {
                     // Top Header
                     Text("The Social Deck")
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                         .opacity(titleOpacity)
                         .padding(.top, 20)
                     
@@ -121,7 +121,7 @@ struct HomeView: View {
                                 HStack(spacing: 6) {
                                     ForEach(0..<4, id: \.self) { index in
                                         Circle()
-                                            .fill(index == currentSlideIndex ? Color.black : Color.black.opacity(0.4))
+                                            .fill(index == currentSlideIndex ? Color.primaryText : Color.primaryText.opacity(0.4))
                                             .frame(width: 6, height: 6)
                                     }
                                 }
@@ -134,7 +134,7 @@ struct HomeView: View {
                             VStack(alignment: .leading, spacing: 5) {
                                 Text("Featured Deck")
                                     .font(.system(size: 20, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                             }
                             
                             Spacer()
@@ -146,7 +146,7 @@ struct HomeView: View {
                                     .foregroundColor(.white)
                                     .padding(.horizontal, 24)
                                     .padding(.vertical, 10)
-                                    .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .background(Color.buttonBackground)
                                     .cornerRadius(20)
                             }
                             .scaleEffect(featuredPlayButtonPressed ? 0.95 : 1.0)
@@ -168,16 +168,16 @@ struct HomeView: View {
                         .padding(.horizontal, 20)
                         .padding(.bottom, 20)
                     }
-                    .background(Color.white)
+                    .background(Color.cardBackground)
                     .cornerRadius(16)
-                    .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                    .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
                     .scaleEffect(featuredCardScale)
                     .opacity(featuredCardOpacity)
                     .padding(.horizontal, 40)
                     
                     // Separator
                     Rectangle()
-                        .fill(Color(red: 0xE1/255.0, green: 0xE1/255.0, blue: 0xE1/255.0))
+                        .fill(Color.borderColor)
                         .frame(height: 1)
                         .padding(.horizontal, 40)
                         .padding(.vertical, 8)
@@ -230,12 +230,12 @@ struct HomeView: View {
                        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
                         Text("Version \(version) (\(build))")
                             .font(.system(size: 12, weight: .regular, design: .rounded))
-                            .foregroundColor(Color.gray)
+                            .foregroundColor(.tertiaryText)
                             .padding(.bottom, 20)
                     } else {
                         Text("Version 1.0")
                             .font(.system(size: 12, weight: .regular, design: .rounded))
-                            .foregroundColor(Color.gray)
+                            .foregroundColor(.tertiaryText)
                             .padding(.bottom, 20)
                     }
                 }
@@ -394,7 +394,7 @@ struct NavigationButton<Destination: View>: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                .background(Color.buttonBackground)
                 .cornerRadius(16)
         }
         .scaleEffect(isPressed ? 0.96 : 1.0)

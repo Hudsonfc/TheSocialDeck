@@ -26,8 +26,8 @@ struct SettingsView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -36,7 +36,7 @@ struct SettingsView: View {
                     // Title
                     Text("Settings")
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                         .padding(.top, 20)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         
@@ -78,7 +78,7 @@ struct SettingsView: View {
                                 .font(.system(size: 18, weight: .regular, design: .rounded))
                                 .foregroundColor(.white)
                                 .frame(width: UIScreen.main.bounds.width * 0.85, height: 60)
-                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .background(Color.buttonBackground)
                                 .cornerRadius(16)
                         }
                         .scaleEffect(rateUsButtonPressed ? 0.97 : 1.0)
@@ -94,10 +94,10 @@ struct SettingsView: View {
                 VStack(spacing: 4) {
                     Text("The Social Deck")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                     Text("Version \(appVersion) (\(buildNumber))")
                         .font(.system(size: 12, weight: .regular, design: .rounded))
-                        .foregroundColor(Color(red: 0xB0/255.0, green: 0xB0/255.0, blue: 0xB0/255.0))
+                        .foregroundColor(.tertiaryText)
                 }
                 .padding(.bottom, 16)
                 
@@ -106,14 +106,14 @@ struct SettingsView: View {
                     NavigationLink(destination: PrivacyPolicyView()) {
                         Text("Privacy Policy")
                             .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                             .underline()
                     }
                     
                     NavigationLink(destination: TermsOfServiceView()) {
                         Text("Terms of Service")
                             .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                             .underline()
                     }
                 }
@@ -131,7 +131,7 @@ struct SettingsView: View {
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
             }
         }
@@ -156,7 +156,7 @@ struct SettingsNavigationButton<Destination: View>: View {
                 .font(.system(size: 18, weight: .regular, design: .rounded))
                 .foregroundColor(.white)
                 .frame(width: UIScreen.main.bounds.width * 0.85, height: 60)
-                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                .background(Color.buttonBackground)
                 .cornerRadius(16)
         }
         .scaleEffect(isPressed ? 0.97 : 1.0)

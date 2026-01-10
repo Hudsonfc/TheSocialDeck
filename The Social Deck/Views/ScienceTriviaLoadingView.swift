@@ -19,8 +19,8 @@ struct ScienceTriviaLoadingView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 32) {
@@ -32,27 +32,27 @@ struct ScienceTriviaLoadingView: View {
                     .scaledToFit()
                     .frame(width: 200, height: 275)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 8)
+                    .shadow(color: Color.cardShadowColor, radius: 15, x: 0, y: 8)
                 
                 // Loading text
                 VStack(spacing: 12) {
                     Text("Get Ready!")
                         .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                     
                     Text("Preparing your game...")
                         .font(.system(size: 16, weight: .regular, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                 }
                 
                 // Progress bar
                 ZStack(alignment: .leading) {
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                        .fill(Color.tertiaryBackground)
                         .frame(height: 8)
                     
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .fill(Color.buttonBackground)
                         .frame(width: 200 * progress, height: 8)
                         .animation(.easeInOut(duration: 0.3), value: progress)
                 }
@@ -69,9 +69,9 @@ struct ScienceTriviaLoadingView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     Spacer()

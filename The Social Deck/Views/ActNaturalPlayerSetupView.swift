@@ -20,8 +20,8 @@ struct ActNaturalPlayerSetupView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -32,9 +32,9 @@ struct ActNaturalPlayerSetupView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     
@@ -42,7 +42,7 @@ struct ActNaturalPlayerSetupView: View {
                     
                     Text("\(manager.players.count)/\(maxPlayers) Players")
                         .font(.system(size: 16, weight: .medium, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 20)
@@ -55,18 +55,18 @@ struct ActNaturalPlayerSetupView: View {
                     .scaledToFit()
                     .frame(width: 120, height: 165)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                    .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
                     .padding(.top, 20)
                 
                 // Title
                 Text("Add Players")
                     .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                     .padding(.top, 20)
                 
                 Text("Minimum \(minPlayers) players required")
                     .font(.system(size: 14, weight: .regular, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(.secondaryText)
                     .padding(.top, 4)
                 
                 // Name input
@@ -75,7 +75,7 @@ struct ActNaturalPlayerSetupView: View {
                         .font(.system(size: 16, weight: .regular, design: .rounded))
                         .padding(.horizontal, 16)
                         .padding(.vertical, 14)
-                        .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                        .background(Color.secondaryBackground)
                         .cornerRadius(12)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
@@ -89,7 +89,7 @@ struct ActNaturalPlayerSetupView: View {
                             .frame(width: 50, height: 50)
                             .background(
                                 manager.players.count < maxPlayers && !currentName.trimmingCharacters(in: .whitespaces).isEmpty
-                                    ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+                                    ? Color.primaryAccent
                                     : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
                             )
                             .cornerRadius(12)
@@ -106,12 +106,12 @@ struct ActNaturalPlayerSetupView: View {
                             HStack {
                                 Text("\(index + 1).")
                                     .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                    .foregroundColor(.secondaryText)
                                     .frame(width: 30, alignment: .leading)
                                 
                                 Text(player.name)
                                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                                 
                                 Spacer()
                                 
@@ -128,7 +128,7 @@ struct ActNaturalPlayerSetupView: View {
                             }
                             .padding(.horizontal, 16)
                             .padding(.vertical, 12)
-                            .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                            .background(Color.secondaryBackground)
                             .cornerRadius(12)
                         }
                     }
@@ -138,11 +138,29 @@ struct ActNaturalPlayerSetupView: View {
                 
                 Spacer()
                 
+                // Tips section
+                if manager.players.count >= minPlayers {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Tips")
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .foregroundColor(.primaryText)
+                        
+                        tipRow(icon: "person.2.fill", text: "\(manager.players.count >= 6 ? "2 unknowns" : "1 unknown") will be chosen randomly")
+                        tipRow(icon: "eye.slash.fill", text: "Unknown players must blend in without knowing the word")
+                        tipRow(icon: "bubble.left.and.bubble.right.fill", text: "Discuss clues without saying the word directly")
+                    }
+                    .padding(16)
+                    .background(Color.secondaryBackground)
+                    .cornerRadius(12)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 12)
+                }
+                
                 // Unknown count info
                 if manager.players.count >= minPlayers {
                     Text(manager.players.count >= 6 ? "2 unknowns will be chosen" : "1 unknown will be chosen")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .foregroundColor(Color.primaryAccent)
                         .padding(.bottom, 8)
                 }
                 
@@ -155,7 +173,7 @@ struct ActNaturalPlayerSetupView: View {
                         .frame(height: 56)
                         .background(
                             manager.players.count >= minPlayers
-                                ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+                                ? Color.primaryAccent
                                 : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
                         )
                         .cornerRadius(16)
@@ -198,6 +216,19 @@ struct ActNaturalPlayerSetupView: View {
         manager.startGame()
         navigateToReveal = true
         HapticManager.shared.mediumImpact()
+    }
+    
+    private func tipRow(icon: String, text: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 14))
+                .foregroundColor(Color.primaryAccent)
+                .frame(width: 20)
+            
+            Text(text)
+                .font(.system(size: 14, weight: .regular, design: .rounded))
+                .foregroundColor(.secondaryText)
+        }
     }
 }
 

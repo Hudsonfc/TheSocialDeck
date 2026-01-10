@@ -47,8 +47,8 @@ struct NHIESetupView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -59,7 +59,7 @@ struct NHIESetupView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                     }
                     Spacer()
                 }
@@ -75,13 +75,13 @@ struct NHIESetupView: View {
                         .scaledToFit()
                         .frame(width: 160, height: 220)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                        .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
                     
                     // Selected categories chips
                     VStack(spacing: 12) {
                         Text("Selected Categories")
                             .font(.system(size: 16, weight: .medium, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                         
                         if selectedCategories.count <= 3 {
                             // Center when 3 or fewer categories
@@ -92,7 +92,7 @@ struct NHIESetupView: View {
                                         .foregroundColor(.white)
                                         .padding(.horizontal, 20)
                                         .padding(.vertical, 10)
-                                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                        .background(Color.buttonBackground)
                                         .cornerRadius(24)
                                 }
                             }
@@ -106,7 +106,7 @@ struct NHIESetupView: View {
                                             .foregroundColor(.white)
                                             .padding(.horizontal, 20)
                                             .padding(.vertical, 10)
-                                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                            .background(Color.buttonBackground)
                                             .cornerRadius(24)
                                     }
                                 }
@@ -118,7 +118,7 @@ struct NHIESetupView: View {
                     // Description
                     Text(deck.description)
                         .font(.system(size: 18, weight: .regular, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
                         .padding(.horizontal, 40)
@@ -127,24 +127,24 @@ struct NHIESetupView: View {
                     VStack(spacing: 12) {
                         Text("Number of Cards")
                             .font(.system(size: 16, weight: .medium, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                         
                         VStack(spacing: 8) {
                             Text("\(Int(selectedCardCount)) cards")
                                 .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(.primaryText)
                             
                             Slider(value: $selectedCardCount, in: Double(minCards)...Double(maxCards), step: 1)
-                                .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .tint(Color.primaryAccent)
                             
                             HStack {
                                 Text("\(minCards)")
                                     .font(.system(size: 12, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                    .foregroundColor(.secondaryText)
                                 Spacer()
                                 Text("\(maxCards)")
                                     .font(.system(size: 12, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                    .foregroundColor(.secondaryText)
                             }
                         }
                         .padding(.horizontal, 20)

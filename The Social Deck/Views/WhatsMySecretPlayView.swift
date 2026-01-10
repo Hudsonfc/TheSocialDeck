@@ -19,8 +19,8 @@ struct WhatsMySecretPlayView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -31,9 +31,9 @@ struct WhatsMySecretPlayView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     
@@ -43,9 +43,9 @@ struct WhatsMySecretPlayView: View {
                     }) {
                         Image(systemName: "house.fill")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     .padding(.leading, 12)
@@ -56,7 +56,7 @@ struct WhatsMySecretPlayView: View {
                     if !manager.isFinished && manager.cards.count > 0 {
                         Text("Round \(manager.roundNumber) of \(manager.cards.count)")
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                     }
                 }
                 .padding(.horizontal, 40)
@@ -157,22 +157,22 @@ struct PlayersTurnView: View {
                 // Icon
                 ZStack {
                     Circle()
-                        .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.1))
+                        .fill(Color.buttonBackground.opacity(0.1))
                         .frame(width: 120, height: 120)
                     
                     Image(systemName: "eye.slash.fill")
                         .font(.system(size: 50, weight: .medium))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .foregroundColor(Color.buttonBackground)
                 }
                 
                 VStack(spacing: 12) {
                     Text("Player's Turn")
                         .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                     
                     Text("\(manager.currentPlayer)")
                         .font(.system(size: 36, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .foregroundColor(Color.buttonBackground)
                     
                     Text("Everyone else, look away!")
                         .font(.system(size: 16, weight: .medium, design: .rounded))
@@ -207,7 +207,7 @@ struct ShowingSecretView: View {
                     // Player's turn text
                     Text("\(manager.currentPlayer)'s turn")
                         .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
                     
@@ -341,13 +341,13 @@ struct SecretCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(red: 0xF8/255.0, green: 0xF9/255.0, blue: 0xFA/255.0))
+                .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack(spacing: 20) {
                 Image(systemName: "eye.slash.fill")
                     .font(.system(size: 50))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
                 
                 Text(secret)
                     .font(.system(size: 24, weight: .semibold, design: .rounded))
@@ -381,7 +381,7 @@ struct TimerRunningView: View {
             VStack(spacing: 16) {
                 Text("Group Interaction Time")
                     .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                 
                 Text("\(manager.currentPlayer) is following a secret rule. Try to figure it out!")
                     .font(.system(size: 18, weight: .medium, design: .rounded))
@@ -394,25 +394,25 @@ struct TimerRunningView: View {
             VStack(spacing: 12) {
                 Text(formatTime(manager.timeRemaining))
                     .font(.system(size: 72, weight: .bold, design: .rounded))
-                    .foregroundColor(manager.timeRemaining <= 30 ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(manager.timeRemaining <= 30 ? Color.buttonBackground : .primaryText)
                     .monospacedDigit()
                     .animation(.easeInOut(duration: 0.3), value: manager.timeRemaining <= 30)
                 
                 Text(manager.timeRemaining <= 30 ? "Time running out!" : "time remaining")
                     .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundColor(manager.timeRemaining <= 30 ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(manager.timeRemaining <= 30 ? Color.buttonBackground : .secondaryText)
                     .animation(.easeInOut(duration: 0.3), value: manager.timeRemaining <= 30)
             }
             
             // Circular progress indicator
             ZStack {
                 Circle()
-                    .stroke(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0), lineWidth: 8)
+                    .stroke(Color.tertiaryBackground, lineWidth: 8)
                 
                 Circle()
                     .trim(from: 0, to: CGFloat(max(0, manager.timeRemaining / 120.0)))
                     .stroke(
-                        manager.timeRemaining <= 30 ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0),
+                        manager.timeRemaining <= 30 ? Color.buttonBackground : Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0),
                         style: StrokeStyle(lineWidth: 8, lineCap: .round)
                     )
                     .rotationEffect(.degrees(-90))
@@ -432,10 +432,10 @@ struct TimerRunningView: View {
                         Text("View Secret Again")
                             .font(.system(size: 16, weight: .medium, design: .rounded))
                     }
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
                     .padding(.vertical, 12)
                     .padding(.horizontal, 24)
-                    .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                    .background(Color.tertiaryBackground)
                     .cornerRadius(20)
                 }
                 
@@ -449,10 +449,10 @@ struct TimerRunningView: View {
                 }) {
                     Text("Group Ready - Skip Timer")
                         .font(.system(size: 16, weight: .medium, design: .rounded))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .foregroundColor(Color.buttonBackground)
                         .padding(.vertical, 12)
                         .padding(.horizontal, 24)
-                        .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                        .background(Color.tertiaryBackground)
                         .cornerRadius(20)
                 }
             }
@@ -469,7 +469,7 @@ struct GuessingView: View {
         VStack(spacing: 32) {
             Text("Time's Up!")
                 .font(.system(size: 36, weight: .bold, design: .rounded))
-                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                .foregroundColor(.primaryText)
             
             if let secret = manager.currentSecret {
                 VStack(spacing: 24) {
@@ -481,11 +481,11 @@ struct GuessingView: View {
                     ZStack {
                         RoundedRectangle(cornerRadius: 24)
                             .fill(Color(red: 0xF8/255.0, green: 0xF9/255.0, blue: 0xFA/255.0))
-                            .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
+                            .shadow(color: Color.shadowColor, radius: 20, x: 0, y: 10)
                         
                         Text(secret)
                             .font(.system(size: 24, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .multilineTextAlignment(.center)
                             .padding(32)
                     }
@@ -538,9 +538,9 @@ struct GuessingView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 20)
-                    .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .background(Color.buttonBackground)
                     .cornerRadius(12)
-                    .shadow(color: Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.3), radius: 8, x: 0, y: 4)
+                    .shadow(color: Color.buttonBackground.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
             }
             .padding(.horizontal, 40)
@@ -559,18 +559,18 @@ struct ResultView: View {
                 // Result visual
                 ZStack {
                     Circle()
-                        .fill(wasCorrect ? Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0).opacity(0.1) : Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.1))
+                        .fill(wasCorrect ? Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0).opacity(0.1) : Color.buttonBackground.opacity(0.1))
                         .frame(width: 200, height: 200)
                     
                     Image(systemName: wasCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
                         .font(.system(size: 60, weight: .medium))
-                        .foregroundColor(wasCorrect ? Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0) : Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .foregroundColor(wasCorrect ? Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0) : Color.buttonBackground)
                 }
                 
                 VStack(spacing: 16) {
                     Text(wasCorrect ? "Group Wins!" : "\(manager.currentPlayer) Wins!")
                         .font(.system(size: 36, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                     
                     Text(wasCorrect ? "The group correctly guessed the secret!" : "The group couldn't figure out the secret!")
                         .font(.system(size: 18, weight: .medium, design: .rounded))
@@ -605,7 +605,7 @@ struct ResultView: View {
                                 .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                             Text("\(manager.secretPlayerWins)")
                                 .font(.system(size: 24, weight: .bold, design: .rounded))
-                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .foregroundColor(Color.buttonBackground)
                         }
                     }
                 }

@@ -315,8 +315,8 @@ struct Play2View: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -325,11 +325,11 @@ struct Play2View: View {
                     HStack(spacing: 12) {
                         Image(systemName: "magnifyingglass")
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                         
                         TextField("Search games...", text: $searchText)
                             .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .onChange(of: searchText) { oldValue, newValue in
                                 withAnimation {
                                     currentCardIndex = 0
@@ -349,13 +349,13 @@ struct Play2View: View {
                             }) {
                                 Image(systemName: "xmark.circle.fill")
                                     .font(.system(size: 18, weight: .medium))
-                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                    .foregroundColor(.secondaryText)
                             }
                         }
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                    .background(Color.secondaryBackground)
                     .cornerRadius(16)
                 }
                 .padding(.horizontal, 40)
@@ -395,7 +395,7 @@ struct Play2View: View {
                     if !filteredDecks.isEmpty {
                         Text("\(filteredDecks.count) game\(filteredDecks.count == 1 ? "" : "s") found")
                             .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                 .padding(.bottom, 16)
                     }
                 }
@@ -409,16 +409,16 @@ struct Play2View: View {
                             VStack(spacing: 24) {
                                 Image(systemName: "magnifyingglass")
                                     .font(.system(size: 50, weight: .light))
-                                    .foregroundColor(Color(red: 0xD0/255.0, green: 0xD0/255.0, blue: 0xD0/255.0))
+                                    .foregroundColor(.tertiaryText)
                                 
                                 VStack(spacing: 8) {
                                     Text("No Games Found")
                                         .font(.system(size: 24, weight: .bold, design: .rounded))
-                                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                        .foregroundColor(.primaryText)
                                     
                                     Text("Try searching with different keywords")
                                         .font(.system(size: 16, weight: .regular, design: .rounded))
-                                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                        .foregroundColor(.secondaryText)
                                         .multilineTextAlignment(.center)
                                 }
                             }
@@ -454,16 +454,16 @@ struct Play2View: View {
                             VStack(spacing: 24) {
                                 Image(systemName: "magnifyingglass")
                                     .font(.system(size: 50, weight: .light))
-                                    .foregroundColor(Color(red: 0xD0/255.0, green: 0xD0/255.0, blue: 0xD0/255.0))
+                                    .foregroundColor(.tertiaryText)
                                 
                                 VStack(spacing: 8) {
                                     Text("No Games Found")
                                         .font(.system(size: 24, weight: .bold, design: .rounded))
-                                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                        .foregroundColor(.primaryText)
                                     
                                     Text("Try searching with different keywords")
                                         .font(.system(size: 16, weight: .regular, design: .rounded))
-                                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                        .foregroundColor(.secondaryText)
                                         .multilineTextAlignment(.center)
                                 }
                             }
@@ -540,11 +540,11 @@ struct Play2View: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .clipped() // Hide cards when they slide off screen
                     
-                    // Placeholder text under cards (hidden when searching or grid view)
-                    if searchText.isEmpty && !isGridView {
-                        Text("Tap card to flip and see details")
-                            .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(Color(red: 0xB0/255.0, green: 0xB0/255.0, blue: 0xB0/255.0))
+                // Placeholder text under cards (hidden when searching or grid view)
+                if searchText.isEmpty && !isGridView {
+                    Text("Tap card to flip and see details")
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(.tertiaryText)
                             .padding(.top, 16)
                     }
                     
@@ -553,7 +553,7 @@ struct Play2View: View {
                         HStack(spacing: 8) {
                             ForEach(0..<currentDecks.count, id: \.self) { index in
                                 Circle()
-                                    .fill(index == currentCardIndex ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0))
+                                    .fill(index == currentCardIndex ? Color.primaryAccent : Color.borderColor)
                                     .frame(width: 8, height: 8)
                             }
                         }
@@ -688,7 +688,7 @@ struct Play2View: View {
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .foregroundColor(.primaryAccent)
                 }
             }
             
@@ -709,13 +709,13 @@ struct Play2View: View {
                         // When in grid view, show rotated rectangle.stack to switch back to card view
                         Image(systemName: "rectangle.stack")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .foregroundColor(.primaryAccent)
                             .rotationEffect(.degrees(90))
                     } else {
                         // When in card view, show grid icon to switch to grid view
                         Image(systemName: "square.grid.2x2")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .foregroundColor(.primaryAccent)
                     }
                 }
             }
@@ -933,10 +933,10 @@ struct CategoryTab: View {
         VStack(spacing: 8) {
             Text(title)
                 .font(.system(size: 18, weight: isSelected ? .bold : .regular, design: .rounded))
-                .foregroundColor(isSelected ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                .foregroundColor(isSelected ? .primaryAccent : .secondaryText)
             
             Rectangle()
-                .fill(isSelected ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color.clear)
+                .fill(isSelected ? .primaryAccent : Color.clear)
                 .frame(height: 3)
         }
     }
@@ -975,9 +975,9 @@ struct FavoriteButton: View {
         }) {
             Image(systemName: isFavorite ? "heart.fill" : "heart")
                 .font(.system(size: 20, weight: .medium))
-                .foregroundColor(isFavorite ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                .foregroundColor(isFavorite ? .primaryAccent : .secondaryText)
                 .frame(width: 40, height: 40)
-                .background(isFavorite ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.1) : Color(red: 0xF5/255.0, green: 0xF5/255.0, blue: 0xF5/255.0))
+                .background(isFavorite ? Color.primaryAccent.opacity(0.1) : Color.tertiaryBackground)
                 .clipShape(Circle())
                 .scaleEffect(scale)
         }
@@ -1016,12 +1016,12 @@ struct GameCardView: View {
                     
                     Text(deck.title)
                         .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                         .multilineTextAlignment(.center)
                     
                     Text(deck.description)
                         .font(.system(size: 15, weight: .regular, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
                         .padding(.horizontal, 24)
@@ -1030,10 +1030,10 @@ struct GameCardView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "clock")
                             .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                         Text(deck.estimatedTime)
                             .font(.system(size: 13, weight: .medium, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                     }
                     .padding(.top, 4)
                     
@@ -1046,7 +1046,7 @@ struct GameCardView: View {
                             .foregroundColor(.white)
                             .frame(width: 180)
                             .padding(.vertical, 14)
-                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .background(Color.buttonBackground)
                             .cornerRadius(14)
                     }
                     .padding(.top, 12)
@@ -1059,9 +1059,9 @@ struct GameCardView: View {
                 .padding(16)
             }
             .frame(width: cardWidth, height: cardHeight)
-            .background(Color.white)
+            .background(Color.cardBackground)
             .clipShape(RoundedRectangle(cornerRadius: 20))
-            .shadow(color: Color.black.opacity(0.15), radius: 12, x: 0, y: 6)
+            .shadow(color: Color.cardShadowColor, radius: 12, x: 0, y: 6)
             .rotation3DEffect(
                 .degrees(flipDegrees + 180),
                 axis: (x: 0, y: -1, z: 0)
@@ -1077,7 +1077,7 @@ struct GameCardView: View {
                 .aspectRatio(imageAspectRatio, contentMode: .fit)
                 .frame(width: cardWidth, height: cardHeight)
                 .clipShape(RoundedRectangle(cornerRadius: 20))
-                .shadow(color: Color.black.opacity(0.15), radius: 12, x: 0, y: 6)
+                .shadow(color: Color.cardShadowColor, radius: 12, x: 0, y: 6)
                 .rotation3DEffect(
                     .degrees(flipDegrees),
                     axis: (x: 0, y: -1, z: 0)
@@ -1140,7 +1140,7 @@ struct GridGameTile: View {
                 ZStack(alignment: .topTrailing) {
                     // Background for the card area
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                        .fill(Color.tertiaryBackground)
                         .frame(width: tileWidth, height: tileHeight)
                     
                     // Card image - scaled to fit to show full shape
@@ -1159,7 +1159,7 @@ struct GridGameTile: View {
                     }) {
                         Image(systemName: favoritesManager.isFavorite(deck.type) ? "heart.fill" : "heart")
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(favoritesManager.isFavorite(deck.type) ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : .white)
+                            .foregroundColor(favoritesManager.isFavorite(deck.type) ? .primaryAccent : .white)
                             .frame(width: 32, height: 32)
                             .background(Color.black.opacity(0.3))
                             .clipShape(Circle())
@@ -1170,7 +1170,7 @@ struct GridGameTile: View {
                 // Game title
                 Text(deck.title)
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                     .frame(maxWidth: .infinity)
@@ -1179,10 +1179,10 @@ struct GridGameTile: View {
                 HStack(spacing: 6) {
                     Image(systemName: "clock")
                         .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                     Text(deck.estimatedTime)
                         .font(.system(size: 12, weight: .regular, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                 }
             }
             .scaleEffect(isPressed ? 0.97 : 1.0)
@@ -1207,8 +1207,8 @@ struct GameDescriptionOverlay: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -1222,9 +1222,9 @@ struct GameDescriptionOverlay: View {
                     }) {
                         Image(systemName: "xmark")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     
@@ -1237,9 +1237,9 @@ struct GameDescriptionOverlay: View {
                     }) {
                         Image(systemName: favoritesManager.isFavorite(deck.type) ? "heart.fill" : "heart")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(favoritesManager.isFavorite(deck.type) ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(favoritesManager.isFavorite(deck.type) ? .primaryAccent : .primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                 }
@@ -1255,7 +1255,7 @@ struct GameDescriptionOverlay: View {
                     .aspectRatio(420.0 / 577.0, contentMode: .fit)
                     .frame(width: min(180, UIScreen.main.bounds.width - 120))
                     .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+                    .shadow(color: Color.shadowColor, radius: 8, x: 0, y: 4)
                     .padding(.bottom, 20)
                 
                 Spacer()
@@ -1263,7 +1263,7 @@ struct GameDescriptionOverlay: View {
                 // Deck title
                 Text(deck.title)
                     .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
                     .padding(.bottom, 16)
@@ -1271,7 +1271,7 @@ struct GameDescriptionOverlay: View {
                 // Description
                 Text(deck.description)
                     .font(.system(size: 16, weight: .regular, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(.secondaryText)
                     .multilineTextAlignment(.center)
                     .lineSpacing(6)
                     .padding(.horizontal, 40)
@@ -1281,13 +1281,13 @@ struct GameDescriptionOverlay: View {
                 VStack(spacing: 4) {
                     Image(systemName: "clock")
                         .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                     Text(deck.estimatedTime)
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                     Text("Estimated Time")
                         .font(.system(size: 12, weight: .regular, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                 }
                 .padding(.bottom, 32)
                 

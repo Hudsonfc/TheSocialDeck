@@ -38,13 +38,13 @@ struct WelcomeView: View {
                     // Title
                     Text("Ready to Play?")
                         .font(.system(size: 30, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                     
                     // Description
                     VStack(spacing: 16) {
                         Text("Browse our collection of card games, pick your favorites, and start playing with friends!")
                             .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(Color(red: 0x5A/255.0, green: 0x5A/255.0, blue: 0x5A/255.0))
+                            .foregroundColor(.secondaryText)
                             .multilineTextAlignment(.center)
                             .lineSpacing(4)
                             .padding(.horizontal, 40)
@@ -60,7 +60,7 @@ struct WelcomeView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
-                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .background(Color.buttonBackground)
                             .cornerRadius(16)
                     }
                     .padding(.horizontal, 40)
@@ -68,9 +68,9 @@ struct WelcomeView: View {
                 }
             }
             .frame(width: 340)
-            .background(Color.white)
+            .background(Color.cardBackground)
             .cornerRadius(24)
-            .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
+            .shadow(color: Color.cardShadowColor, radius: 20, x: 0, y: 10)
             .scaleEffect(cardScale)
             .opacity(cardOpacity)
         }

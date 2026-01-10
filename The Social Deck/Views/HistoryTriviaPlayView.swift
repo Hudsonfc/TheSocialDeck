@@ -22,7 +22,7 @@ struct HistoryTriviaPlayView: View {
     
     var body: some View {
         ZStack {
-            Color.white
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -34,9 +34,9 @@ struct HistoryTriviaPlayView: View {
                     }) {
                         Image(systemName: "house.fill")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     .padding(.leading, 12)
@@ -52,10 +52,10 @@ struct HistoryTriviaPlayView: View {
                                 Text("Previous")
                                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                             }
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .cornerRadius(20)
                             .fixedSize()
                         }
@@ -70,7 +70,7 @@ struct HistoryTriviaPlayView: View {
                         if let _ = manager.currentCard() {
                             Text("\(manager.currentIndex + 1) / \(manager.cards.count)")
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(.primaryText)
                         }
                     
                     // Score
@@ -80,7 +80,7 @@ struct HistoryTriviaPlayView: View {
                             .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                         Text("\(manager.score)")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .foregroundColor(Color.buttonBackground)
                         }
                     }
                     .padding(.trailing, 12)
@@ -101,7 +101,7 @@ struct HistoryTriviaPlayView: View {
                             
                             Text(currentCard.text)
                                 .font(.system(size: 24, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(.primaryText)
                                 .multilineTextAlignment(.center)
                                 .lineLimit(nil)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -112,7 +112,7 @@ struct HistoryTriviaPlayView: View {
                         .background(
                             RoundedRectangle(cornerRadius: 24)
                                 .fill(Color.white)
-                                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                                .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
                         )
                         .padding(.horizontal, 40)
                         
@@ -220,7 +220,7 @@ struct HistoryTriviaPlayView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .background(Color.buttonBackground)
                             .cornerRadius(12)
                     }
                     .padding(.horizontal, 40)
@@ -414,9 +414,9 @@ fileprivate struct AnswerButton: View {
         } else if isIncorrect {
             return .red.opacity(0.2)
         } else if isSelected {
-            return Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+            return Color.buttonBackground
         } else {
-            return Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0)
+            return Color.tertiaryBackground
         }
     }
     
@@ -426,9 +426,9 @@ fileprivate struct AnswerButton: View {
         } else if isIncorrect {
             return .red.opacity(0.1)
         } else if isSelected {
-            return Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.1)
+            return Color.buttonBackground.opacity(0.1)
         } else {
-            return Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0)
+            return Color.tertiaryBackground
         }
     }
     
@@ -438,9 +438,9 @@ fileprivate struct AnswerButton: View {
         } else if isIncorrect {
             return .red
         } else if isSelected {
-            return Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+            return Color.buttonBackground
         } else {
-            return Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0)
+            return .primaryText
         }
     }
     
@@ -450,7 +450,7 @@ fileprivate struct AnswerButton: View {
         } else if isIncorrect {
             return .red
         } else {
-            return Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+            return Color.buttonBackground
         }
     }
 }

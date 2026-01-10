@@ -15,8 +15,8 @@ struct HistoryTriviaCategorySelectionView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -27,7 +27,7 @@ struct HistoryTriviaCategorySelectionView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                     }
                     Spacer()
                 }
@@ -44,19 +44,19 @@ struct HistoryTriviaCategorySelectionView: View {
                             .scaledToFit()
                             .frame(width: 160, height: 220)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                            .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
                             .padding(.top, 20)
                             .padding(.bottom, 32)
                         
                         // Title
                         Text("Select Difficulty")
                             .font(.system(size: 24, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .padding(.bottom, 8)
                         
                         Text("Choose your challenge level")
                             .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                             .padding(.bottom, 24)
                         
                         // Difficulty buttons
@@ -113,20 +113,20 @@ fileprivate struct DifficultyButton: View {
                 VStack(spacing: 8) {
                     Text(category)
                         .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(isSelected ? .white : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(isSelected ? .white : .primaryText)
                 }
                 Spacer()
             }
             .frame(height: 120)
             .background(
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(isSelected ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                    .fill(isSelected ? .primaryAccent : Color.tertiaryBackground)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
                     .stroke(isSelected ? Color.clear : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: 1)
             )
-            .shadow(color: isSelected ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.3) : Color.black.opacity(0.05), radius: isSelected ? 10 : 5, x: 0, y: 5)
+            .shadow(color: isSelected ? .primaryAccent.opacity(0.3) : Color.black.opacity(0.05), radius: isSelected ? 10 : 5, x: 0, y: 5)
         }
         .buttonStyle(PlainButtonStyle())
     }

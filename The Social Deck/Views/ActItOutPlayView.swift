@@ -23,8 +23,8 @@ struct ActItOutPlayView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -35,9 +35,9 @@ struct ActItOutPlayView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     
@@ -47,9 +47,9 @@ struct ActItOutPlayView: View {
                     }) {
                         Image(systemName: "house.fill")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     .padding(.leading, 12)
@@ -65,10 +65,10 @@ struct ActItOutPlayView: View {
                                 Text("Previous")
                                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                             }
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .cornerRadius(20)
                         }
                         .padding(.leading, 12)
@@ -79,7 +79,7 @@ struct ActItOutPlayView: View {
                     // Progress indicator
                     Text("\(manager.currentCardIndex + 1) / \(manager.cards.count)")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
                 .padding(.horizontal, 40)
                 .padding(.top, 20)
@@ -89,7 +89,7 @@ struct ActItOutPlayView: View {
                 if manager.isFlipped {
                     Text("\(manager.currentPlayer)'s Turn")
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .foregroundColor(Color.buttonBackground)
                         .padding(.bottom, 8)
                 }
                 
@@ -97,7 +97,7 @@ struct ActItOutPlayView: View {
                 if manager.timerEnabled && manager.isFlipped {
                     Text("\(manager.timeRemaining)")
                         .font(.system(size: 48, weight: .bold, design: .rounded))
-                        .foregroundColor(manager.timeRemaining <= 10 ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(manager.timeRemaining <= 10 ? Color.buttonBackground : .primaryText)
                         .padding(.bottom, 8)
                 }
                 
@@ -106,7 +106,7 @@ struct ActItOutPlayView: View {
                 // "Act It Out" label
                 Text("Act It Out")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
                     .padding(.bottom, 24)
                 
                 // Card
@@ -150,13 +150,13 @@ struct ActItOutPlayView: View {
                             }) {
                                 Text("Skip (\(manager.skipsRemaining))")
                                     .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .foregroundColor(Color.buttonBackground)
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 16)
-                                    .background(Color.white)
+                                    .background(Color.appBackground)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 12)
-                                            .stroke(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0), lineWidth: 2)
+                                            .stroke(Color.buttonBackground, lineWidth: 2)
                                     )
                                     .cornerRadius(12)
                             }
@@ -176,7 +176,7 @@ struct ActItOutPlayView: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 16)
-                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .background(Color.buttonBackground)
                                 .cornerRadius(12)
                         }
                     }
@@ -390,7 +390,7 @@ struct ActItOutCardFrontView: View {
             VStack {
                 Image(systemName: "theatermasks.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
                     .padding(.bottom, 20)
                 
                 Text("Tap to reveal")
@@ -413,7 +413,7 @@ struct ActItOutCardBackView: View {
             VStack(spacing: 16) {
                 Text("Act It Out")
                     .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
                 
                 Text(text)
                     .font(.system(size: 28, weight: .semibold, design: .rounded))

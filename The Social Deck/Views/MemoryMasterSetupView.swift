@@ -15,8 +15,8 @@ struct MemoryMasterSetupView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -27,7 +27,7 @@ struct MemoryMasterSetupView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                     }
                     Spacer()
                 }
@@ -43,13 +43,13 @@ struct MemoryMasterSetupView: View {
                         .scaledToFit()
                         .frame(width: 160, height: 220)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                        .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
                     
                     // Difficulty Selection
                     VStack(spacing: 20) {
                         Text("Select Difficulty")
                             .font(.system(size: 20, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                         
                         VStack(spacing: 16) {
                             DifficultyButton(
@@ -134,18 +134,18 @@ fileprivate struct DifficultyButton: View {
                 VStack(alignment: .center, spacing: 4) {
                     Text(difficulty.displayName)
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                        .foregroundColor(isSelected ? .white : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(isSelected ? .white : .primaryText)
                     
                     Text("\(difficulty.numberOfPairs * 2) cards")
                         .font(.system(size: 14, weight: .regular, design: .rounded))
-                        .foregroundColor(isSelected ? .white.opacity(0.8) : Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(isSelected ? .white.opacity(0.8) : .secondaryText)
                 }
                 
                 Spacer()
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 16)
-            .background(isSelected ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+            .background(isSelected ? Color.primaryAccent : Color.tertiaryBackground)
             .cornerRadius(16)
         }
     }

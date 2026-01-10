@@ -48,8 +48,8 @@ struct WhatsNewView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             if updateCards.isEmpty {
@@ -63,11 +63,11 @@ struct WhatsNewView: View {
                     VStack(spacing: 12) {
                         Text("No Updates Yet")
                             .font(.system(size: 24, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                         
                         Text("New features and announcements will appear here when available.")
                             .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                             .multilineTextAlignment(.center)
                             .lineSpacing(4)
                             .padding(.horizontal, 40)
@@ -80,7 +80,7 @@ struct WhatsNewView: View {
                         // Title
                         Text("What's New")
                             .font(.system(size: 32, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .padding(.top, 20)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         
@@ -118,7 +118,7 @@ struct WhatsNewView: View {
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
             }
         }
@@ -161,7 +161,7 @@ struct UpdateCardView: View {
             // Red accent line at top (optional)
             if hasAccent {
                 Rectangle()
-                    .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .fill(Color.buttonBackground)
                     .frame(height: 3)
                     .cornerRadius(1.5)
             }
@@ -172,7 +172,7 @@ struct UpdateCardView: View {
                         // Title
                         Text(title)
                             .font(.system(size: 22, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                         
                         Spacer()
                         
@@ -184,7 +184,7 @@ struct UpdateCardView: View {
                             }) {
                                 Image(systemName: "xmark.circle.fill")
                                     .font(.system(size: 20))
-                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                    .foregroundColor(.secondaryText)
                             }
                         }
                     }
@@ -193,7 +193,7 @@ struct UpdateCardView: View {
                     // Description
                     Text(description)
                         .font(.system(size: 16, weight: .regular, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                         .lineSpacing(4)
                         .fixedSize(horizontal: false, vertical: true)
                     
@@ -201,7 +201,7 @@ struct UpdateCardView: View {
                     if let dateString = dateString {
                         Text(dateString)
                             .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                             .padding(.top, 4)
                     }
                 }
@@ -209,9 +209,9 @@ struct UpdateCardView: View {
             .padding(20)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white)
+        .background(Color.secondaryBackground)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+        .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
     }
 }
 

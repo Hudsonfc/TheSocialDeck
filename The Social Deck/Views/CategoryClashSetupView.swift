@@ -49,8 +49,8 @@ struct CategoryClashSetupView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -61,7 +61,7 @@ struct CategoryClashSetupView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                     }
                     Spacer()
                 }
@@ -77,13 +77,13 @@ struct CategoryClashSetupView: View {
                         .scaledToFit()
                         .frame(width: 160, height: 220)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                        .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
                     
                     // Selected categories chips
                     VStack(spacing: 12) {
                         Text("Selected Categories")
                             .font(.system(size: 16, weight: .medium, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                         
                         if selectedCategories.count <= 3 {
                             // Center when 3 or fewer categories
@@ -94,7 +94,7 @@ struct CategoryClashSetupView: View {
                                         .foregroundColor(.white)
                                         .padding(.horizontal, 20)
                                         .padding(.vertical, 10)
-                                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                        .background(Color.primaryAccent)
                                         .cornerRadius(24)
                                 }
                             }
@@ -108,7 +108,7 @@ struct CategoryClashSetupView: View {
                                             .foregroundColor(.white)
                                             .padding(.horizontal, 20)
                                             .padding(.vertical, 10)
-                                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                            .background(Color.primaryAccent)
                                             .cornerRadius(24)
                                     }
                                 }
@@ -120,7 +120,7 @@ struct CategoryClashSetupView: View {
                     // Description
                     Text(deck.description)
                         .font(.system(size: 18, weight: .regular, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
                         .padding(.horizontal, 40)
@@ -129,24 +129,24 @@ struct CategoryClashSetupView: View {
                     VStack(spacing: 12) {
                         Text("Number of Categories")
                             .font(.system(size: 16, weight: .medium, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                         
                         VStack(spacing: 8) {
                             Text("\(Int(selectedCardCount)) categories")
                                 .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(.primaryText)
                             
                             Slider(value: $selectedCardCount, in: Double(minCards)...Double(maxCards), step: 1)
-                                .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .tint(Color.primaryAccent)
                             
                             HStack {
                                 Text("\(minCards)")
                                     .font(.system(size: 12, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                    .foregroundColor(.secondaryText)
                                 Spacer()
                                 Text("\(maxCards)")
                                     .font(.system(size: 12, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                    .foregroundColor(.secondaryText)
                             }
                         }
                         .padding(.horizontal, 20)
@@ -158,34 +158,34 @@ struct CategoryClashSetupView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Timer")
                                     .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                                 
                                 Text("Add urgency with a countdown timer")
                                     .font(.system(size: 12, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                    .foregroundColor(.secondaryText)
                             }
                             
                             Spacer()
                             
                             Toggle("", isOn: $timerEnabled)
-                                .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .tint(Color.primaryAccent)
                         }
                         
                         if timerEnabled {
                             VStack(spacing: 8) {
                                 Text("\(Int(timerDuration)) seconds per category")
                                     .font(.system(size: 14, weight: .medium, design: .rounded))
-                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .foregroundColor(Color.primaryAccent)
                                 
                                 Slider(value: $timerDuration, in: 15...60, step: 5)
-                                    .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .tint(Color.primaryAccent)
                             }
                             .transition(.opacity.combined(with: .move(edge: .top)))
                         }
                     }
                     .padding(.horizontal, 20)
                     .padding(.vertical, 16)
-                    .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                    .background(Color.secondaryBackground)
                     .cornerRadius(16)
                     .animation(.easeInOut(duration: 0.2), value: timerEnabled)
                     

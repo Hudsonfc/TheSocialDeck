@@ -26,8 +26,8 @@ struct TTLPlayView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -38,9 +38,9 @@ struct TTLPlayView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     
@@ -50,9 +50,9 @@ struct TTLPlayView: View {
                     }) {
                         Image(systemName: "house.fill")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     .padding(.leading, 12)
@@ -68,10 +68,10 @@ struct TTLPlayView: View {
                                 Text("Previous")
                                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                             }
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .cornerRadius(20)
                         }
                         .padding(.leading, 12)
@@ -83,7 +83,7 @@ struct TTLPlayView: View {
                     if let currentCard = manager.currentCard() {
                         Text("\(manager.currentIndex + 1) / \(manager.cards.count)")
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                     }
                 }
                 .padding(.horizontal, 40)
@@ -95,7 +95,7 @@ struct TTLPlayView: View {
                 // "Two Truths and a Lie" label
                 Text("Two Truths and a Lie")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
                     .padding(.bottom, 32)
                 
                 // Card
@@ -178,7 +178,7 @@ struct TTLPlayView: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 16)
-                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .background(Color.buttonBackground)
                                 .cornerRadius(12)
                         }
                         .padding(.horizontal, 40)
@@ -349,13 +349,13 @@ struct TTLCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color.appBackground)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack {
                 Image(systemName: "questionmark.circle.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
                     .padding(.bottom, 20)
                 
                 Text("Tap to reveal")
@@ -375,14 +375,14 @@ struct TTLCardBackView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color.appBackground)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             ScrollView {
                 VStack(spacing: 16) {
                     Text("Two Truths and a Lie")
                         .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .foregroundColor(Color.buttonBackground)
                         .padding(.top, 24)
                     
                     Text("Tap the statement you think is a LIE")
@@ -401,11 +401,11 @@ struct TTLCardBackView: View {
                             HStack {
                                 Text("1.")
                                     .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                                 
                                 Text(statement1)
                                     .font(.system(size: 16, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                                     .multilineTextAlignment(.leading)
                                 
                                 Spacer()
@@ -413,16 +413,16 @@ struct TTLCardBackView: View {
                                 if selectedStatement == 1 {
                                     Image(systemName: "checkmark.circle.fill")
                                         .font(.system(size: 20, weight: .semibold))
-                                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                        .foregroundColor(Color.buttonBackground)
                                 }
                             }
                             .padding(.horizontal, 16)
                             .padding(.vertical, 12)
-                            .background(selectedStatement == 1 ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(selectedStatement == 1 ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.tertiaryBackground)
                             .cornerRadius(12)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(selectedStatement == 1 ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color.clear, lineWidth: 2)
+                                    .stroke(selectedStatement == 1 ? Color.buttonBackground : Color.clear, lineWidth: 2)
                             )
                         }
                         .buttonStyle(PlainButtonStyle())
@@ -436,11 +436,11 @@ struct TTLCardBackView: View {
                             HStack {
                                 Text("2.")
                                     .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                                 
                                 Text(statement2)
                                     .font(.system(size: 16, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                                     .multilineTextAlignment(.leading)
                                 
                                 Spacer()
@@ -448,16 +448,16 @@ struct TTLCardBackView: View {
                                 if selectedStatement == 2 {
                                     Image(systemName: "checkmark.circle.fill")
                                         .font(.system(size: 20, weight: .semibold))
-                                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                        .foregroundColor(Color.buttonBackground)
                                 }
                             }
                             .padding(.horizontal, 16)
                             .padding(.vertical, 12)
-                            .background(selectedStatement == 2 ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(selectedStatement == 2 ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.tertiaryBackground)
                             .cornerRadius(12)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(selectedStatement == 2 ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color.clear, lineWidth: 2)
+                                    .stroke(selectedStatement == 2 ? Color.buttonBackground : Color.clear, lineWidth: 2)
                             )
                         }
                         .buttonStyle(PlainButtonStyle())
@@ -471,11 +471,11 @@ struct TTLCardBackView: View {
                             HStack {
                                 Text("3.")
                                     .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                                 
                                 Text(statement3)
                                     .font(.system(size: 16, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                                     .multilineTextAlignment(.leading)
                                 
                                 Spacer()
@@ -483,16 +483,16 @@ struct TTLCardBackView: View {
                                 if selectedStatement == 3 {
                                     Image(systemName: "checkmark.circle.fill")
                                         .font(.system(size: 20, weight: .semibold))
-                                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                        .foregroundColor(Color.buttonBackground)
                                 }
                             }
                             .padding(.horizontal, 16)
                             .padding(.vertical, 12)
-                            .background(selectedStatement == 3 ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(selectedStatement == 3 ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.tertiaryBackground)
                             .cornerRadius(12)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(selectedStatement == 3 ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color.clear, lineWidth: 2)
+                                    .stroke(selectedStatement == 3 ? Color.buttonBackground : Color.clear, lineWidth: 2)
                             )
                         }
                         .buttonStyle(PlainButtonStyle())

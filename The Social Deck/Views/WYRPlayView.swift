@@ -26,8 +26,8 @@ struct WYRPlayView: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            // Dark adaptive background
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -38,9 +38,9 @@ struct WYRPlayView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     
@@ -50,9 +50,9 @@ struct WYRPlayView: View {
                     }) {
                         Image(systemName: "house.fill")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     .padding(.leading, 12)
@@ -68,10 +68,10 @@ struct WYRPlayView: View {
                                 Text("Previous")
                                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                             }
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .cornerRadius(20)
                         }
                         .padding(.leading, 12)
@@ -83,7 +83,7 @@ struct WYRPlayView: View {
                     if let currentCard = manager.currentCard() {
                         Text("\(manager.currentIndex + 1) / \(manager.cards.count)")
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                     }
                 }
                 .padding(.horizontal, 40)
@@ -95,7 +95,7 @@ struct WYRPlayView: View {
                 // "Would You Rather" label
                 Text("Would You Rather")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
                     .padding(.bottom, 32)
                 
                 // Card
@@ -177,7 +177,7 @@ struct WYRPlayView: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 16)
-                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .background(Color.buttonBackground)
                                 .cornerRadius(12)
                         }
                         .padding(.horizontal, 40)
@@ -375,7 +375,7 @@ struct WYRCardFrontView: View {
             VStack {
                 Image(systemName: "questionmark.circle.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
                     .padding(.bottom, 20)
                 
                 Text("Tap to reveal")
@@ -400,7 +400,7 @@ struct WYRCardBackView: View {
             VStack(spacing: 24) {
                 Text("Would You Rather")
                     .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color.buttonBackground)
                     .padding(.top, 24)
                 
                 VStack(spacing: 20) {
@@ -417,24 +417,24 @@ struct WYRCardBackView: View {
                             
                             Text(optionA)
                                 .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(.primaryText)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 24)
                             
                             if selectedOption == "A" {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.system(size: 24, weight: .semibold))
-                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .foregroundColor(Color.buttonBackground)
                                     .padding(.top, 4)
                             }
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 20)
-                        .background(selectedOption == "A" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                        .background(selectedOption == "A" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.tertiaryBackground)
                         .cornerRadius(16)
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
-                                .stroke(selectedOption == "A" ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color.clear, lineWidth: 2)
+                                .stroke(selectedOption == "A" ? Color.buttonBackground : Color.clear, lineWidth: 2)
                         )
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -442,17 +442,17 @@ struct WYRCardBackView: View {
                     // Divider
                     HStack {
                         Rectangle()
-                            .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .fill(Color.buttonBackground)
                             .frame(height: 2)
                             .frame(width: 40)
                         
                         Text("OR")
                             .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .foregroundColor(Color.buttonBackground)
                             .padding(.horizontal, 12)
                         
                         Rectangle()
-                            .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .fill(Color.buttonBackground)
                             .frame(height: 2)
                             .frame(width: 40)
                     }
@@ -470,24 +470,24 @@ struct WYRCardBackView: View {
                             
                             Text(optionB)
                                 .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(.primaryText)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 24)
                             
                             if selectedOption == "B" {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.system(size: 24, weight: .semibold))
-                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .foregroundColor(Color.buttonBackground)
                                     .padding(.top, 4)
                             }
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 20)
-                        .background(selectedOption == "B" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                        .background(selectedOption == "B" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.tertiaryBackground)
                         .cornerRadius(16)
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
-                                .stroke(selectedOption == "B" ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color.clear, lineWidth: 2)
+                                .stroke(selectedOption == "B" ? Color.buttonBackground : Color.clear, lineWidth: 2)
                         )
                     }
                     .buttonStyle(PlainButtonStyle())
