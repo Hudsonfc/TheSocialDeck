@@ -11,7 +11,6 @@ import StoreKit
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var generalButtonPressed = false
-    @State private var helpButtonPressed = false
     @State private var whatsNewButtonPressed = false
     @State private var feedbackButtonPressed = false
     @State private var rateUsButtonPressed = false
@@ -46,13 +45,6 @@ struct SettingsView: View {
                             title: "General",
                             destination: GeneralSettingsView(),
                             isPressed: $generalButtonPressed
-                        )
-                        
-                        // Help / FAQ Button
-                        SettingsNavigationButton(
-                            title: "Help / FAQ",
-                            destination: HelpFAQView(),
-                            isPressed: $helpButtonPressed
                         )
                         
                         // What's New Button
