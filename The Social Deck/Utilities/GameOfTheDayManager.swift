@@ -35,6 +35,11 @@ class GameOfTheDayManager {
         GameOfTheDayInfo(title: "What's My Secret?", description: "One player gets a secret rule to follow. Can the group figure out what it is?", imageName: "WMS 2.0", type: .whatsMySecret),
         GameOfTheDayInfo(title: "Riddle Me This", description: "Solve riddles quickly! The first player to say the correct answer wins the round.", imageName: "RMT 2.0", type: .riddleMeThis),
         GameOfTheDayInfo(title: "Act It Out", description: "Act out prompts silently while others guess! First to guess correctly wins the round.", imageName: "AIO 2.0", type: .actItOut),
+        GameOfTheDayInfo(title: "Category Clash", description: "Name items in a category before time runs out! Hesitate or repeat an answer and you're out.", imageName: "CC 2.0", type: .categoryClash),
+        GameOfTheDayInfo(title: "Spin the Bottle", description: "Tap to spin and let the bottle decide everyone's fate. No strategy, no mercy, just pure chaos.", imageName: "STB 2.0", type: .spinTheBottle),
+        GameOfTheDayInfo(title: "Story Chain", description: "Add one sentence to continue the story. Pass the phone and watch the chaos unfold.", imageName: "SC 2.0", type: .storyChain),
+        GameOfTheDayInfo(title: "Memory Master", description: "A timed card-matching game. Flip cards to find pairs and clear the board as fast as possible!", imageName: "MM 2.0", type: .memoryMaster),
+        GameOfTheDayInfo(title: "Bluff Call", description: "Convince the group your answer is true, or call their bluff!", imageName: "BC 2.0", type: .bluffCall),
         
         // Trivia Games
         GameOfTheDayInfo(title: "Pop Culture Trivia", description: "Test your knowledge of movies, music, and celebrities.", imageName: "pop culture 2.0", type: .popCultureTrivia),
@@ -42,14 +47,7 @@ class GameOfTheDayManager {
         GameOfTheDayInfo(title: "Science Trivia", description: "Explore the world of science and discovery.", imageName: "science 2.0", type: .scienceTrivia),
         GameOfTheDayInfo(title: "Sports Trivia", description: "Show off your sports knowledge.", imageName: "sports 2.0", type: .sportsTrivia),
         GameOfTheDayInfo(title: "Movie Trivia", description: "Test your movie knowledge with film questions.", imageName: "movies 2.0", type: .movieTrivia),
-        GameOfTheDayInfo(title: "Music Trivia", description: "Guess songs, artists, and music facts.", imageName: "music 2.0", type: .musicTrivia),
-        
-        // Party Games
-        GameOfTheDayInfo(title: "Category Clash", description: "Name items in a category before time runs out! Hesitate or repeat an answer and you're out.", imageName: "CC 2.0", type: .categoryClash),
-        GameOfTheDayInfo(title: "Spin the Bottle", description: "Tap to spin and let the bottle decide everyone's fate. No strategy, no mercy, just pure chaos.", imageName: "STB 2.0", type: .spinTheBottle),
-        GameOfTheDayInfo(title: "Story Chain", description: "Add one sentence to continue the story. Pass the phone and watch the chaos unfold.", imageName: "SC 2.0", type: .storyChain),
-        GameOfTheDayInfo(title: "Memory Master", description: "A timed card-matching game. Flip cards to find pairs and clear the board as fast as possible!", imageName: "MM 2.0", type: .memoryMaster),
-        GameOfTheDayInfo(title: "Bluff Call", description: "Convince the group your answer is true, or call their bluff!", imageName: "BC 2.0", type: .bluffCall)
+        GameOfTheDayInfo(title: "Music Trivia", description: "Guess songs, artists, and music facts.", imageName: "music 2.0", type: .musicTrivia)
     ]
     
     private init() {}

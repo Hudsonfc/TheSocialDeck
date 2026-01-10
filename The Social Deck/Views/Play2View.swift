@@ -13,6 +13,13 @@ struct Play2View: View {
     @State private var currentCardIndex = 0
     @State private var selectedCategory = "Classic Games"
     @State private var navigateToCategorySelection: Deck? = nil
+    @State private var navigateToPlayView: Deck? = nil
+    @State private var navigateToStoryChainSetup: Deck? = nil
+    @State private var navigateToMemoryMasterSetup: Deck? = nil
+    @State private var navigateToHotPotatoSetup: Deck? = nil
+    @State private var navigateToRhymeTimeSetup: Deck? = nil
+    @State private var navigateToTapDuelSetup: Deck? = nil
+    @State private var navigateToRiddleMeThisSetup: Deck? = nil
     @State private var cardFlippedStates: [Bool] = Array(repeating: false, count: 10) // Max 10 cards per category
     @State private var cardOffset: CGFloat = 0
     @State private var isDragging = false
@@ -20,10 +27,12 @@ struct Play2View: View {
     @State private var showWelcomeView: Bool = false
     @State private var searchText: String = ""
     @State private var isSearching: Bool = false
+    @State private var isGridView: Bool = false // Track layout mode
+    @State private var selectedDeckForDescription: Deck? = nil // Track deck for description overlay
     
     // All category names (Favorites shown dynamically when items exist)
     var categories: [String] {
-        var cats = ["Classic Games", "Social Deck Games", "Trivia", "Party Games"]
+        var cats = ["Classic Games", "Social Deck Games", "Trivia"]
         if !favoriteDecks.isEmpty {
             cats.insert("Favorites", at: 0)
         }
@@ -32,7 +41,7 @@ struct Play2View: View {
     
     // Get all decks
     private var allDecks: [Deck] {
-        classicGamesDecks + socialDeckGamesDecks + triviaGamesDecks + partyGamesDecks
+        classicGamesDecks + socialDeckGamesDecks + triviaGamesDecks
     }
     
     // Get favorite decks
@@ -44,7 +53,7 @@ struct Play2View: View {
     let classicGamesDecks: [Deck] = [
         Deck(
             title: "Never Have I Ever",
-            description: "Reveal your wildest experiences and learn about your friends.",
+            description: "Reveal your wildest experiences and learn about your friends. Take turns asking 'Never have I ever...' questions. If you've done it, put a finger down. Last person with fingers up wins! Perfect for parties and getting to know each other better.",
             numberOfCards: 330,
             estimatedTime: "30-45 min",
             imageName: "NHIE 2.0",
@@ -54,7 +63,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Truth or Dare",
-            description: "Choose truth or dare and see where the night takes you.",
+            description: "Choose truth or dare and see where the night takes you. Answer revealing questions truthfully or complete fun challenges. Each player takes turns choosing their fate. The classic party game that never gets old!",
             numberOfCards: 330,
             estimatedTime: "30-45 min",
             imageName: "TOD 2.0",
@@ -64,7 +73,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Would You Rather",
-            description: "Make tough choices and discover what your friends prefer.",
+            description: "Make tough choices and discover what your friends prefer. Face impossible dilemmas and see who would choose what. Debate your choices and learn surprising things about your friends' preferences and values.",
             numberOfCards: 330,
             estimatedTime: "30-45 min",
             imageName: "WYR 2.0",
@@ -74,7 +83,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Most Likely To",
-            description: "Find out who's most likely to do crazy things.",
+            description: "Find out who's most likely to do crazy things. Vote on which friend is most likely to do outrageous scenarios. Funny, revealing, and perfect for groups. Discover who your friends think would do the wildest things!",
             numberOfCards: 330,
             estimatedTime: "30-45 min",
             imageName: "MLT 2.0",
@@ -88,7 +97,7 @@ struct Play2View: View {
     let socialDeckGamesDecks: [Deck] = [
         Deck(
             title: "Hot Potato",
-            description: "Pass the phone quickly as the heat builds! The player holding it when time expires loses.",
+            description: "Pass the phone quickly as the heat builds! Random timers create chaos as players frantically pass the device. Watch out for random perks and penalties! The player holding it when time expires loses. Fast-paced and hilarious!",
             numberOfCards: 50,
             estimatedTime: "10-15 min",
             imageName: "HP 2.0",
@@ -98,7 +107,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Rhyme Time",
-            description: "Say a word that rhymes with the base word before time runs out!",
+            description: "Say a word that rhymes with the base word before time runs out! Challenge your vocabulary and quick thinking. Repeat a rhyme or hesitate and you're out. Choose your difficulty level and see how long you can last in this word battle!",
             numberOfCards: 40,
             estimatedTime: "10-15 min",
             imageName: "RT 2.0",
@@ -108,7 +117,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Tap Duel",
-            description: "Fast head-to-head reaction game. Wait for GO, then tap first to win!",
+            description: "Fast head-to-head reaction game. Wait for GO, then tap first to win! Test your reflexes in intense one-on-one battles. Tap too early and you lose. Perfect for quick competitive rounds between friends.",
             numberOfCards: 999,
             estimatedTime: "2-5 min",
             imageName: "TD 2.0",
@@ -118,7 +127,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "What's My Secret?",
-            description: "One player gets a secret rule to follow. Can the group figure out what it is?",
+            description: "One player gets a secret rule to follow. Can the group figure out what it is? The secret player must act according to hidden rules while others try to guess. Pick categories like Party, Wild, Social, Actions, or Behavior. Think fast and stay sharp!",
             numberOfCards: 75,
             estimatedTime: "5-10 min",
             imageName: "WMS 2.0",
@@ -128,7 +137,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Riddle Me This",
-            description: "Solve riddles quickly! The first player to say the correct answer wins the round.",
+            description: "Solve riddles quickly! The first player to say the correct answer wins the round. Test your problem-solving skills with tricky riddles. Wrong answers lock you out, so think carefully. Brain teasers that challenge your logic and creativity!",
             numberOfCards: 71,
             estimatedTime: "5-10 min",
             imageName: "RMT 2.0",
@@ -138,85 +147,17 @@ struct Play2View: View {
         ),
         Deck(
             title: "Act It Out",
-            description: "Act out prompts silently while others guess! First to guess correctly wins the round.",
+            description: "Act out prompts silently while others guess! First to guess correctly wins the round. Challenge your acting skills with categories like Actions & Verbs, Animals, Emotions, Daily Activities, Sports, Objects, Food, Famous Concepts, Movie Genres, and Nature. No talking, only acting!",
             numberOfCards: 300,
             estimatedTime: "15-30 min",
             imageName: "AIO 2.0",
             type: .actItOut,
             cards: allActItOutCards,
             availableCategories: ["Actions & Verbs", "Animals", "Emotions & Expressions", "Daily Activities", "Sports & Activities", "Objects & Tools", "Food & Cooking", "Famous Concepts", "Movie Genres", "Nature & Weather"]
-        )
-    ]
-    
-    // Trivia Games decks with 2.0 artwork
-    let triviaGamesDecks: [Deck] = [
-        Deck(
-            title: "Pop Culture Trivia",
-            description: "Test your knowledge of movies, music, and celebrities.",
-            numberOfCards: 1200,
-            estimatedTime: "10-15 min",
-            imageName: "pop culture 2.0",
-            type: .popCultureTrivia,
-            cards: allPopCultureTriviaCards,
-            availableCategories: ["Easy", "Medium", "Hard"]
         ),
-        Deck(
-            title: "History Trivia",
-            description: "Challenge yourself with historical facts and events.",
-            numberOfCards: 620,
-            estimatedTime: "10-15 min",
-            imageName: "History 2.0",
-            type: .historyTrivia,
-            cards: allHistoryTriviaCards,
-            availableCategories: ["Easy", "Medium", "Hard"]
-        ),
-        Deck(
-            title: "Science Trivia",
-            description: "Explore the world of science and discovery.",
-            numberOfCards: 640,
-            estimatedTime: "10-15 min",
-            imageName: "science 2.0",
-            type: .scienceTrivia,
-            cards: allScienceTriviaCards,
-            availableCategories: ["Easy", "Medium", "Hard"]
-        ),
-        Deck(
-            title: "Sports Trivia",
-            description: "Show off your sports knowledge.",
-            numberOfCards: 920,
-            estimatedTime: "10-15 min",
-            imageName: "sports 2.0",
-            type: .sportsTrivia,
-            cards: allSportsTriviaCards,
-            availableCategories: ["Easy", "Medium", "Hard"]
-        ),
-        Deck(
-            title: "Movie Trivia",
-            description: "Test your movie knowledge with film questions.",
-            numberOfCards: 600,
-            estimatedTime: "10-15 min",
-            imageName: "movies 2.0",
-            type: .movieTrivia,
-            cards: allMovieTriviaCards,
-            availableCategories: ["Easy", "Medium", "Hard"]
-        ),
-        Deck(
-            title: "Music Trivia",
-            description: "Guess songs, artists, and music facts.",
-            numberOfCards: 600,
-            estimatedTime: "10-15 min",
-            imageName: "music 2.0",
-            type: .musicTrivia,
-            cards: allMusicTriviaCards,
-            availableCategories: ["Easy", "Medium", "Hard"]
-        )
-    ]
-    
-    // Party Games decks with 2.0 artwork (excluding Truth or Drink)
-    let partyGamesDecks: [Deck] = [
         Deck(
             title: "Act Natural",
-            description: "One player doesn't know the secret word — can they blend in and figure it out before getting caught?",
+            description: "One player doesn't know the secret word — can they blend in and figure it out before getting caught? Everyone else knows the secret word and tries to subtly mention it. The secret player must figure it out while acting natural. Deception meets deduction!",
             numberOfCards: 150,
             estimatedTime: "10-20 min",
             imageName: "AN 2.0",
@@ -226,7 +167,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Category Clash",
-            description: "Name items in a category before time runs out! Hesitate or repeat an answer and you're out.",
+            description: "Name items in a category before time runs out! Hesitate or repeat an answer and you're out. Choose from categories like Food & Drink, Pop Culture, General, Sports & Activities, or Animals & Nature. The pace gets faster each round, turning it into a hilarious pressure game!",
             numberOfCards: 250,
             estimatedTime: "15-20 min",
             imageName: "CC 2.0",
@@ -236,7 +177,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Spin the Bottle",
-            description: "Tap to spin and let the bottle decide everyone's fate. No strategy, no mercy, just pure chaos.",
+            description: "Tap to spin and let the bottle decide everyone's fate. No strategy, no mercy, just pure chaos. Add players, spin the bottle, and see who it lands on. Classic party game with endless possibilities. Where the bottle points, fate decides!",
             numberOfCards: 40,
             estimatedTime: "20-30 min",
             imageName: "STB 2.0",
@@ -246,7 +187,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Story Chain",
-            description: "Add one sentence to continue the story. Pass the phone and watch the chaos unfold.",
+            description: "Add one sentence to continue the story. Pass the phone and watch the chaos unfold. Each player adds one sentence, creating an unpredictable collaborative story. Choose how many rounds to play. See where your group's imagination takes the tale!",
             numberOfCards: 145,
             estimatedTime: "15-25 min",
             imageName: "SC 2.0",
@@ -256,7 +197,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Memory Master",
-            description: "A timed card-matching game. Flip cards to find pairs and clear the board as fast as possible!",
+            description: "A timed card-matching game. Flip cards to find pairs and clear the board as fast as possible! Memorize card positions, then match pairs under pressure. Choose your difficulty level - Easy, Medium, Hard, or Expert. Challenge your memory and compete for the best time!",
             numberOfCards: 55,
             estimatedTime: "5-10 min",
             imageName: "MM 2.0",
@@ -266,7 +207,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Bluff Call",
-            description: "Convince the group your answer is true, or call their bluff!",
+            description: "Convince the group your answer is true, or call their bluff! One player sees a prompt and must convince others their answer is true. The group decides whether to believe or call the bluff. Pick categories like Party, Wild, Couples, Teens, Dirty, or Friends. Deception meets deduction!",
             numberOfCards: 300,
             estimatedTime: "15-20 min",
             imageName: "BC 2.0",
@@ -275,6 +216,71 @@ struct Play2View: View {
             availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
         )
     ]
+    
+    // Trivia Games decks with 2.0 artwork
+    let triviaGamesDecks: [Deck] = [
+        Deck(
+            title: "Pop Culture Trivia",
+            description: "Test your knowledge of movies, music, and celebrities. Challenge yourself with questions about the latest trends, classic films, chart-topping hits, and famous faces. Choose from Easy, Medium, or Hard difficulty levels. Perfect for pop culture enthusiasts!",
+            numberOfCards: 1200,
+            estimatedTime: "10-15 min",
+            imageName: "pop culture 2.0",
+            type: .popCultureTrivia,
+            cards: allPopCultureTriviaCards,
+            availableCategories: ["Easy", "Medium", "Hard"]
+        ),
+        Deck(
+            title: "History Trivia",
+            description: "Challenge yourself with historical facts and events. Travel through time with questions about world history, famous figures, major events, and historical moments. Choose Easy, Medium, or Hard difficulty. Perfect for history buffs and curious minds!",
+            numberOfCards: 620,
+            estimatedTime: "10-15 min",
+            imageName: "History 2.0",
+            type: .historyTrivia,
+            cards: allHistoryTriviaCards,
+            availableCategories: ["Easy", "Medium", "Hard"]
+        ),
+        Deck(
+            title: "Science Trivia",
+            description: "Explore the world of science and discovery. Test your knowledge of biology, chemistry, physics, space, and groundbreaking discoveries. Choose from Easy, Medium, or Hard difficulty levels. Perfect for science lovers and curious minds!",
+            numberOfCards: 640,
+            estimatedTime: "10-15 min",
+            imageName: "science 2.0",
+            type: .scienceTrivia,
+            cards: allScienceTriviaCards,
+            availableCategories: ["Easy", "Medium", "Hard"]
+        ),
+        Deck(
+            title: "Sports Trivia",
+            description: "Show off your sports knowledge. Challenge yourself with questions about professional sports, famous athletes, championships, records, and sports history. Choose Easy, Medium, or Hard difficulty. Perfect for sports fans and trivia enthusiasts!",
+            numberOfCards: 920,
+            estimatedTime: "10-15 min",
+            imageName: "sports 2.0",
+            type: .sportsTrivia,
+            cards: allSportsTriviaCards,
+            availableCategories: ["Easy", "Medium", "Hard"]
+        ),
+        Deck(
+            title: "Movie Trivia",
+            description: "Test your movie knowledge with film questions. Answer questions about classic films, blockbusters, actors, directors, quotes, and movie history. Choose from Easy, Medium, or Hard difficulty levels. Perfect for film buffs and movie lovers!",
+            numberOfCards: 600,
+            estimatedTime: "10-15 min",
+            imageName: "movies 2.0",
+            type: .movieTrivia,
+            cards: allMovieTriviaCards,
+            availableCategories: ["Easy", "Medium", "Hard"]
+        ),
+        Deck(
+            title: "Music Trivia",
+            description: "Guess songs, artists, and music facts. Test your knowledge of hit songs, famous artists, music genres, lyrics, and music history across decades. Choose Easy, Medium, or Hard difficulty. Perfect for music lovers and playlist creators!",
+            numberOfCards: 600,
+            estimatedTime: "10-15 min",
+            imageName: "music 2.0",
+            type: .musicTrivia,
+            cards: allMusicTriviaCards,
+            availableCategories: ["Easy", "Medium", "Hard"]
+        )
+    ]
+    
     
     // Filtered decks based on search
     var filteredDecks: [Deck] {
@@ -302,8 +308,6 @@ struct Play2View: View {
             return socialDeckGamesDecks
         case "Trivia":
             return triviaGamesDecks
-        case "Party Games":
-            return partyGamesDecks
         default:
             return classicGamesDecks
         }
@@ -396,122 +400,170 @@ struct Play2View: View {
                     }
                 }
                 
-                // Card Deck - Simple horizontal scroll with current card only
-                ZStack {
-                    // Empty state for search
-                    if !searchText.isEmpty && filteredDecks.isEmpty {
-                        VStack(spacing: 24) {
-                            Image(systemName: "magnifyingglass")
-                                .font(.system(size: 50, weight: .light))
-                                .foregroundColor(Color(red: 0xD0/255.0, green: 0xD0/255.0, blue: 0xD0/255.0))
-                            
-                            VStack(spacing: 8) {
-                                Text("No Games Found")
-                                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                // Content area - Card view or Grid view
+                if isGridView {
+                    // Grid View - Show all games at once
+                    ScrollView(.vertical, showsIndicators: false) {
+                        // Empty state for search
+                        if !searchText.isEmpty && filteredDecks.isEmpty {
+                            VStack(spacing: 24) {
+                                Image(systemName: "magnifyingglass")
+                                    .font(.system(size: 50, weight: .light))
+                                    .foregroundColor(Color(red: 0xD0/255.0, green: 0xD0/255.0, blue: 0xD0/255.0))
                                 
-                                Text("Try searching with different keywords")
-                                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                                    .multilineTextAlignment(.center)
+                                VStack(spacing: 8) {
+                                    Text("No Games Found")
+                                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    
+                                    Text("Try searching with different keywords")
+                                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                        .multilineTextAlignment(.center)
+                                }
                             }
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
-                    // Current card
-                    else if !currentDecks.isEmpty && currentCardIndex < currentDecks.count {
-                        GameCardView(
-                            deck: currentDecks[currentCardIndex],
-                            isFlipped: $cardFlippedStates[currentCardIndex],
-                            onSelect: {
-                                // Reset flip state before navigating
-                                cardFlippedStates[currentCardIndex] = false
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                    navigateToCategorySelection = currentDecks[currentCardIndex]
-                                }
-                            },
-                            allowInteraction: true
-                        )
-                        .id("\(selectedCategory)-\(currentCardIndex)") // Force view update on category change
-                        .offset(x: cardOffset)
-                        .transition(.asymmetric(
-                            insertion: .opacity.combined(with: .scale(scale: 0.95)),
-                            removal: .opacity.combined(with: .scale(scale: 0.95))
-                        ))
-                        .gesture(
-                            DragGesture(minimumDistance: 20)
-                                .onChanged { value in
-                                    // Allow drag regardless of flip state
-                                    isDragging = true
-                                    cardOffset = value.translation.width
-                                }
-                                .onEnded { value in
-                                    isDragging = false
-                                    // Allow swipe regardless of flip state
-                                    if value.translation.width < -80 && currentCardIndex < currentDecks.count - 1 {
-                                        // Swipe left - go to next card (reset flip state)
-                                        cardFlippedStates[currentCardIndex] = false
-                                        withAnimation(.easeOut(duration: 0.25)) {
-                                            cardOffset = -UIScreen.main.bounds.width
-                                        }
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                                            currentCardIndex += 1
-                                            cardOffset = UIScreen.main.bounds.width
-                                            withAnimation(.easeOut(duration: 0.25)) {
-                                                cardOffset = 0
-                                            }
-                                        }
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 100)
+                        } else if !currentDecks.isEmpty {
+                            let columns = [
+                                GridItem(.flexible(), spacing: 16),
+                                GridItem(.flexible(), spacing: 16)
+                            ]
+                            
+                            LazyVGrid(columns: columns, spacing: 20) {
+                                ForEach(Array(currentDecks.enumerated()), id: \.element.id) { index, deck in
+                                    GridGameTile(deck: deck) {
                                         HapticManager.shared.lightImpact()
-                                    } else if value.translation.width > 80 && currentCardIndex > 0 {
-                                        // Swipe right - go to previous card (reset flip state)
-                                        cardFlippedStates[currentCardIndex] = false
-                                        withAnimation(.easeOut(duration: 0.25)) {
-                                            cardOffset = UIScreen.main.bounds.width
-                                        }
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                                            currentCardIndex -= 1
-                                            cardOffset = -UIScreen.main.bounds.width
-                                            withAnimation(.easeOut(duration: 0.25)) {
-                                                cardOffset = 0
-                                            }
-                                        }
-                                        HapticManager.shared.lightImpact()
-                                    } else {
-                                        // Snap back to center
                                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                            cardOffset = 0
+                                            selectedDeckForDescription = deck
                                         }
                                     }
                                 }
-                        )
+                            }
+                            .padding(.horizontal, 40)
+                            .padding(.top, 20)
+                            .padding(.bottom, 30)
+                        }
                     }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .clipped() // Hide cards when they slide off screen
-                
-                // Placeholder text under cards (hidden when searching)
-                if searchText.isEmpty {
-                Text("Tap card to flip and see details")
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                    .foregroundColor(Color(red: 0xB0/255.0, green: 0xB0/255.0, blue: 0xB0/255.0))
-                    .padding(.top, 16)
-                }
-                
-                // Card Counter (hidden when searching with no results)
-                if !currentDecks.isEmpty && !(!searchText.isEmpty && filteredDecks.isEmpty) {
-                HStack(spacing: 8) {
-                    ForEach(0..<currentDecks.count, id: \.self) { index in
-                        Circle()
-                            .fill(index == currentCardIndex ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0))
-                            .frame(width: 8, height: 8)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    // Card Deck - Simple horizontal scroll with current card only
+                    ZStack {
+                        // Empty state for search
+                        if !searchText.isEmpty && filteredDecks.isEmpty {
+                            VStack(spacing: 24) {
+                                Image(systemName: "magnifyingglass")
+                                    .font(.system(size: 50, weight: .light))
+                                    .foregroundColor(Color(red: 0xD0/255.0, green: 0xD0/255.0, blue: 0xD0/255.0))
+                                
+                                VStack(spacing: 8) {
+                                    Text("No Games Found")
+                                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    
+                                    Text("Try searching with different keywords")
+                                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                        .multilineTextAlignment(.center)
+                                }
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        }
+                        // Current card
+                        else if !currentDecks.isEmpty && currentCardIndex < currentDecks.count {
+                            GameCardView(
+                                deck: currentDecks[currentCardIndex],
+                                isFlipped: $cardFlippedStates[currentCardIndex],
+                                onSelect: {
+                                    // Reset flip state before navigating
+                                    cardFlippedStates[currentCardIndex] = false
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                        navigateToCategorySelection = currentDecks[currentCardIndex]
+                                    }
+                                },
+                                allowInteraction: true
+                            )
+                            .id("\(selectedCategory)-\(currentCardIndex)") // Force view update on category change
+                            .offset(x: cardOffset)
+                            .transition(.asymmetric(
+                                insertion: .opacity.combined(with: .scale(scale: 0.95)),
+                                removal: .opacity.combined(with: .scale(scale: 0.95))
+                            ))
+                            .gesture(
+                                DragGesture(minimumDistance: 20)
+                                    .onChanged { value in
+                                        // Allow drag regardless of flip state
+                                        isDragging = true
+                                        cardOffset = value.translation.width
+                                    }
+                                    .onEnded { value in
+                                        isDragging = false
+                                        // Allow swipe regardless of flip state
+                                        if value.translation.width < -80 && currentCardIndex < currentDecks.count - 1 {
+                                            // Swipe left - go to next card (reset flip state)
+                                            cardFlippedStates[currentCardIndex] = false
+                                            withAnimation(.easeOut(duration: 0.25)) {
+                                                cardOffset = -UIScreen.main.bounds.width
+                                            }
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                                                currentCardIndex += 1
+                                                cardOffset = UIScreen.main.bounds.width
+                                                withAnimation(.easeOut(duration: 0.25)) {
+                                                    cardOffset = 0
+                                                }
+                                            }
+                                            HapticManager.shared.lightImpact()
+                                        } else if value.translation.width > 80 && currentCardIndex > 0 {
+                                            // Swipe right - go to previous card (reset flip state)
+                                            cardFlippedStates[currentCardIndex] = false
+                                            withAnimation(.easeOut(duration: 0.25)) {
+                                                cardOffset = UIScreen.main.bounds.width
+                                            }
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                                                currentCardIndex -= 1
+                                                cardOffset = -UIScreen.main.bounds.width
+                                                withAnimation(.easeOut(duration: 0.25)) {
+                                                    cardOffset = 0
+                                                }
+                                            }
+                                            HapticManager.shared.lightImpact()
+                                        } else {
+                                            // Snap back to center
+                                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                                cardOffset = 0
+                                            }
+                                        }
+                                    }
+                            )
+                        }
                     }
-                }
-                .padding(.top, 8)
-                .padding(.bottom, 30)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .clipped() // Hide cards when they slide off screen
+                    
+                    // Placeholder text under cards (hidden when searching or grid view)
+                    if searchText.isEmpty && !isGridView {
+                        Text("Tap card to flip and see details")
+                            .font(.system(size: 14, weight: .regular, design: .rounded))
+                            .foregroundColor(Color(red: 0xB0/255.0, green: 0xB0/255.0, blue: 0xB0/255.0))
+                            .padding(.top, 16)
+                    }
+                    
+                    // Card Counter (hidden when searching with no results or grid view)
+                    if !currentDecks.isEmpty && !(!searchText.isEmpty && filteredDecks.isEmpty) && !isGridView {
+                        HStack(spacing: 8) {
+                            ForEach(0..<currentDecks.count, id: \.self) { index in
+                                Circle()
+                                    .fill(index == currentCardIndex ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0))
+                                    .frame(width: 8, height: 8)
+                            }
+                        }
+                        .padding(.top, 8)
+                        .padding(.bottom, 30)
+                    }
                 }
             }
             
-            // Navigation link for category selection
+            // Navigation links for category selection and setup views
             NavigationLink(
                 destination: categorySelectionView,
                 isActive: Binding(
@@ -521,11 +573,97 @@ struct Play2View: View {
             ) {
                 EmptyView()
             }
+            
+            NavigationLink(
+                destination: playViewDestination,
+                isActive: Binding(
+                    get: { navigateToPlayView != nil },
+                    set: { if !$0 { navigateToPlayView = nil } }
+                )
+            ) {
+                EmptyView()
+            }
+            
+            NavigationLink(
+                destination: storyChainSetupDestination,
+                isActive: Binding(
+                    get: { navigateToStoryChainSetup != nil },
+                    set: { if !$0 { navigateToStoryChainSetup = nil } }
+                )
+            ) {
+                EmptyView()
+            }
+            
+            NavigationLink(
+                destination: memoryMasterSetupDestination,
+                isActive: Binding(
+                    get: { navigateToMemoryMasterSetup != nil },
+                    set: { if !$0 { navigateToMemoryMasterSetup = nil } }
+                )
+            ) {
+                EmptyView()
+            }
+            
+            NavigationLink(
+                destination: hotPotatoSetupDestination,
+                isActive: Binding(
+                    get: { navigateToHotPotatoSetup != nil },
+                    set: { if !$0 { navigateToHotPotatoSetup = nil } }
+                )
+            ) {
+                EmptyView()
+            }
+            
+            NavigationLink(
+                destination: rhymeTimeSetupDestination,
+                isActive: Binding(
+                    get: { navigateToRhymeTimeSetup != nil },
+                    set: { if !$0 { navigateToRhymeTimeSetup = nil } }
+                )
+            ) {
+                EmptyView()
+            }
+            
+            NavigationLink(
+                destination: tapDuelSetupDestination,
+                isActive: Binding(
+                    get: { navigateToTapDuelSetup != nil },
+                    set: { if !$0 { navigateToTapDuelSetup = nil } }
+                )
+            ) {
+                EmptyView()
+            }
+            
+            NavigationLink(
+                destination: riddleMeThisSetupDestination,
+                isActive: Binding(
+                    get: { navigateToRiddleMeThisSetup != nil },
+                    set: { if !$0 { navigateToRiddleMeThisSetup = nil } }
+                )
+            ) {
+                EmptyView()
+            }
         }
         .overlay {
             // Welcome View for first-time users
             if showWelcomeView {
                 WelcomeView(isPresented: $showWelcomeView)
+            }
+            
+            // Game Description Overlay for Grid View
+            if isGridView, let deck = selectedDeckForDescription {
+                GameDescriptionOverlay(
+                    deck: deck,
+                    selectedDeck: $selectedDeckForDescription,
+                    navigateToCategorySelection: $navigateToCategorySelection,
+                    navigateToPlayView: $navigateToPlayView,
+                    navigateToStoryChainSetup: $navigateToStoryChainSetup,
+                    navigateToMemoryMasterSetup: $navigateToMemoryMasterSetup,
+                    navigateToHotPotatoSetup: $navigateToHotPotatoSetup,
+                    navigateToRhymeTimeSetup: $navigateToRhymeTimeSetup,
+                    navigateToTapDuelSetup: $navigateToTapDuelSetup,
+                    navigateToRiddleMeThisSetup: $navigateToRiddleMeThisSetup
+                )
             }
         }
         .onAppear {
@@ -553,8 +691,178 @@ struct Play2View: View {
                         .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                 }
             }
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    HapticManager.shared.lightImpact()
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        isGridView.toggle()
+                        // Reset card index when switching layouts
+                        if !isGridView {
+                            currentCardIndex = 0
+                            cardOffset = 0
+                            cardFlippedStates = Array(repeating: false, count: 10)
+                        }
+                    }
+                }) {
+                    if isGridView {
+                        // When in grid view, show rotated rectangle.stack to switch back to card view
+                        Image(systemName: "rectangle.stack")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .rotationEffect(.degrees(90))
+                    } else {
+                        // When in card view, show grid icon to switch to grid view
+                        Image(systemName: "square.grid.2x2")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    }
+                }
+            }
         }
         .navigationBarBackButtonHidden(true)
+    }
+    
+    @ViewBuilder
+    private var playViewDestination: some View {
+        NavigationLink(
+            destination: playView,
+            isActive: Binding(
+                get: { navigateToPlayView != nil },
+                set: { if !$0 { navigateToPlayView = nil } }
+            )
+        ) {
+            EmptyView()
+        }
+    }
+    
+    @ViewBuilder
+    private var playView: some View {
+        if let deck = navigateToPlayView {
+            if deck.type == .spinTheBottle {
+                SpinTheBottleView()
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var storyChainSetupDestination: some View {
+        NavigationLink(
+            destination: storyChainSetupView,
+            isActive: Binding(
+                get: { navigateToStoryChainSetup != nil },
+                set: { if !$0 { navigateToStoryChainSetup = nil } }
+            )
+        ) {
+            EmptyView()
+        }
+    }
+    
+    @ViewBuilder
+    private var storyChainSetupView: some View {
+        if let deck = navigateToStoryChainSetup {
+            StoryChainSetupView(deck: deck)
+        }
+    }
+    
+    @ViewBuilder
+    private var memoryMasterSetupDestination: some View {
+        NavigationLink(
+            destination: memoryMasterSetupView,
+            isActive: Binding(
+                get: { navigateToMemoryMasterSetup != nil },
+                set: { if !$0 { navigateToMemoryMasterSetup = nil } }
+            )
+        ) {
+            EmptyView()
+        }
+    }
+    
+    @ViewBuilder
+    private var memoryMasterSetupView: some View {
+        if let deck = navigateToMemoryMasterSetup {
+            MemoryMasterSetupView(deck: deck)
+        }
+    }
+    
+    @ViewBuilder
+    private var hotPotatoSetupDestination: some View {
+        NavigationLink(
+            destination: hotPotatoSetupView,
+            isActive: Binding(
+                get: { navigateToHotPotatoSetup != nil },
+                set: { if !$0 { navigateToHotPotatoSetup = nil } }
+            )
+        ) {
+            EmptyView()
+        }
+    }
+    
+    @ViewBuilder
+    private var hotPotatoSetupView: some View {
+        if let deck = navigateToHotPotatoSetup {
+            HotPotatoSetupView(deck: deck)
+        }
+    }
+    
+    @ViewBuilder
+    private var rhymeTimeSetupDestination: some View {
+        NavigationLink(
+            destination: rhymeTimeSetupView,
+            isActive: Binding(
+                get: { navigateToRhymeTimeSetup != nil },
+                set: { if !$0 { navigateToRhymeTimeSetup = nil } }
+            )
+        ) {
+            EmptyView()
+        }
+    }
+    
+    @ViewBuilder
+    private var rhymeTimeSetupView: some View {
+        if let deck = navigateToRhymeTimeSetup {
+            RhymeTimeSetupView(deck: deck)
+        }
+    }
+    
+    @ViewBuilder
+    private var tapDuelSetupDestination: some View {
+        NavigationLink(
+            destination: tapDuelSetupView,
+            isActive: Binding(
+                get: { navigateToTapDuelSetup != nil },
+                set: { if !$0 { navigateToTapDuelSetup = nil } }
+            )
+        ) {
+            EmptyView()
+        }
+    }
+    
+    @ViewBuilder
+    private var tapDuelSetupView: some View {
+        if let deck = navigateToTapDuelSetup {
+            TapDuelSetupView(deck: deck)
+        }
+    }
+    
+    @ViewBuilder
+    private var riddleMeThisSetupDestination: some View {
+        NavigationLink(
+            destination: riddleMeThisSetupView,
+            isActive: Binding(
+                get: { navigateToRiddleMeThisSetup != nil },
+                set: { if !$0 { navigateToRiddleMeThisSetup = nil } }
+            )
+        ) {
+            EmptyView()
+        }
+    }
+    
+    @ViewBuilder
+    private var riddleMeThisSetupView: some View {
+        if let deck = navigateToRiddleMeThisSetup {
+            RiddleMeThisSetupView(deck: deck)
+        }
     }
     
     @ViewBuilder
@@ -596,7 +904,7 @@ struct Play2View: View {
                 MovieTriviaCategorySelectionView(deck: deck)
             case .musicTrivia:
                 MusicTriviaCategorySelectionView(deck: deck)
-            // Party Games
+            // Social Deck Games (formerly Party Games)
             case .actNatural:
                 ActNaturalLoadingView(deck: deck)
             case .categoryClash:
@@ -718,6 +1026,17 @@ struct GameCardView: View {
                         .lineSpacing(4)
                         .padding(.horizontal, 24)
                     
+                    // Estimated time on back of card
+                    HStack(spacing: 6) {
+                        Image(systemName: "clock")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        Text(deck.estimatedTime)
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    }
+                    .padding(.top, 4)
+                    
                     Button(action: {
                         HapticManager.shared.lightImpact()
                         onSelect()
@@ -785,6 +1104,320 @@ struct GameCardView: View {
                 }
             }
         }
+    }
+}
+
+// Grid Game Tile Component
+struct GridGameTile: View {
+    let deck: Deck
+    let onTap: () -> Void
+    @ObservedObject private var favoritesManager = FavoritesManager.shared
+    @State private var isPressed = false
+    
+    // Card dimensions based on actual image ratio (420 x 577)
+    private let imageAspectRatio: CGFloat = 420.0 / 577.0
+    private var tileWidth: CGFloat {
+        (UIScreen.main.bounds.width - 80 - 16) / 2
+    }
+    private var tileHeight: CGFloat {
+        tileWidth / imageAspectRatio
+    }
+    
+    var body: some View {
+        Button(action: {
+            withAnimation(.easeInOut(duration: 0.1)) {
+                isPressed = true
+            }
+            onTap()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    isPressed = false
+                }
+            }
+        }) {
+            VStack(spacing: 12) {
+                // Game artwork
+                ZStack(alignment: .topTrailing) {
+                    // Background for the card area
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                        .frame(width: tileWidth, height: tileHeight)
+                    
+                    // Card image - scaled to fit to show full shape
+                    Image(deck.imageName)
+                        .resizable()
+                        .interpolation(.high)
+                        .antialiased(true)
+                        .aspectRatio(imageAspectRatio, contentMode: .fit)
+                        .frame(width: tileWidth, height: tileHeight)
+                        .cornerRadius(16)
+                    
+                    // Favorite button
+                    Button(action: {
+                        favoritesManager.toggleFavorite(deck.type)
+                        HapticManager.shared.lightImpact()
+                    }) {
+                        Image(systemName: favoritesManager.isFavorite(deck.type) ? "heart.fill" : "heart")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(favoritesManager.isFavorite(deck.type) ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : .white)
+                            .frame(width: 32, height: 32)
+                            .background(Color.black.opacity(0.3))
+                            .clipShape(Circle())
+                    }
+                    .padding(8)
+                }
+                
+                // Game title
+                Text(deck.title)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .frame(maxWidth: .infinity)
+                
+                // Game stats - Estimated time only
+                HStack(spacing: 6) {
+                    Image(systemName: "clock")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    Text(deck.estimatedTime)
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                }
+            }
+            .scaleEffect(isPressed ? 0.97 : 1.0)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+// Game Description Overlay for Grid View
+struct GameDescriptionOverlay: View {
+    let deck: Deck
+    @Binding var selectedDeck: Deck?
+    @Binding var navigateToCategorySelection: Deck?
+    @Binding var navigateToPlayView: Deck?
+    @Binding var navigateToStoryChainSetup: Deck?
+    @Binding var navigateToMemoryMasterSetup: Deck?
+    @Binding var navigateToHotPotatoSetup: Deck?
+    @Binding var navigateToRhymeTimeSetup: Deck?
+    @Binding var navigateToTapDuelSetup: Deck?
+    @Binding var navigateToRiddleMeThisSetup: Deck?
+    @ObservedObject private var favoritesManager = FavoritesManager.shared
+    
+    var body: some View {
+        ZStack {
+            // White background
+            Color.white
+                .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Top bar with close and favorite buttons (swapped positions)
+                HStack {
+                    // Close button (now on the left)
+                    Button(action: {
+                        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                            selectedDeck = nil
+                        }
+                    }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .frame(width: 44, height: 44)
+                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .clipShape(Circle())
+                    }
+                    
+                    Spacer()
+                    
+                    // Favorite button (now on the right)
+                    Button(action: {
+                        favoritesManager.toggleFavorite(deck.type)
+                        HapticManager.shared.lightImpact()
+                    }) {
+                        Image(systemName: favoritesManager.isFavorite(deck.type) ? "heart.fill" : "heart")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(favoritesManager.isFavorite(deck.type) ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .frame(width: 44, height: 44)
+                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .clipShape(Circle())
+                    }
+                }
+                .padding(.horizontal, 40)
+                .padding(.top, 20)
+                .padding(.bottom, 16)
+                
+                // Deck artwork - smaller version
+                Image(deck.imageName)
+                    .resizable()
+                    .interpolation(.high)
+                    .antialiased(true)
+                    .aspectRatio(420.0 / 577.0, contentMode: .fit)
+                    .frame(width: min(180, UIScreen.main.bounds.width - 120))
+                    .cornerRadius(12)
+                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+                    .padding(.bottom, 20)
+                
+                Spacer()
+                
+                // Deck title
+                Text(deck.title)
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+                    .padding(.bottom, 16)
+                
+                // Description
+                Text(deck.description)
+                    .font(.system(size: 16, weight: .regular, design: .rounded))
+                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(6)
+                    .padding(.horizontal, 40)
+                    .padding(.bottom, 24)
+                
+                // Game stats - Estimated time only
+                VStack(spacing: 4) {
+                    Image(systemName: "clock")
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    Text(deck.estimatedTime)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    Text("Estimated Time")
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                }
+                .padding(.bottom, 32)
+                
+                Spacer()
+                
+                // Play button - handle all game types
+                if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .popCultureTrivia || deck.type == .historyTrivia || deck.type == .scienceTrivia || deck.type == .sportsTrivia || deck.type == .movieTrivia || deck.type == .musicTrivia || deck.type == .truthOrDrink || deck.type == .categoryClash || deck.type == .bluffCall || deck.type == .whatsMySecret || deck.type == .actItOut {
+                        PrimaryButton(title: "Play") {
+                            // Navigate first, then dismiss overlay after navigation completes
+                            navigateToCategorySelection = deck
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                    selectedDeck = nil
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 40)
+                    } else if deck.type == .spinTheBottle {
+                        PrimaryButton(title: "Play") {
+                            // Navigate first, then dismiss overlay after navigation completes
+                            navigateToPlayView = deck
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                    selectedDeck = nil
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 40)
+                    } else if deck.type == .storyChain {
+                        PrimaryButton(title: "Play") {
+                            // Navigate first, then dismiss overlay after navigation completes
+                            navigateToStoryChainSetup = deck
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                    selectedDeck = nil
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 40)
+                    } else if deck.type == .memoryMaster {
+                        PrimaryButton(title: "Play") {
+                            // Navigate first, then dismiss overlay after navigation completes
+                            navigateToMemoryMasterSetup = deck
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                    selectedDeck = nil
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 40)
+                    } else if deck.type == .hotPotato {
+                        PrimaryButton(title: "Play") {
+                            // Navigate first, then dismiss overlay after navigation completes
+                            navigateToHotPotatoSetup = deck
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                    selectedDeck = nil
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 40)
+                    } else if deck.type == .rhymeTime {
+                        PrimaryButton(title: "Play") {
+                            // Navigate first, then dismiss overlay after navigation completes
+                            navigateToRhymeTimeSetup = deck
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                    selectedDeck = nil
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 40)
+                    } else if deck.type == .tapDuel {
+                        PrimaryButton(title: "Play") {
+                            // Navigate first, then dismiss overlay after navigation completes
+                            navigateToTapDuelSetup = deck
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                    selectedDeck = nil
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 40)
+                    } else if deck.type == .riddleMeThis {
+                        PrimaryButton(title: "Play") {
+                            // Navigate first, then dismiss overlay after navigation completes
+                            navigateToRiddleMeThisSetup = deck
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                    selectedDeck = nil
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 40)
+                    } else if deck.type == .actNatural {
+                        PrimaryButton(title: "Play") {
+                            // Navigate first, then dismiss overlay after navigation completes
+                            navigateToCategorySelection = deck
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                    selectedDeck = nil
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 40)
+                    } else {
+                        PrimaryButton(title: "Play") {
+                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                selectedDeck = nil
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 40)
+                    }
+            }
+        }
+        .transition(.asymmetric(
+            insertion: .scale(scale: 0.1).combined(with: .opacity),
+            removal: .scale(scale: 0.1).combined(with: .opacity)
+        ))
+        .zIndex(1000)
     }
 }
 
