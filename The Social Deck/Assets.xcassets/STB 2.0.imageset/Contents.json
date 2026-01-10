@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "STB 2.0.png",
+      "filename" : "STB2.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "STB 2.0 1.png",
+      "filename" : "STB2 1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "STB 2.0 2.png",
+      "filename" : "STB2 2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "BC 2.0.png",
+      "filename" : "BC2.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "BC 2.0 1.png",
+      "filename" : "BC2 1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "BC 2.0 2.png",
+      "filename" : "BC2 2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
