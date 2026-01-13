@@ -121,7 +121,7 @@ struct HomeView: View {
                                 HStack(spacing: 6) {
                                     ForEach(0..<4, id: \.self) { index in
                                         Circle()
-                                            .fill(index == currentSlideIndex ? Color.primaryText : Color.primaryText.opacity(0.4))
+                                            .fill(index == currentSlideIndex ? Color(light: Color.black, dark: Color.black) : Color(light: Color.black.opacity(0.4), dark: Color.black.opacity(0.4)))
                                             .frame(width: 6, height: 6)
                                     }
                                 }

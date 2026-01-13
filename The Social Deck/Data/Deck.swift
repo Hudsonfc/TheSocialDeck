@@ -34,6 +34,9 @@ enum DeckType: String {
     case actNatural
     case colorClash
     case flip21
+    case quickfireCouples
+    case closerThanEver
+    case usAfterDark
     case other
 }
 

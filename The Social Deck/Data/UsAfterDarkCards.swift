@@ -1,0 +1,274 @@
+//
+//  UsAfterDarkCards.swift
+//  The Social Deck
+//
+//  Created by Hudson Ferreira on 1/2/26.
+//
+
+import Foundation
+
+// All Us After Dark cards with deeper, intimate questions
+let allUsAfterDarkCards: [Card] = [
+    // Desires & Intimacy
+    Card(text: "What's something you desire that you haven't told me yet?", category: "Desires", cardType: nil),
+    Card(text: "What makes you feel most desired by me?", category: "Desires", cardType: nil),
+    Card(text: "What's a fantasy you have that involves us?", category: "Desires", cardType: nil),
+    Card(text: "What's something intimate you'd like to try together?", category: "Desires", cardType: nil),
+    Card(text: "What's a way I could make you feel more wanted?", category: "Desires", cardType: nil),
+    Card(text: "What's something you're curious about but haven't asked?", category: "Desires", cardType: nil),
+    Card(text: "What's a desire you have that you're afraid to share?", category: "Desires", cardType: nil),
+    Card(text: "What's something you want more of in our relationship?", category: "Desires", cardType: nil),
+    Card(text: "What's a way we could explore intimacy together?", category: "Desires", cardType: nil),
+    Card(text: "What's something you've always wanted to do with me?", category: "Desires", cardType: nil),
+    
+    // Boundaries & Comfort
+    Card(text: "What's a boundary you have that I should respect more?", category: "Boundaries", cardType: nil),
+    Card(text: "What makes you feel uncomfortable that I might not know?", category: "Boundaries", cardType: nil),
+    Card(text: "What's something you need me to understand about your boundaries?", category: "Boundaries", cardType: nil),
+    Card(text: "What's a limit you have that you want to discuss?", category: "Boundaries", cardType: nil),
+    Card(text: "What's something that crosses a line for you?", category: "Boundaries", cardType: nil),
+    Card(text: "What's a boundary you've set that I should know about?", category: "Boundaries", cardType: nil),
+    Card(text: "What makes you feel safe to say no to me?", category: "Boundaries", cardType: nil),
+    Card(text: "What's a way I could better respect your boundaries?", category: "Boundaries", cardType: nil),
+    Card(text: "What's something you're not comfortable with that I should know?", category: "Boundaries", cardType: nil),
+    Card(text: "What's a boundary you'd like to set together?", category: "Boundaries", cardType: nil),
+    
+    // Deep Memories
+    Card(text: "What's a memory of us that makes you feel most connected?", category: "Memories", cardType: nil),
+    Card(text: "What's a moment when you felt most understood by me?", category: "Memories", cardType: nil),
+    Card(text: "What's a memory that changed how you see me?", category: "Memories", cardType: nil),
+    Card(text: "What's a moment when you felt most vulnerable with me?", category: "Memories", cardType: nil),
+    Card(text: "What's a memory that made you fall deeper in love?", category: "Memories", cardType: nil),
+    Card(text: "What's a moment when you felt most seen by me?", category: "Memories", cardType: nil),
+    Card(text: "What's a memory that shows how much we've grown?", category: "Memories", cardType: nil),
+    Card(text: "What's a moment when you felt most accepted by me?", category: "Memories", cardType: nil),
+    Card(text: "What's a memory that made you trust me more?", category: "Memories", cardType: nil),
+    Card(text: "What's a moment when you felt most intimate with me?", category: "Memories", cardType: nil),
+    
+    // What Makes Us Special
+    Card(text: "What's something about our connection that feels unique?", category: "Connection", cardType: nil),
+    Card(text: "What makes our relationship different from others you've had?", category: "Connection", cardType: nil),
+    Card(text: "What's something about us that you're most grateful for?", category: "Connection", cardType: nil),
+    Card(text: "What's a way we connect that no one else understands?", category: "Connection", cardType: nil),
+    Card(text: "What's something about our bond that surprises you?", category: "Connection", cardType: nil),
+    Card(text: "What makes you feel most special when you're with me?", category: "Connection", cardType: nil),
+    Card(text: "What's something about us that you want to protect?", category: "Connection", cardType: nil),
+    Card(text: "What's a way we understand each other that's unique?", category: "Connection", cardType: nil),
+    Card(text: "What's something about our relationship that feels sacred?", category: "Connection", cardType: nil),
+    Card(text: "What makes our connection feel most real to you?", category: "Connection", cardType: nil),
+    
+    // Emotional Closeness
+    Card(text: "What's something emotional you've been holding back?", category: "Emotions", cardType: nil),
+    Card(text: "What's a feeling you have about us that you haven't expressed?", category: "Emotions", cardType: nil),
+    Card(text: "What's something that makes you feel emotionally safe with me?", category: "Emotions", cardType: nil),
+    Card(text: "What's an emotion you struggle to share with me?", category: "Emotions", cardType: nil),
+    Card(text: "What's something that makes you feel emotionally connected?", category: "Emotions", cardType: nil),
+    Card(text: "What's a way I could make you feel more emotionally supported?", category: "Emotions", cardType: nil),
+    Card(text: "What's something you're feeling that I should know about?", category: "Emotions", cardType: nil),
+    Card(text: "What's an emotion you want to explore together?", category: "Emotions", cardType: nil),
+    Card(text: "What's something that makes you feel emotionally vulnerable?", category: "Emotions", cardType: nil),
+    Card(text: "What's a way we could deepen our emotional intimacy?", category: "Emotions", cardType: nil),
+    
+    // Honesty & Truth
+    Card(text: "What's something you've been wanting to tell me but haven't?", category: "Honesty", cardType: nil),
+    Card(text: "What's a truth about yourself you want me to know?", category: "Honesty", cardType: nil),
+    Card(text: "What's something you've been hiding that you want to share?", category: "Honesty", cardType: nil),
+    Card(text: "What's a truth about us you want to acknowledge?", category: "Honesty", cardType: nil),
+    Card(text: "What's something you need to be honest about?", category: "Honesty", cardType: nil),
+    Card(text: "What's a truth you're afraid to tell me?", category: "Honesty", cardType: nil),
+    Card(text: "What's something you want to be completely honest about?", category: "Honesty", cardType: nil),
+    Card(text: "What's a truth you've been avoiding?", category: "Honesty", cardType: nil),
+    Card(text: "What's something you need to say out loud?", category: "Honesty", cardType: nil),
+    Card(text: "What's a truth about how you feel that I should know?", category: "Honesty", cardType: nil),
+    
+    // Curiosity & Discovery
+    Card(text: "What's something about me you're most curious about?", category: "Curiosity", cardType: nil),
+    Card(text: "What's a question you've always wanted to ask me?", category: "Curiosity", cardType: nil),
+    Card(text: "What's something about yourself you want me to discover?", category: "Curiosity", cardType: nil),
+    Card(text: "What's a part of me you want to explore more?", category: "Curiosity", cardType: nil),
+    Card(text: "What's something you're curious about in our relationship?", category: "Curiosity", cardType: nil),
+    Card(text: "What's a side of me you haven't seen yet that you want to?", category: "Curiosity", cardType: nil),
+    Card(text: "What's something about us you want to discover together?", category: "Curiosity", cardType: nil),
+    Card(text: "What's a question you're afraid to ask but want to know?", category: "Curiosity", cardType: nil),
+    Card(text: "What's something about me that intrigues you most?", category: "Curiosity", cardType: nil),
+    Card(text: "What's a way we could explore each other more deeply?", category: "Curiosity", cardType: nil),
+    
+    // Feeling Seen & Understood
+    Card(text: "What makes you feel most seen by me?", category: "Understanding", cardType: nil),
+    Card(text: "What's something about you I don't fully understand yet?", category: "Understanding", cardType: nil),
+    Card(text: "What's a way I could understand you better?", category: "Understanding", cardType: nil),
+    Card(text: "What's something you wish I saw in you?", category: "Understanding", cardType: nil),
+    Card(text: "What makes you feel most understood by me?", category: "Understanding", cardType: nil),
+    Card(text: "What's a part of you I haven't fully seen?", category: "Understanding", cardType: nil),
+    Card(text: "What's something you want me to see in you?", category: "Understanding", cardType: nil),
+    Card(text: "What's a way I could make you feel more seen?", category: "Understanding", cardType: nil),
+    Card(text: "What's something about yourself you want me to understand?", category: "Understanding", cardType: nil),
+    Card(text: "What makes you feel invisible that I should know about?", category: "Understanding", cardType: nil),
+    
+    // Growth & Future Together
+    Card(text: "What's a way we could grow closer together?", category: "Growth", cardType: nil),
+    Card(text: "What's something you want us to work on as a couple?", category: "Growth", cardType: nil),
+    Card(text: "What's a way we could deepen our relationship?", category: "Growth", cardType: nil),
+    Card(text: "What's something you want to build together?", category: "Growth", cardType: nil),
+    Card(text: "What's a way we could strengthen our bond?", category: "Growth", cardType: nil),
+    Card(text: "What's something you want us to explore together?", category: "Growth", cardType: nil),
+    Card(text: "What's a way we could evolve as a couple?", category: "Growth", cardType: nil),
+    Card(text: "What's something you want us to create together?", category: "Growth", cardType: nil),
+    Card(text: "What's a way we could become more connected?", category: "Growth", cardType: nil),
+    Card(text: "What's something you want us to develop together?", category: "Growth", cardType: nil),
+    
+    // Quiet Moments & Intimacy
+    Card(text: "What's your favorite way to spend quiet time together?", category: "Intimacy", cardType: nil),
+    Card(text: "What makes a moment feel most intimate to you?", category: "Intimacy", cardType: nil),
+    Card(text: "What's something you want to do together when we're alone?", category: "Intimacy", cardType: nil),
+    Card(text: "What's a way we could create more intimate moments?", category: "Intimacy", cardType: nil),
+    Card(text: "What's something that makes you feel closest to me?", category: "Intimacy", cardType: nil),
+    Card(text: "What's a quiet moment you want to share with me?", category: "Intimacy", cardType: nil),
+    Card(text: "What makes you feel most intimate with me?", category: "Intimacy", cardType: nil),
+    Card(text: "What's a way we could be more present with each other?", category: "Intimacy", cardType: nil),
+    Card(text: "What's something you want to experience together in private?", category: "Intimacy", cardType: nil),
+    Card(text: "What's a way we could create deeper intimacy?", category: "Intimacy", cardType: nil),
+    
+    // Fears & Vulnerabilities
+    Card(text: "What's a fear you have about us that you want to share?", category: "Vulnerability", cardType: nil),
+    Card(text: "What's something you're afraid to be vulnerable about?", category: "Vulnerability", cardType: nil),
+    Card(text: "What's a fear you have that I could help with?", category: "Vulnerability", cardType: nil),
+    Card(text: "What makes you feel most vulnerable with me?", category: "Vulnerability", cardType: nil),
+    Card(text: "What's something you're scared to tell me?", category: "Vulnerability", cardType: nil),
+    Card(text: "What's a way I could make you feel safer to be vulnerable?", category: "Vulnerability", cardType: nil),
+    Card(text: "What's a fear about our relationship you want to discuss?", category: "Vulnerability", cardType: nil),
+    Card(text: "What's something vulnerable you want to share with me?", category: "Vulnerability", cardType: nil),
+    Card(text: "What's a fear you have that you want me to understand?", category: "Vulnerability", cardType: nil),
+    Card(text: "What makes you feel safe enough to be vulnerable?", category: "Vulnerability", cardType: nil),
+    
+    // Appreciation & Gratitude
+    Card(text: "What's something about me you're most grateful for?", category: "Appreciation", cardType: nil),
+    Card(text: "What's a way I've changed your life for the better?", category: "Appreciation", cardType: nil),
+    Card(text: "What's something I do that you appreciate most?", category: "Appreciation", cardType: nil),
+    Card(text: "What's a quality in me you're most thankful for?", category: "Appreciation", cardType: nil),
+    Card(text: "What's something about our relationship you're grateful for?", category: "Appreciation", cardType: nil),
+    Card(text: "What's a way I've supported you that you're thankful for?", category: "Appreciation", cardType: nil),
+    Card(text: "What's something about me you don't take for granted?", category: "Appreciation", cardType: nil),
+    Card(text: "What's a moment when you felt most grateful for me?", category: "Appreciation", cardType: nil),
+    Card(text: "What's something I've given you that you're grateful for?", category: "Appreciation", cardType: nil),
+    Card(text: "What's a way I've made your life better?", category: "Appreciation", cardType: nil),
+    
+    // Deep Questions
+    Card(text: "What's something you want to know about my inner world?", category: "Deep Questions", cardType: nil),
+    Card(text: "What's a question you've never asked but always wondered?", category: "Deep Questions", cardType: nil),
+    Card(text: "What's something about my past you want to understand?", category: "Deep Questions", cardType: nil),
+    Card(text: "What's a deep question you want me to answer?", category: "Deep Questions", cardType: nil),
+    Card(text: "What's something about my thoughts you're curious about?", category: "Deep Questions", cardType: nil),
+    Card(text: "What's a question that would help you understand me better?", category: "Deep Questions", cardType: nil),
+    Card(text: "What's something about my feelings you want to explore?", category: "Deep Questions", cardType: nil),
+    Card(text: "What's a deep question about us you want to ask?", category: "Deep Questions", cardType: nil),
+    Card(text: "What's something about my desires you want to know?", category: "Deep Questions", cardType: nil),
+    Card(text: "What's a question that would bring us closer?", category: "Deep Questions", cardType: nil),
+    
+    // Additional Desires & Intimacy
+    Card(text: "What's a desire you have that you're ready to share with me?", category: "Desires", cardType: nil),
+    Card(text: "What's something you want to explore together that we haven't tried?", category: "Desires", cardType: nil),
+    Card(text: "What's a way I could make you feel more desired?", category: "Desires", cardType: nil),
+    Card(text: "What's something intimate you've been thinking about?", category: "Desires", cardType: nil),
+    Card(text: "What's a fantasy you'd like to explore together?", category: "Desires", cardType: nil),
+    Card(text: "What's something you want more intimacy around?", category: "Desires", cardType: nil),
+    Card(text: "What's a way we could explore our desires together?", category: "Desires", cardType: nil),
+    Card(text: "What's something you desire that would make you feel more connected?", category: "Desires", cardType: nil),
+    
+    // Additional Boundaries
+    Card(text: "What's a boundary you need me to understand better?", category: "Boundaries", cardType: nil),
+    Card(text: "What's something that makes you feel your boundaries are respected?", category: "Boundaries", cardType: nil),
+    Card(text: "What's a limit you have that's important for me to know?", category: "Boundaries", cardType: nil),
+    Card(text: "What's a way I could make you feel safer about your boundaries?", category: "Boundaries", cardType: nil),
+    Card(text: "What's a boundary you'd like to discuss together?", category: "Boundaries", cardType: nil),
+    Card(text: "What's something that helps you feel comfortable setting boundaries?", category: "Boundaries", cardType: nil),
+    
+    // Additional Memories
+    Card(text: "What's a memory that made you feel most loved by me?", category: "Memories", cardType: nil),
+    Card(text: "What's a moment when you felt most connected to me?", category: "Memories", cardType: nil),
+    Card(text: "What's a memory that deepened your feelings for me?", category: "Memories", cardType: nil),
+    Card(text: "What's a moment when you felt most intimate with me?", category: "Memories", cardType: nil),
+    Card(text: "What's a memory that shows how much we mean to each other?", category: "Memories", cardType: nil),
+    Card(text: "What's a moment when you felt most seen and understood?", category: "Memories", cardType: nil),
+    
+    // Additional Connection
+    Card(text: "What's something about our connection that you treasure most?", category: "Connection", cardType: nil),
+    Card(text: "What makes our bond feel most special to you?", category: "Connection", cardType: nil),
+    Card(text: "What's something about us that you want to protect and nurture?", category: "Connection", cardType: nil),
+    Card(text: "What makes you feel our connection is unique?", category: "Connection", cardType: nil),
+    Card(text: "What's something about our relationship that feels sacred to you?", category: "Connection", cardType: nil),
+    Card(text: "What makes you feel most connected to me right now?", category: "Connection", cardType: nil),
+    
+    // Additional Emotions
+    Card(text: "What's an emotion you want to share with me but haven't?", category: "Emotions", cardType: nil),
+    Card(text: "What's a feeling you have about us that you want to explore?", category: "Emotions", cardType: nil),
+    Card(text: "What's something that makes you feel emotionally safe with me?", category: "Emotions", cardType: nil),
+    Card(text: "What's an emotion you struggle to express that I should know about?", category: "Emotions", cardType: nil),
+    Card(text: "What's a way we could share our emotions more deeply?", category: "Emotions", cardType: nil),
+    Card(text: "What's something emotional you need from me?", category: "Emotions", cardType: nil),
+    
+    // Additional Honesty
+    Card(text: "What's something you need to be honest about with me?", category: "Honesty", cardType: nil),
+    Card(text: "What's a truth you want to share but are nervous about?", category: "Honesty", cardType: nil),
+    Card(text: "What's something you've been holding back that you want to say?", category: "Honesty", cardType: nil),
+    Card(text: "What's a truth about us you want to acknowledge together?", category: "Honesty", cardType: nil),
+    Card(text: "What's something you need to tell me to feel more honest?", category: "Honesty", cardType: nil),
+    Card(text: "What's a truth you're ready to share with me?", category: "Honesty", cardType: nil),
+    
+    // Additional Curiosity
+    Card(text: "What's something about me you're most curious to discover?", category: "Curiosity", cardType: nil),
+    Card(text: "What's a question you've been wanting to ask me?", category: "Curiosity", cardType: nil),
+    Card(text: "What's something about yourself you want me to explore?", category: "Curiosity", cardType: nil),
+    Card(text: "What's a part of me you want to understand better?", category: "Curiosity", cardType: nil),
+    Card(text: "What's something you're curious about that would bring us closer?", category: "Curiosity", cardType: nil),
+    Card(text: "What's a question you're afraid to ask but want to know?", category: "Curiosity", cardType: nil),
+    
+    // Additional Understanding
+    Card(text: "What's something about you I don't fully see yet?", category: "Understanding", cardType: nil),
+    Card(text: "What's a way I could understand you on a deeper level?", category: "Understanding", cardType: nil),
+    Card(text: "What's something you want me to see in you that I might miss?", category: "Understanding", cardType: nil),
+    Card(text: "What makes you feel most understood by me?", category: "Understanding", cardType: nil),
+    Card(text: "What's a part of you I haven't fully discovered yet?", category: "Understanding", cardType: nil),
+    Card(text: "What's something about yourself you want me to understand better?", category: "Understanding", cardType: nil),
+    
+    // Additional Growth
+    Card(text: "What's a way we could grow even closer together?", category: "Growth", cardType: nil),
+    Card(text: "What's something you want us to work on to deepen our relationship?", category: "Growth", cardType: nil),
+    Card(text: "What's a way we could strengthen our bond even more?", category: "Growth", cardType: nil),
+    Card(text: "What's something you want to build together that would bring us closer?", category: "Growth", cardType: nil),
+    Card(text: "What's a way we could evolve and grow as a couple?", category: "Growth", cardType: nil),
+    Card(text: "What's something you want us to develop together?", category: "Growth", cardType: nil),
+    
+    // Additional Intimacy
+    Card(text: "What's a way we could create more intimate moments together?", category: "Intimacy", cardType: nil),
+    Card(text: "What makes a moment feel most intimate and special to you?", category: "Intimacy", cardType: nil),
+    Card(text: "What's something you want to experience together that would deepen our intimacy?", category: "Intimacy", cardType: nil),
+    Card(text: "What's a way we could be more present and intimate with each other?", category: "Intimacy", cardType: nil),
+    Card(text: "What's something that makes you feel most intimate with me?", category: "Intimacy", cardType: nil),
+    Card(text: "What's a way we could explore intimacy on a deeper level?", category: "Intimacy", cardType: nil),
+    
+    // Additional Vulnerability
+    Card(text: "What's something vulnerable you want to share with me?", category: "Vulnerability", cardType: nil),
+    Card(text: "What makes you feel safe enough to be completely vulnerable with me?", category: "Vulnerability", cardType: nil),
+    Card(text: "What's a fear you have that you want to share with me?", category: "Vulnerability", cardType: nil),
+    Card(text: "What's something you're afraid to be vulnerable about that I should know?", category: "Vulnerability", cardType: nil),
+    Card(text: "What's a way I could make you feel safer to be vulnerable?", category: "Vulnerability", cardType: nil),
+    Card(text: "What's something vulnerable you're ready to share with me?", category: "Vulnerability", cardType: nil),
+    
+    // Additional Appreciation
+    Card(text: "What's something about me you're most grateful for today?", category: "Appreciation", cardType: nil),
+    Card(text: "What's a way I've made your life better that you're thankful for?", category: "Appreciation", cardType: nil),
+    Card(text: "What's something I do that you appreciate most in our relationship?", category: "Appreciation", cardType: nil),
+    Card(text: "What's a quality in me you're most thankful for?", category: "Appreciation", cardType: nil),
+    Card(text: "What's something about our relationship you're grateful for right now?", category: "Appreciation", cardType: nil),
+    Card(text: "What's a way I've supported you that you're most thankful for?", category: "Appreciation", cardType: nil),
+    
+    // Additional Deep Questions
+    Card(text: "What's something about my inner world you want to explore?", category: "Deep Questions", cardType: nil),
+    Card(text: "What's a deep question you've always wanted to ask me?", category: "Deep Questions", cardType: nil),
+    Card(text: "What's something about my thoughts and feelings you're curious about?", category: "Deep Questions", cardType: nil),
+    Card(text: "What's a question that would help you understand me on a deeper level?", category: "Deep Questions", cardType: nil),
+    Card(text: "What's something about me you want to discover that would bring us closer?", category: "Deep Questions", cardType: nil),
+    Card(text: "What's a deep question about us you want to explore together?", category: "Deep Questions", cardType: nil)
+]
+

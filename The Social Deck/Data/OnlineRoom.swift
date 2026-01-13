@@ -165,6 +165,9 @@ extension DeckType {
         case .actNatural: return "actNatural"
         case .colorClash: return "colorClash"
         case .flip21: return "flip21"
+        case .quickfireCouples: return "quickfireCouples"
+        case .closerThanEver: return "closerThanEver"
+        case .usAfterDark: return "usAfterDark"
         case .other: return "other"
         }
     }
@@ -197,6 +200,9 @@ extension DeckType {
         case "actItOut": self = .actItOut
         case "colorClash": self = .colorClash
         case "flip21": self = .flip21
+        case "quickfireCouples": self = .quickfireCouples
+        case "closerThanEver": self = .closerThanEver
+        case "usAfterDark": self = .usAfterDark
         case "other": self = .other
         default: return nil
         }

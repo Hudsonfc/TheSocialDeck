@@ -32,7 +32,7 @@ struct Play2View: View {
     
     // All category names (Favorites shown dynamically when items exist)
     var categories: [String] {
-        var cats = ["Classic Games", "Social Deck Games", "Trivia"]
+        var cats = ["Classic Games", "Social Deck Games", "Date/Couples"]
         if !favoriteDecks.isEmpty {
             cats.insert("Favorites", at: 0)
         }
@@ -41,7 +41,7 @@ struct Play2View: View {
     
     // Get all decks
     private var allDecks: [Deck] {
-        classicGamesDecks + socialDeckGamesDecks + triviaGamesDecks
+        classicGamesDecks + socialDeckGamesDecks + dateCouplesGamesDecks
     }
     
     // Get favorite decks
@@ -158,7 +158,7 @@ struct Play2View: View {
         Deck(
             title: "Act Natural",
             description: "One player doesn't know the secret word — can they blend in and figure it out before getting caught? Everyone else knows the secret word and tries to subtly mention it. The secret player must figure it out while acting natural. Deception meets deduction!",
-            numberOfCards: 150,
+            numberOfCards: 200,
             estimatedTime: "10-20 min",
             imageName: "AN 2.0",
             type: .actNatural,
@@ -214,6 +214,40 @@ struct Play2View: View {
             type: .bluffCall,
             cards: allBluffCallCards,
             availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
+        )
+    ]
+    
+    // Date/Couples Games decks with 2.0 artwork
+    let dateCouplesGamesDecks: [Deck] = [
+        Deck(
+            title: "Quickfire Couples",
+            description: "Fast-paced \"this or that\" choices for couples. Answer instantly to reveal preferences and chemistry. 200+ questions included.",
+            numberOfCards: 200,
+            estimatedTime: "15-25 min",
+            imageName: "Quickfire Couples",
+            type: .quickfireCouples,
+            cards: allQuickfireCouplesCards,
+            availableCategories: []
+        ),
+        Deck(
+            title: "Closer Than Ever",
+            description: "Meaningful questions designed to deepen connection and strengthen emotional bonds. Explore love languages, shared memories, values, and future dreams through thoughtful conversation. 150+ questions included.",
+            numberOfCards: 200,
+            estimatedTime: "30-45 min",
+            imageName: "Closer than ever",
+            type: .closerThanEver,
+            cards: allCloserThanEverCards,
+            availableCategories: []
+        ),
+        Deck(
+            title: "Us After Dark",
+            description: "A deeper, intimate couples game focused on honesty, curiosity, and emotional closeness. Questions explore desires, boundaries, memories, and what makes your connection special. 200+ intimate questions included.",
+            numberOfCards: 200,
+            estimatedTime: "30-45 min",
+            imageName: "us after dark",
+            type: .usAfterDark,
+            cards: allUsAfterDarkCards,
+            availableCategories: []
         )
     ]
     
@@ -306,8 +340,8 @@ struct Play2View: View {
             return classicGamesDecks
         case "Social Deck Games":
             return socialDeckGamesDecks
-        case "Trivia":
-            return triviaGamesDecks
+        case "Date/Couples":
+            return dateCouplesGamesDecks
         default:
             return classicGamesDecks
         }
@@ -917,6 +951,13 @@ struct Play2View: View {
                 MemoryMasterSetupView(deck: deck)
             case .bluffCall:
                 BluffCallCategorySelectionView(deck: deck)
+            // Date/Couples Games
+            case .quickfireCouples:
+                QuickfireCouplesSetupView(deck: deck, selectedCategories: [])
+            case .closerThanEver:
+                CloserThanEverSetupView(deck: deck, selectedCategories: [])
+            case .usAfterDark:
+                UsAfterDarkSetupView(deck: deck, selectedCategories: [])
             default:
                 EmptyView()
             }
@@ -1019,12 +1060,34 @@ struct GameCardView: View {
                         .foregroundColor(.primaryText)
                         .multilineTextAlignment(.center)
                     
-                    Text(deck.description)
-                        .font(.system(size: 15, weight: .regular, design: .rounded))
-                        .foregroundColor(.secondaryText)
-                        .multilineTextAlignment(.center)
-                        .lineSpacing(4)
+                    // Description with question count highlighted for couples games
+                    if deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark {
+                        let parts = deck.description.components(separatedBy: ". ")
+                        let mainDescription = parts.dropLast().joined(separator: ". ")
+                        let questionCount = parts.last ?? ""
+                        
+                        VStack(spacing: 4) {
+                            if !mainDescription.isEmpty {
+                                Text(mainDescription + ".")
+                                    .font(.system(size: 15, weight: .regular, design: .rounded))
+                                    .foregroundColor(.secondaryText)
+                                    .multilineTextAlignment(.center)
+                                    .lineSpacing(4)
+                            }
+                            Text(questionCount)
+                                .font(.system(size: 15, weight: .bold, design: .rounded))
+                                .foregroundColor(Color.buttonBackground)
+                                .multilineTextAlignment(.center)
+                        }
                         .padding(.horizontal, 24)
+                    } else {
+                        Text(deck.description)
+                            .font(.system(size: 15, weight: .regular, design: .rounded))
+                            .foregroundColor(.secondaryText)
+                            .multilineTextAlignment(.center)
+                            .lineSpacing(4)
+                            .padding(.horizontal, 24)
+                    }
                     
                     // Estimated time on back of card
                     HStack(spacing: 6) {
@@ -1268,14 +1331,36 @@ struct GameDescriptionOverlay: View {
                     .padding(.horizontal, 40)
                     .padding(.bottom, 16)
                 
-                // Description
-                Text(deck.description)
-                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                    .foregroundColor(.secondaryText)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(6)
+                // Description with question count highlighted for couples games
+                if deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark {
+                    let parts = deck.description.components(separatedBy: ". ")
+                    let mainDescription = parts.dropLast().joined(separator: ". ")
+                    let questionCount = parts.last ?? ""
+                    
+                    VStack(spacing: 6) {
+                        if !mainDescription.isEmpty {
+                            Text(mainDescription + ".")
+                                .font(.system(size: 16, weight: .regular, design: .rounded))
+                                .foregroundColor(.secondaryText)
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(6)
+                        }
+                        Text(questionCount)
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .foregroundColor(Color.buttonBackground)
+                            .multilineTextAlignment(.center)
+                    }
                     .padding(.horizontal, 40)
                     .padding(.bottom, 24)
+                } else {
+                    Text(deck.description)
+                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                        .foregroundColor(.secondaryText)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(6)
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 24)
+                }
                 
                 // Game stats - Estimated time only
                 VStack(spacing: 4) {

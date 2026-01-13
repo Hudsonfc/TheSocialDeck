@@ -41,6 +41,9 @@ struct SelectedGameDisplayCard: View {
         case .actNatural: return "Act Natural"
         case .colorClash: return "Color Clash"
         case .flip21: return "Flip 21"
+        case .quickfireCouples: return "Quickfire Couples"
+        case .closerThanEver: return "Closer Than Ever"
+        case .usAfterDark: return "Us After Dark"
         case .other: return "Game"
         }
     }
