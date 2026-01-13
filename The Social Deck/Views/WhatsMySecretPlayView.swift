@@ -317,7 +317,7 @@ struct SecretCardBackView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0))
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack(spacing: 20) {
@@ -328,7 +328,7 @@ struct SecretCardBackView: View {
                 
                 Text("Tap to reveal")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
             }
         }
     }
@@ -341,13 +341,13 @@ struct SecretCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0))
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack(spacing: 20) {
                 Image(systemName: "eye.slash.fill")
                     .font(.system(size: 50))
-                    .foregroundColor(Color.buttonBackground)
+                    .foregroundColor(.white)
                 
                 Text(secret)
                     .font(.system(size: 24, weight: .semibold, design: .rounded))
@@ -357,7 +357,7 @@ struct SecretCardFrontView: View {
                 
                 Text("Follow this rule without revealing it!")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
             }

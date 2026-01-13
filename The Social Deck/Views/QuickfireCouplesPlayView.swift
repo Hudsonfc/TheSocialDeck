@@ -95,7 +95,7 @@ struct QuickfireCouplesPlayView: View {
                 // "Quickfire Couples" label
                 Text("Quickfire Couples")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.buttonBackground)
+                    .foregroundColor(.white)
                     .padding(.bottom, 32)
                 
                 // Card
@@ -369,18 +369,18 @@ struct QuickfireCouplesCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0))
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack {
                 Image(systemName: "questionmark.circle.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(Color.buttonBackground)
+                    .foregroundColor(.white)
                     .padding(.bottom, 20)
                 
                 Text("Tap to reveal")
                     .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
             }
         }
     }
@@ -394,13 +394,13 @@ struct QuickfireCouplesCardBackView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0))
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack(spacing: 24) {
                 Text("This or That")
                     .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.buttonBackground)
+                    .foregroundColor(.white)
                     .padding(.top, 24)
                 
                 VStack(spacing: 20) {
@@ -420,35 +420,36 @@ struct QuickfireCouplesCardBackView: View {
                             if selectedOption == "A" {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.system(size: 24, weight: .semibold))
-                                    .foregroundColor(Color.buttonBackground)
+                                    .foregroundColor(Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0))
                                     .padding(.top, 4)
                             }
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 20)
-                        .background(selectedOption == "A" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                        .background(selectedOption == "A" ? Color.white : Color.white.opacity(0.9))
                         .cornerRadius(16)
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
-                                .stroke(selectedOption == "A" ? Color.buttonBackground : Color.clear, lineWidth: 2)
+                                .stroke(selectedOption == "A" ? Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0) : Color.white.opacity(0.3), lineWidth: selectedOption == "A" ? 3 : 2)
                         )
+                        .shadow(color: selectedOption == "A" ? Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0).opacity(0.3) : Color.black.opacity(0.1), radius: selectedOption == "A" ? 8 : 4, x: 0, y: 2)
                     }
                     .buttonStyle(PlainButtonStyle())
                     
                     // Divider
                     HStack {
                         Rectangle()
-                            .fill(Color.buttonBackground)
+                            .fill(Color.white.opacity(0.8))
                             .frame(height: 2)
                             .frame(width: 40)
                         
                         Text("OR")
                             .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundColor(Color.buttonBackground)
+                            .foregroundColor(.white)
                             .padding(.horizontal, 12)
                         
                         Rectangle()
-                            .fill(Color.buttonBackground)
+                            .fill(Color.white.opacity(0.8))
                             .frame(height: 2)
                             .frame(width: 40)
                     }
@@ -469,18 +470,19 @@ struct QuickfireCouplesCardBackView: View {
                             if selectedOption == "B" {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.system(size: 24, weight: .semibold))
-                                    .foregroundColor(Color.buttonBackground)
+                                    .foregroundColor(Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0))
                                     .padding(.top, 4)
                             }
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 20)
-                        .background(selectedOption == "B" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                        .background(selectedOption == "B" ? Color.white : Color.white.opacity(0.9))
                         .cornerRadius(16)
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
-                                .stroke(selectedOption == "B" ? Color.buttonBackground : Color.clear, lineWidth: 2)
+                                .stroke(selectedOption == "B" ? Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0) : Color.white.opacity(0.3), lineWidth: selectedOption == "B" ? 3 : 2)
                         )
+                        .shadow(color: selectedOption == "B" ? Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0).opacity(0.3) : Color.black.opacity(0.1), radius: selectedOption == "B" ? 8 : 4, x: 0, y: 2)
                     }
                     .buttonStyle(PlainButtonStyle())
                 }

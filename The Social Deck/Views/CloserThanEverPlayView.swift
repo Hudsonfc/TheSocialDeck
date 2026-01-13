@@ -92,7 +92,7 @@ struct CloserThanEverPlayView: View {
                 // "Closer Than Ever" label
                 Text("Closer Than Ever")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.buttonBackground)
+                    .foregroundColor(.white)
                     .padding(.bottom, 32)
                 
                 // Card
@@ -325,18 +325,18 @@ struct CloserThanEverCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color(red: 0xFF/255.0, green: 0x84/255.0, blue: 0x84/255.0))
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack {
                 Image(systemName: "heart.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(Color.buttonBackground)
+                    .foregroundColor(.white)
                     .padding(.bottom, 20)
                 
                 Text("Tap to reveal")
                     .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
             }
         }
     }
@@ -348,13 +348,13 @@ struct CloserThanEverCardBackView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color(red: 0xFF/255.0, green: 0x84/255.0, blue: 0x84/255.0))
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack(spacing: 16) {
                 Text("Closer Than Ever")
                     .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.buttonBackground)
+                    .foregroundColor(.white)
                     .padding(.top, 24)
                 
                 Text(text)

@@ -53,9 +53,9 @@ struct CloserThanEverSetupView: View {
                             .multilineTextAlignment(.center)
                             .lineSpacing(4)
                         
-                        Text("150+ meaningful questions included")
+                        Text("200+ questions included")
                             .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundColor(Color.buttonBackground)
+                            .foregroundColor(.white)
                     }
                     .padding(.horizontal, 40)
                     

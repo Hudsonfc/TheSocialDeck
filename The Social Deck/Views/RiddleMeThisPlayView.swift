@@ -275,7 +275,7 @@ struct RiddleCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color(red: 0xA1/255.0, green: 0xC2/255.0, blue: 0xFF/255.0))
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack(spacing: 16) {
@@ -296,17 +296,17 @@ struct RiddleCardBackView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color(red: 0xA1/255.0, green: 0xC2/255.0, blue: 0xFF/255.0))
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack(spacing: 20) {
                 Image(systemName: "questionmark.circle.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(Color.buttonBackground)
+                    .foregroundColor(.white)
                 
                 Text(text)
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.buttonBackground)
+                    .foregroundColor(.white)
             }
         }
     }
@@ -320,7 +320,7 @@ struct RiddleCardAnswerView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color(red: 0xA1/255.0, green: 0xC2/255.0, blue: 0xFF/255.0))
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack(spacing: 0) {
@@ -328,7 +328,7 @@ struct RiddleCardAnswerView: View {
                 VStack(spacing: 16) {
                     Text("Answer")
                         .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundColor(Color.buttonBackground)
+                        .foregroundColor(.white)
                         .padding(.top, 40)
                     
                     Text(answer)

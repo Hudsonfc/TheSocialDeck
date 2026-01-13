@@ -326,7 +326,7 @@ struct MemoryCardBackView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white)
+                .fill(Color(red: 0xFF/255.0, green: 0x84/255.0, blue: 0x84/255.0))
                 .shadow(color: Color.shadowColor, radius: 4, x: 0, y: 2)
             
             // Display a symbol or number based on pairId

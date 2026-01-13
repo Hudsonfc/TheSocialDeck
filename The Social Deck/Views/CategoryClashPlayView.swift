@@ -137,7 +137,7 @@ struct CategoryClashPlayView: View {
                         .padding(.vertical, 32)
                         .background(
                             RoundedRectangle(cornerRadius: 24)
-                                .fill(Color.white)
+                                .fill(Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0))
                                 .shadow(color: Color.cardShadowColor, radius: 15, x: 0, y: 8)
                         )
                         .padding(.horizontal, 40)

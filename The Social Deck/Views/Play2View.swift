@@ -20,7 +20,10 @@ struct Play2View: View {
     @State private var navigateToRhymeTimeSetup: Deck? = nil
     @State private var navigateToTapDuelSetup: Deck? = nil
     @State private var navigateToRiddleMeThisSetup: Deck? = nil
-    @State private var cardFlippedStates: [Bool] = Array(repeating: false, count: 10) // Max 10 cards per category
+    @State private var navigateToQuickfireCouplesSetup: Deck? = nil
+    @State private var navigateToCloserThanEverSetup: Deck? = nil
+    @State private var navigateToUsAfterDarkSetup: Deck? = nil
+    @State private var cardFlippedStates: [Bool] = []
     @State private var cardOffset: CGFloat = 0
     @State private var isDragging = false
     @AppStorage("hasSeenWelcomeView") private var hasSeenWelcomeView: Bool = false
@@ -95,16 +98,6 @@ struct Play2View: View {
     
     // Social Deck Games decks with 2.0 artwork
     let socialDeckGamesDecks: [Deck] = [
-        Deck(
-            title: "Hot Potato",
-            description: "Pass the phone quickly as the heat builds! Random timers create chaos as players frantically pass the device. Watch out for random perks and penalties! The player holding it when time expires loses. Fast-paced and hilarious!",
-            numberOfCards: 50,
-            estimatedTime: "10-15 min",
-            imageName: "HP 2.0",
-            type: .hotPotato,
-            cards: [],
-            availableCategories: []
-        ),
         Deck(
             title: "Rhyme Time",
             description: "Say a word that rhymes with the base word before time runs out! Challenge your vocabulary and quick thinking. Repeat a rhyme or hesitate and you're out. Choose your difficulty level and see how long you can last in this word battle!",
@@ -214,6 +207,16 @@ struct Play2View: View {
             type: .bluffCall,
             cards: allBluffCallCards,
             availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
+        ),
+        Deck(
+            title: "Hot Potato",
+            description: "Pass the phone quickly as the heat builds! Random timers create chaos as players frantically pass the device. Watch out for random perks and penalties! The player holding it when time expires loses. Fast-paced and hilarious!",
+            numberOfCards: 50,
+            estimatedTime: "10-15 min",
+            imageName: "HP 2.0",
+            type: .hotPotato,
+            cards: [],
+            availableCategories: []
         )
     ]
     
@@ -241,7 +244,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Us After Dark",
-            description: "A deeper, intimate couples game focused on honesty, curiosity, and emotional closeness. Questions explore desires, boundaries, memories, and what makes your connection special. 200+ intimate questions included.",
+            description: "A deeper, intimate couples game focused on honesty, curiosity, and emotional closeness. Questions explore desires, boundaries, memories, and what makes your connection special. 200+ questions included.",
             numberOfCards: 200,
             estimatedTime: "30-45 min",
             imageName: "us after dark",
@@ -368,7 +371,7 @@ struct Play2View: View {
                                 withAnimation {
                                     currentCardIndex = 0
                                     cardOffset = 0
-                                    cardFlippedStates = Array(repeating: false, count: 10)
+                                    cardFlippedStates = Array(repeating: false, count: max(currentDecks.count, 1))
                                 }
                             }
                         
@@ -412,8 +415,6 @@ struct Play2View: View {
                                             selectedCategory = category
                                             currentCardIndex = 0
                                             cardOffset = 0
-                                            // Reset flipped states when switching category
-                                            cardFlippedStates = Array(repeating: false, count: 10)
                                         }
                                         HapticManager.shared.lightImpact()
                                     }
@@ -504,13 +505,15 @@ struct Play2View: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                         }
                         // Current card
-                        else if !currentDecks.isEmpty && currentCardIndex < currentDecks.count {
+                        else if !currentDecks.isEmpty && currentCardIndex < currentDecks.count && currentCardIndex < cardFlippedStates.count {
                             GameCardView(
                                 deck: currentDecks[currentCardIndex],
                                 isFlipped: $cardFlippedStates[currentCardIndex],
                                 onSelect: {
                                     // Reset flip state before navigating
-                                    cardFlippedStates[currentCardIndex] = false
+                                    if currentCardIndex < cardFlippedStates.count {
+                                        cardFlippedStates[currentCardIndex] = false
+                                    }
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                         navigateToCategorySelection = currentDecks[currentCardIndex]
                                     }
@@ -535,7 +538,9 @@ struct Play2View: View {
                                         // Allow swipe regardless of flip state
                                         if value.translation.width < -80 && currentCardIndex < currentDecks.count - 1 {
                                             // Swipe left - go to next card (reset flip state)
-                                            cardFlippedStates[currentCardIndex] = false
+                                            if currentCardIndex < cardFlippedStates.count {
+                                                cardFlippedStates[currentCardIndex] = false
+                                            }
                                             withAnimation(.easeOut(duration: 0.25)) {
                                                 cardOffset = -UIScreen.main.bounds.width
                                             }
@@ -677,6 +682,36 @@ struct Play2View: View {
             ) {
                 EmptyView()
             }
+            
+            NavigationLink(
+                destination: quickfireCouplesSetupDestination,
+                isActive: Binding(
+                    get: { navigateToQuickfireCouplesSetup != nil },
+                    set: { if !$0 { navigateToQuickfireCouplesSetup = nil } }
+                )
+            ) {
+                EmptyView()
+            }
+            
+            NavigationLink(
+                destination: closerThanEverSetupDestination,
+                isActive: Binding(
+                    get: { navigateToCloserThanEverSetup != nil },
+                    set: { if !$0 { navigateToCloserThanEverSetup = nil } }
+                )
+            ) {
+                EmptyView()
+            }
+            
+            NavigationLink(
+                destination: usAfterDarkSetupDestination,
+                isActive: Binding(
+                    get: { navigateToUsAfterDarkSetup != nil },
+                    set: { if !$0 { navigateToUsAfterDarkSetup = nil } }
+                )
+            ) {
+                EmptyView()
+            }
         }
         .overlay {
             // Welcome View for first-time users
@@ -696,7 +731,10 @@ struct Play2View: View {
                     navigateToHotPotatoSetup: $navigateToHotPotatoSetup,
                     navigateToRhymeTimeSetup: $navigateToRhymeTimeSetup,
                     navigateToTapDuelSetup: $navigateToTapDuelSetup,
-                    navigateToRiddleMeThisSetup: $navigateToRiddleMeThisSetup
+                    navigateToRiddleMeThisSetup: $navigateToRiddleMeThisSetup,
+                    navigateToQuickfireCouplesSetup: $navigateToQuickfireCouplesSetup,
+                    navigateToCloserThanEverSetup: $navigateToCloserThanEverSetup,
+                    navigateToUsAfterDarkSetup: $navigateToUsAfterDarkSetup
                 )
             }
         }
@@ -712,6 +750,14 @@ struct Play2View: View {
             if !newValue && !hasSeenWelcomeView {
                 hasSeenWelcomeView = true
             }
+        }
+        .onChange(of: selectedCategory) { oldValue, newValue in
+            // Update cardFlippedStates size when category changes
+            cardFlippedStates = Array(repeating: false, count: max(currentDecks.count, 1))
+        }
+        .task {
+            // Initialize cardFlippedStates when view appears
+            cardFlippedStates = Array(repeating: false, count: max(currentDecks.count, 1))
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -735,7 +781,7 @@ struct Play2View: View {
                         if !isGridView {
                             currentCardIndex = 0
                             cardOffset = 0
-                            cardFlippedStates = Array(repeating: false, count: 10)
+                            cardFlippedStates = Array(repeating: false, count: max(currentDecks.count, 1))
                         }
                     }
                 }) {
@@ -900,6 +946,66 @@ struct Play2View: View {
     }
     
     @ViewBuilder
+    private var quickfireCouplesSetupDestination: some View {
+        NavigationLink(
+            destination: quickfireCouplesSetupView,
+            isActive: Binding(
+                get: { navigateToQuickfireCouplesSetup != nil },
+                set: { if !$0 { navigateToQuickfireCouplesSetup = nil } }
+            )
+        ) {
+            EmptyView()
+        }
+    }
+    
+    @ViewBuilder
+    private var quickfireCouplesSetupView: some View {
+        if let deck = navigateToQuickfireCouplesSetup {
+            QuickfireCouplesSetupView(deck: deck, selectedCategories: [])
+        }
+    }
+    
+    @ViewBuilder
+    private var closerThanEverSetupDestination: some View {
+        NavigationLink(
+            destination: closerThanEverSetupView,
+            isActive: Binding(
+                get: { navigateToCloserThanEverSetup != nil },
+                set: { if !$0 { navigateToCloserThanEverSetup = nil } }
+            )
+        ) {
+            EmptyView()
+        }
+    }
+    
+    @ViewBuilder
+    private var closerThanEverSetupView: some View {
+        if let deck = navigateToCloserThanEverSetup {
+            CloserThanEverSetupView(deck: deck, selectedCategories: [])
+        }
+    }
+    
+    @ViewBuilder
+    private var usAfterDarkSetupDestination: some View {
+        NavigationLink(
+            destination: usAfterDarkSetupView,
+            isActive: Binding(
+                get: { navigateToUsAfterDarkSetup != nil },
+                set: { if !$0 { navigateToUsAfterDarkSetup = nil } }
+            )
+        ) {
+            EmptyView()
+        }
+    }
+    
+    @ViewBuilder
+    private var usAfterDarkSetupView: some View {
+        if let deck = navigateToUsAfterDarkSetup {
+            UsAfterDarkSetupView(deck: deck, selectedCategories: [])
+        }
+    }
+    
+    @ViewBuilder
     private var categorySelectionView: some View {
         if let deck = navigateToCategorySelection {
             switch deck.type {
@@ -1048,6 +1154,14 @@ struct GameCardView: View {
         flipDegrees < 90 || flipDegrees > 270
     }
     
+    // Parse description for couples games
+    private var descriptionParts: (main: String, questionCount: String) {
+        let parts = deck.description.components(separatedBy: ". ")
+        let mainDescription = parts.dropLast().joined(separator: ". ")
+        let questionCount = parts.last ?? ""
+        return (mainDescription, questionCount)
+    }
+    
     var body: some View {
         ZStack {
             // Back of card (description and select button) - behind front
@@ -1057,26 +1171,31 @@ struct GameCardView: View {
                     
                     Text(deck.title)
                         .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(.primaryText)
+                        .foregroundColor(
+                            deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark ?
+                            Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0) : .primaryText
+                        )
                         .multilineTextAlignment(.center)
                     
                     // Description with question count highlighted for couples games
                     if deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark {
-                        let parts = deck.description.components(separatedBy: ". ")
-                        let mainDescription = parts.dropLast().joined(separator: ". ")
-                        let questionCount = parts.last ?? ""
-                        
                         VStack(spacing: 4) {
-                            if !mainDescription.isEmpty {
-                                Text(mainDescription + ".")
+                            if !descriptionParts.main.isEmpty {
+                                Text(descriptionParts.main + ".")
                                     .font(.system(size: 15, weight: .regular, design: .rounded))
-                                    .foregroundColor(.secondaryText)
+                                    .foregroundColor(
+                                        deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark ?
+                                        Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0) : .secondaryText
+                                    )
                                     .multilineTextAlignment(.center)
                                     .lineSpacing(4)
                             }
-                            Text(questionCount)
+                            Text(descriptionParts.questionCount)
                                 .font(.system(size: 15, weight: .bold, design: .rounded))
-                                .foregroundColor(Color.buttonBackground)
+                                .foregroundColor(
+                                    deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark ?
+                                    .white : Color.buttonBackground
+                                )
                                 .multilineTextAlignment(.center)
                         }
                         .padding(.horizontal, 24)
@@ -1093,10 +1212,16 @@ struct GameCardView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "clock")
                             .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.secondaryText)
+                            .foregroundColor(
+                                deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark ?
+                                Color(red: 0x4A/255.0, green: 0x4A/255.0, blue: 0x4A/255.0) : .secondaryText
+                            )
                         Text(deck.estimatedTime)
                             .font(.system(size: 13, weight: .medium, design: .rounded))
-                            .foregroundColor(.secondaryText)
+                            .foregroundColor(
+                                deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark ?
+                                Color(red: 0x4A/255.0, green: 0x4A/255.0, blue: 0x4A/255.0) : .secondaryText
+                            )
                     }
                     .padding(.top, 4)
                     
@@ -1122,8 +1247,23 @@ struct GameCardView: View {
                 .padding(16)
             }
             .frame(width: cardWidth, height: cardHeight)
-            .background(Color.cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .background(
+                deck.type == .quickfireCouples ? Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0) :
+                deck.type == .closerThanEver ? Color(red: 0xFF/255.0, green: 0x84/255.0, blue: 0x84/255.0) :
+                deck.type == .usAfterDark ? Color(red: 0xA1/255.0, green: 0xC2/255.0, blue: 0xFF/255.0) :
+                // Red games
+                deck.type == .neverHaveIEver || deck.type == .rhymeTime || deck.type == .memoryMaster ? Color(red: 0xFF/255.0, green: 0x84/255.0, blue: 0x84/255.0) :
+                // Blue games
+                deck.type == .truthOrDare || deck.type == .riddleMeThis || deck.type == .actNatural ? Color(red: 0xA1/255.0, green: 0xC2/255.0, blue: 0xFF/255.0) :
+                // Green games
+                deck.type == .mostLikelyTo || deck.type == .actItOut ? Color(red: 0xB0/255.0, green: 0xE9/255.0, blue: 0x8D/255.0) :
+                // Pink games
+                deck.type == .whatsMySecret || deck.type == .categoryClash ? Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0) :
+                // Yellow game
+                deck.type == .wouldYouRather ? Color(red: 0xFE/255.0, green: 0xFE/255.0, blue: 0xAC/255.0) :
+                Color.cardBackground
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 30))
             .shadow(color: Color.cardShadowColor, radius: 12, x: 0, y: 6)
             .rotation3DEffect(
                 .degrees(flipDegrees + 180),
@@ -1266,7 +1406,18 @@ struct GameDescriptionOverlay: View {
     @Binding var navigateToRhymeTimeSetup: Deck?
     @Binding var navigateToTapDuelSetup: Deck?
     @Binding var navigateToRiddleMeThisSetup: Deck?
+    @Binding var navigateToQuickfireCouplesSetup: Deck?
+    @Binding var navigateToCloserThanEverSetup: Deck?
+    @Binding var navigateToUsAfterDarkSetup: Deck?
     @ObservedObject private var favoritesManager = FavoritesManager.shared
+    
+    // Parse description for couples games
+    private var descriptionParts: (main: String, questionCount: String) {
+        let parts = deck.description.components(separatedBy: ". ")
+        let mainDescription = parts.dropLast().joined(separator: ". ")
+        let questionCount = parts.last ?? ""
+        return (mainDescription, questionCount)
+    }
     
     var body: some View {
         ZStack {
@@ -1333,21 +1484,20 @@ struct GameDescriptionOverlay: View {
                 
                 // Description with question count highlighted for couples games
                 if deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark {
-                    let parts = deck.description.components(separatedBy: ". ")
-                    let mainDescription = parts.dropLast().joined(separator: ". ")
-                    let questionCount = parts.last ?? ""
-                    
                     VStack(spacing: 6) {
-                        if !mainDescription.isEmpty {
-                            Text(mainDescription + ".")
+                        if !descriptionParts.main.isEmpty {
+                            Text(descriptionParts.main + ".")
                                 .font(.system(size: 16, weight: .regular, design: .rounded))
                                 .foregroundColor(.secondaryText)
                                 .multilineTextAlignment(.center)
                                 .lineSpacing(6)
                         }
-                        Text(questionCount)
+                        Text(descriptionParts.questionCount)
                             .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundColor(Color.buttonBackground)
+                            .foregroundColor(
+                                deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark ?
+                                .white : Color.buttonBackground
+                            )
                             .multilineTextAlignment(.center)
                     }
                     .padding(.horizontal, 40)
@@ -1479,6 +1629,42 @@ struct GameDescriptionOverlay: View {
                         PrimaryButton(title: "Play") {
                             // Navigate first, then dismiss overlay after navigation completes
                             navigateToCategorySelection = deck
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                    selectedDeck = nil
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 40)
+                    } else if deck.type == .quickfireCouples {
+                        PrimaryButton(title: "Play") {
+                            // Navigate first, then dismiss overlay after navigation completes
+                            navigateToQuickfireCouplesSetup = deck
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                    selectedDeck = nil
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 40)
+                    } else if deck.type == .closerThanEver {
+                        PrimaryButton(title: "Play") {
+                            // Navigate first, then dismiss overlay after navigation completes
+                            navigateToCloserThanEverSetup = deck
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                    selectedDeck = nil
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 40)
+                    } else if deck.type == .usAfterDark {
+                        PrimaryButton(title: "Play") {
+                            // Navigate first, then dismiss overlay after navigation completes
+                            navigateToUsAfterDarkSetup = deck
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                 withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                                     selectedDeck = nil

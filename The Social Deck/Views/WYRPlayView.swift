@@ -369,18 +369,18 @@ struct WYRCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color(red: 0xFE/255.0, green: 0xFE/255.0, blue: 0xAC/255.0))
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack {
                 Image(systemName: "questionmark.circle.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(Color.buttonBackground)
+                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                     .padding(.bottom, 20)
                 
                 Text("Tap to reveal")
                     .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
             }
         }
     }
@@ -394,13 +394,13 @@ struct WYRCardBackView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color(red: 0xFE/255.0, green: 0xFE/255.0, blue: 0xAC/255.0))
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack(spacing: 24) {
                 Text("Would You Rather")
                     .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.buttonBackground)
+                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                     .padding(.top, 24)
                 
                 VStack(spacing: 20) {

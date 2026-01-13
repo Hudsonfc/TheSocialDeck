@@ -39,15 +39,7 @@ class GameOfTheDayManager {
         GameOfTheDayInfo(title: "Spin the Bottle", description: "Tap to spin and let the bottle decide everyone's fate. No strategy, no mercy, just pure chaos.", imageName: "STB 2.0", type: .spinTheBottle),
         GameOfTheDayInfo(title: "Story Chain", description: "Add one sentence to continue the story. Pass the phone and watch the chaos unfold.", imageName: "SC 2.0", type: .storyChain),
         GameOfTheDayInfo(title: "Memory Master", description: "A timed card-matching game. Flip cards to find pairs and clear the board as fast as possible!", imageName: "MM 2.0", type: .memoryMaster),
-        GameOfTheDayInfo(title: "Bluff Call", description: "Convince the group your answer is true, or call their bluff!", imageName: "BC 2.0", type: .bluffCall),
-        
-        // Trivia Games
-        GameOfTheDayInfo(title: "Pop Culture Trivia", description: "Test your knowledge of movies, music, and celebrities.", imageName: "pop culture 2.0", type: .popCultureTrivia),
-        GameOfTheDayInfo(title: "History Trivia", description: "Challenge yourself with historical facts and events.", imageName: "History 2.0", type: .historyTrivia),
-        GameOfTheDayInfo(title: "Science Trivia", description: "Explore the world of science and discovery.", imageName: "science 2.0", type: .scienceTrivia),
-        GameOfTheDayInfo(title: "Sports Trivia", description: "Show off your sports knowledge.", imageName: "sports 2.0", type: .sportsTrivia),
-        GameOfTheDayInfo(title: "Movie Trivia", description: "Test your movie knowledge with film questions.", imageName: "movies 2.0", type: .movieTrivia),
-        GameOfTheDayInfo(title: "Music Trivia", description: "Guess songs, artists, and music facts.", imageName: "music 2.0", type: .musicTrivia)
+        GameOfTheDayInfo(title: "Bluff Call", description: "Convince the group your answer is true, or call their bluff!", imageName: "BC 2.0", type: .bluffCall)
     ]
     
     private init() {}

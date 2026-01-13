@@ -384,18 +384,18 @@ struct ActItOutCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color(red: 0xB0/255.0, green: 0xE9/255.0, blue: 0x8D/255.0))
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack {
                 Image(systemName: "theatermasks.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(Color.buttonBackground)
+                    .foregroundColor(.white)
                     .padding(.bottom, 20)
                 
                 Text("Tap to reveal")
                     .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
             }
         }
     }
@@ -407,13 +407,13 @@ struct ActItOutCardBackView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color(red: 0xB0/255.0, green: 0xE9/255.0, blue: 0x8D/255.0))
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack(spacing: 16) {
                 Text("Act It Out")
                     .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.buttonBackground)
+                    .foregroundColor(.white)
                 
                 Text(text)
                     .font(.system(size: 28, weight: .semibold, design: .rounded))
@@ -423,7 +423,7 @@ struct ActItOutCardBackView: View {
                 
                 Text("Act this out!")
                     .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
                     .padding(.top, 16)
             }
         }
