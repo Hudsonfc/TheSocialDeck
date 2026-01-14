@@ -95,7 +95,7 @@ struct QuickfireCouplesPlayView: View {
                 // "Quickfire Couples" label
                 Text("Quickfire Couples")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(Color.buttonBackground)
                     .padding(.bottom, 32)
                 
                 // Card

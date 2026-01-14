@@ -1134,6 +1134,8 @@ struct GameCardView: View {
                             Color.black : .primaryText
                         )
                         .multilineTextAlignment(.center)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
                     
                     // Description with question count highlighted for couples games
                     if deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark {
@@ -1147,6 +1149,8 @@ struct GameCardView: View {
                                     )
                                     .multilineTextAlignment(.center)
                                     .lineSpacing(4)
+                                    .lineLimit(nil)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
                             Text(descriptionParts.questionCount)
                                 .font(.system(size: 15, weight: .bold, design: .rounded))
@@ -1163,6 +1167,8 @@ struct GameCardView: View {
                             .foregroundColor(.black)
                             .multilineTextAlignment(.center)
                             .lineSpacing(4)
+                            .lineLimit(nil)
+                            .fixedSize(horizontal: false, vertical: true)
                             .padding(.horizontal, 24)
                     }
                     
@@ -1423,6 +1429,8 @@ struct GameDescriptionOverlay: View {
                     .font(.system(size: 28, weight: .bold, design: .rounded))
                     .foregroundColor(.primaryText)
                     .multilineTextAlignment(.center)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 40)
                     .padding(.bottom, 16)
                 
@@ -1432,9 +1440,11 @@ struct GameDescriptionOverlay: View {
                         if !descriptionParts.main.isEmpty {
                             Text(descriptionParts.main + ".")
                                 .font(.system(size: 16, weight: .regular, design: .rounded))
-                                .foregroundColor(.black)
+                                .foregroundColor(.primaryText)
                                 .multilineTextAlignment(.center)
                                 .lineSpacing(6)
+                                .lineLimit(nil)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                         Text(descriptionParts.questionCount)
                             .font(.system(size: 16, weight: .bold, design: .rounded))
@@ -1449,9 +1459,11 @@ struct GameDescriptionOverlay: View {
                 } else {
                     Text(deck.description)
                         .font(.system(size: 16, weight: .regular, design: .rounded))
-                        .foregroundColor(.black)
+                        .foregroundColor(.primaryText)
                         .multilineTextAlignment(.center)
                         .lineSpacing(6)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
                         .padding(.horizontal, 40)
                         .padding(.bottom, 24)
                 }

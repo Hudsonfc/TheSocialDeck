@@ -286,44 +286,6 @@ struct BluffCallSetupView: View {
                         .disabled(players.count < 2)
                         .padding(.horizontal, 24)
                         .padding(.bottom, 40)
-                        
-                        // Tips section
-                        if players.count >= 2 {
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("Tips")
-                                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                                    .foregroundColor(.primaryText)
-                                
-                                tipRow(icon: "questionmark.circle.fill", text: "Answer truthfully or bluff")
-                                tipRow(icon: "hand.raised.fill", text: "Group votes on whether to believe you")
-                                tipRow(icon: "trophy.fill", text: "Score points for successful bluffs")
-                            }
-                            .padding(16)
-                            .background(Color.secondaryBackground)
-                            .cornerRadius(12)
-                            .padding(.horizontal, 24)
-                            .padding(.bottom, 12)
-                        }
-                        
-                        // Start Game button
-                        Button(action: {
-                            navigateToPlay = true
-                        }) {
-                            Text("Start Game")
-                                .font(.system(size: 18, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 56)
-                                .background(
-                                    players.count >= 2
-                                        ? Color.primaryAccent
-                                        : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
-                                )
-                                .cornerRadius(16)
-                        }
-                        .disabled(players.count < 2)
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 40)
                     }
                 }
             }

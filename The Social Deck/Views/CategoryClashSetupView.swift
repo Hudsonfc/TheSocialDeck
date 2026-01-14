@@ -117,14 +117,6 @@ struct CategoryClashSetupView: View {
                         }
                     }
                     
-                    // Description
-                    Text(deck.description)
-                        .font(.system(size: 18, weight: .regular, design: .rounded))
-                        .foregroundColor(.secondaryText)
-                        .multilineTextAlignment(.center)
-                        .lineSpacing(4)
-                        .padding(.horizontal, 40)
-                    
                     // Card Count Selector
                     VStack(spacing: 12) {
                         Text("Number of Categories")

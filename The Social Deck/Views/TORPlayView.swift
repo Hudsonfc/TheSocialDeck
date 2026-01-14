@@ -91,6 +91,12 @@ struct TORPlayView: View {
                 
                 Spacer()
                 
+                // "Truth or Dare" label
+                Text("Truth or Dare")
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .foregroundColor(Color.buttonBackground)
+                    .padding(.bottom, 32)
+                
                 // Card
                 if let currentCard = manager.currentCard() {
                     ZStack {

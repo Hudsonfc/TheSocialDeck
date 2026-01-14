@@ -92,7 +92,7 @@ struct UsAfterDarkPlayView: View {
                 // "Us After Dark" label
                 Text("Us After Dark")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(Color.buttonBackground)
                     .padding(.bottom, 32)
                 
                 // Card

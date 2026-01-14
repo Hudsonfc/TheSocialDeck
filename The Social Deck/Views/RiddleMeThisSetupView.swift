@@ -52,59 +52,6 @@ struct RiddleMeThisSetupView: View {
                                 .padding(.top, 20)
                                 .padding(.bottom, 32)
                             
-                            // Game description
-                            VStack(spacing: 16) {
-                                Text("How to Play")
-                                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                                    .foregroundColor(.primaryText)
-                                
-                                VStack(spacing: 12) {
-                                    Text("Read the riddle out loud to the group. Players race to say the correct answer. Tap 'Show Answer' when ready to reveal the solution.")
-                                        .font(.system(size: 14, weight: .regular, design: .rounded))
-                                        .foregroundColor(.secondaryText)
-                                        .multilineTextAlignment(.center)
-                                        .lineSpacing(4)
-                                    
-                                    // Tips section
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        Text("Tips")
-                                            .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                            .foregroundColor(.primaryText)
-                                        
-                                        HStack(alignment: .top, spacing: 8) {
-                                            Text("•")
-                                                .font(.system(size: 14, weight: .regular))
-                                                .foregroundColor(Color.primaryAccent)
-                                            Text("Tap the card to flip it and reveal the riddle")
-                                                .font(.system(size: 13, weight: .regular, design: .rounded))
-                                                .foregroundColor(.secondaryText)
-                                        }
-                                        
-                                        HStack(alignment: .top, spacing: 8) {
-                                            Text("•")
-                                                .font(.system(size: 14, weight: .regular))
-                                                .foregroundColor(Color.primaryAccent)
-                                            Text("You can flip the card back and forth as many times as needed")
-                                                .font(.system(size: 13, weight: .regular, design: .rounded))
-                                                .foregroundColor(.secondaryText)
-                                        }
-                                        
-                                        HStack(alignment: .top, spacing: 8) {
-                                            Text("•")
-                                                .font(.system(size: 14, weight: .regular))
-                                                .foregroundColor(Color.primaryAccent)
-                                            Text("Take your time - there's no timer!")
-                                                .font(.system(size: 13, weight: .regular, design: .rounded))
-                                                .foregroundColor(.secondaryText)
-                                        }
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.top, 4)
-                                }
-                            }
-                            .padding(.horizontal, 40)
-                            .padding(.bottom, 32)
-                            
                             // Card Count Selector
                             VStack(spacing: 12) {
                                 Text("Number of Riddles")

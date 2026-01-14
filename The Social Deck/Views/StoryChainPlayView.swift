@@ -93,7 +93,7 @@ struct StoryChainPlayView: View {
                 if !manager.isFinished {
                     Text(deck.title)
                         .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(.primaryText)
+                        .foregroundColor(Color.buttonBackground)
                         .padding(.horizontal, 40)
                         .padding(.bottom, 24)
                 }

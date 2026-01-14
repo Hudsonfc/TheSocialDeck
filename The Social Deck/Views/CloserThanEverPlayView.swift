@@ -92,7 +92,7 @@ struct CloserThanEverPlayView: View {
                 // "Closer Than Ever" label
                 Text("Closer Than Ever")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(Color.buttonBackground)
                     .padding(.bottom, 32)
                 
                 // Card

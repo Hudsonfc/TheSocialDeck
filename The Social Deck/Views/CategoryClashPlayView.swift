@@ -91,7 +91,7 @@ struct CategoryClashPlayView: View {
                         // Game title
                         Text(deck.title)
                             .font(.system(size: 28, weight: .bold, design: .rounded))
-                            .foregroundColor(.primaryText)
+                            .foregroundColor(Color.buttonBackground)
                             .padding(.horizontal, 40)
                         
                         // Timer display (if enabled)

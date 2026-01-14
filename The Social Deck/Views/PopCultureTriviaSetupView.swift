@@ -128,6 +128,8 @@ struct PopCultureTriviaSetupView: View {
                         .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
                         .padding(.horizontal, 40)
                     
                     // Card Count Selector

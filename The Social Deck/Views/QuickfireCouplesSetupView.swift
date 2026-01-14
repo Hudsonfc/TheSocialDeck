@@ -45,19 +45,6 @@ struct QuickfireCouplesSetupView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                         .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
                     
-                    // Description
-                    VStack(spacing: 8) {
-                        Text(deck.description)
-                            .font(.system(size: 18, weight: .regular, design: .rounded))
-                            .foregroundColor(.secondaryText)
-                            .multilineTextAlignment(.center)
-                            .lineSpacing(4)
-                        
-                        Text("200+ questions included")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
-                    }
-                    .padding(.horizontal, 40)
                     
                     // Start Game button
                     PrimaryButton(title: "Start Game") {

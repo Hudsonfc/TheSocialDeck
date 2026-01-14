@@ -94,7 +94,7 @@ struct NHIEPlayView: View {
                 // "Never Have I Ever" label
                 Text("Never Have I Ever")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(.primaryAccent)
+                    .foregroundColor(Color.buttonBackground)
                     .padding(.bottom, 32)
                 
                 // Card

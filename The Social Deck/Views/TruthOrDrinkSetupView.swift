@@ -121,6 +121,8 @@ struct TruthOrDrinkSetupView: View {
                         .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
                         .padding(.horizontal, 40)
                     
                     // Card Count Selector
