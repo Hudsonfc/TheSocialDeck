@@ -16,7 +16,6 @@ struct Play2View: View {
     @State private var navigateToPlayView: Deck? = nil
     @State private var navigateToStoryChainSetup: Deck? = nil
     @State private var navigateToMemoryMasterSetup: Deck? = nil
-    @State private var navigateToHotPotatoSetup: Deck? = nil
     @State private var navigateToRhymeTimeSetup: Deck? = nil
     @State private var navigateToTapDuelSetup: Deck? = nil
     @State private var navigateToRiddleMeThisSetup: Deck? = nil
@@ -207,16 +206,6 @@ struct Play2View: View {
             type: .bluffCall,
             cards: allBluffCallCards,
             availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
-        ),
-        Deck(
-            title: "Hot Potato",
-            description: "Pass the phone quickly as the heat builds! Random timers create chaos as players frantically pass the device. Watch out for random perks and penalties! The player holding it when time expires loses. Fast-paced and hilarious!",
-            numberOfCards: 50,
-            estimatedTime: "10-15 min",
-            imageName: "HP 2.0",
-            type: .hotPotato,
-            cards: [],
-            availableCategories: []
         )
     ]
     
@@ -644,16 +633,6 @@ struct Play2View: View {
             }
             
             NavigationLink(
-                destination: hotPotatoSetupDestination,
-                isActive: Binding(
-                    get: { navigateToHotPotatoSetup != nil },
-                    set: { if !$0 { navigateToHotPotatoSetup = nil } }
-                )
-            ) {
-                EmptyView()
-            }
-            
-            NavigationLink(
                 destination: rhymeTimeSetupDestination,
                 isActive: Binding(
                     get: { navigateToRhymeTimeSetup != nil },
@@ -728,7 +707,6 @@ struct Play2View: View {
                     navigateToPlayView: $navigateToPlayView,
                     navigateToStoryChainSetup: $navigateToStoryChainSetup,
                     navigateToMemoryMasterSetup: $navigateToMemoryMasterSetup,
-                    navigateToHotPotatoSetup: $navigateToHotPotatoSetup,
                     navigateToRhymeTimeSetup: $navigateToRhymeTimeSetup,
                     navigateToTapDuelSetup: $navigateToTapDuelSetup,
                     navigateToRiddleMeThisSetup: $navigateToRiddleMeThisSetup,
@@ -866,26 +844,6 @@ struct Play2View: View {
     }
     
     @ViewBuilder
-    private var hotPotatoSetupDestination: some View {
-        NavigationLink(
-            destination: hotPotatoSetupView,
-            isActive: Binding(
-                get: { navigateToHotPotatoSetup != nil },
-                set: { if !$0 { navigateToHotPotatoSetup = nil } }
-            )
-        ) {
-            EmptyView()
-        }
-    }
-    
-    @ViewBuilder
-    private var hotPotatoSetupView: some View {
-        if let deck = navigateToHotPotatoSetup {
-            HotPotatoSetupView(deck: deck)
-        }
-    }
-    
-    @ViewBuilder
     private var rhymeTimeSetupDestination: some View {
         NavigationLink(
             destination: rhymeTimeSetupView,
@@ -1019,8 +977,6 @@ struct Play2View: View {
             case .mostLikelyTo:
                 MLTCategorySelectionView(deck: deck)
             // Social Deck Games
-            case .hotPotato:
-                HotPotatoSetupView(deck: deck)
             case .rhymeTime:
                 RhymeTimeSetupView(deck: deck)
             case .tapDuel:
@@ -1185,7 +1141,7 @@ struct GameCardView: View {
                                     .font(.system(size: 15, weight: .regular, design: .rounded))
                                     .foregroundColor(
                                         deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark ?
-                                        Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0) : .secondaryText
+                                        Color.black : Color.black
                                     )
                                     .multilineTextAlignment(.center)
                                     .lineSpacing(4)
@@ -1202,7 +1158,7 @@ struct GameCardView: View {
                     } else {
                         Text(deck.description)
                             .font(.system(size: 15, weight: .regular, design: .rounded))
-                            .foregroundColor(.secondaryText)
+                            .foregroundColor(.black)
                             .multilineTextAlignment(.center)
                             .lineSpacing(4)
                             .padding(.horizontal, 24)
@@ -1402,7 +1358,6 @@ struct GameDescriptionOverlay: View {
     @Binding var navigateToPlayView: Deck?
     @Binding var navigateToStoryChainSetup: Deck?
     @Binding var navigateToMemoryMasterSetup: Deck?
-    @Binding var navigateToHotPotatoSetup: Deck?
     @Binding var navigateToRhymeTimeSetup: Deck?
     @Binding var navigateToTapDuelSetup: Deck?
     @Binding var navigateToRiddleMeThisSetup: Deck?
@@ -1488,7 +1443,7 @@ struct GameDescriptionOverlay: View {
                         if !descriptionParts.main.isEmpty {
                             Text(descriptionParts.main + ".")
                                 .font(.system(size: 16, weight: .regular, design: .rounded))
-                                .foregroundColor(.secondaryText)
+                                .foregroundColor(.black)
                                 .multilineTextAlignment(.center)
                                 .lineSpacing(6)
                         }
@@ -1505,7 +1460,7 @@ struct GameDescriptionOverlay: View {
                 } else {
                     Text(deck.description)
                         .font(.system(size: 16, weight: .regular, design: .rounded))
-                        .foregroundColor(.secondaryText)
+                        .foregroundColor(.black)
                         .multilineTextAlignment(.center)
                         .lineSpacing(6)
                         .padding(.horizontal, 40)
@@ -1569,18 +1524,6 @@ struct GameDescriptionOverlay: View {
                         PrimaryButton(title: "Play") {
                             // Navigate first, then dismiss overlay after navigation completes
                             navigateToMemoryMasterSetup = deck
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                    selectedDeck = nil
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 40)
-                        .padding(.bottom, 40)
-                    } else if deck.type == .hotPotato {
-                        PrimaryButton(title: "Play") {
-                            // Navigate first, then dismiss overlay after navigation completes
-                            navigateToHotPotatoSetup = deck
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                 withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                                     selectedDeck = nil
