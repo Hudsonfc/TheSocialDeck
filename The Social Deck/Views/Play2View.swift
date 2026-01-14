@@ -1129,7 +1129,9 @@ struct GameCardView: View {
                         .font(.system(size: 28, weight: .bold, design: .rounded))
                         .foregroundColor(
                             deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark ?
-                            Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0) : .primaryText
+                            Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0) :
+                            deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .tapDuel || deck.type == .spinTheBottle || deck.type == .bluffCall ?
+                            Color.black : .primaryText
                         )
                         .multilineTextAlignment(.center)
                     
@@ -1163,23 +1165,6 @@ struct GameCardView: View {
                             .lineSpacing(4)
                             .padding(.horizontal, 24)
                     }
-                    
-                    // Estimated time on back of card
-                    HStack(spacing: 6) {
-                        Image(systemName: "clock")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(
-                                deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark ?
-                                Color(red: 0x4A/255.0, green: 0x4A/255.0, blue: 0x4A/255.0) : .secondaryText
-                            )
-                        Text(deck.estimatedTime)
-                            .font(.system(size: 13, weight: .medium, design: .rounded))
-                            .foregroundColor(
-                                deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark ?
-                                Color(red: 0x4A/255.0, green: 0x4A/255.0, blue: 0x4A/255.0) : .secondaryText
-                            )
-                    }
-                    .padding(.top, 4)
                     
                     Button(action: {
                         HapticManager.shared.lightImpact()
@@ -1217,6 +1202,10 @@ struct GameCardView: View {
                 deck.type == .whatsMySecret || deck.type == .categoryClash ? Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0) :
                 // Yellow game
                 deck.type == .wouldYouRather ? Color(red: 0xFE/255.0, green: 0xFE/255.0, blue: 0xAC/255.0) :
+                // Orange game
+                deck.type == .storyChain ? Color(red: 0xFE/255.0, green: 0xB1/255.0, blue: 0x87/255.0) :
+                // White background games
+                deck.type == .tapDuel || deck.type == .spinTheBottle || deck.type == .bluffCall ? Color.white :
                 Color.cardBackground
             )
             .clipShape(RoundedRectangle(cornerRadius: 30))
@@ -1466,20 +1455,6 @@ struct GameDescriptionOverlay: View {
                         .padding(.horizontal, 40)
                         .padding(.bottom, 24)
                 }
-                
-                // Game stats - Estimated time only
-                VStack(spacing: 4) {
-                    Image(systemName: "clock")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(.secondaryText)
-                    Text(deck.estimatedTime)
-                        .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        .foregroundColor(.primaryText)
-                    Text("Estimated Time")
-                        .font(.system(size: 12, weight: .regular, design: .rounded))
-                        .foregroundColor(.secondaryText)
-                }
-                .padding(.bottom, 32)
                 
                 Spacer()
                 
