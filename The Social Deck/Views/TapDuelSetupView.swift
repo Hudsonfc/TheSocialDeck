@@ -40,118 +40,109 @@ struct TapDuelSetupView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 20)
                 
-                ScrollView {
-                    VStack(spacing: 0) {
-                        // Game artwork
-                        Image(deck.imageName)
-                            .resizable()
-                            .interpolation(.high)
-                            .antialiased(true)
-                            .scaledToFit()
-                            .frame(width: 120, height: 165)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                            .padding(.top, 20)
-                        
-                        // Title
-                        Text("Enter Player Names")
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
-                            .foregroundColor(.primaryText)
-                            .padding(.top, 20)
-                        
-                        Text("Two players required")
-                            .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(.secondaryText)
-                            .padding(.top, 4)
-                        
-                        Spacer()
-                        
-                        // Players section
-                        VStack(spacing: 20) {
-                            // Player 1 input
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Player 1 (Left Side)")
-                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                    .foregroundColor(.primaryText)
-                                
-                                TextField("Enter name", text: $player1Name)
-                                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                                    .foregroundColor(.primaryText)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 14)
-                                    .background(Color.secondaryBackground)
-                                    .cornerRadius(12)
-                                    .autocapitalization(.words)
-                                    .disableAutocorrection(true)
-                            }
+                VStack(spacing: 0) {
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            // Game artwork
+                            Image(deck.imageName)
+                                .resizable()
+                                .interpolation(.high)
+                                .antialiased(true)
+                                .scaledToFit()
+                                .frame(width: 120, height: 165)
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
+                                .padding(.top, 20)
                             
-                            // Player 2 input
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Player 2 (Right Side)")
-                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                    .foregroundColor(.primaryText)
+                            // Title
+                            Text("Enter Player Names")
+                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                .foregroundColor(.primaryText)
+                                .padding(.top, 20)
+                            
+                            Text("Two players required")
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
+                                .foregroundColor(.secondaryText)
+                                .padding(.top, 4)
+                            
+                            // Players section
+                            VStack(spacing: 20) {
+                                // Player 1 input
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Player 1 (Left Side)")
+                                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                        .foregroundColor(.primaryText)
+                                    
+                                    TextField("Enter name", text: $player1Name)
+                                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                                        .foregroundColor(.primaryText)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 14)
+                                        .background(Color.secondaryBackground)
+                                        .cornerRadius(12)
+                                        .autocapitalization(.words)
+                                        .disableAutocorrection(true)
+                                }
                                 
-                                TextField("Enter name", text: $player2Name)
-                                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                                    .foregroundColor(.primaryText)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 14)
-                                    .background(Color.secondaryBackground)
-                                    .cornerRadius(12)
-                                    .autocapitalization(.words)
-                                    .disableAutocorrection(true)
+                                // Player 2 input
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Player 2 (Right Side)")
+                                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                        .foregroundColor(.primaryText)
+                                    
+                                    TextField("Enter name", text: $player2Name)
+                                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                                        .foregroundColor(.primaryText)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 14)
+                                        .background(Color.secondaryBackground)
+                                        .cornerRadius(12)
+                                        .autocapitalization(.words)
+                                        .disableAutocorrection(true)
+                                }
                             }
-                        }
-                        .padding(.horizontal, 24)
-                        .padding(.top, 32)
-                        
-                        Spacer()
-                        
-                        // Tips section
-                        if !player1Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !player2Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("Tips")
-                                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                                    .foregroundColor(.primaryText)
-                                
-                                tipRow(icon: "hand.tap.fill", text: "Tap your side when you see GO")
-                                tipRow(icon: "trophy.fill", text: "First to tap wins the round")
-                                tipRow(icon: "arrow.left.arrow.right", text: "Best of multiple rounds")
-                            }
-                            .padding(16)
-                            .background(Color.secondaryBackground)
-                            .cornerRadius(12)
                             .padding(.horizontal, 24)
-                            .padding(.bottom, 12)
-                        }
-                        
-                        // Start Game button
-                        Button(action: {
-                            // Add haptic feedback
-                            let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-                            impactFeedback.impactOccurred()
+                            .padding(.top, 32)
                             
-                            // Small delay for smoother transition
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                navigateToPlay = true
+                            // Tips section
+                            if !player1Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !player2Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text("Tips")
+                                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                                        .foregroundColor(.primaryText)
+                                    
+                                    tipRow(icon: "hand.tap.fill", text: "Tap your side when you see GO")
+                                    tipRow(icon: "trophy.fill", text: "First to tap wins the round")
+                                    tipRow(icon: "arrow.left.arrow.right", text: "Best of multiple rounds")
+                                }
+                                .padding(16)
+                                .background(Color.secondaryBackground)
+                                .cornerRadius(12)
+                                .padding(.horizontal, 24)
+                                .padding(.bottom, 32)
+                            } else {
+                                Spacer()
+                                    .frame(height: 20)
                             }
-                        }) {
-                            Text("Start Game")
-                                .font(.system(size: 18, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 56)
-                                .background(
-                                    !player1Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !player2Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                                        ? Color.primaryAccent
-                                        : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
-                                )
-                                .cornerRadius(16)
                         }
-                        .disabled(player1Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || player2Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 40)
                     }
+                    
+                    // Start Game button - anchored at bottom
+                    PrimaryButton(title: "Start Game") {
+                        // Add haptic feedback
+                        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                        impactFeedback.impactOccurred()
+                        
+                        // Small delay for smoother transition
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            navigateToPlay = true
+                        }
+                    }
+                    .disabled(player1Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || player2Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .opacity((!player1Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !player2Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) ? 1.0 : 0.5)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 20)
+                    .padding(.bottom, 40)
                 }
             }
         }

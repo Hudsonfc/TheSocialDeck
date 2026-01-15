@@ -9,8 +9,9 @@ import SwiftUI
 
 struct ActNaturalLoadingView: View {
     let deck: Deck
+    let manager: ActNaturalGameManager
     
-    @State private var navigateToSetup: Bool = false
+    @State private var navigateToReveal: Bool = false
     @State private var progress: Double = 0
     @State private var hasStartedLoading: Bool = false
     @Environment(\.dismiss) private var dismiss
@@ -90,8 +91,8 @@ struct ActNaturalLoadingView: View {
         }
         .background(
             NavigationLink(
-                destination: ActNaturalPlayerSetupView(deck: deck),
-                isActive: $navigateToSetup
+                destination: ActNaturalRevealView(manager: manager, deck: deck),
+                isActive: $navigateToReveal
             ) {
                 EmptyView()
             }
@@ -117,7 +118,7 @@ struct ActNaturalLoadingView: View {
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.3) {
-            navigateToSetup = true
+            navigateToReveal = true
         }
     }
 }
@@ -134,7 +135,8 @@ struct ActNaturalLoadingView: View {
                 type: .other,
                 cards: [],
                 availableCategories: []
-            )
+            ),
+            manager: ActNaturalGameManager()
         )
     }
 }

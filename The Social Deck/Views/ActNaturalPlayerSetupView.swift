@@ -186,7 +186,7 @@ struct ActNaturalPlayerSetupView: View {
         .navigationBarHidden(true)
         .background(
             NavigationLink(
-                destination: ActNaturalRevealView(manager: manager, deck: deck),
+                destination: ActNaturalLoadingView(deck: deck, manager: manager),
                 isActive: $navigateToReveal
             ) {
                 EmptyView()

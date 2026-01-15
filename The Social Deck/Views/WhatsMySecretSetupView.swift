@@ -50,176 +50,168 @@ struct WhatsMySecretSetupView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 20)
                 
-                ScrollView {
-                    VStack(spacing: 0) {
-                        // Game artwork
-                        Image(deck.imageName)
-                            .resizable()
-                            .interpolation(.high)
-                            .antialiased(true)
-                            .scaledToFit()
-                            .frame(width: 120, height: 165)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                            .padding(.top, 20)
-                        
-                        // Title
-                        Text("Add Players")
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
-                            .foregroundColor(.primaryText)
-                            .padding(.top, 20)
-                        
-                        Text("Minimum 2 players required")
-                            .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(.secondaryText)
-                            .padding(.top, 4)
-                        
-                        // Players section
+                VStack(spacing: 0) {
+                    ScrollView {
                         VStack(spacing: 0) {
+                            // Game artwork
+                            Image(deck.imageName)
+                                .resizable()
+                                .interpolation(.high)
+                                .antialiased(true)
+                                .scaledToFit()
+                                .frame(width: 120, height: 165)
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
+                                .padding(.top, 20)
                             
-                            // Name input
-                            HStack(spacing: 12) {
-                                TextField("Enter player name", text: $newPlayerName)
-                                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                                    .foregroundColor(.primaryText)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 14)
-                                    .background(Color.secondaryBackground)
-                                    .cornerRadius(12)
-                                    .autocapitalization(.words)
-                                    .disableAutocorrection(true)
-                                    .onSubmit {
-                                        addPlayer()
-                                    }
+                            // Title
+                            Text("Add Players")
+                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                .foregroundColor(.primaryText)
+                                .padding(.top, 20)
+                            
+                            Text("Minimum 2 players required")
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
+                                .foregroundColor(.secondaryText)
+                                .padding(.top, 4)
+                            
+                            // Players section
+                            VStack(spacing: 0) {
                                 
-                                Button(action: {
-                                    addPlayer()
-                                }) {
-                                    Image(systemName: "plus")
-                                        .font(.system(size: 18, weight: .bold))
-                                        .foregroundColor(.white)
-                                        .frame(width: 50, height: 50)
-                                        .background(
-                                            players.count < 12 && !newPlayerName.trimmingCharacters(in: .whitespaces).isEmpty
-                                                ? Color.primaryAccent
-                                                : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
-                                        )
-                                        .cornerRadius(12)
-                                }
-                                .disabled(players.count >= 12 || newPlayerName.trimmingCharacters(in: .whitespaces).isEmpty)
-                            }
-                            .padding(.horizontal, 24)
-                            .padding(.top, 24)
-                            
-                            // Players list
-                            ScrollView {
-                                VStack(spacing: 8) {
-                                    ForEach(Array(players.enumerated()), id: \.offset) { index, player in
-                                        HStack {
-                                            Text("\(index + 1).")
-                                                .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                                .foregroundColor(.secondaryText)
-                                                .frame(width: 30, alignment: .leading)
-                                            
-                                            Text(player)
-                                                .font(.system(size: 16, weight: .medium, design: .rounded))
-                                                .foregroundColor(.primaryText)
-                                            
-                                            Spacer()
-                                            
-                                            Button(action: {
-                                                players.remove(at: index)
-                                            }) {
-                                                Image(systemName: "xmark.circle.fill")
-                                                    .font(.system(size: 20))
-                                                    .foregroundColor(Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0))
-                                            }
-                                        }
+                                // Name input
+                                HStack(spacing: 12) {
+                                    TextField("Enter player name", text: $newPlayerName)
+                                        .font(.system(size: 16, weight: .regular, design: .rounded))
+                                        .foregroundColor(.primaryText)
                                         .padding(.horizontal, 16)
-                                        .padding(.vertical, 12)
+                                        .padding(.vertical, 14)
                                         .background(Color.secondaryBackground)
                                         .cornerRadius(12)
+                                        .autocapitalization(.words)
+                                        .disableAutocorrection(true)
+                                        .onSubmit {
+                                            addPlayer()
+                                        }
+                                    
+                                    Button(action: {
+                                        addPlayer()
+                                    }) {
+                                        Image(systemName: "plus")
+                                            .font(.system(size: 18, weight: .bold))
+                                            .foregroundColor(.white)
+                                            .frame(width: 50, height: 50)
+                                            .background(
+                                                players.count < 12 && !newPlayerName.trimmingCharacters(in: .whitespaces).isEmpty
+                                                    ? Color.primaryAccent
+                                                    : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
+                                            )
+                                            .cornerRadius(12)
                                     }
+                                    .disabled(players.count >= 12 || newPlayerName.trimmingCharacters(in: .whitespaces).isEmpty)
                                 }
                                 .padding(.horizontal, 24)
+                                .padding(.top, 24)
+                                
+                                // Players list
+                                ScrollView {
+                                    VStack(spacing: 8) {
+                                        ForEach(Array(players.enumerated()), id: \.offset) { index, player in
+                                            HStack {
+                                                Text("\(index + 1).")
+                                                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                                    .foregroundColor(.secondaryText)
+                                                    .frame(width: 30, alignment: .leading)
+                                                
+                                                Text(player)
+                                                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                                                    .foregroundColor(.primaryText)
+                                                
+                                                Spacer()
+                                                
+                                                Button(action: {
+                                                    players.remove(at: index)
+                                                }) {
+                                                    Image(systemName: "xmark.circle.fill")
+                                                        .font(.system(size: 20))
+                                                        .foregroundColor(Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0))
+                                                }
+                                            }
+                                            .padding(.horizontal, 16)
+                                            .padding(.vertical, 12)
+                                            .background(Color.secondaryBackground)
+                                            .cornerRadius(12)
+                                        }
+                                    }
+                                    .padding(.horizontal, 24)
+                                }
+                                .padding(.top, 16)
                             }
-                            .padding(.top, 16)
-                        }
-                        
-                        // Card Count Selector
-                        VStack(spacing: 12) {
-                            Text("Number of Secrets")
-                                .font(.system(size: 16, weight: .medium, design: .rounded))
-                                .foregroundColor(.secondaryText)
                             
-                        VStack(spacing: 8) {
-                            Text("\(Int(selectedCardCount)) secret\(Int(selectedCardCount) == 1 ? "" : "s")")
-                                .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                .foregroundColor(.primaryText)
-                            
-                            Slider(value: $selectedCardCount, in: Double(minCards)...Double(maxCards), step: 1)
-                                .tint(Color.primaryAccent)
-                            
-                            HStack {
-                                Text("\(minCards)")
-                                    .font(.system(size: 12, weight: .regular, design: .rounded))
+                            // Card Count Selector
+                            VStack(spacing: 12) {
+                                Text("Number of Secrets")
+                                    .font(.system(size: 16, weight: .medium, design: .rounded))
                                     .foregroundColor(.secondaryText)
-                                Spacer()
-                                Text("\(maxCards)")
-                                    .font(.system(size: 12, weight: .regular, design: .rounded))
-                                    .foregroundColor(.secondaryText)
-                            }
-                        }
-                        .padding(.horizontal, 20)
-                        }
-                        .padding(.horizontal, 40)
-                        .padding(.bottom, 32)
-                        
-                        // Tips section
-                        if players.count >= 2 {
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("Tips")
-                                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                                
+                            VStack(spacing: 8) {
+                                Text("\(Int(selectedCardCount)) secret\(Int(selectedCardCount) == 1 ? "" : "s")")
+                                    .font(.system(size: 18, weight: .semibold, design: .rounded))
                                     .foregroundColor(.primaryText)
                                 
-                                tipRow(icon: "person.2.fill", text: "Each player gets a secret rule to follow")
-                                tipRow(icon: "eye.slash.fill", text: "Don't reveal your secret until the end")
-                                tipRow(icon: "bubble.left.and.bubble.right.fill", text: "Try to guess others' secrets")
+                                Slider(value: $selectedCardCount, in: Double(minCards)...Double(maxCards), step: 1)
+                                    .tint(Color.primaryAccent)
+                                
+                                HStack {
+                                    Text("\(minCards)")
+                                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                                        .foregroundColor(.secondaryText)
+                                    Spacer()
+                                    Text("\(maxCards)")
+                                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                                        .foregroundColor(.secondaryText)
+                                }
                             }
-                            .padding(16)
-                            .background(Color.secondaryBackground)
-                            .cornerRadius(12)
-                            .padding(.horizontal, 24)
-                            .padding(.bottom, 12)
-                        }
-                        
-                        // Start Game button
-                        Button(action: {
-                            // Add haptic feedback
-                            let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-                            impactFeedback.impactOccurred()
+                            .padding(.horizontal, 20)
+                            }
+                            .padding(.horizontal, 40)
+                            .padding(.bottom, 32)
                             
-                            // Small delay for smoother transition
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                navigateToPlay = true
+                            // Tips section
+                            if players.count >= 2 {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text("Tips")
+                                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                                        .foregroundColor(.primaryText)
+                                    
+                                    tipRow(icon: "person.2.fill", text: "Each player gets a secret rule to follow")
+                                    tipRow(icon: "eye.slash.fill", text: "Don't reveal your secret until the end")
+                                    tipRow(icon: "bubble.left.and.bubble.right.fill", text: "Try to guess others' secrets")
+                                }
+                                .padding(16)
+                                .background(Color.secondaryBackground)
+                                .cornerRadius(12)
+                                .padding(.horizontal, 24)
+                                .padding(.bottom, 32)
                             }
-                        }) {
-                            Text("Start Game")
-                                .font(.system(size: 18, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 56)
-                                .background(
-                                    players.count >= 2
-                                        ? Color.primaryAccent
-                                        : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
-                                )
-                                .cornerRadius(16)
                         }
-                        .disabled(players.count < 2)
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 40)
                     }
+                    
+                    // Start Game button - anchored at bottom
+                    PrimaryButton(title: "Start Game") {
+                        // Add haptic feedback
+                        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                        impactFeedback.impactOccurred()
+                        
+                        // Small delay for smoother transition
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            navigateToPlay = true
+                        }
+                    }
+                    .disabled(players.count < 2)
+                    .opacity(players.count >= 2 ? 1.0 : 0.5)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 20)
+                    .padding(.bottom, 40)
                 }
             }
         }

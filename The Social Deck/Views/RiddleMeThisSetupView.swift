@@ -11,6 +11,8 @@ import UIKit
 struct RiddleMeThisSetupView: View {
     let deck: Deck
     @State private var navigateToPlay: Bool = false
+    @State private var timerEnabled: Bool = false
+    @State private var timerDuration: Double = 30
     @Environment(\.dismiss) private var dismiss
     
     private let minCards: Int = 1
@@ -79,11 +81,50 @@ struct RiddleMeThisSetupView: View {
                                 .padding(.horizontal, 20)
                             }
                             .padding(.horizontal, 40)
+                            .padding(.bottom, 20)
+                            
+                            // Timer Toggle Section
+                            VStack(spacing: 12) {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Timer")
+                                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                            .foregroundColor(.primaryText)
+                                        
+                                        Text("Add urgency with a countdown timer")
+                                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                                            .foregroundColor(.secondaryText)
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Toggle("", isOn: $timerEnabled)
+                                        .tint(Color.primaryAccent)
+                                }
+                                
+                                if timerEnabled {
+                                    VStack(spacing: 8) {
+                                        Text(formatTimerDuration(Int(timerDuration)))
+                                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                                            .foregroundColor(Color.primaryAccent)
+                                        
+                                        Slider(value: $timerDuration, in: 15...180, step: 5)
+                                            .tint(Color.primaryAccent)
+                                    }
+                                    .transition(.opacity.combined(with: .move(edge: .top)))
+                                }
+                            }
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 16)
+                            .background(Color.secondaryBackground)
+                            .cornerRadius(16)
+                            .animation(.easeInOut(duration: 0.2), value: timerEnabled)
+                            .padding(.horizontal, 40)
                             .padding(.bottom, 32)
                         }
                     }
                     
-                    // Start Game button
+                    // Start Game button - anchored at bottom
                     PrimaryButton(title: "Start Game") {
                         // Add haptic feedback
                         let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
@@ -95,6 +136,7 @@ struct RiddleMeThisSetupView: View {
                         }
                     }
                     .padding(.horizontal, 40)
+                    .padding(.top, 20)
                     .padding(.bottom, 40)
                 }
             }
@@ -104,13 +146,29 @@ struct RiddleMeThisSetupView: View {
             NavigationLink(
                 destination: RiddleMeThisLoadingView(
                     deck: deck,
-                    cardCount: Int(selectedCardCount)
+                    cardCount: Int(selectedCardCount),
+                    timerEnabled: timerEnabled,
+                    timerDuration: Int(timerDuration)
                 ),
                 isActive: $navigateToPlay
             ) {
                 EmptyView()
             }
         )
+    }
+    
+    private func formatTimerDuration(_ seconds: Int) -> String {
+        if seconds < 60 {
+            return "\(seconds) seconds per riddle"
+        } else {
+            let minutes = seconds / 60
+            let remainingSeconds = seconds % 60
+            if remainingSeconds == 0 {
+                return "\(minutes) minute\(minutes == 1 ? "" : "s") per riddle"
+            } else {
+                return "\(minutes)m \(remainingSeconds)s per riddle"
+            }
+        }
     }
 }
 

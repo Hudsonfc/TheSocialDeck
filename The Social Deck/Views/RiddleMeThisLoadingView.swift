@@ -10,6 +10,8 @@ import SwiftUI
 struct RiddleMeThisLoadingView: View {
     let deck: Deck
     let cardCount: Int
+    let timerEnabled: Bool
+    let timerDuration: Int
     
     @State private var navigateToPlay: Bool = false
     @State private var progress: Double = 0
@@ -91,7 +93,7 @@ struct RiddleMeThisLoadingView: View {
         .background(
             NavigationLink(
                 destination: RiddleMeThisPlayView(
-                    manager: RiddleMeThisGameManager(deck: deck, cardCount: cardCount),
+                    manager: RiddleMeThisGameManager(deck: deck, cardCount: cardCount, timerEnabled: timerEnabled, timerDuration: timerDuration),
                     deck: deck
                 ),
                 isActive: $navigateToPlay

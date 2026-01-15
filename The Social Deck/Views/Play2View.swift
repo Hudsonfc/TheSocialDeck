@@ -1002,7 +1002,7 @@ struct Play2View: View {
                 MusicTriviaCategorySelectionView(deck: deck)
             // Social Deck Games (formerly Party Games)
             case .actNatural:
-                ActNaturalLoadingView(deck: deck)
+                ActNaturalPlayerSetupView(deck: deck)
             case .categoryClash:
                 CategoryClashCategorySelectionView(deck: deck)
             case .spinTheBottle:
@@ -1176,7 +1176,7 @@ struct GameCardView: View {
                         HapticManager.shared.lightImpact()
                         onSelect()
                     }) {
-                        Text("Select")
+                        Text("Play")
                             .font(.system(size: 18, weight: .semibold, design: .rounded))
                             .foregroundColor(.white)
                             .frame(width: 180)
@@ -1328,16 +1328,6 @@ struct GridGameTile: View {
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                     .frame(maxWidth: .infinity)
-                
-                // Game stats - Estimated time only
-                HStack(spacing: 6) {
-                    Image(systemName: "clock")
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(.secondaryText)
-                    Text(deck.estimatedTime)
-                        .font(.system(size: 12, weight: .regular, design: .rounded))
-                        .foregroundColor(.secondaryText)
-                }
             }
             .scaleEffect(isPressed ? 0.97 : 1.0)
         }

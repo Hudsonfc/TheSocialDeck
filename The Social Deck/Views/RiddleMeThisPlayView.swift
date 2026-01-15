@@ -55,6 +55,25 @@ struct RiddleMeThisPlayView: View {
                     
                     Spacer()
                     
+                    // Timer indicator (if enabled, started, and in riddle phase)
+                    if manager.timerEnabled && manager.timerStarted && manager.gamePhase == .showingRiddle {
+                        HStack(spacing: 6) {
+                            Image(systemName: "timer")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(manager.timeRemaining <= 10 ? .buttonBackground : .buttonBackground)
+                            Text(formatCountdownTime(manager.timeRemaining))
+                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                .monospacedDigit()
+                                .foregroundColor(manager.timeRemaining <= 10 ? .buttonBackground : .buttonBackground)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(manager.timeRemaining <= 10 ? Color.buttonBackground.opacity(0.25) : Color.buttonBackground.opacity(0.15))
+                        .cornerRadius(20)
+                        .padding(.trailing, 8)
+                        .animation(.easeInOut(duration: 0.3), value: manager.timeRemaining <= 10)
+                    }
+                    
                     // Round indicator
                     Text("Round \(manager.roundNumber)")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
@@ -122,6 +141,31 @@ struct RiddleMeThisPlayView: View {
             }
         }
     }
+    
+    private func formatTimerDuration(_ seconds: Int) -> String {
+        if seconds < 60 {
+            return "\(seconds)s"
+        } else {
+            let minutes = seconds / 60
+            let remainingSeconds = seconds % 60
+            if remainingSeconds == 0 {
+                return "\(minutes)m"
+            } else {
+                return "\(minutes)m \(remainingSeconds)s"
+            }
+        }
+    }
+    
+    private func formatCountdownTime(_ time: TimeInterval) -> String {
+        let totalSeconds = Int(time)
+        if totalSeconds < 60 {
+            return "\(totalSeconds)s"
+        } else {
+            let minutes = totalSeconds / 60
+            let seconds = totalSeconds % 60
+            return String(format: "%d:%02d", minutes, seconds)
+        }
+    }
 }
 
 // Riddle View - Shows riddle card and answer buttons
@@ -134,6 +178,39 @@ struct RiddleView: View {
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
+            
+            // Timer indicator (prominent display when timer is enabled and started)
+            if manager.timerEnabled && manager.timerStarted && manager.gamePhase == .showingRiddle {
+                VStack(spacing: 8) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "timer")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(manager.timeRemaining <= 10 ? .buttonBackground : .buttonBackground)
+                        Text(formatCountdownTime(manager.timeRemaining))
+                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundColor(manager.timeRemaining <= 10 ? .buttonBackground : .buttonBackground)
+                    }
+                    
+                    if manager.timeRemaining <= 10 {
+                        Text("Time running out!")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundColor(.buttonBackground)
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(manager.timeRemaining <= 10 ? Color.buttonBackground.opacity(0.3) : Color.buttonBackground.opacity(0.2))
+                .cornerRadius(25)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 25)
+                        .stroke(manager.timeRemaining <= 10 ? Color.buttonBackground : Color.buttonBackground.opacity(0.5), lineWidth: manager.timeRemaining <= 10 ? 3 : 2)
+                )
+                .scaleEffect(manager.timeRemaining <= 5 ? 1.05 : 1.0)
+                .padding(.bottom, 24)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .animation(.easeInOut(duration: 0.3), value: manager.timeRemaining <= 10)
+            }
             
             // Card
             if let riddle = manager.currentRiddle {
@@ -161,6 +238,17 @@ struct RiddleView: View {
                 }
             }
             
+            // Placeholder text when timer is enabled but card hasn't been flipped yet
+            if manager.timerEnabled && !manager.timerStarted && !isCardFlipped {
+                Text("Tap the card to flip and start the timer")
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundColor(.secondaryText)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+                    .padding(.top, 24)
+                    .transition(.opacity)
+            }
+            
             Spacer()
             
             // Show answer button (only when card is flipped to show riddle)
@@ -181,6 +269,31 @@ struct RiddleView: View {
         .animation(.spring(response: 0.6, dampingFraction: 0.8), value: isCardFlipped)
     }
     
+    private func formatTimerDuration(_ seconds: Int) -> String {
+        if seconds < 60 {
+            return "\(seconds) seconds"
+        } else {
+            let minutes = seconds / 60
+            let remainingSeconds = seconds % 60
+            if remainingSeconds == 0 {
+                return "\(minutes) minute\(minutes == 1 ? "" : "s")"
+            } else {
+                return "\(minutes)m \(remainingSeconds)s"
+            }
+        }
+    }
+    
+    private func formatCountdownTime(_ time: TimeInterval) -> String {
+        let totalSeconds = Int(time)
+        if totalSeconds < 60 {
+            return "\(totalSeconds)s"
+        } else {
+            let minutes = totalSeconds / 60
+            let seconds = totalSeconds % 60
+            return String(format: "%d:%02d", minutes, seconds)
+        }
+    }
+    
     private func toggleCard() {
         if isCardFlipped {
             // Flip back to front
@@ -189,14 +302,19 @@ struct RiddleView: View {
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                 isCardFlipped = false
+                // Timer continues running even when card is flipped back
             }
         } else {
-            // Flip to back (show answer)
+            // Flip to back (show riddle)
             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
                 cardRotation = 180
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                 isCardFlipped = true
+                // Start timer when card is first flipped to show riddle (only starts once)
+                if manager.timerEnabled {
+                    manager.startTimer()
+                }
             }
         }
     }

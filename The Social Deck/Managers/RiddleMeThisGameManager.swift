@@ -15,6 +15,11 @@ class RiddleMeThisGameManager: ObservableObject {
     @Published var roundNumber: Int = 1
     @Published var winner: String? = nil
     @Published var isFinished: Bool = false
+    let timerEnabled: Bool
+    let timerDuration: Int
+    @Published var timeRemaining: TimeInterval = 0
+    @Published var timerStarted: Bool = false
+    private var countdownTimer: Timer?
     
     enum GamePhase {
         case showingRiddle // Riddle is displayed
@@ -23,7 +28,9 @@ class RiddleMeThisGameManager: ObservableObject {
     
     @Published var gamePhase: GamePhase = .showingRiddle
     
-    init(deck: Deck, cardCount: Int) {
+    init(deck: Deck, cardCount: Int, timerEnabled: Bool = false, timerDuration: Int = 30) {
+        self.timerEnabled = timerEnabled
+        self.timerDuration = timerDuration
         // Get cards - shuffle and take cardCount
         if cardCount == 0 {
             self.cards = deck.cards.shuffled()
@@ -107,9 +114,55 @@ class RiddleMeThisGameManager: ObservableObject {
         winner = nil
         gamePhase = .showingRiddle
         
+        // Reset timer (but don't start it yet - will start when card is flipped)
+        if timerEnabled {
+            timeRemaining = TimeInterval(timerDuration)
+            timerStarted = false
+        }
+        
         // Haptic feedback
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
         impactFeedback.impactOccurred()
+    }
+    
+    func startTimer() {
+        // Start timer if enabled, in riddle phase, and hasn't been started yet
+        if timerEnabled && gamePhase == .showingRiddle && !timerStarted && timeRemaining > 0 {
+            timerStarted = true
+            startCountdownTimer()
+        }
+    }
+    
+    private func startCountdownTimer() {
+        // Stop any existing timer
+        countdownTimer?.invalidate()
+        
+        // Start new countdown timer
+        countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
+            guard let self = self else {
+                timer.invalidate()
+                return
+            }
+            
+            // Only countdown if we're in showingRiddle phase
+            guard self.gamePhase == .showingRiddle else {
+                timer.invalidate()
+                return
+            }
+            
+            self.timeRemaining -= 1
+            
+            // When timer reaches 0, automatically show answer
+            if self.timeRemaining <= 0 {
+                timer.invalidate()
+                self.showAnswer()
+            }
+        }
+    }
+    
+    func stopTimer() {
+        countdownTimer?.invalidate()
+        countdownTimer = nil
     }
     
     func submitCorrectAnswer() {
@@ -135,6 +188,9 @@ class RiddleMeThisGameManager: ObservableObject {
     }
     
     func showAnswer() {
+        // Stop timer
+        stopTimer()
+        
         // No winner when showing answer directly
         winner = nil
         
@@ -147,6 +203,9 @@ class RiddleMeThisGameManager: ObservableObject {
     }
     
     func nextRound() {
+        // Stop timer
+        stopTimer()
+        
         // Move to next card
         currentCardIndex += 1
         roundNumber += 1
@@ -158,6 +217,10 @@ class RiddleMeThisGameManager: ObservableObject {
             // Start next round
             startRound()
         }
+    }
+    
+    deinit {
+        stopTimer()
     }
     
 }

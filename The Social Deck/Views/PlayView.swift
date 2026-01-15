@@ -150,7 +150,7 @@ struct PlayView: View {
             case .whatsMySecret:
                 WhatsMySecretSetupView(deck: deck)
             case .actNatural:
-                ActNaturalLoadingView(deck: deck)
+                ActNaturalPlayerSetupView(deck: deck)
             default:
                 EmptyView()
             }

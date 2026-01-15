@@ -115,40 +115,26 @@ struct BluffCallSetupView: View {
                         // Selected categories chips
                         VStack(spacing: 12) {
                             Text("Selected Categories")
-                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                                .font(.system(size: 14, weight: .medium, design: .rounded))
                                 .foregroundColor(.secondaryText)
-                        
-                        if selectedCategories.count <= 3 {
-                            // Center when 3 or fewer categories
-                            HStack(spacing: 12) {
-                                ForEach(selectedCategories, id: \.self) { category in
-                                    Text(category)
-                                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.white)
-                                        .padding(.horizontal, 20)
-                                        .padding(.vertical, 10)
-                                        .background(Color.buttonBackground)
-                                        .cornerRadius(24)
-                                }
-                            }
-                        } else {
-                            // Scrollable when more than 3 categories
+                            
+                            // Chips in scrollable layout
                             ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 12) {
+                                HStack(spacing: 8) {
                                     ForEach(selectedCategories, id: \.self) { category in
                                         Text(category)
-                                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                            .foregroundColor(.white)
-                                            .padding(.horizontal, 20)
-                                            .padding(.vertical, 10)
-                                            .background(Color.buttonBackground)
-                                            .cornerRadius(24)
+                                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                                            .foregroundColor(Color.primaryAccent)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 6)
+                                            .background(Color.primaryAccent.opacity(0.1))
+                                            .cornerRadius(16)
                                     }
                                 }
-                                .padding(.horizontal, 20)
+                                .padding(.horizontal, 40)
                             }
                         }
-                        }
+                        .padding(.bottom, 20)
                         
                         // Players section
                         VStack(spacing: 0) {
@@ -249,45 +235,18 @@ struct BluffCallSetupView: View {
                         }
                         .padding(.horizontal, 40)
                         
-                        // Tips section
-                        if players.count >= 2 {
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("Tips")
-                                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                                    .foregroundColor(.primaryText)
-                                
-                                tipRow(icon: "questionmark.circle.fill", text: "Answer truthfully or bluff")
-                                tipRow(icon: "hand.raised.fill", text: "Group votes on whether to believe you")
-                                tipRow(icon: "trophy.fill", text: "Score points for successful bluffs")
-                            }
-                            .padding(16)
-                            .background(Color.secondaryBackground)
-                            .cornerRadius(12)
-                            .padding(.horizontal, 24)
-                            .padding(.bottom, 12)
-                        }
-                        
-                        // Start Game button
-                        Button(action: {
-                            navigateToPlay = true
-                        }) {
-                            Text("Start Game")
-                                .font(.system(size: 18, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 56)
-                                .background(
-                                    players.count >= 2
-                                        ? Color.primaryAccent
-                                        : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
-                                )
-                                .cornerRadius(16)
-                        }
-                        .disabled(players.count < 2)
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 40)
                     }
                 }
+                
+                // Start Game button - anchored at bottom
+                PrimaryButton(title: "Start Game") {
+                    navigateToPlay = true
+                }
+                .disabled(players.count < 2)
+                .opacity(players.count >= 2 ? 1.0 : 0.5)
+                .padding(.horizontal, 24)
+                .padding(.top, 20)
+                .padding(.bottom, 40)
             }
         }
         .navigationBarHidden(true)

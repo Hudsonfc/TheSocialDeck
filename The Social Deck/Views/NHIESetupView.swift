@@ -66,92 +66,81 @@ struct NHIESetupView: View {
                 .padding(.horizontal, 40)
                 .padding(.top, 20)
                 
-                Spacer()
-                
-                VStack(spacing: 32) {
-                    // Game artwork - regular card image
-                    Image(deck.imageName)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 160, height: 220)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                    
-                    // Selected categories chips
-                    VStack(spacing: 12) {
-                        Text("Selected Categories")
-                            .font(.system(size: 16, weight: .medium, design: .rounded))
-                            .foregroundColor(.secondaryText)
-                        
-                        if selectedCategories.count <= 3 {
-                            // Center when 3 or fewer categories
-                            HStack(spacing: 12) {
-                                ForEach(selectedCategories, id: \.self) { category in
-                                    Text(category)
-                                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.white)
-                                        .padding(.horizontal, 20)
-                                        .padding(.vertical, 10)
-                                        .background(Color.buttonBackground)
-                                        .cornerRadius(24)
+                VStack(spacing: 0) {
+                    ScrollView {
+                        VStack(spacing: 32) {
+                            // Game artwork - regular card image
+                            Image(deck.imageName)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 160, height: 220)
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
+                                .padding(.top, 20)
+                            
+                            // Selected categories chips
+                            VStack(spacing: 12) {
+                                Text("Selected Categories")
+                                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                                    .foregroundColor(.secondaryText)
+                                
+                                // Chips in scrollable layout
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 8) {
+                                        ForEach(selectedCategories, id: \.self) { category in
+                                            Text(category)
+                                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                                .foregroundColor(Color.primaryAccent)
+                                                .padding(.horizontal, 12)
+                                                .padding(.vertical, 6)
+                                                .background(Color.primaryAccent.opacity(0.1))
+                                                .cornerRadius(16)
+                                        }
+                                    }
+                                    .padding(.horizontal, 40)
                                 }
                             }
-                        } else {
-                            // Scrollable when more than 3 categories
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 12) {
-                                    ForEach(selectedCategories, id: \.self) { category in
-                                        Text(category)
-                                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                            .foregroundColor(.white)
-                                            .padding(.horizontal, 20)
-                                            .padding(.vertical, 10)
-                                            .background(Color.buttonBackground)
-                                            .cornerRadius(24)
+                            .padding(.bottom, 20)
+                            
+                            // Card Count Selector
+                            VStack(spacing: 12) {
+                                Text("Number of Cards")
+                                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                                    .foregroundColor(.secondaryText)
+                                
+                                VStack(spacing: 8) {
+                                    Text("\(Int(selectedCardCount)) cards")
+                                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                        .foregroundColor(.primaryText)
+                                    
+                                    Slider(value: $selectedCardCount, in: Double(minCards)...Double(maxCards), step: 1)
+                                        .tint(Color.primaryAccent)
+                                    
+                                    HStack {
+                                        Text("\(minCards)")
+                                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                                            .foregroundColor(.secondaryText)
+                                        Spacer()
+                                        Text("\(maxCards)")
+                                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                                            .foregroundColor(.secondaryText)
                                     }
                                 }
                                 .padding(.horizontal, 20)
                             }
+                            .padding(.bottom, 32)
                         }
+                        .padding(.horizontal, 40)
                     }
                     
-                    // Card Count Selector
-                    VStack(spacing: 12) {
-                        Text("Number of Cards")
-                            .font(.system(size: 16, weight: .medium, design: .rounded))
-                            .foregroundColor(.secondaryText)
-                        
-                        VStack(spacing: 8) {
-                            Text("\(Int(selectedCardCount)) cards")
-                                .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                .foregroundColor(.primaryText)
-                            
-                            Slider(value: $selectedCardCount, in: Double(minCards)...Double(maxCards), step: 1)
-                                .tint(Color.primaryAccent)
-                            
-                            HStack {
-                                Text("\(minCards)")
-                                    .font(.system(size: 12, weight: .regular, design: .rounded))
-                                    .foregroundColor(.secondaryText)
-                                Spacer()
-                                Text("\(maxCards)")
-                                    .font(.system(size: 12, weight: .regular, design: .rounded))
-                                    .foregroundColor(.secondaryText)
-                            }
-                        }
-                        .padding(.horizontal, 20)
-                    }
-                    
-                    // Start Game button
+                    // Start Game button - anchored at bottom
                     PrimaryButton(title: "Start Game") {
                         navigateToPlay = true
                     }
                     .padding(.horizontal, 40)
                     .padding(.top, 20)
+                    .padding(.bottom, 40)
                 }
-                .padding(.horizontal, 40)
-                
-                Spacer()
             }
         }
         .navigationBarHidden(true)
