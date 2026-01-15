@@ -820,6 +820,8 @@ struct Play2View: View {
     private var storyChainSetupView: some View {
         if let deck = navigateToStoryChainSetup {
             StoryChainSetupView(deck: deck)
+        } else {
+            Color.appBackground.ignoresSafeArea()
         }
     }
     
@@ -840,6 +842,8 @@ struct Play2View: View {
     private var memoryMasterSetupView: some View {
         if let deck = navigateToMemoryMasterSetup {
             MemoryMasterSetupView(deck: deck)
+        } else {
+            Color.appBackground.ignoresSafeArea()
         }
     }
     
@@ -860,6 +864,8 @@ struct Play2View: View {
     private var rhymeTimeSetupView: some View {
         if let deck = navigateToRhymeTimeSetup {
             RhymeTimeSetupView(deck: deck)
+        } else {
+            Color.appBackground.ignoresSafeArea()
         }
     }
     
@@ -880,6 +886,8 @@ struct Play2View: View {
     private var tapDuelSetupView: some View {
         if let deck = navigateToTapDuelSetup {
             TapDuelSetupView(deck: deck)
+        } else {
+            Color.appBackground.ignoresSafeArea()
         }
     }
     
@@ -900,6 +908,8 @@ struct Play2View: View {
     private var riddleMeThisSetupView: some View {
         if let deck = navigateToRiddleMeThisSetup {
             RiddleMeThisSetupView(deck: deck)
+        } else {
+            Color.appBackground.ignoresSafeArea()
         }
     }
     
@@ -920,6 +930,8 @@ struct Play2View: View {
     private var quickfireCouplesSetupView: some View {
         if let deck = navigateToQuickfireCouplesSetup {
             QuickfireCouplesSetupView(deck: deck, selectedCategories: [])
+        } else {
+            Color.appBackground.ignoresSafeArea()
         }
     }
     
@@ -940,6 +952,8 @@ struct Play2View: View {
     private var closerThanEverSetupView: some View {
         if let deck = navigateToCloserThanEverSetup {
             CloserThanEverSetupView(deck: deck, selectedCategories: [])
+        } else {
+            Color.appBackground.ignoresSafeArea()
         }
     }
     
@@ -960,6 +974,8 @@ struct Play2View: View {
     private var usAfterDarkSetupView: some View {
         if let deck = navigateToUsAfterDarkSetup {
             UsAfterDarkSetupView(deck: deck, selectedCategories: [])
+        } else {
+            Color.appBackground.ignoresSafeArea()
         }
     }
     
@@ -1487,60 +1503,60 @@ struct GameDescriptionOverlay: View {
                         .padding(.bottom, 40)
                     } else if deck.type == .storyChain {
                         PrimaryButton(title: "Play") {
-                            // Navigate first, then dismiss overlay after navigation completes
-                            navigateToStoryChainSetup = deck
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                    selectedDeck = nil
-                                }
+                            // Dismiss overlay immediately, then navigate
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                selectedDeck = nil
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                navigateToStoryChainSetup = deck
                             }
                         }
                         .padding(.horizontal, 40)
                         .padding(.bottom, 40)
                     } else if deck.type == .memoryMaster {
                         PrimaryButton(title: "Play") {
-                            // Navigate first, then dismiss overlay after navigation completes
-                            navigateToMemoryMasterSetup = deck
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                    selectedDeck = nil
-                                }
+                            // Dismiss overlay immediately, then navigate
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                selectedDeck = nil
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                navigateToMemoryMasterSetup = deck
                             }
                         }
                         .padding(.horizontal, 40)
                         .padding(.bottom, 40)
                     } else if deck.type == .rhymeTime {
                         PrimaryButton(title: "Play") {
-                            // Navigate first, then dismiss overlay after navigation completes
-                            navigateToRhymeTimeSetup = deck
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                    selectedDeck = nil
-                                }
+                            // Dismiss overlay immediately, then navigate
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                selectedDeck = nil
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                navigateToRhymeTimeSetup = deck
                             }
                         }
                         .padding(.horizontal, 40)
                         .padding(.bottom, 40)
                     } else if deck.type == .tapDuel {
                         PrimaryButton(title: "Play") {
-                            // Navigate first, then dismiss overlay after navigation completes
-                            navigateToTapDuelSetup = deck
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                    selectedDeck = nil
-                                }
+                            // Dismiss overlay immediately, then navigate
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                selectedDeck = nil
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                navigateToTapDuelSetup = deck
                             }
                         }
                         .padding(.horizontal, 40)
                         .padding(.bottom, 40)
                     } else if deck.type == .riddleMeThis {
                         PrimaryButton(title: "Play") {
-                            // Navigate first, then dismiss overlay after navigation completes
-                            navigateToRiddleMeThisSetup = deck
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                    selectedDeck = nil
-                                }
+                            // Dismiss overlay immediately, then navigate
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                selectedDeck = nil
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                navigateToRiddleMeThisSetup = deck
                             }
                         }
                         .padding(.horizontal, 40)
@@ -1559,36 +1575,36 @@ struct GameDescriptionOverlay: View {
                         .padding(.bottom, 40)
                     } else if deck.type == .quickfireCouples {
                         PrimaryButton(title: "Play") {
-                            // Navigate first, then dismiss overlay after navigation completes
-                            navigateToQuickfireCouplesSetup = deck
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                    selectedDeck = nil
-                                }
+                            // Dismiss overlay immediately, then navigate
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                selectedDeck = nil
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                navigateToQuickfireCouplesSetup = deck
                             }
                         }
                         .padding(.horizontal, 40)
                         .padding(.bottom, 40)
                     } else if deck.type == .closerThanEver {
                         PrimaryButton(title: "Play") {
-                            // Navigate first, then dismiss overlay after navigation completes
-                            navigateToCloserThanEverSetup = deck
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                    selectedDeck = nil
-                                }
+                            // Dismiss overlay immediately, then navigate
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                selectedDeck = nil
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                navigateToCloserThanEverSetup = deck
                             }
                         }
                         .padding(.horizontal, 40)
                         .padding(.bottom, 40)
                     } else if deck.type == .usAfterDark {
                         PrimaryButton(title: "Play") {
-                            // Navigate first, then dismiss overlay after navigation completes
-                            navigateToUsAfterDarkSetup = deck
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                    selectedDeck = nil
-                                }
+                            // Dismiss overlay immediately, then navigate
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                selectedDeck = nil
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                navigateToUsAfterDarkSetup = deck
                             }
                         }
                         .padding(.horizontal, 40)
