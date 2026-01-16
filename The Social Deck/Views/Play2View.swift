@@ -603,7 +603,7 @@ struct Play2View: View {
             }
             
             NavigationLink(
-                destination: playViewDestination,
+                destination: playView,
                 isActive: Binding(
                     get: { navigateToPlayView != nil },
                     set: { if !$0 { navigateToPlayView = nil } }
@@ -613,7 +613,7 @@ struct Play2View: View {
             }
             
             NavigationLink(
-                destination: storyChainSetupDestination,
+                destination: storyChainSetupView,
                 isActive: Binding(
                     get: { navigateToStoryChainSetup != nil },
                     set: { if !$0 { navigateToStoryChainSetup = nil } }
@@ -623,7 +623,7 @@ struct Play2View: View {
             }
             
             NavigationLink(
-                destination: memoryMasterSetupDestination,
+                destination: memoryMasterSetupView,
                 isActive: Binding(
                     get: { navigateToMemoryMasterSetup != nil },
                     set: { if !$0 { navigateToMemoryMasterSetup = nil } }
@@ -633,7 +633,7 @@ struct Play2View: View {
             }
             
             NavigationLink(
-                destination: rhymeTimeSetupDestination,
+                destination: rhymeTimeSetupView,
                 isActive: Binding(
                     get: { navigateToRhymeTimeSetup != nil },
                     set: { if !$0 { navigateToRhymeTimeSetup = nil } }
@@ -643,7 +643,7 @@ struct Play2View: View {
             }
             
             NavigationLink(
-                destination: tapDuelSetupDestination,
+                destination: tapDuelSetupView,
                 isActive: Binding(
                     get: { navigateToTapDuelSetup != nil },
                     set: { if !$0 { navigateToTapDuelSetup = nil } }
@@ -653,7 +653,7 @@ struct Play2View: View {
             }
             
             NavigationLink(
-                destination: riddleMeThisSetupDestination,
+                destination: riddleMeThisSetupView,
                 isActive: Binding(
                     get: { navigateToRiddleMeThisSetup != nil },
                     set: { if !$0 { navigateToRiddleMeThisSetup = nil } }
@@ -663,7 +663,7 @@ struct Play2View: View {
             }
             
             NavigationLink(
-                destination: quickfireCouplesSetupDestination,
+                destination: quickfireCouplesSetupView,
                 isActive: Binding(
                     get: { navigateToQuickfireCouplesSetup != nil },
                     set: { if !$0 { navigateToQuickfireCouplesSetup = nil } }
@@ -673,7 +673,7 @@ struct Play2View: View {
             }
             
             NavigationLink(
-                destination: closerThanEverSetupDestination,
+                destination: closerThanEverSetupView,
                 isActive: Binding(
                     get: { navigateToCloserThanEverSetup != nil },
                     set: { if !$0 { navigateToCloserThanEverSetup = nil } }
@@ -683,7 +683,7 @@ struct Play2View: View {
             }
             
             NavigationLink(
-                destination: usAfterDarkSetupDestination,
+                destination: usAfterDarkSetupView,
                 isActive: Binding(
                     get: { navigateToUsAfterDarkSetup != nil },
                     set: { if !$0 { navigateToUsAfterDarkSetup = nil } }
@@ -782,37 +782,11 @@ struct Play2View: View {
     }
     
     @ViewBuilder
-    private var playViewDestination: some View {
-        NavigationLink(
-            destination: playView,
-            isActive: Binding(
-                get: { navigateToPlayView != nil },
-                set: { if !$0 { navigateToPlayView = nil } }
-            )
-        ) {
-            EmptyView()
-        }
-    }
-    
-    @ViewBuilder
     private var playView: some View {
         if let deck = navigateToPlayView {
             if deck.type == .spinTheBottle {
                 SpinTheBottleView()
             }
-        }
-    }
-    
-    @ViewBuilder
-    private var storyChainSetupDestination: some View {
-        NavigationLink(
-            destination: storyChainSetupView,
-            isActive: Binding(
-                get: { navigateToStoryChainSetup != nil },
-                set: { if !$0 { navigateToStoryChainSetup = nil } }
-            )
-        ) {
-            EmptyView()
         }
     }
     
@@ -826,37 +800,11 @@ struct Play2View: View {
     }
     
     @ViewBuilder
-    private var memoryMasterSetupDestination: some View {
-        NavigationLink(
-            destination: memoryMasterSetupView,
-            isActive: Binding(
-                get: { navigateToMemoryMasterSetup != nil },
-                set: { if !$0 { navigateToMemoryMasterSetup = nil } }
-            )
-        ) {
-            EmptyView()
-        }
-    }
-    
-    @ViewBuilder
     private var memoryMasterSetupView: some View {
         if let deck = navigateToMemoryMasterSetup {
             MemoryMasterSetupView(deck: deck)
         } else {
             Color.appBackground.ignoresSafeArea()
-        }
-    }
-    
-    @ViewBuilder
-    private var rhymeTimeSetupDestination: some View {
-        NavigationLink(
-            destination: rhymeTimeSetupView,
-            isActive: Binding(
-                get: { navigateToRhymeTimeSetup != nil },
-                set: { if !$0 { navigateToRhymeTimeSetup = nil } }
-            )
-        ) {
-            EmptyView()
         }
     }
     
@@ -870,37 +818,11 @@ struct Play2View: View {
     }
     
     @ViewBuilder
-    private var tapDuelSetupDestination: some View {
-        NavigationLink(
-            destination: tapDuelSetupView,
-            isActive: Binding(
-                get: { navigateToTapDuelSetup != nil },
-                set: { if !$0 { navigateToTapDuelSetup = nil } }
-            )
-        ) {
-            EmptyView()
-        }
-    }
-    
-    @ViewBuilder
     private var tapDuelSetupView: some View {
         if let deck = navigateToTapDuelSetup {
             TapDuelSetupView(deck: deck)
         } else {
             Color.appBackground.ignoresSafeArea()
-        }
-    }
-    
-    @ViewBuilder
-    private var riddleMeThisSetupDestination: some View {
-        NavigationLink(
-            destination: riddleMeThisSetupView,
-            isActive: Binding(
-                get: { navigateToRiddleMeThisSetup != nil },
-                set: { if !$0 { navigateToRiddleMeThisSetup = nil } }
-            )
-        ) {
-            EmptyView()
         }
     }
     
@@ -914,19 +836,6 @@ struct Play2View: View {
     }
     
     @ViewBuilder
-    private var quickfireCouplesSetupDestination: some View {
-        NavigationLink(
-            destination: quickfireCouplesSetupView,
-            isActive: Binding(
-                get: { navigateToQuickfireCouplesSetup != nil },
-                set: { if !$0 { navigateToQuickfireCouplesSetup = nil } }
-            )
-        ) {
-            EmptyView()
-        }
-    }
-    
-    @ViewBuilder
     private var quickfireCouplesSetupView: some View {
         if let deck = navigateToQuickfireCouplesSetup {
             QuickfireCouplesSetupView(deck: deck, selectedCategories: [])
@@ -936,37 +845,11 @@ struct Play2View: View {
     }
     
     @ViewBuilder
-    private var closerThanEverSetupDestination: some View {
-        NavigationLink(
-            destination: closerThanEverSetupView,
-            isActive: Binding(
-                get: { navigateToCloserThanEverSetup != nil },
-                set: { if !$0 { navigateToCloserThanEverSetup = nil } }
-            )
-        ) {
-            EmptyView()
-        }
-    }
-    
-    @ViewBuilder
     private var closerThanEverSetupView: some View {
         if let deck = navigateToCloserThanEverSetup {
             CloserThanEverSetupView(deck: deck, selectedCategories: [])
         } else {
             Color.appBackground.ignoresSafeArea()
-        }
-    }
-    
-    @ViewBuilder
-    private var usAfterDarkSetupDestination: some View {
-        NavigationLink(
-            destination: usAfterDarkSetupView,
-            isActive: Binding(
-                get: { navigateToUsAfterDarkSetup != nil },
-                set: { if !$0 { navigateToUsAfterDarkSetup = nil } }
-            )
-        ) {
-            EmptyView()
         }
     }
     
