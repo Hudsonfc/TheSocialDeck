@@ -1017,80 +1017,103 @@ struct GameCardView: View {
         return (mainDescription, questionCount)
     }
     
+    // Helper to determine if background is light colored
+    private var isLightBackground: Bool {
+        deck.type == .quickfireCouples || deck.type == .closerThanEver || 
+        deck.type == .usAfterDark || deck.type == .wouldYouRather || 
+        deck.type == .mostLikelyTo || deck.type == .tapDuel || 
+        deck.type == .spinTheBottle || deck.type == .bluffCall ||
+        deck.type == .storyChain || deck.type == .actItOut ||
+        deck.type == .whatsMySecret || deck.type == .categoryClash
+    }
+    
+    // Consistent text color for titles
+    private var titleColor: Color {
+        isLightBackground ? Color.black.opacity(0.9) : Color.white
+    }
+    
+    // Consistent text color for descriptions
+    private var descriptionColor: Color {
+        isLightBackground ? Color.black.opacity(0.75) : Color.white.opacity(0.9)
+    }
+    
     var body: some View {
         ZStack {
             // Back of card (description and select button) - behind front
             ZStack(alignment: .topTrailing) {
-                VStack(spacing: 20) {
+                VStack(spacing: 16) {
                     Spacer()
                     
+                    // Title
                     Text(deck.title)
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(
-                            deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark ?
-                            Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0) :
-                            deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .tapDuel || deck.type == .spinTheBottle || deck.type == .bluffCall ?
-                            Color.black : .primaryText
-                        )
+                        .font(.system(size: 30, weight: .bold, design: .rounded))
+                        .foregroundColor(titleColor)
                         .multilineTextAlignment(.center)
                         .lineLimit(nil)
                         .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, 24)
                     
                     // Description with question count highlighted for couples games
                     if deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark {
-                        VStack(spacing: 4) {
+                        VStack(spacing: 6) {
                             if !descriptionParts.main.isEmpty {
                                 Text(descriptionParts.main + ".")
-                                    .font(.system(size: 15, weight: .regular, design: .rounded))
-                                    .foregroundColor(
-                                        deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark ?
-                                        Color.black : Color.black
-                                    )
+                                    .font(.system(size: 15, weight: .medium, design: .rounded))
+                                    .foregroundColor(descriptionColor)
                                     .multilineTextAlignment(.center)
-                                    .lineSpacing(4)
+                                    .lineSpacing(5)
                                     .lineLimit(nil)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
                             Text(descriptionParts.questionCount)
-                                .font(.system(size: 15, weight: .bold, design: .rounded))
-                                .foregroundColor(
-                                    deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark ?
-                                    .white : Color.buttonBackground
-                                )
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .foregroundColor(Color.buttonBackground)
                                 .multilineTextAlignment(.center)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 6)
+                                .background(Color.white.opacity(0.95))
+                                .cornerRadius(8)
                         }
-                        .padding(.horizontal, 24)
+                        .padding(.horizontal, 28)
                     } else {
                         Text(deck.description)
-                            .font(.system(size: 15, weight: .regular, design: .rounded))
-                            .foregroundColor(.black)
+                            .font(.system(size: 15, weight: .medium, design: .rounded))
+                            .foregroundColor(descriptionColor)
                             .multilineTextAlignment(.center)
-                            .lineSpacing(4)
+                            .lineSpacing(5)
                             .lineLimit(nil)
                             .fixedSize(horizontal: false, vertical: true)
-                            .padding(.horizontal, 24)
+                            .padding(.horizontal, 28)
                     }
                     
+                    // Play Button
                     Button(action: {
                         HapticManager.shared.lightImpact()
                         onSelect()
                     }) {
                         Text("Play")
-                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
-                            .frame(width: 180)
-                            .padding(.vertical, 14)
-                            .background(Color.buttonBackground)
-                            .cornerRadius(14)
+                            .frame(width: 200)
+                            .padding(.vertical, 16)
+                            .background(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [Color.buttonBackground, Color.buttonBackground.opacity(0.85)]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .cornerRadius(16)
+                            .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
                     }
-                    .padding(.top, 12)
+                    .padding(.top, 8)
                     
                     Spacer()
                 }
                 
                 // Favorite button - top right
                 FavoriteButton(deck: deck)
-                .padding(16)
+                    .padding(20)
             }
             .frame(width: cardWidth, height: cardHeight)
             .background(
