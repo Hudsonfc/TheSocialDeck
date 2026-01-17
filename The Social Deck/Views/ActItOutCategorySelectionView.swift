@@ -128,15 +128,9 @@ struct CategoryButton: View {
     var body: some View {
         Button(action: action) {
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(isSelected ? .white : .primaryText)
-                    
-                    Text("\(cardCount) prompts")
-                        .font(.system(size: 12, weight: .regular, design: .rounded))
-                        .foregroundColor(isSelected ? .white.opacity(0.8) : .secondaryText)
-                }
+                Text(title)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundColor(isSelected ? .white : .primaryText)
                 
                 Spacer()
                 
