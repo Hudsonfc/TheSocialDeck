@@ -13,8 +13,8 @@ struct SplashView: View {
     @State private var logoRotation: Double = -180
     @State private var logoBounce: CGFloat = 0
     @State private var logoExitOffset: CGFloat = 0
-    @State private var showAgeCheck: Bool = false
-    @State private var ageCheckOpacity: Double = 0
+    @State private var navigateToOnboarding: Bool = false
+    @State private var navigateToHome: Bool = false
     
     let words = ["The", "Social", "Deck"]
     @State private var wordOpacities: [Double] = [0, 0, 0]
@@ -55,12 +55,17 @@ struct SplashView: View {
                     }
                 }
             }
-            .opacity(showAgeCheck ? 0 : 1)
+            .opacity(navigateToOnboarding || navigateToHome ? 0 : 1)
             
-            // AgeCheckView overlay
-            if showAgeCheck {
-                AgeCheckView()
-                    .opacity(ageCheckOpacity)
+            // Navigate to OnboardingView if not completed
+            if navigateToOnboarding {
+                OnboardingView()
+                    .transition(.opacity)
+            }
+            
+            // Navigate to HomeView if onboarding already completed
+            if navigateToHome {
+                HomeView()
                     .transition(.opacity)
             }
         }
@@ -116,16 +121,16 @@ struct SplashView: View {
                     }
                 }
                 
-                // Fade out background and show AgeCheckView after exit animations
+                // Navigate after exit animations
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation(.easeIn(duration: 0.3)) {
-                        showAgeCheck = true
-                    }
-                    
-                    // Fade in AgeCheckView
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        withAnimation(.easeIn(duration: 0.5)) {
-                            ageCheckOpacity = 1.0
+                    // Check if onboarding has been completed
+                    if OnboardingManager.shared.hasCompletedOnboarding {
+                        withAnimation(.easeIn(duration: 0.3)) {
+                            navigateToHome = true
+                        }
+                    } else {
+                        withAnimation(.easeIn(duration: 0.3)) {
+                            navigateToOnboarding = true
                         }
                     }
                 }

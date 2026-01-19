@@ -21,6 +21,13 @@ struct WhatsNewView: View {
     // Update cards - newest first
     private let allUpdateCards: [UpdateCard] = [
         UpdateCard(
+            id: UUID(uuidString: "00000000-0000-0000-0000-000000000003")!,
+            title: "Welcome to The Social Deck!",
+            description: "Welcome to The Social Deck! We're so excited to have you here. Get ready to enjoy fun card games with friends, create lasting memories, and bring people together through laughter and connection. Gather around and pass the device—no accounts needed, just pure fun.",
+            date: Date(),
+            hasAccent: true
+        ),
+        UpdateCard(
             id: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!,
             title: "Why We Built The Social Deck",
             description: "We built The Social Deck to bring people together through fun card games and create lasting memories with friends. Our goal is to make gathering with friends more engaging and enjoyable.",
@@ -91,7 +98,7 @@ struct WhatsNewView: View {
                                 description: card.description,
                                 date: card.date,
                                 hasAccent: card.hasAccent,
-                                showDeleteButton: card.id.uuidString != "00000000-0000-0000-0000-000000000001",
+                                showDeleteButton: card.id.uuidString != "00000000-0000-0000-0000-000000000001" && card.id.uuidString != "00000000-0000-0000-0000-000000000003",
                                 onDelete: {
                                     deleteCard(card.id)
                                 }

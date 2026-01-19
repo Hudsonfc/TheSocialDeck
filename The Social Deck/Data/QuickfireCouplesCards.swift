@@ -295,6 +295,66 @@ let allQuickfireCouplesCards: [Card] = [
     Card(text: "", category: "Relationship", optionA: "City living", optionB: "Suburban living"),
     Card(text: "", category: "Relationship", optionA: "Small town", optionB: "Big city"),
     Card(text: "", category: "Relationship", optionA: "Stay local", optionB: "Move away"),
-    Card(text: "", category: "Relationship", optionA: "Same job", optionB: "Different jobs")
+    Card(text: "", category: "Relationship", optionA: "Same job", optionB: "Different jobs"),
+    
+    // Additional Light & Fun questions
+    Card(text: "", category: "Light & Fun", optionA: "Morning coffee", optionB: "Evening tea"),
+    Card(text: "", category: "Light & Fun", optionA: "Sweet breakfast", optionB: "Savory breakfast"),
+    Card(text: "", category: "Light & Fun", optionA: "Weekend getaway", optionB: "Staycation"),
+    Card(text: "", category: "Light & Fun", optionA: "Theme park", optionB: "Museum"),
+    Card(text: "", category: "Light & Fun", optionA: "Live music", optionB: "Quiet evening"),
+    Card(text: "", category: "Light & Fun", optionA: "Dancing", optionB: "Karaoke"),
+    Card(text: "", category: "Light & Fun", optionA: "Outdoor concert", optionB: "Indoor show"),
+    Card(text: "", category: "Light & Fun", optionA: "Festival", optionB: "Quiet dinner"),
+    Card(text: "", category: "Light & Fun", optionA: "Adventure sports", optionB: "Relaxing activities"),
+    Card(text: "", category: "Light & Fun", optionA: "Try new things", optionB: "Stick to favorites"),
+    
+    // Additional Preferences questions
+    Card(text: "", category: "Preferences", optionA: "Morning person", optionB: "Night person"),
+    Card(text: "", category: "Preferences", optionA: "Early dinner", optionB: "Late dinner"),
+    Card(text: "", category: "Preferences", optionA: "Formal events", optionB: "Casual hangouts"),
+    Card(text: "", category: "Preferences", optionA: "Big celebrations", optionB: "Intimate moments"),
+    Card(text: "", category: "Preferences", optionA: "Surprise gifts", optionB: "Planned gifts"),
+    Card(text: "", category: "Preferences", optionA: "Physical touch", optionB: "Verbal affirmation"),
+    Card(text: "", category: "Preferences", optionA: "Active dates", optionB: "Relaxing dates"),
+    Card(text: "", category: "Preferences", optionA: "Outdoor activities", optionB: "Indoor activities"),
+    Card(text: "", category: "Preferences", optionA: "Group activities", optionB: "One-on-one time"),
+    Card(text: "", category: "Preferences", optionA: "New experiences", optionB: "Familiar routines"),
+    
+    // Additional Personality questions
+    Card(text: "", category: "Personality", optionA: "Talkative", optionB: "Quiet"),
+    Card(text: "", category: "Personality", optionA: "Expressive", optionB: "Reserved"),
+    Card(text: "", category: "Personality", optionA: "Emotional", optionB: "Logical"),
+    Card(text: "", category: "Personality", optionA: "Spontaneous", optionB: "Planned"),
+    Card(text: "", category: "Personality", optionA: "Adventurous", optionB: "Cautious"),
+    Card(text: "", category: "Personality", optionA: "Social", optionB: "Solo"),
+    Card(text: "", category: "Personality", optionA: "Optimistic", optionB: "Realistic"),
+    Card(text: "", category: "Personality", optionA: "Flexible", optionB: "Structured"),
+    Card(text: "", category: "Personality", optionA: "Impulsive", optionB: "Thoughtful"),
+    Card(text: "", category: "Personality", optionA: "Independent", optionB: "Interdependent"),
+    
+    // Additional Date Ideas questions
+    Card(text: "", category: "Date Ideas", optionA: "Sunset picnic", optionB: "Sunrise hike"),
+    Card(text: "", category: "Date Ideas", optionA: "Wine tasting", optionB: "Beer tasting"),
+    Card(text: "", category: "Date Ideas", optionA: "Cooking class", optionB: "Dance class"),
+    Card(text: "", category: "Date Ideas", optionA: "Art museum", optionB: "Science museum"),
+    Card(text: "", category: "Date Ideas", optionA: "Beach day", optionB: "Mountain hike"),
+    Card(text: "", category: "Date Ideas", optionA: "City lights", optionB: "Stargazing"),
+    Card(text: "", category: "Date Ideas", optionA: "Concert", optionB: "Theater show"),
+    Card(text: "", category: "Date Ideas", optionA: "Food tour", optionB: "Bar crawl"),
+    Card(text: "", category: "Date Ideas", optionA: "Spa day", optionB: "Adventure day"),
+    Card(text: "", category: "Date Ideas", optionA: "Bookstore date", optionB: "Record store date"),
+    
+    // Additional Relationship questions
+    Card(text: "", category: "Relationship", optionA: "Share everything", optionB: "Keep some privacy"),
+    Card(text: "", category: "Relationship", optionA: "Be vulnerable early", optionB: "Build trust first"),
+    Card(text: "", category: "Relationship", optionA: "Talk daily", optionB: "Space between calls"),
+    Card(text: "", category: "Relationship", optionA: "See each other often", optionB: "Maintain independence"),
+    Card(text: "", category: "Relationship", optionA: "Merge friend groups", optionB: "Keep separate friends"),
+    Card(text: "", category: "Relationship", optionA: "Share hobbies", optionB: "Have separate interests"),
+    Card(text: "", category: "Relationship", optionA: "Make decisions together", optionB: "Decide independently"),
+    Card(text: "", category: "Relationship", optionA: "Talk about future", optionB: "Live in present"),
+    Card(text: "", category: "Relationship", optionA: "Celebrate milestones", optionB: "Keep it simple"),
+    Card(text: "", category: "Relationship", optionA: "Be best friends", optionB: "Keep separate best friends")
 ]
 

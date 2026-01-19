@@ -8,43 +8,60 @@
 import SwiftUI
 
 struct OnboardingView: View {
+    @StateObject private var languageManager = LanguageManager.shared
     @State private var currentPage: Int = 1
-    private let totalPages: Int = 4 // Update this when adding more pages
+    private let totalPages: Int = 6 // Language (1), Referral (2), Welcome (3), Pass & Play (4), Pick Deck (5), All Set (6)
     
-    @State private var logoOpacity: Double = 0
-    @State private var logoScale: CGFloat = 0.8
-    @State private var titleOpacity: Double = 0
-    @State private var subtitleOpacity: Double = 0
-    @State private var buttonOffset: CGFloat = 50
-    @State private var buttonOpacity: Double = 0
+    // Page 1 - Language Selection animation states
+    @State private var page1IconOpacity: Double = 0
+    @State private var page1IconScale: CGFloat = 0.8
+    @State private var page1TitleOpacity: Double = 0
+    @State private var page1DescriptionOpacity: Double = 0
+    @State private var page1ButtonOffset: CGFloat = 50
+    @State private var page1ButtonOpacity: Double = 0
+    @State private var selectedLanguage: String = ""
     
-    // Page 2 animation states (now for Pass & Play - needs two icons)
-    @State private var page2IconOpacity: Double = 0  // left icon
+    // Page 2 - Referral Source animation states
+    @State private var page2IconOpacity: Double = 0
     @State private var page2IconScale: CGFloat = 0.8
-    @State private var page2RightIconOpacity: Double = 0  // right icon
-    @State private var page2RightIconScale: CGFloat = 0.8
     @State private var page2TitleOpacity: Double = 0
     @State private var page2DescriptionOpacity: Double = 0
     @State private var page2ButtonOffset: CGFloat = 50
     @State private var page2ButtonOpacity: Double = 0
     
-    // Page 3 animation states
-    @State private var page3LeftIconOpacity: Double = 0
-    @State private var page3LeftIconScale: CGFloat = 0.8
-    @State private var page3RightIconOpacity: Double = 0
-    @State private var page3RightIconScale: CGFloat = 0.8
+    // Page 3 - Welcome (old page 1) animation states
+    @State private var page3LogoOpacity: Double = 0
+    @State private var page3LogoScale: CGFloat = 0.8
     @State private var page3TitleOpacity: Double = 0
-    @State private var page3DescriptionOpacity: Double = 0
+    @State private var page3SubtitleOpacity: Double = 0
     @State private var page3ButtonOffset: CGFloat = 50
     @State private var page3ButtonOpacity: Double = 0
     
-    // Page 4 animation states
-    @State private var page4LogoOpacity: Double = 0
-    @State private var page4LogoScale: CGFloat = 0.8
+    // Page 4 - Pass & Play animation states
+    @State private var page4LeftIconOpacity: Double = 0
+    @State private var page4LeftIconScale: CGFloat = 0.8
+    @State private var page4RightIconOpacity: Double = 0
+    @State private var page4RightIconScale: CGFloat = 0.8
     @State private var page4TitleOpacity: Double = 0
     @State private var page4DescriptionOpacity: Double = 0
     @State private var page4ButtonOffset: CGFloat = 50
     @State private var page4ButtonOpacity: Double = 0
+    
+    // Page 5 - Pick a deck animation states
+    @State private var page5IconOpacity: Double = 0
+    @State private var page5IconScale: CGFloat = 0.8
+    @State private var page5TitleOpacity: Double = 0
+    @State private var page5DescriptionOpacity: Double = 0
+    @State private var page5ButtonOffset: CGFloat = 50
+    @State private var page5ButtonOpacity: Double = 0
+    
+    // Page 6 - All Set animation states
+    @State private var page6LogoOpacity: Double = 0
+    @State private var page6LogoScale: CGFloat = 0.8
+    @State private var page6TitleOpacity: Double = 0
+    @State private var page6DescriptionOpacity: Double = 0
+    @State private var page6ButtonOffset: CGFloat = 50
+    @State private var page6ButtonOpacity: Double = 0
     
     @State private var dragOffset: CGFloat = 0
     @State private var navigateToHome: Bool = false
@@ -57,15 +74,16 @@ struct OnboardingView: View {
             
             // Page content with swipe gesture
             ZStack {
-                // Page 1
+                // Page 1 - Language Selection
                 if currentPage == 1 {
-                    OnboardingPage1(
-                        logoOpacity: $logoOpacity,
-                        logoScale: $logoScale,
-                        titleOpacity: $titleOpacity,
-                        subtitleOpacity: $subtitleOpacity,
-                        buttonOffset: $buttonOffset,
-                        buttonOpacity: $buttonOpacity,
+                    OnboardingLanguageSelectionView(
+                        selectedLanguage: $selectedLanguage,
+                        iconOpacity: $page1IconOpacity,
+                        iconScale: $page1IconScale,
+                        titleOpacity: $page1TitleOpacity,
+                        descriptionOpacity: $page1DescriptionOpacity,
+                        buttonOpacity: $page1ButtonOpacity,
+                        buttonOffset: $page1ButtonOffset,
                         currentPage: currentPage,
                         totalPages: totalPages,
                         onContinue: {
@@ -79,20 +97,18 @@ struct OnboardingView: View {
                     ))
                 }
                 
-                // Page 2 - Pass & Play (swapped from page 3)
+                // Page 2 - Referral Source
                 if currentPage == 2 {
-                    OnboardingPage3(
-                        leftIconOpacity: $page2IconOpacity,
-                        leftIconScale: $page2IconScale,
-                        rightIconOpacity: $page2RightIconOpacity,
-                        rightIconScale: $page2RightIconScale,
+                    OnboardingReferralSourceView(
+                        iconOpacity: $page2IconOpacity,
+                        iconScale: $page2IconScale,
                         titleOpacity: $page2TitleOpacity,
                         descriptionOpacity: $page2DescriptionOpacity,
-                        buttonOffset: $page2ButtonOffset,
                         buttonOpacity: $page2ButtonOpacity,
+                        buttonOffset: $page2ButtonOffset,
                         currentPage: currentPage,
                         totalPages: totalPages,
-                        onNext: {
+                        onContinue: {
                             navigateToPage(3)
                         }
                     )
@@ -103,18 +119,18 @@ struct OnboardingView: View {
                     ))
                 }
                 
-                // Page 3 - Pick a deck (swapped from page 2)
+                // Page 3 - Welcome (old page 1)
                 if currentPage == 3 {
-                    OnboardingPage2(
-                        iconOpacity: $page3LeftIconOpacity,
-                        iconScale: $page3LeftIconScale,
+                    OnboardingPage1(
+                        logoOpacity: $page3LogoOpacity,
+                        logoScale: $page3LogoScale,
                         titleOpacity: $page3TitleOpacity,
-                        descriptionOpacity: $page3DescriptionOpacity,
+                        subtitleOpacity: $page3SubtitleOpacity,
                         buttonOffset: $page3ButtonOffset,
                         buttonOpacity: $page3ButtonOpacity,
                         currentPage: currentPage,
                         totalPages: totalPages,
-                        onNext: {
+                        onContinue: {
                             navigateToPage(4)
                         }
                     )
@@ -125,18 +141,65 @@ struct OnboardingView: View {
                     ))
                 }
                 
-                // Page 4
+                // Page 4 - Pass & Play
                 if currentPage == 4 {
-                    OnboardingPage4(
-                        logoOpacity: $page4LogoOpacity,
-                        logoScale: $page4LogoScale,
+                    OnboardingPage3(
+                        leftIconOpacity: $page4LeftIconOpacity,
+                        leftIconScale: $page4LeftIconScale,
+                        rightIconOpacity: $page4RightIconOpacity,
+                        rightIconScale: $page4RightIconScale,
                         titleOpacity: $page4TitleOpacity,
                         descriptionOpacity: $page4DescriptionOpacity,
                         buttonOffset: $page4ButtonOffset,
                         buttonOpacity: $page4ButtonOpacity,
                         currentPage: currentPage,
                         totalPages: totalPages,
+                        onNext: {
+                            navigateToPage(5)
+                        }
+                    )
+                    .offset(x: dragOffset)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing),
+                        removal: .move(edge: .leading)
+                    ))
+                }
+                
+                // Page 5 - Pick a deck
+                if currentPage == 5 {
+                    OnboardingPage2(
+                        iconOpacity: $page5IconOpacity,
+                        iconScale: $page5IconScale,
+                        titleOpacity: $page5TitleOpacity,
+                        descriptionOpacity: $page5DescriptionOpacity,
+                        buttonOffset: $page5ButtonOffset,
+                        buttonOpacity: $page5ButtonOpacity,
+                        currentPage: currentPage,
+                        totalPages: totalPages,
+                        onNext: {
+                            navigateToPage(6)
+                        }
+                    )
+                    .offset(x: dragOffset)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing),
+                        removal: .move(edge: .leading)
+                    ))
+                }
+                
+                // Page 6 - All Set (old page 4)
+                if currentPage == 6 {
+                    OnboardingPage4(
+                        logoOpacity: $page6LogoOpacity,
+                        logoScale: $page6LogoScale,
+                        titleOpacity: $page6TitleOpacity,
+                        descriptionOpacity: $page6DescriptionOpacity,
+                        buttonOffset: $page6ButtonOffset,
+                        buttonOpacity: $page6ButtonOpacity,
+                        currentPage: currentPage,
+                        totalPages: totalPages,
                         onGetStarted: {
+                            AnalyticsService.shared.trackOnboardingCompleted()
                             navigateToHome = true
                         }
                     )
@@ -177,8 +240,8 @@ struct OnboardingView: View {
                     }
             )
             
-            // Skip button (only show on pages 1-3)
-            if currentPage < totalPages {
+            // Skip button (only show on pages 3-5, not on language/referral pages)
+            if currentPage > 2 && currentPage < totalPages {
                 VStack {
                     HStack {
                         Spacer()
@@ -199,6 +262,10 @@ struct OnboardingView: View {
             }
         }
         .onAppear {
+            // Initialize selected language
+            if selectedLanguage.isEmpty {
+                selectedLanguage = languageManager.currentLanguage
+            }
             if currentPage == 1 {
                 startPage1Animations()
             }
@@ -217,6 +284,12 @@ struct OnboardingView: View {
             } else if newPage == 4 {
                 resetPage4Animations()
                 startPage4Animations()
+            } else if newPage == 5 {
+                resetPage5Animations()
+                startPage5Animations()
+            } else if newPage == 6 {
+                resetPage6Animations()
+                startPage6Animations()
             }
         }
         .fullScreenCover(isPresented: $navigateToHome) {
@@ -257,6 +330,16 @@ struct OnboardingView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 startPage4Animations()
             }
+        } else if page == 5 {
+            resetPage5Animations()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                startPage5Animations()
+            }
+        } else if page == 6 {
+            resetPage6Animations()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                startPage6Animations()
+            }
         }
     }
     
@@ -282,54 +365,63 @@ struct OnboardingView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 startPage3Animations()
             }
+        } else if page == 4 {
+            resetPage4Animations()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                startPage4Animations()
+            }
+        } else if page == 5 {
+            resetPage5Animations()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                startPage5Animations()
+            }
         }
     }
     
+    // Page 1 - Language Selection animations
     private func resetPage1Animations() {
-        logoOpacity = 0
-        logoScale = 0.8
-        titleOpacity = 0
-        subtitleOpacity = 0
-        buttonOffset = 50
-        buttonOpacity = 0
+        page1IconOpacity = 0
+        page1IconScale = 0.8
+        page1TitleOpacity = 0
+        page1DescriptionOpacity = 0
+        page1ButtonOffset = 50
+        page1ButtonOpacity = 0
     }
     
     private func startPage1Animations() {
-        // Logo fade + scale animation
+        // Icon fade + scale animation
         withAnimation(.spring(response: 0.8, dampingFraction: 0.7)) {
-            logoOpacity = 1.0
-            logoScale = 1.0
+            page1IconOpacity = 1.0
+            page1IconScale = 1.0
         }
         
         // Title fade in
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             withAnimation(.easeIn(duration: 0.6)) {
-                titleOpacity = 1.0
+                page1TitleOpacity = 1.0
             }
         }
         
-        // Subtitle fade in
+        // Description fade in
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             withAnimation(.easeIn(duration: 0.6)) {
-                subtitleOpacity = 1.0
+                page1DescriptionOpacity = 1.0
             }
         }
         
         // Button slide up animation
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
-                buttonOffset = 0
-                buttonOpacity = 1.0
+                page1ButtonOffset = 0
+                page1ButtonOpacity = 1.0
             }
         }
     }
     
+    // Page 2 - Referral Source animations
     private func resetPage2Animations() {
-        // Reset for Pass & Play page (now page 2, uses two icons)
-        page2IconOpacity = 0  // left icon
+        page2IconOpacity = 0
         page2IconScale = 0.8
-        page2RightIconOpacity = 0  // right icon
-        page2RightIconScale = 0.8
         page2TitleOpacity = 0
         page2DescriptionOpacity = 0
         page2ButtonOffset = 50
@@ -337,19 +429,10 @@ struct OnboardingView: View {
     }
     
     private func startPage2Animations() {
-        // Pass & Play page animations (now page 2, uses two icons)
-        // Left icon fade + scale animation
+        // Icon fade + scale animation
         withAnimation(.spring(response: 0.8, dampingFraction: 0.7)) {
             page2IconOpacity = 1.0
             page2IconScale = 1.0
-        }
-        
-        // Right icon fade + scale animation (slight delay)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-            withAnimation(.spring(response: 0.8, dampingFraction: 0.7)) {
-                page2RightIconOpacity = 1.0
-                page2RightIconScale = 1.0
-            }
         }
         
         // Title fade in
@@ -375,22 +458,21 @@ struct OnboardingView: View {
         }
     }
     
+    // Page 3 - Welcome animations (old page 1)
     private func resetPage3Animations() {
-        // Reset for Pick a deck page (now page 3, uses single icon)
-        page3LeftIconOpacity = 0  // single icon
-        page3LeftIconScale = 0.8
+        page3LogoOpacity = 0
+        page3LogoScale = 0.8
         page3TitleOpacity = 0
-        page3DescriptionOpacity = 0
+        page3SubtitleOpacity = 0
         page3ButtonOffset = 50
         page3ButtonOpacity = 0
     }
     
     private func startPage3Animations() {
-        // Pick a deck page animations (now page 3, uses single icon)
-        // Icon fade + scale animation
+        // Logo fade + scale animation
         withAnimation(.spring(response: 0.8, dampingFraction: 0.7)) {
-            page3LeftIconOpacity = 1.0
-            page3LeftIconScale = 1.0
+            page3LogoOpacity = 1.0
+            page3LogoScale = 1.0
         }
         
         // Title fade in
@@ -400,10 +482,10 @@ struct OnboardingView: View {
             }
         }
         
-        // Description fade in
+        // Subtitle fade in
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             withAnimation(.easeIn(duration: 0.6)) {
-                page3DescriptionOpacity = 1.0
+                page3SubtitleOpacity = 1.0
             }
         }
         
@@ -416,9 +498,12 @@ struct OnboardingView: View {
         }
     }
     
+    // Page 4 - Pass & Play animations
     private func resetPage4Animations() {
-        page4LogoOpacity = 0
-        page4LogoScale = 0.8
+        page4LeftIconOpacity = 0
+        page4LeftIconScale = 0.8
+        page4RightIconOpacity = 0
+        page4RightIconScale = 0.8
         page4TitleOpacity = 0
         page4DescriptionOpacity = 0
         page4ButtonOffset = 50
@@ -426,10 +511,18 @@ struct OnboardingView: View {
     }
     
     private func startPage4Animations() {
-        // Logo fade + scale animation
+        // Left icon fade + scale animation
         withAnimation(.spring(response: 0.8, dampingFraction: 0.7)) {
-            page4LogoOpacity = 1.0
-            page4LogoScale = 1.0
+            page4LeftIconOpacity = 1.0
+            page4LeftIconScale = 1.0
+        }
+        
+        // Right icon fade + scale animation (slight delay)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            withAnimation(.spring(response: 0.8, dampingFraction: 0.7)) {
+                page4RightIconOpacity = 1.0
+                page4RightIconScale = 1.0
+            }
         }
         
         // Title fade in
@@ -451,6 +544,86 @@ struct OnboardingView: View {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
                 page4ButtonOffset = 0
                 page4ButtonOpacity = 1.0
+            }
+        }
+    }
+    
+    // Page 5 - Pick a deck animations
+    private func resetPage5Animations() {
+        page5IconOpacity = 0
+        page5IconScale = 0.8
+        page5TitleOpacity = 0
+        page5DescriptionOpacity = 0
+        page5ButtonOffset = 50
+        page5ButtonOpacity = 0
+    }
+    
+    private func startPage5Animations() {
+        // Icon fade + scale animation
+        withAnimation(.spring(response: 0.8, dampingFraction: 0.7)) {
+            page5IconOpacity = 1.0
+            page5IconScale = 1.0
+        }
+        
+        // Title fade in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            withAnimation(.easeIn(duration: 0.6)) {
+                page5TitleOpacity = 1.0
+            }
+        }
+        
+        // Description fade in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation(.easeIn(duration: 0.6)) {
+                page5DescriptionOpacity = 1.0
+            }
+        }
+        
+        // Button slide up animation
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                page5ButtonOffset = 0
+                page5ButtonOpacity = 1.0
+            }
+        }
+    }
+    
+    // Page 6 - All Set animations
+    private func resetPage6Animations() {
+        page6LogoOpacity = 0
+        page6LogoScale = 0.8
+        page6TitleOpacity = 0
+        page6DescriptionOpacity = 0
+        page6ButtonOffset = 50
+        page6ButtonOpacity = 0
+    }
+    
+    private func startPage6Animations() {
+        // Logo fade + scale animation
+        withAnimation(.spring(response: 0.8, dampingFraction: 0.7)) {
+            page6LogoOpacity = 1.0
+            page6LogoScale = 1.0
+        }
+        
+        // Title fade in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            withAnimation(.easeIn(duration: 0.6)) {
+                page6TitleOpacity = 1.0
+            }
+        }
+        
+        // Description fade in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation(.easeIn(duration: 0.6)) {
+                page6DescriptionOpacity = 1.0
+            }
+        }
+        
+        // Button slide up animation
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                page6ButtonOffset = 0
+                page6ButtonOpacity = 1.0
             }
         }
     }

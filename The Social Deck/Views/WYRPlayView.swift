@@ -424,17 +424,17 @@ struct WYRCardBackView: View {
                             if selectedOption == "A" {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.system(size: 24, weight: .semibold))
-                                    .foregroundColor(Color.buttonBackground)
+                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                                     .padding(.top, 4)
                             }
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 20)
-                        .background(selectedOption == "A" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.tertiaryBackground)
+                        .background(selectedOption == "A" ? Color(red: 0xFF/255.0, green: 0xFC/255.0, blue: 0xD6/255.0) : Color.tertiaryBackground)
                         .cornerRadius(16)
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
-                                .stroke(selectedOption == "A" ? Color.buttonBackground : Color.clear, lineWidth: 2)
+                                .stroke(selectedOption == "A" ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color.clear, lineWidth: 2)
                         )
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -442,17 +442,17 @@ struct WYRCardBackView: View {
                     // Divider
                     HStack {
                         Rectangle()
-                            .fill(Color.buttonBackground)
+                            .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                             .frame(height: 2)
                             .frame(width: 40)
                         
                         Text("OR")
                             .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundColor(Color.buttonBackground)
+                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                             .padding(.horizontal, 12)
                         
                         Rectangle()
-                            .fill(Color.buttonBackground)
+                            .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                             .frame(height: 2)
                             .frame(width: 40)
                     }
@@ -477,17 +477,17 @@ struct WYRCardBackView: View {
                             if selectedOption == "B" {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.system(size: 24, weight: .semibold))
-                                    .foregroundColor(Color.buttonBackground)
+                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                                     .padding(.top, 4)
                             }
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 20)
-                        .background(selectedOption == "B" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.tertiaryBackground)
+                        .background(selectedOption == "B" ? Color(red: 0xFF/255.0, green: 0xFC/255.0, blue: 0xD6/255.0) : Color.tertiaryBackground)
                         .cornerRadius(16)
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
-                                .stroke(selectedOption == "B" ? Color.buttonBackground : Color.clear, lineWidth: 2)
+                                .stroke(selectedOption == "B" ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color.clear, lineWidth: 2)
                         )
                     }
                     .buttonStyle(PlainButtonStyle())

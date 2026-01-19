@@ -17,7 +17,9 @@ struct OnlineGameContainerView: View {
     
     var body: some View {
         Group {
+            // Only show game if status is still inGame - navigation handles the exit
             if let room = onlineManager.currentRoom,
+               room.status == .inGame,
                let gameType = room.selectedGameType,
                let myUserId = authManager.userProfile?.userId {
                 
@@ -64,10 +66,11 @@ struct OnlineGameContainerView: View {
                     }
                 }
             } else {
-                // Loading state
+                // Loading state (entering game)
                 VStack(spacing: 24) {
                     ProgressView()
                         .scaleEffect(1.5)
+                        .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                     Text("Loading game...")
                         .font(.system(size: 16, weight: .regular, design: .rounded))
                         .foregroundColor(.gray)

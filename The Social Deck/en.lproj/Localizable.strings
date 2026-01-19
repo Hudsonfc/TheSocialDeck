@@ -1,0 +1,43 @@
+/* 
+  Localizable.strings (English)
+  The Social Deck
+  
+  Created by Hudson Ferreira on 1/2/26.
+*/
+
+/* Onboarding - Language Selection */
+"onboarding.language.title" = "Choose Your Language";
+"onboarding.language.subtitle" = "Select your preferred language";
+"onboarding.language.continue" = "Continue";
+
+/* Onboarding - Referral Source */
+"onboarding.referral.title" = "How did you hear about us?";
+"onboarding.referral.subtitle" = "Help us understand how you found The Social Deck";
+"onboarding.referral.app_store" = "App Store";
+"onboarding.referral.social_media" = "Social Media";
+"onboarding.referral.friend_family" = "Friend or Family";
+"onboarding.referral.advertisement" = "Advertisement";
+"onboarding.referral.search_engine" = "Search Engine";
+"onboarding.referral.other" = "Other";
+"onboarding.referral.skip" = "Skip";
+"onboarding.referral.continue" = "Continue";
+
+/* Onboarding - Welcome */
+"onboarding.welcome.title" = "Welcome to The Social Deck";
+"onboarding.welcome.subtitle" = "The ultimate card game for parties, groups, and good times.";
+"onboarding.welcome.continue" = "Continue";
+
+/* Onboarding - Pass & Play */
+"onboarding.passplay.title" = "Pass & Play with Friends";
+"onboarding.passplay.description" = "Gather around and pass the device. Everyone takes turns, making it easy to play together in the same room.";
+"onboarding.passplay.next" = "Next";
+
+/* Onboarding - Pick a Deck */
+"onboarding.pickdeck.title" = "Pick a deck. Flip a card. Have fun.";
+"onboarding.pickdeck.description" = "Choose from tons of party decks designed to keep the group laughing, talking, and competing.";
+"onboarding.pickdeck.next" = "Next";
+
+/* Onboarding - All Set */
+"onboarding.allset.title" = "You're all set!";
+"onboarding.allset.description" = "Start exploring decks, play with friends, and enjoy The Social Deck.";
+"onboarding.allset.get_started" = "Get Started";

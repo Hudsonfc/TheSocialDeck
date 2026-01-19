@@ -240,6 +240,90 @@ let allCloserThanEverCards: [Card] = [
     Card(text: "What's a way we could build even more trust together?", category: "Trust", cardType: nil),
     Card(text: "What's something about me that makes you feel secure?", category: "Trust", cardType: nil),
     Card(text: "What's a way I could make you feel more confident in us?", category: "Trust", cardType: nil),
-    Card(text: "What's something that shows you can rely on me?", category: "Trust", cardType: nil)
+    Card(text: "What's something that shows you can rely on me?", category: "Trust", cardType: nil),
+    
+    // Additional Love Languages
+    Card(text: "What's a way I could show love that would surprise you?", category: "Love Languages", cardType: nil),
+    Card(text: "What's a love language you'd like to receive more of?", category: "Love Languages", cardType: nil),
+    Card(text: "What's a small gesture that would make you feel most loved right now?", category: "Love Languages", cardType: nil),
+    Card(text: "What's a way I express love that you appreciate most?", category: "Love Languages", cardType: nil),
+    Card(text: "What's a love language you think I need more of?", category: "Love Languages", cardType: nil),
+    
+    // Additional Memories
+    Card(text: "What's a memory from our first few dates that stands out?", category: "Memories", cardType: nil),
+    Card(text: "What's a moment when you felt most proud to be with me?", category: "Memories", cardType: nil),
+    Card(text: "What's a memory that makes you laugh every time you think about it?", category: "Memories", cardType: nil),
+    Card(text: "What's a moment when you felt most supported by me?", category: "Memories", cardType: nil),
+    Card(text: "What's a memory that shows our chemistry together?", category: "Memories", cardType: nil),
+    
+    // Additional Values
+    Card(text: "What's a value you've learned from me that you appreciate?", category: "Values", cardType: nil),
+    Card(text: "What's a principle we both share that strengthens our relationship?", category: "Values", cardType: nil),
+    Card(text: "What's a value you'd like us to practice more together?", category: "Values", cardType: nil),
+    Card(text: "What's a belief you have that I've helped you understand better?", category: "Values", cardType: nil),
+    Card(text: "What's a value that's important to both of us in our relationship?", category: "Values", cardType: nil),
+    
+    // Additional Dreams
+    Card(text: "What's a dream we've talked about that you're most excited about?", category: "Dreams", cardType: nil),
+    Card(text: "What's a goal we could work toward together this year?", category: "Dreams", cardType: nil),
+    Card(text: "What's a dream you have that I could help make reality?", category: "Dreams", cardType: nil),
+    Card(text: "What's something you want to experience together before we're old?", category: "Dreams", cardType: nil),
+    Card(text: "What's a dream that involves both of us growing together?", category: "Dreams", cardType: nil),
+    
+    // Additional Communication
+    Card(text: "What's a topic you'd like us to discuss more deeply?", category: "Communication", cardType: nil),
+    Card(text: "What's a way we could have more meaningful conversations?", category: "Communication", cardType: nil),
+    Card(text: "What's something you wish I asked you about more?", category: "Communication", cardType: nil),
+    Card(text: "What's a conversation you've been avoiding that we should have?", category: "Communication", cardType: nil),
+    Card(text: "What's a way I could listen to you better?", category: "Communication", cardType: nil),
+    
+    // Additional Gratitude
+    Card(text: "What's something I did recently that you're grateful for?", category: "Gratitude", cardType: nil),
+    Card(text: "What's a quality in me that you're most thankful for?", category: "Gratitude", cardType: nil),
+    Card(text: "What's a way I've surprised you in a good way?", category: "Gratitude", cardType: nil),
+    Card(text: "What's something about our relationship you don't take for granted?", category: "Gratitude", cardType: nil),
+    Card(text: "What's a moment when you felt most grateful to be with me?", category: "Gratitude", cardType: nil),
+    
+    // Additional Intimacy
+    Card(text: "What's a way we could feel more emotionally connected?", category: "Intimacy", cardType: nil),
+    Card(text: "What's something that makes you feel most intimate with me?", category: "Intimacy", cardType: nil),
+    Card(text: "What's a way we could create more special moments together?", category: "Intimacy", cardType: nil),
+    Card(text: "What's something intimate you'd like to share with me?", category: "Intimacy", cardType: nil),
+    Card(text: "What's a way we could be more present with each other?", category: "Intimacy", cardType: nil),
+    
+    // Additional Growth
+    Card(text: "What's something you'd like to work on together as a couple this year?", category: "Growth", cardType: nil),
+    Card(text: "What's a way we could grow closer in the next few months?", category: "Growth", cardType: nil),
+    Card(text: "What's a habit you'd like us to develop together?", category: "Growth", cardType: nil),
+    Card(text: "What's a skill you'd like us to learn together?", category: "Growth", cardType: nil),
+    Card(text: "What's a way we could better support each other's personal growth?", category: "Growth", cardType: nil),
+    
+    // Additional Daily Life
+    Card(text: "What's a daily routine you'd like us to share?", category: "Daily Life", cardType: nil),
+    Card(text: "What's something about my daily habits you'd like to know more about?", category: "Daily Life", cardType: nil),
+    Card(text: "What's a way we could make our mornings together better?", category: "Daily Life", cardType: nil),
+    Card(text: "What's a way we could make our evenings together more special?", category: "Daily Life", cardType: nil),
+    Card(text: "What's a small daily ritual you'd like us to start?", category: "Daily Life", cardType: nil),
+    
+    // Additional Fun
+    Card(text: "What's a fun activity you'd like us to try together?", category: "Fun", cardType: nil),
+    Card(text: "What's a way we could bring more playfulness into our relationship?", category: "Fun", cardType: nil),
+    Card(text: "What's something silly you'd like us to do together?", category: "Fun", cardType: nil),
+    Card(text: "What's a game you'd like us to play together?", category: "Fun", cardType: nil),
+    Card(text: "What's a way we could have more fun in our daily life?", category: "Fun", cardType: nil),
+    
+    // Additional Conflict
+    Card(text: "What's a way we could handle disagreements more constructively?", category: "Conflict", cardType: nil),
+    Card(text: "What's something that helps you feel better after we disagree?", category: "Conflict", cardType: nil),
+    Card(text: "What's a way we could prevent misunderstandings?", category: "Conflict", cardType: nil),
+    Card(text: "What's something I do during disagreements that helps you?", category: "Conflict", cardType: nil),
+    Card(text: "What's a way we could make up better after an argument?", category: "Conflict", cardType: nil),
+    
+    // Additional Personal Growth
+    Card(text: "What's a personal goal you have that I could help support?", category: "Personal Growth", cardType: nil),
+    Card(text: "What's something you're working on personally that I should know about?", category: "Personal Growth", cardType: nil),
+    Card(text: "What's a way I could encourage your individual growth?", category: "Personal Growth", cardType: nil),
+    Card(text: "What's a dream you have for yourself that I could support?", category: "Personal Growth", cardType: nil),
+    Card(text: "What's a way we could balance togetherness and independence better?", category: "Personal Growth", cardType: nil)
 ]
 
