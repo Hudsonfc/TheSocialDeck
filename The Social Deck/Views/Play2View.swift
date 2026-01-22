@@ -27,8 +27,6 @@ struct Play2View: View {
     @State private var isDragging = false
     @AppStorage("hasSeenWelcomeView") private var hasSeenWelcomeView: Bool = false
     @State private var showWelcomeView: Bool = false
-    @State private var searchText: String = ""
-    @State private var isSearching: Bool = false
     @State private var isGridView: Bool = false // Track layout mode
     @State private var selectedDeckForDescription: Deck? = nil // Track deck for description overlay
     
@@ -308,23 +306,8 @@ struct Play2View: View {
     ]
     
     
-    // Filtered decks based on search
-    var filteredDecks: [Deck] {
-        if searchText.isEmpty {
-            return []
-        }
-        let searchLower = searchText.lowercased()
-        return allDecks.filter { deck in
-            deck.title.lowercased().contains(searchLower) ||
-            deck.description.lowercased().contains(searchLower)
-        }
-    }
-    
-    // Current decks based on selected category or search
+    // Current decks based on selected category
     var currentDecks: [Deck] {
-        if !searchText.isEmpty {
-            return filteredDecks
-        }
         switch selectedCategory {
         case "Favorites":
             return favoriteDecks
@@ -346,50 +329,7 @@ struct Play2View: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Search Bar
-                HStack(spacing: 12) {
-                    HStack(spacing: 12) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.secondaryText)
-                        
-                        TextField("Search games...", text: $searchText)
-                            .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(.primaryText)
-                            .onChange(of: searchText) { oldValue, newValue in
-                                withAnimation {
-                                    currentCardIndex = 0
-                                    cardOffset = 0
-                                    cardFlippedStates = Array(repeating: false, count: max(currentDecks.count, 1))
-                                }
-                            }
-                        
-                        if !searchText.isEmpty {
-                            Button(action: {
-                                withAnimation {
-                                    searchText = ""
-                                    currentCardIndex = 0
-                                    cardOffset = 0
-                                }
-                                HapticManager.shared.lightImpact()
-                            }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .font(.system(size: 18, weight: .medium))
-                                    .foregroundColor(.secondaryText)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(Color.secondaryBackground)
-                    .cornerRadius(16)
-                }
-                .padding(.horizontal, 40)
-                .padding(.top, 20)
-                .padding(.bottom, 16)
-                
-                // Category Tabs (hidden when searching)
-                if searchText.isEmpty {
+                // Category Tabs
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 24) {
                         ForEach(categories, id: \.self) { category in
@@ -413,42 +353,14 @@ struct Play2View: View {
                     .padding(.horizontal, 40)
                 }
                 .animation(.spring(response: 0.4, dampingFraction: 0.8), value: categories)
-                    .padding(.bottom, 16)
-                } else {
-                    // Search results count
-                    if !filteredDecks.isEmpty {
-                        Text("\(filteredDecks.count) game\(filteredDecks.count == 1 ? "" : "s") found")
-                            .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundColor(.secondaryText)
+                .padding(.top, 20)
                 .padding(.bottom, 16)
-                    }
-                }
                 
                 // Content area - Card view or Grid view
                 if isGridView {
                     // Grid View - Show all games at once
                     ScrollView(.vertical, showsIndicators: false) {
-                        // Empty state for search
-                        if !searchText.isEmpty && filteredDecks.isEmpty {
-                            VStack(spacing: 24) {
-                                Image(systemName: "magnifyingglass")
-                                    .font(.system(size: 50, weight: .light))
-                                    .foregroundColor(.tertiaryText)
-                                
-                                VStack(spacing: 8) {
-                                    Text("No Games Found")
-                                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                                        .foregroundColor(.primaryText)
-                                    
-                                    Text("Try searching with different keywords")
-                                        .font(.system(size: 16, weight: .regular, design: .rounded))
-                                        .foregroundColor(.secondaryText)
-                                        .multilineTextAlignment(.center)
-                                }
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 100)
-                        } else if !currentDecks.isEmpty {
+                        if !currentDecks.isEmpty {
                             let columns = [
                                 GridItem(.flexible(), spacing: 16),
                                 GridItem(.flexible(), spacing: 16)
@@ -473,28 +385,7 @@ struct Play2View: View {
                 } else {
                     // Card Deck - Simple horizontal scroll with current card only
                     ZStack {
-                        // Empty state for search
-                        if !searchText.isEmpty && filteredDecks.isEmpty {
-                            VStack(spacing: 24) {
-                                Image(systemName: "magnifyingglass")
-                                    .font(.system(size: 50, weight: .light))
-                                    .foregroundColor(.tertiaryText)
-                                
-                                VStack(spacing: 8) {
-                                    Text("No Games Found")
-                                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                                        .foregroundColor(.primaryText)
-                                    
-                                    Text("Try searching with different keywords")
-                                        .font(.system(size: 16, weight: .regular, design: .rounded))
-                                        .foregroundColor(.secondaryText)
-                                        .multilineTextAlignment(.center)
-                                }
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        }
-                        // Current card
-                        else if !currentDecks.isEmpty && currentCardIndex < currentDecks.count && currentCardIndex < cardFlippedStates.count {
+                        if !currentDecks.isEmpty && currentCardIndex < currentDecks.count && currentCardIndex < cardFlippedStates.count {
                             GameCardView(
                                 deck: currentDecks[currentCardIndex],
                                 isFlipped: $cardFlippedStates[currentCardIndex],
@@ -568,16 +459,16 @@ struct Play2View: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .clipped() // Hide cards when they slide off screen
                     
-                // Placeholder text under cards (hidden when searching or grid view)
-                if searchText.isEmpty && !isGridView {
+                // Placeholder text under cards (hidden when grid view or no decks)
+                if !currentDecks.isEmpty && !isGridView {
                     Text("Tap card to flip and see details")
                         .font(.system(size: 14, weight: .regular, design: .rounded))
                         .foregroundColor(.tertiaryText)
-                            .padding(.top, 16)
-                    }
-                    
-                    // Card Counter (hidden when searching with no results or grid view)
-                    if !currentDecks.isEmpty && !(!searchText.isEmpty && filteredDecks.isEmpty) && !isGridView {
+                        .padding(.top, 16)
+                }
+                
+                // Card Counter (hidden when grid view)
+                if !currentDecks.isEmpty && !isGridView {
                         HStack(spacing: 8) {
                             ForEach(0..<currentDecks.count, id: \.self) { index in
                                 Circle()

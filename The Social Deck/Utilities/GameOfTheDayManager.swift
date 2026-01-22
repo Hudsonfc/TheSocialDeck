@@ -28,8 +28,7 @@ class GameOfTheDayManager {
         GameOfTheDayInfo(title: "Would You Rather", description: "Make tough choices and discover what your friends prefer.", imageName: "WYR 2.0", type: .wouldYouRather),
         GameOfTheDayInfo(title: "Most Likely To", description: "Find out who's most likely to do crazy things.", imageName: "MLT 2.0", type: .mostLikelyTo),
         
-        // Social Deck Games
-        GameOfTheDayInfo(title: "Hot Potato", description: "Pass the phone quickly as the heat builds! The player holding it when time expires loses.", imageName: "HP 2.0", type: .hotPotato),
+        // Social Deck Games (Hot Potato excluded from Game of the Day)
         GameOfTheDayInfo(title: "Rhyme Time", description: "Say a word that rhymes with the base word before time runs out!", imageName: "RT 2.0", type: .rhymeTime),
         GameOfTheDayInfo(title: "Tap Duel", description: "Fast head-to-head reaction game. Wait for GO, then tap first to win!", imageName: "TD 2.0", type: .tapDuel),
         GameOfTheDayInfo(title: "What's My Secret?", description: "One player gets a secret rule to follow. Can the group figure out what it is?", imageName: "WMS 2.0", type: .whatsMySecret),
