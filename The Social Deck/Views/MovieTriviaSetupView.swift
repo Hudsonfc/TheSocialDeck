@@ -164,10 +164,10 @@ struct MovieTriviaSetupView: View {
         }
         .background(
             NavigationLink(
-                destination: MovieTriviaLoadingView(
+                destination: MovieTriviaPlayView(
+                    manager: MovieTriviaGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount)),
                     deck: deck,
-                    selectedCategories: selectedCategories,
-                    cardCount: Int(selectedCardCount)
+                    selectedCategories: selectedCategories
                 ),
                 isActive: $navigateToPlay
             ) {

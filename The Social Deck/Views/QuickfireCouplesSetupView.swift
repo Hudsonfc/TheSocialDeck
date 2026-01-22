@@ -95,10 +95,10 @@ struct QuickfireCouplesSetupView: View {
         .navigationBarHidden(true)
         .background(
             NavigationLink(
-                destination: QuickfireCouplesLoadingView(
+                destination: QuickfireCouplesPlayView(
+                    manager: QuickfireCouplesGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount)),
                     deck: deck,
-                    selectedCategories: selectedCategories,
-                    cardCount: Int(selectedCardCount)
+                    selectedCategories: selectedCategories
                 ),
                 isActive: $navigateToPlay
             ) {

@@ -129,10 +129,9 @@ struct TapDuelSetupView: View {
         .navigationBarHidden(true)
         .background(
             NavigationLink(
-                destination: TapDuelLoadingView(
-                    deck: deck,
-                    player1Name: player1Name.trimmingCharacters(in: .whitespacesAndNewlines),
-                    player2Name: player2Name.trimmingCharacters(in: .whitespacesAndNewlines)
+                destination: TapDuelPlayView(
+                    manager: TapDuelGameManager(player1Name: player1Name.trimmingCharacters(in: .whitespacesAndNewlines), player2Name: player2Name.trimmingCharacters(in: .whitespacesAndNewlines)),
+                    deck: deck
                 ),
                 isActive: $navigateToPlay
             ) {

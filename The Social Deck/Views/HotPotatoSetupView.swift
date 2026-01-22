@@ -259,11 +259,9 @@ struct HotPotatoSetupView: View {
         .background(
             Group {
                 NavigationLink(
-                    destination: HotPotatoLoadingView(
-                        deck: deck,
-                        players: players,
-                        perksEnabled: perksEnabled,
-                        numberOfRounds: Int(numberOfRounds)
+                    destination: HotPotatoPlayView(
+                        manager: HotPotatoGameManager(players: players, perksEnabled: perksEnabled, totalRounds: Int(numberOfRounds)),
+                        deck: deck
                     ),
                     isActive: $navigateToPlay
                 ) {

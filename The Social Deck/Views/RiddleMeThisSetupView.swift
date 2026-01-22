@@ -144,11 +144,9 @@ struct RiddleMeThisSetupView: View {
         .navigationBarHidden(true)
         .background(
             NavigationLink(
-                destination: RiddleMeThisLoadingView(
-                    deck: deck,
-                    cardCount: Int(selectedCardCount),
-                    timerEnabled: timerEnabled,
-                    timerDuration: Int(timerDuration)
+                destination: RiddleMeThisPlayView(
+                    manager: RiddleMeThisGameManager(deck: deck, cardCount: Int(selectedCardCount), timerEnabled: timerEnabled, timerDuration: Int(timerDuration)),
+                    deck: deck
                 ),
                 isActive: $navigateToPlay
             ) {

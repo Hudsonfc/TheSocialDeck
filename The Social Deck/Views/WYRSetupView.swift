@@ -159,10 +159,10 @@ struct WYRSetupView: View {
         }
         .background(
             NavigationLink(
-                destination: WYRLoadingView(
+                destination: WYRPlayView(
+                    manager: WYRGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount)),
                     deck: deck,
-                    selectedCategories: selectedCategories,
-                    cardCount: Int(selectedCardCount)
+                    selectedCategories: selectedCategories
                 ),
                 isActive: $navigateToPlay
             ) {

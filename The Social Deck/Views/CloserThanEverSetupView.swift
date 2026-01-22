@@ -95,10 +95,10 @@ struct CloserThanEverSetupView: View {
         .navigationBarHidden(true)
         .background(
             NavigationLink(
-                destination: CloserThanEverLoadingView(
+                destination: CloserThanEverPlayView(
+                    manager: CloserThanEverGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount)),
                     deck: deck,
-                    selectedCategories: selectedCategories,
-                    cardCount: Int(selectedCardCount)
+                    selectedCategories: selectedCategories
                 ),
                 isActive: $navigateToPlay
             ) {

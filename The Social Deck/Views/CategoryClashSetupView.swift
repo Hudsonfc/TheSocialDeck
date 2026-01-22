@@ -188,12 +188,10 @@ struct CategoryClashSetupView: View {
         }
         .background(
             NavigationLink(
-                destination: CategoryClashLoadingView(
+                destination: CategoryClashPlayView(
+                    manager: CategoryClashGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount), timerEnabled: timerEnabled, timerDuration: Int(timerDuration)),
                     deck: deck,
-                    selectedCategories: selectedCategories,
-                    cardCount: Int(selectedCardCount),
-                    timerEnabled: timerEnabled,
-                    timerDuration: Int(timerDuration)
+                    selectedCategories: selectedCategories
                 ),
                 isActive: $navigateToPlay
             ) {

@@ -149,10 +149,10 @@ struct NHIESetupView: View {
         }
         .background(
             NavigationLink(
-                destination: NHIELoadingView(
+                destination: NHIEPlayView(
+                    manager: NHIEGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount)),
                     deck: deck,
-                    selectedCategories: selectedCategories,
-                    cardCount: Int(selectedCardCount)
+                    selectedCategories: selectedCategories
                 ),
                 isActive: $navigateToPlay
             ) {

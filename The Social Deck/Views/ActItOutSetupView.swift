@@ -321,13 +321,17 @@ struct ActItOutSetupView: View {
         }
         .background(
             NavigationLink(
-                destination: ActItOutLoadingView(
+                destination: ActItOutPlayView(
+                    manager: ActItOutGameManager(
+                        deck: deck,
+                        selectedCategories: selectedCategories,
+                        players: useDefaultPlayers ? [] : players,
+                        cardCount: Int(selectedCardCount),
+                        timerEnabled: timerEnabled,
+                        timerDuration: Int(timerDuration)
+                    ),
                     deck: deck,
-                    selectedCategories: selectedCategories,
-                    players: useDefaultPlayers ? [] : players,
-                    cardCount: Int(selectedCardCount),
-                    timerEnabled: timerEnabled,
-                    timerDuration: Int(timerDuration)
+                    selectedCategories: selectedCategories
                 ),
                 isActive: $navigateToPlay
             ) {

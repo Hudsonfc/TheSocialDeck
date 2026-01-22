@@ -164,10 +164,10 @@ struct SportsTriviaSetupView: View {
         }
         .background(
             NavigationLink(
-                destination: SportsTriviaLoadingView(
+                destination: SportsTriviaPlayView(
+                    manager: SportsTriviaGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount)),
                     deck: deck,
-                    selectedCategories: selectedCategories,
-                    cardCount: Int(selectedCardCount)
+                    selectedCategories: selectedCategories
                 ),
                 isActive: $navigateToPlay
             ) {

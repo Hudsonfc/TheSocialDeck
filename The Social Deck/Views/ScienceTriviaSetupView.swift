@@ -164,10 +164,10 @@ struct ScienceTriviaSetupView: View {
         }
         .background(
             NavigationLink(
-                destination: ScienceTriviaLoadingView(
+                destination: ScienceTriviaPlayView(
+                    manager: ScienceTriviaGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount)),
                     deck: deck,
-                    selectedCategories: selectedCategories,
-                    cardCount: Int(selectedCardCount)
+                    selectedCategories: selectedCategories
                 ),
                 isActive: $navigateToPlay
             ) {

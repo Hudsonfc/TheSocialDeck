@@ -177,10 +177,10 @@ struct HistoryTriviaSetupView: View {
         }
         .background(
             NavigationLink(
-                destination: HistoryTriviaLoadingView(
+                destination: HistoryTriviaPlayView(
+                    manager: HistoryTriviaGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount)),
                     deck: deck,
-                    selectedCategories: selectedCategories,
-                    cardCount: Int(selectedCardCount)
+                    selectedCategories: selectedCategories
                 ),
                 isActive: $navigateToPlay
             ) {

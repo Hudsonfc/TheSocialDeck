@@ -201,10 +201,9 @@ struct RhymeTimeSetupView: View {
         .navigationBarHidden(true)
         .background(
             NavigationLink(
-                destination: RhymeTimeLoadingView(
-                    deck: deck,
-                    players: players,
-                    timerDuration: Int(timerDuration)
+                destination: RhymeTimePlayView(
+                    manager: RhymeTimeGameManager(deck: deck, players: players, timerDuration: Int(timerDuration)),
+                    deck: deck
                 ),
                 isActive: $navigateToPlay
             ) {

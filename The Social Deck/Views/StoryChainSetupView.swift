@@ -160,9 +160,9 @@ struct StoryChainSetupView: View {
         .navigationBarHidden(true)
         .background(
             NavigationLink(
-                destination: StoryChainLoadingView(
-                    deck: deck,
-                    players: players
+                destination: StoryChainPlayView(
+                    manager: StoryChainGameManager(deck: deck, players: players),
+                    deck: deck
                 ),
                 isActive: $navigateToPlay
             ) {

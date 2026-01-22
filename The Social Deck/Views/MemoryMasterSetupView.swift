@@ -113,9 +113,9 @@ struct MemoryMasterSetupView: View {
         .navigationBarHidden(true)
         .background(
             NavigationLink(
-                destination: MemoryMasterLoadingView(
-                    deck: deck,
-                    difficulty: selectedDifficulty
+                destination: MemoryMasterPlayView(
+                    manager: MemoryMasterGameManager(difficulty: selectedDifficulty),
+                    deck: deck
                 ),
                 isActive: $navigateToPlay
             ) {

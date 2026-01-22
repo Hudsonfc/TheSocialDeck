@@ -224,11 +224,15 @@ struct WhatsMySecretSetupView: View {
         }
         .background(
             NavigationLink(
-                destination: WhatsMySecretLoadingView(
+                destination: WhatsMySecretPlayView(
+                    manager: WhatsMySecretGameManager(
+                        deck: deck,
+                        selectedCategories: deck.availableCategories,
+                        cardCount: Int(selectedCardCount),
+                        players: players
+                    ),
                     deck: deck,
-                    selectedCategories: deck.availableCategories,
-                    cardCount: Int(selectedCardCount),
-                    players: players
+                    selectedCategories: deck.availableCategories
                 ),
                 isActive: $navigateToPlay
             ) {

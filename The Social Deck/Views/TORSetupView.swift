@@ -149,10 +149,10 @@ struct TORSetupView: View {
         }
         .background(
             NavigationLink(
-                destination: TORLoadingView(
+                destination: TORPlayView(
+                    manager: TORGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount)),
                     deck: deck,
-                    selectedCategories: selectedCategories,
-                    cardCount: Int(selectedCardCount)
+                    selectedCategories: selectedCategories
                 ),
                 isActive: $navigateToPlay
             ) {

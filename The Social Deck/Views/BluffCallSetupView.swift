@@ -255,11 +255,10 @@ struct BluffCallSetupView: View {
         }
         .background(
             NavigationLink(
-                destination: BluffCallLoadingView(
+                destination: BluffCallPlayView(
+                    manager: BluffCallGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount), players: players),
                     deck: deck,
-                    selectedCategories: selectedCategories,
-                    cardCount: Int(selectedCardCount),
-                    players: players
+                    selectedCategories: selectedCategories
                 ),
                 isActive: $navigateToPlay
             ) {

@@ -95,10 +95,10 @@ struct UsAfterDarkSetupView: View {
         .navigationBarHidden(true)
         .background(
             NavigationLink(
-                destination: UsAfterDarkLoadingView(
+                destination: UsAfterDarkPlayView(
+                    manager: UsAfterDarkGameManager(deck: deck, selectedCategories: selectedCategories, cardCount: Int(selectedCardCount)),
                     deck: deck,
-                    selectedCategories: selectedCategories,
-                    cardCount: Int(selectedCardCount)
+                    selectedCategories: selectedCategories
                 ),
                 isActive: $navigateToPlay
             ) {
