@@ -138,24 +138,6 @@ struct ActNaturalPlayerSetupView: View {
                 
                 Spacer()
                 
-                // Tips section
-                if manager.players.count >= minPlayers {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Tips")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundColor(.primaryText)
-                        
-                        tipRow(icon: "person.2.fill", text: "\(manager.players.count >= 6 ? "2 unknowns" : "1 unknown") will be chosen randomly")
-                        tipRow(icon: "eye.slash.fill", text: "Unknown players must blend in without knowing the word")
-                        tipRow(icon: "bubble.left.and.bubble.right.fill", text: "Discuss clues without saying the word directly")
-                    }
-                    .padding(16)
-                    .background(Color.secondaryBackground)
-                    .cornerRadius(12)
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 12)
-                }
-                
                 // Unknown count info
                 if manager.players.count >= minPlayers {
                     Text(manager.players.count >= 6 ? "2 unknowns will be chosen" : "1 unknown will be chosen")
@@ -216,19 +198,6 @@ struct ActNaturalPlayerSetupView: View {
         manager.startGame()
         navigateToReveal = true
         HapticManager.shared.mediumImpact()
-    }
-    
-    private func tipRow(icon: String, text: String) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 14))
-                .foregroundColor(Color.primaryAccent)
-                .frame(width: 20)
-            
-            Text(text)
-                .font(.system(size: 14, weight: .regular, design: .rounded))
-                .foregroundColor(.secondaryText)
-        }
     }
 }
 

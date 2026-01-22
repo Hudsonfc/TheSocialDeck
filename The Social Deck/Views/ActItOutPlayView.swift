@@ -29,76 +29,71 @@ struct ActItOutPlayView: View {
             
             VStack(spacing: 0) {
                 // Top bar with exit, home button, and progress
-                HStack {
+                HStack(alignment: .center, spacing: 8) {
                     Button(action: {
                         dismiss()
                     }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(.primaryText)
-                            .frame(width: 44, height: 44)
+                            .frame(width: 40, height: 40)
                             .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                     
-                    // Home button
                     Button(action: {
                         showHomeAlert = true
                     }) {
                         Image(systemName: "house.fill")
-                            .font(.system(size: 18, weight: .medium))
+                            .font(.system(size: 16, weight: .medium))
                             .foregroundColor(.primaryText)
-                            .frame(width: 44, height: 44)
+                            .frame(width: 40, height: 40)
                             .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
-                    .padding(.leading, 12)
                     
-                    // Back button
                     if manager.canGoBack {
                         Button(action: {
                             previousCard()
                         }) {
-                            HStack(spacing: 6) {
+                            HStack(spacing: 4) {
                                 Image(systemName: "chevron.left")
-                                    .font(.system(size: 14, weight: .semibold))
+                                    .font(.system(size: 12, weight: .semibold))
                                 Text("Previous")
-                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                    .font(.system(size: 12, weight: .semibold, design: .rounded))
                             }
                             .foregroundColor(.primaryText)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 8)
                             .background(Color.tertiaryBackground)
-                            .cornerRadius(20)
+                            .cornerRadius(16)
                         }
-                        .padding(.leading, 12)
                     }
                     
                     Spacer()
                     
-                    // Progress indicator
                     Text("\(manager.currentCardIndex + 1) / \(manager.cards.count)")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundColor(.primaryText)
                 }
-                .padding(.horizontal, 40)
-                .padding(.top, 20)
-                .padding(.bottom, 16)
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+                .padding(.bottom, 12)
                 
                 // Current player indicator
                 if manager.isFlipped {
                     Text("\(manager.currentPlayer)'s Turn")
-                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundColor(Color.buttonBackground)
-                        .padding(.bottom, 8)
+                        .padding(.bottom, 4)
                 }
                 
                 // Timer (if enabled and card is flipped)
                 if manager.timerEnabled && manager.isFlipped {
                     Text("\(manager.timeRemaining)")
-                        .font(.system(size: 48, weight: .bold, design: .rounded))
+                        .font(.system(size: 32, weight: .bold, design: .rounded))
                         .foregroundColor(manager.timeRemaining <= 10 ? Color.buttonBackground : .primaryText)
-                        .padding(.bottom, 8)
+                        .padding(.bottom, 4)
                 }
                 
                 Spacer()
@@ -141,28 +136,26 @@ struct ActItOutPlayView: View {
                 
                 // Action buttons (shown when card is flipped)
                 if manager.isFlipped {
-                    HStack(spacing: 12) {
-                        // Skip button
+                    HStack(spacing: 10) {
                         if manager.skipsRemaining > 0 {
                             Button(action: {
                                 HapticManager.shared.lightImpact()
                                 skipCard()
                             }) {
                                 Text("Skip (\(manager.skipsRemaining))")
-                                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                    .font(.system(size: 15, weight: .semibold, design: .rounded))
                                     .foregroundColor(Color.buttonBackground)
                                     .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 16)
+                                    .padding(.vertical, 12)
                                     .background(Color.appBackground)
                                     .overlay(
-                                        RoundedRectangle(cornerRadius: 12)
+                                        RoundedRectangle(cornerRadius: 10)
                                             .stroke(Color.buttonBackground, lineWidth: 2)
                                     )
-                                    .cornerRadius(12)
+                                    .cornerRadius(10)
                             }
                         }
                         
-                        // Next button
                         Button(action: {
                             HapticManager.shared.lightImpact()
                             if manager.currentCardIndex >= manager.cards.count - 1 {
@@ -172,16 +165,16 @@ struct ActItOutPlayView: View {
                             }
                         }) {
                             Text(manager.currentCardIndex >= manager.cards.count - 1 ? "Finish" : "Next")
-                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                .font(.system(size: 15, weight: .semibold, design: .rounded))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
+                                .padding(.vertical, 12)
                                 .background(Color.buttonBackground)
-                                .cornerRadius(12)
+                                .cornerRadius(10)
                         }
                     }
-                    .padding(.horizontal, 40)
-                    .padding(.bottom, 40)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 32)
                     .opacity(actionButtonsOpacity)
                     .offset(y: actionButtonsOffset)
                 }

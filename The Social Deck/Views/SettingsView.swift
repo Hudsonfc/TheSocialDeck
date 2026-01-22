@@ -14,8 +14,6 @@ struct SettingsView: View {
     @State private var whatsNewButtonPressed = false
     @State private var feedbackButtonPressed = false
     @State private var rateUsButtonPressed = false
-    @State private var onboardingButtonPressed = false
-    @State private var showOnboarding = false
     
     // App version info
     private var appVersion: String {
@@ -55,30 +53,6 @@ struct SettingsView: View {
                             destination: WhatsNewView(),
                             isPressed: $whatsNewButtonPressed
                         )
-                        
-                        // Onboarding Button
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.1)) {
-                                onboardingButtonPressed = true
-                            }
-                            HapticManager.shared.mediumImpact()
-                            // Reset onboarding so it can be viewed again
-                            OnboardingManager.shared.resetOnboarding()
-                            showOnboarding = true
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                                withAnimation(.easeInOut(duration: 0.15)) {
-                                    onboardingButtonPressed = false
-                                }
-                            }
-                        }) {
-                            Text("View Onboarding")
-                                .font(.system(size: 18, weight: .regular, design: .rounded))
-                                .foregroundColor(.white)
-                                .frame(width: UIScreen.main.bounds.width * 0.85, height: 60)
-                                .background(Color.buttonBackground)
-                                .cornerRadius(16)
-                        }
-                        .scaleEffect(onboardingButtonPressed ? 0.97 : 1.0)
                         
                         // Feedback Button
                         SettingsNavigationButton(
@@ -162,9 +136,6 @@ struct SettingsView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        .fullScreenCover(isPresented: $showOnboarding) {
-            OnboardingView()
-        }
     }
     
     private func requestReview() {

@@ -17,6 +17,9 @@ struct CategoryClashPlayView: View {
     @State private var showHomeAlert: Bool = false
     @State private var categoryOffset: CGFloat = 0
     @State private var isTransitioning: Bool = false
+    @State private var cardRotation: Double = 0
+    
+    private var isFlipped: Bool { cardRotation >= 90 }
     
     var body: some View {
         ZStack {
@@ -85,17 +88,16 @@ struct CategoryClashPlayView: View {
                 
                 Spacer()
                 
-                // Category display
+                // Category display with flip-to-reveal
                 if let currentCard = manager.currentCard() {
                     VStack(spacing: 32) {
-                        // Game title
                         Text(deck.title)
                             .font(.system(size: 28, weight: .bold, design: .rounded))
                             .foregroundColor(Color.buttonBackground)
                             .padding(.horizontal, 40)
                         
-                        // Timer display (if enabled)
-                        if manager.timerEnabled {
+                        // Timer (only when flipped and enabled)
+                        if manager.timerEnabled && isFlipped {
                             ZStack {
                                 Circle()
                                     .stroke(Color.tertiaryBackground, lineWidth: 8)
@@ -123,37 +125,41 @@ struct CategoryClashPlayView: View {
                             }
                         }
                         
-                        // Category card - large and prominent
-                        VStack(spacing: 20) {
-                            Text(currentCard.text)
-                                .font(.system(size: 26, weight: .bold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                .multilineTextAlignment(.center)
-                                .lineSpacing(6)
-                                .padding(.horizontal, 32)
+                        // Flippable category card
+                        ZStack {
+                            CategoryClashCardFrontView()
+                                .opacity(cardRotation < 90 ? 1 : 0)
+                            
+                            CategoryClashCardBackView(categoryText: currentCard.text)
+                                .opacity(cardRotation >= 90 ? 1 : 0)
+                                .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
                         }
-                        .frame(maxWidth: .infinity)
-                        .frame(minHeight: 180)
-                        .padding(.vertical, 32)
-                        .background(
-                            RoundedRectangle(cornerRadius: 24)
-                                .fill(Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0))
-                                .shadow(color: Color.cardShadowColor, radius: 15, x: 0, y: 8)
+                        .frame(width: 320, height: 220)
+                        .rotation3DEffect(
+                            .degrees(cardRotation),
+                            axis: (x: 0, y: 1, z: 0),
+                            perspective: 0.5
                         )
+                        .onTapGesture {
+                            if !isTransitioning && !isFlipped {
+                                flipCard()
+                            }
+                        }
                         .padding(.horizontal, 40)
                         
-                        // Instructions - simplified for one phone
-                        VStack(spacing: 12) {
-                            Text("Pass the phone around")
-                                .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                .foregroundColor(.primaryText)
-                            
-                            Text("Take turns naming items. Hesitate, repeat, or freeze? You're out!")
-                                .font(.system(size: 15, weight: .regular, design: .rounded))
-                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                                .multilineTextAlignment(.center)
+                        if isFlipped {
+                            VStack(spacing: 12) {
+                                Text("Pass the phone around")
+                                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.primaryText)
+                                
+                                Text("Take turns naming items. Hesitate, repeat, or freeze? You're out!")
+                                    .font(.system(size: 15, weight: .regular, design: .rounded))
+                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                    .multilineTextAlignment(.center)
+                            }
+                            .padding(.horizontal, 40)
                         }
-                        .padding(.horizontal, 40)
                     }
                     .offset(x: categoryOffset)
                     .id(currentCard.id)
@@ -213,12 +219,6 @@ struct CategoryClashPlayView: View {
                 }
             }
         )
-        .onAppear {
-            // Start timer for first category if enabled
-            if manager.timerEnabled {
-                manager.startTimer()
-            }
-        }
         .onDisappear {
             manager.stopTimer()
         }
@@ -232,31 +232,39 @@ struct CategoryClashPlayView: View {
         }
     }
     
+    private func flipCard() {
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
+            cardRotation = 180
+        }
+        if manager.timerEnabled {
+            manager.startTimer()
+        }
+    }
+    
     private func previousCategory() {
         isTransitioning = true
+        manager.stopTimer()
         
-        // Slide current category right out of screen
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+            cardRotation = 0
+        }
+        
         withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
             categoryOffset = 500
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-            // Position new category off screen to the left BEFORE changing
             var transaction = Transaction(animation: .none)
             withTransaction(transaction) {
                 categoryOffset = -500
+                cardRotation = 0
             }
-            
-            // Now change the category
             manager.previousCategory()
             
-            // Small delay to ensure the view has updated
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
-                // Slide previous category in from left
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
                     categoryOffset = 0
                 }
-                
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     isTransitioning = false
                 }
@@ -266,43 +274,75 @@ struct CategoryClashPlayView: View {
     
     private func nextCategory() {
         isTransitioning = true
-        
-        // Stop timer before transition
         manager.stopTimer()
         
-        // Slide current category left out of screen
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+            cardRotation = 0
+        }
+        
         withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
             categoryOffset = -500
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-            // Position new category off screen to the right BEFORE changing
             var transaction = Transaction(animation: .none)
             withTransaction(transaction) {
                 categoryOffset = 500
+                cardRotation = 0
             }
-            
-            // Now change the category
             manager.nextCategory()
             
-            // Reset and start timer for new category
-            if manager.timerEnabled && !manager.isFinished {
-                manager.resetTimer()
-                manager.startTimer()
-            }
-            
-            // Small delay to ensure the view has updated
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
-                // Slide new category in from right
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
                     categoryOffset = 0
                 }
-                
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     isTransitioning = false
                 }
             }
         }
+    }
+}
+
+// MARK: - Category Clash Card Views
+
+private struct CategoryClashCardFrontView: View {
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "rectangle.stack.fill")
+                .font(.system(size: 48))
+                .foregroundColor(.white)
+            Text("Tap to reveal category")
+                .font(.system(size: 18, weight: .medium, design: .rounded))
+                .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 24)
+                .fill(Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0))
+                .shadow(color: Color.cardShadowColor, radius: 15, x: 0, y: 8)
+        )
+    }
+}
+
+private struct CategoryClashCardBackView: View {
+    let categoryText: String
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Text(categoryText)
+                .font(.system(size: 26, weight: .bold, design: .rounded))
+                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                .multilineTextAlignment(.center)
+                .lineSpacing(6)
+                .padding(.horizontal, 32)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 24)
+                .fill(Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0))
+                .shadow(color: Color.cardShadowColor, radius: 15, x: 0, y: 8)
+        )
     }
 }
 

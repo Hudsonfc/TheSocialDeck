@@ -211,7 +211,7 @@ struct Play2View: View {
     let dateCouplesGamesDecks: [Deck] = [
         Deck(
             title: "Quickfire Couples",
-            description: "Fast-paced \"this or that\" choices for couples. Answer instantly to reveal preferences and chemistry. 200+ questions included.",
+            description: "Fast-paced \"this or that\" choices for couples. Answer instantly to reveal preferences and chemistry.",
             numberOfCards: 200,
             estimatedTime: "15-25 min",
             imageName: "Quickfire Couples",
@@ -221,7 +221,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Closer Than Ever",
-            description: "Meaningful questions designed to deepen connection and strengthen emotional bonds. Explore love languages, shared memories, values, and future dreams through thoughtful conversation. 150+ questions included.",
+            description: "Meaningful questions designed to deepen connection and strengthen emotional bonds. Explore love languages, shared memories, values, and future dreams through thoughtful conversation.",
             numberOfCards: 200,
             estimatedTime: "30-45 min",
             imageName: "Closer than ever",
@@ -231,7 +231,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Us After Dark",
-            description: "A deeper, intimate couples game focused on honesty, curiosity, and emotional closeness. Questions explore desires, boundaries, memories, and what makes your connection special. 200+ questions included.",
+            description: "A deeper, intimate couples game focused on honesty, curiosity, and emotional closeness. Questions explore desires, boundaries, memories, and what makes your connection special.",
             numberOfCards: 200,
             estimatedTime: "30-45 min",
             imageName: "us after dark",
@@ -900,14 +900,6 @@ struct GameCardView: View {
         flipDegrees < 90 || flipDegrees > 270
     }
     
-    // Parse description for couples games
-    private var descriptionParts: (main: String, questionCount: String) {
-        let parts = deck.description.components(separatedBy: ". ")
-        let mainDescription = parts.dropLast().joined(separator: ". ")
-        let questionCount = parts.last ?? ""
-        return (mainDescription, questionCount)
-    }
-    
     // Helper to determine if background is light colored
     private var isLightBackground: Bool {
         deck.type == .quickfireCouples || deck.type == .closerThanEver || 
@@ -944,38 +936,14 @@ struct GameCardView: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.horizontal, 24)
                     
-                    // Description with question count highlighted for couples games
-                    if deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark {
-                        VStack(spacing: 6) {
-                            if !descriptionParts.main.isEmpty {
-                                Text(descriptionParts.main + ".")
-                                    .font(.system(size: 15, weight: .medium, design: .rounded))
-                                    .foregroundColor(descriptionColor)
-                                    .multilineTextAlignment(.center)
-                                    .lineSpacing(5)
-                                    .lineLimit(nil)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                            Text(descriptionParts.questionCount)
-                                .font(.system(size: 16, weight: .bold, design: .rounded))
-                                .foregroundColor(Color.buttonBackground)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 6)
-                                .background(Color.white.opacity(0.95))
-                                .cornerRadius(8)
-                        }
+                    Text(deck.description)
+                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                        .foregroundColor(descriptionColor)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(5)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
                         .padding(.horizontal, 28)
-                    } else {
-                        Text(deck.description)
-                            .font(.system(size: 15, weight: .medium, design: .rounded))
-                            .foregroundColor(descriptionColor)
-                            .multilineTextAlignment(.center)
-                            .lineSpacing(5)
-                            .lineLimit(nil)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .padding(.horizontal, 28)
-                    }
                     
                     // Play Button
                     Button(action: {
@@ -1164,14 +1132,6 @@ struct GameDescriptionOverlay: View {
     @Binding var navigateToUsAfterDarkSetup: Deck?
     @ObservedObject private var favoritesManager = FavoritesManager.shared
     
-    // Parse description for couples games
-    private var descriptionParts: (main: String, questionCount: String) {
-        let parts = deck.description.components(separatedBy: ". ")
-        let mainDescription = parts.dropLast().joined(separator: ". ")
-        let questionCount = parts.last ?? ""
-        return (mainDescription, questionCount)
-    }
-    
     var body: some View {
         ZStack {
             // Adaptive background
@@ -1237,39 +1197,15 @@ struct GameDescriptionOverlay: View {
                     .padding(.horizontal, 40)
                     .padding(.bottom, 16)
                 
-                // Description with question count highlighted for couples games
-                if deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark {
-                    VStack(spacing: 6) {
-                        if !descriptionParts.main.isEmpty {
-                            Text(descriptionParts.main + ".")
-                                .font(.system(size: 16, weight: .regular, design: .rounded))
-                                .foregroundColor(.primaryText)
-                                .multilineTextAlignment(.center)
-                                .lineSpacing(6)
-                                .lineLimit(nil)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        Text(descriptionParts.questionCount)
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundColor(
-                                deck.type == .quickfireCouples || deck.type == .closerThanEver || deck.type == .usAfterDark ?
-                                .white : Color.buttonBackground
-                            )
-                            .multilineTextAlignment(.center)
-                    }
+                Text(deck.description)
+                    .font(.system(size: 16, weight: .regular, design: .rounded))
+                    .foregroundColor(.primaryText)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(6)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 40)
                     .padding(.bottom, 24)
-                } else {
-                    Text(deck.description)
-                        .font(.system(size: 16, weight: .regular, design: .rounded))
-                        .foregroundColor(.primaryText)
-                        .multilineTextAlignment(.center)
-                        .lineSpacing(6)
-                        .lineLimit(nil)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.horizontal, 40)
-                        .padding(.bottom, 24)
-                }
                 
                 Spacer()
                 

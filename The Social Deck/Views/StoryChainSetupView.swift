@@ -138,24 +138,6 @@ struct StoryChainSetupView: View {
                 
                 Spacer()
                 
-                // Tips section
-                if players.count >= minPlayers {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Tips")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundColor(.primaryText)
-                        
-                        tipRow(icon: "text.bubble.fill", text: "Add one sentence to continue the story")
-                        tipRow(icon: "arrow.right", text: "Pass the phone to the next player")
-                        tipRow(icon: "sparkles", text: "Watch the story get wild and creative")
-                    }
-                    .padding(16)
-                    .background(Color.secondaryBackground)
-                    .cornerRadius(12)
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 12)
-                }
-                
                 // Start button
                 Button(action: startGame) {
                     Text("Start Game")
@@ -203,19 +185,6 @@ struct StoryChainSetupView: View {
     
     private func startGame() {
         navigateToPlay = true
-    }
-    
-    private func tipRow(icon: String, text: String) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 14))
-                .foregroundColor(Color.primaryAccent)
-                .frame(width: 20)
-            
-            Text(text)
-                .font(.system(size: 14, weight: .regular, design: .rounded))
-                .foregroundColor(.secondaryText)
-        }
     }
 }
 

@@ -103,27 +103,7 @@ struct TapDuelSetupView: View {
                             }
                             .padding(.horizontal, 24)
                             .padding(.top, 32)
-                            
-                            // Tips section
-                            if !player1Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !player2Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                VStack(alignment: .leading, spacing: 12) {
-                                    Text("Tips")
-                                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                                        .foregroundColor(.primaryText)
-                                    
-                                    tipRow(icon: "hand.tap.fill", text: "Tap your side when you see GO")
-                                    tipRow(icon: "trophy.fill", text: "First to tap wins the round")
-                                    tipRow(icon: "arrow.left.arrow.right", text: "Best of multiple rounds")
-                                }
-                                .padding(16)
-                                .background(Color.secondaryBackground)
-                                .cornerRadius(12)
-                                .padding(.horizontal, 24)
-                                .padding(.bottom, 32)
-                            } else {
-                                Spacer()
-                                    .frame(height: 20)
-                            }
+                            .padding(.bottom, 24)
                         }
                     }
                     
@@ -159,19 +139,6 @@ struct TapDuelSetupView: View {
                 EmptyView()
             }
         )
-    }
-    
-    private func tipRow(icon: String, text: String) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 14))
-                .foregroundColor(Color.primaryAccent)
-                .frame(width: 20)
-            
-            Text(text)
-                .font(.system(size: 14, weight: .regular, design: .rounded))
-                .foregroundColor(.secondaryText)
-        }
     }
 }
 
