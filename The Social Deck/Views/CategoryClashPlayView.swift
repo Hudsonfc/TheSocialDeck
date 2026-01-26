@@ -311,7 +311,7 @@ private struct CategoryClashCardFrontView: View {
         VStack(spacing: 20) {
             Image(systemName: "rectangle.stack.fill")
                 .font(.system(size: 48))
-                .foregroundColor(.white)
+                .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
             Text("Tap to reveal category")
                 .font(.system(size: 18, weight: .medium, design: .rounded))
                 .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
@@ -319,7 +319,7 @@ private struct CategoryClashCardFrontView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0))
+                .fill(Color.white)
                 .shadow(color: Color.cardShadowColor, radius: 15, x: 0, y: 8)
         )
     }
@@ -340,7 +340,7 @@ private struct CategoryClashCardBackView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0))
+                .fill(Color.white)
                 .shadow(color: Color.cardShadowColor, radius: 15, x: 0, y: 8)
         )
     }

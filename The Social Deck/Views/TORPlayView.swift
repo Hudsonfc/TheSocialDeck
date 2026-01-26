@@ -447,18 +447,21 @@ struct TORCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(red: 0xA1/255.0, green: 0xC2/255.0, blue: 0xFF/255.0))
+                .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
-            VStack {
-                Image(systemName: "questionmark.circle.fill")
+            VStack(spacing: 16) {
+                Image(systemName: "mouth.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(.white)
-                    .padding(.bottom, 20)
+                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                
+                Text("Truth or Dare")
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
                 
                 Text("Tap to reveal")
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
             }
         }
     }
@@ -470,7 +473,7 @@ struct TORCardBackView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(red: 0xA1/255.0, green: 0xC2/255.0, blue: 0xFF/255.0))
+                .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             // Show full content (type + text)
@@ -478,7 +481,7 @@ struct TORCardBackView: View {
                 if let cardType = card.cardType {
                     Text(cardType == .truth ? "Truth" : "Dare")
                         .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
                 }
                 
                 Text(card.text)

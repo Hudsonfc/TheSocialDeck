@@ -359,18 +359,21 @@ struct CardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(red: 0xFF/255.0, green: 0x84/255.0, blue: 0x84/255.0))
+                .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
-            VStack {
-                Image(systemName: "questionmark.circle.fill")
+            VStack(spacing: 16) {
+                Image(systemName: "hand.raised.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(.white)
-                    .padding(.bottom, 20)
+                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                
+                Text("Never Have I Ever")
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
                 
                 Text("Tap to reveal")
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
             }
         }
     }
@@ -382,14 +385,10 @@ struct CardBackView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(red: 0xFF/255.0, green: 0x84/255.0, blue: 0x84/255.0))
+                .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack(spacing: 16) {
-                Text("Never Have I Ever")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                
                 Text(text)
                     .font(.system(size: 24, weight: .semibold, design: .rounded))
                     .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))

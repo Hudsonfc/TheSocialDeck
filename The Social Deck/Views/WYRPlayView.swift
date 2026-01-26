@@ -369,18 +369,21 @@ struct WYRCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(red: 0xFE/255.0, green: 0xFE/255.0, blue: 0xAC/255.0))
+                .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
-            VStack {
-                Image(systemName: "questionmark.circle.fill")
+            VStack(spacing: 16) {
+                Image(systemName: "arrow.left.arrow.right")
                     .font(.system(size: 60))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                    .padding(.bottom, 20)
+                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                
+                Text("Would You Rather")
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
                 
                 Text("Tap to reveal")
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
             }
         }
     }
@@ -394,13 +397,13 @@ struct WYRCardBackView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(red: 0xFE/255.0, green: 0xFE/255.0, blue: 0xAC/255.0))
+                .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack(spacing: 24) {
                 Text("Would You Rather")
                     .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
                     .padding(.top, 24)
                 
                 VStack(spacing: 20) {
@@ -411,51 +414,35 @@ struct WYRCardBackView: View {
                         }
                     }) {
                         VStack(spacing: 8) {
-                            Text("Option A")
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                            
                             Text(optionA)
-                                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                .font(.system(size: 18, weight: .medium, design: .rounded))
                                 .foregroundColor(.primaryText)
                                 .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
+                                .lineLimit(nil)
+                                .fixedSize(horizontal: false, vertical: true)
                             
                             if selectedOption == "A" {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.system(size: 24, weight: .semibold))
-                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                    .padding(.top, 4)
+                                    .foregroundColor(.primaryText)
                             }
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 20)
-                        .background(selectedOption == "A" ? Color(red: 0xFF/255.0, green: 0xFC/255.0, blue: 0xD6/255.0) : Color.tertiaryBackground)
-                        .cornerRadius(16)
+                        .padding(.horizontal, 24)
+                        .background(selectedOption == "A" ? Color.white : Color.white)
+                        .cornerRadius(12)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(selectedOption == "A" ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color.clear, lineWidth: 2)
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(selectedOption == "A" ? Color.primaryText : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: selectedOption == "A" ? 2 : 1)
                         )
                     }
                     .buttonStyle(PlainButtonStyle())
                     
                     // Divider
-                    HStack {
-                        Rectangle()
-                            .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            .frame(height: 2)
-                            .frame(width: 40)
-                        
-                        Text("OR")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            .padding(.horizontal, 12)
-                        
-                        Rectangle()
-                            .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            .frame(height: 2)
-                            .frame(width: 40)
-                    }
+                    Text("or")
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                     
                     // Option B - Tappable
                     Button(action: {
@@ -464,30 +451,27 @@ struct WYRCardBackView: View {
                         }
                     }) {
                         VStack(spacing: 8) {
-                            Text("Option B")
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                            
                             Text(optionB)
-                                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                .font(.system(size: 18, weight: .medium, design: .rounded))
                                 .foregroundColor(.primaryText)
                                 .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
+                                .lineLimit(nil)
+                                .fixedSize(horizontal: false, vertical: true)
                             
                             if selectedOption == "B" {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.system(size: 24, weight: .semibold))
-                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                    .padding(.top, 4)
+                                    .foregroundColor(.primaryText)
                             }
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 20)
-                        .background(selectedOption == "B" ? Color(red: 0xFF/255.0, green: 0xFC/255.0, blue: 0xD6/255.0) : Color.tertiaryBackground)
-                        .cornerRadius(16)
+                        .padding(.horizontal, 24)
+                        .background(selectedOption == "B" ? Color.white : Color.white)
+                        .cornerRadius(12)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(selectedOption == "B" ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color.clear, lineWidth: 2)
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(selectedOption == "B" ? Color.primaryText : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: selectedOption == "B" ? 2 : 1)
                         )
                     }
                     .buttonStyle(PlainButtonStyle())

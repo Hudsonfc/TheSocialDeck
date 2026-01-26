@@ -325,13 +325,13 @@ struct CloserThanEverCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(red: 0xFF/255.0, green: 0x84/255.0, blue: 0x84/255.0))
+                .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack {
                 Image(systemName: "heart.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(.white)
+                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
                     .padding(.bottom, 20)
                 
                 Text("Tap to reveal")
@@ -348,22 +348,16 @@ struct CloserThanEverCardBackView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(red: 0xFF/255.0, green: 0x84/255.0, blue: 0x84/255.0))
+                .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack(spacing: 16) {
-                Text("Closer Than Ever")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .padding(.top, 24)
-                
                 Text(text)
                     .font(.system(size: 22, weight: .semibold, design: .rounded))
                     .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                     .multilineTextAlignment(.center)
                     .lineSpacing(6)
                     .padding(.horizontal, 32)
-                    .padding(.bottom, 24)
             }
         }
     }

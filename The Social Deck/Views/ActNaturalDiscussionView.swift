@@ -35,38 +35,49 @@ struct ActNaturalDiscussionView: View {
                 EmptyView()
             }
         )
+        .onDisappear {
+            manager.stopTimer()
+        }
     }
     
     // MARK: - Discussion View
     private var discussionView: some View {
         VStack(spacing: 0) {
-            // Header
-            HStack {
-                Button(action: {
-                    dismiss()
-                }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primaryText)
-                            .frame(width: 44, height: 44)
-                            .background(Color.tertiaryBackground)
-                            .clipShape(Circle())
-                }
-                
-                Spacer()
-            }
-            .padding(.horizontal, 24)
-            .padding(.top, 20)
-            
             Spacer()
             
-            // Discussion content
+            // Discussion content with timer front and center
             VStack(spacing: 32) {
+                // Timer display if enabled - front and center
+                if let duration = manager.timerDuration {
+                    VStack(spacing: 12) {
+                        // Circular timer
+                        ZStack {
+                            Circle()
+                                .stroke(Color.tertiaryBackground, lineWidth: 12)
+                                .frame(width: 120, height: 120)
+                            
+                            Circle()
+                                .trim(from: 0, to: CGFloat(manager.timeRemaining) / CGFloat(duration))
+                                .stroke(
+                                    manager.timeRemaining < 60 ? Color.red : Color.buttonBackground,
+                                    style: StrokeStyle(lineWidth: 12, lineCap: .round)
+                                )
+                                .frame(width: 120, height: 120)
+                                .rotationEffect(.degrees(-90))
+                                .animation(.linear(duration: 0.1), value: manager.timeRemaining)
+                            
+                            Text(timeString)
+                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                .foregroundColor(manager.timeRemaining < 60 ? Color.red : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        }
+                    }
+                }
+                
                 // Icon
                 ZStack {
-                Circle()
-                    .fill(Color.buttonBackground.opacity(0.1))
-                    .frame(width: 100, height: 100)
+                    Circle()
+                        .fill(Color.buttonBackground.opacity(0.1))
+                        .frame(width: 100, height: 100)
                     
                     Image(systemName: "bubble.left.and.bubble.right.fill")
                         .font(.system(size: 40, weight: .medium))
@@ -85,22 +96,6 @@ struct ActNaturalDiscussionView: View {
                         .lineSpacing(4)
                         .padding(.horizontal, 24)
                 }
-                
-                // Tips card
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Tips for Discussion")
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
-                        .foregroundColor(.primaryText)
-                    
-                    tipRow(icon: "lightbulb.fill", text: "Give clues without being too obvious")
-                    tipRow(icon: "eye.fill", text: "Watch for suspicious reactions")
-                    tipRow(icon: "hand.raised.fill", text: "Ask each player to describe the word")
-                    tipRow(icon: "clock.fill", text: "Take your time — no rush!")
-                }
-                .padding(20)
-                .background(Color.secondaryBackground)
-                .cornerRadius(20)
-                .padding(.horizontal, 24)
                 
                 // Player count reminder
                 HStack(spacing: 8) {
@@ -142,96 +137,106 @@ struct ActNaturalDiscussionView: View {
             Spacer()
             
             VStack(spacing: 32) {
-                // Word reveal
+                // Secret Word Card
                 VStack(spacing: 16) {
-                    Text("The Word Was")
-                        .font(.system(size: 18, weight: .medium, design: .rounded))
+                    Text("The Secret Word")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundColor(.secondaryText)
+                        .textCase(.uppercase)
+                        .tracking(1)
                     
                     Text(manager.secretWord?.word ?? "???")
-                        .font(.system(size: 44, weight: .bold, design: .rounded))
+                        .font(.system(size: 36, weight: .bold, design: .rounded))
                         .foregroundColor(.primaryText)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
                     
                     if let category = manager.secretWord?.category {
                         Text(category)
-                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
                             .foregroundColor(.white)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 6)
-                            .background(Color.buttonBackground)
-                            .cornerRadius(20)
+                            .background(
+                                Capsule()
+                                    .fill(Color.buttonBackground)
+                            )
                     }
                 }
-                .padding(32)
+                .padding(24)
                 .frame(maxWidth: .infinity)
-                .background(Color.secondaryBackground)
-                .cornerRadius(24)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.white)
+                        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+                )
                 .padding(.horizontal, 24)
                 
-                // Unknown players reveal
+                // Unknown Players Card
                 VStack(spacing: 16) {
-                    Text("The Unknown\(manager.unknownCount > 1 ? "s Were" : " Was")")
-                        .font(.system(size: 18, weight: .medium, design: .rounded))
+                    Text("The Unknown\(manager.unknownCount > 1 ? "s" : "")")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundColor(.secondaryText)
+                        .textCase(.uppercase)
+                        .tracking(1)
                     
-                    ForEach(manager.unknownPlayers) { player in
-                        HStack(spacing: 12) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.buttonBackground)
-                                    .frame(width: 44, height: 44)
+                    VStack(spacing: 12) {
+                        ForEach(manager.unknownPlayers.prefix(manager.unknownCount)) { player in
+                            HStack(spacing: 12) {
+                                Image(systemName: "person.fill")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(Color.buttonBackground)
+                                    .frame(width: 36, height: 36)
+                                    .background(
+                                        Circle()
+                                            .fill(Color.buttonBackground.opacity(0.15))
+                                    )
                                 
-                                Image(systemName: "questionmark")
-                                    .font(.system(size: 20, weight: .bold))
-                                    .foregroundColor(.white)
+                                Text(player.name)
+                                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.primaryText)
+                                
+                                Spacer()
                             }
-                            
-                            Text(player.name)
-                                .font(.system(size: 24, weight: .bold, design: .rounded))
-                                .foregroundColor(.primaryText)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
                         }
                     }
                 }
                 .padding(24)
                 .frame(maxWidth: .infinity)
-                .background(Color.buttonBackground.opacity(0.1))
-                .cornerRadius(24)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.white)
+                        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+                )
                 .padding(.horizontal, 24)
             }
             
             Spacer()
             
-            // Play again button
-            VStack(spacing: 12) {
-                Button(action: {
-                    navigateToEnd = true
-                    HapticManager.shared.mediumImpact()
-                }) {
-                    Text("Continue")
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 56)
-                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                        .cornerRadius(16)
-                }
+            // Continue button
+            Button(action: {
+                navigateToEnd = true
+                HapticManager.shared.mediumImpact()
+            }) {
+                Text("Continue")
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 56)
+                    .background(Color.buttonBackground)
+                    .cornerRadius(16)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 40)
         }
     }
     
-    private func tipRow(icon: String, text: String) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 16))
-                .foregroundColor(Color.buttonBackground)
-                .frame(width: 24)
-            
-            Text(text)
-                .font(.system(size: 14, weight: .regular, design: .rounded))
-                .foregroundColor(.secondaryText)
-        }
+    private var timeString: String {
+        let minutes = manager.timeRemaining / 60
+        let seconds = manager.timeRemaining % 60
+        return String(format: "%d:%02d", minutes, seconds)
     }
 }
 

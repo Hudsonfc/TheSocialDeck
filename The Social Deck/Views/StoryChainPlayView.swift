@@ -72,7 +72,7 @@ struct StoryChainPlayView: View {
                             .padding(.vertical, 12)
                             .background(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(red: 0xFF/255.0, green: 0xF4/255.0, blue: 0xF4/255.0))
+                                    .fill(Color.tertiaryBackground)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 12)
                                             .stroke(Color.buttonBackground, lineWidth: 2)

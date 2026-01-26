@@ -14,6 +14,11 @@ struct ActNaturalEndView: View {
     @State private var navigateToHome: Bool = false
     @Environment(\.dismiss) private var dismiss
     
+    // Store player names to pass back to setup
+    private var playerNames: [String] {
+        manager.players.map { $0.name }
+    }
+    
     var body: some View {
         ZStack {
             // Background
@@ -80,7 +85,7 @@ struct ActNaturalEndView: View {
                 // Action buttons
                 VStack(spacing: 12) {
                     Button(action: playAgain) {
-                        Text("Play Again")
+                        Text("Play Again with Same Players")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
@@ -114,7 +119,7 @@ struct ActNaturalEndView: View {
         )
         .background(
             NavigationLink(
-                destination: ActNaturalPlayerSetupView(deck: deck),
+                destination: ActNaturalPlayerSetupView(deck: deck, existingPlayers: playerNames),
                 isActive: $navigateToSetup
             ) {
                 EmptyView()
@@ -138,12 +143,14 @@ struct ActNaturalEndView: View {
     
     private func playAgain() {
         HapticManager.shared.mediumImpact()
-        manager.resetGame()
+        // Keep players but reset game state
+        manager.playAgain()
         navigateToSetup = true
     }
     
     private func newGame() {
         HapticManager.shared.mediumImpact()
+        // Reset everything including players
         manager.resetGame()
         navigateToSetup = true
     }

@@ -9,11 +9,20 @@ import SwiftUI
 
 struct ActNaturalPlayerSetupView: View {
     let deck: Deck
+    let existingPlayers: [String]?
     @StateObject private var manager = ActNaturalGameManager()
     @State private var currentName: String = ""
     @State private var showError: Bool = false
     @State private var navigateToReveal: Bool = false
+    @State private var timerEnabled: Bool = false
+    @State private var timerDuration: Double = 300 // Default 5 minutes in seconds
+    @State private var useTwoUnknowns: Bool = false
     @Environment(\.dismiss) private var dismiss
+    
+    init(deck: Deck, existingPlayers: [String]? = nil) {
+        self.deck = deck
+        self.existingPlayers = existingPlayers
+    }
     
     private let minPlayers = 3
     private let maxPlayers = 12
@@ -99,42 +108,110 @@ struct ActNaturalPlayerSetupView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 24)
                 
-                // Players list
+                // Players list and settings in scrollable area
                 ScrollView {
-                    VStack(spacing: 8) {
-                        ForEach(Array(manager.players.enumerated()), id: \.element.id) { index, player in
+                    VStack(spacing: 16) {
+                        // Players list
+                        VStack(spacing: 8) {
+                            ForEach(Array(manager.players.enumerated()), id: \.element.id) { index, player in
+                                HStack {
+                                    Text("\(index + 1).")
+                                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                        .foregroundColor(.secondaryText)
+                                        .frame(width: 30, alignment: .leading)
+                                    
+                                    Text(player.name)
+                                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                                        .foregroundColor(.primaryText)
+                                    
+                                    Spacer()
+                                    
+                                    Button(action: {
+                                        withAnimation(.easeInOut(duration: 0.2)) {
+                                            manager.removePlayer(at: index)
+                                        }
+                                        HapticManager.shared.lightImpact()
+                                    }) {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .font(.system(size: 20))
+                                            .foregroundColor(Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0))
+                                    }
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .background(Color.secondaryBackground)
+                                .cornerRadius(12)
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.top, 16)
+                        
+                        // Timer Toggle Section
+                        VStack(spacing: 12) {
                             HStack {
-                                Text("\(index + 1).")
-                                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                    .foregroundColor(.secondaryText)
-                                    .frame(width: 30, alignment: .leading)
-                                
-                                Text(player.name)
-                                    .font(.system(size: 16, weight: .medium, design: .rounded))
-                                    .foregroundColor(.primaryText)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Timer")
+                                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                        .foregroundColor(.primaryText)
+                                    
+                                    Text("Add urgency with a countdown timer")
+                                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                                        .foregroundColor(.secondaryText)
+                                }
                                 
                                 Spacer()
                                 
-                                Button(action: {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        manager.removePlayer(at: index)
-                                    }
-                                    HapticManager.shared.lightImpact()
-                                }) {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .font(.system(size: 20))
-                                        .foregroundColor(Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0))
-                                }
+                                Toggle("", isOn: $timerEnabled)
+                                    .tint(Color.primaryAccent)
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
-                            .background(Color.secondaryBackground)
-                            .cornerRadius(12)
+                            
+                            if timerEnabled {
+                                VStack(spacing: 8) {
+                                    Text(formatTimerDuration(Int(timerDuration)))
+                                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                                        .foregroundColor(Color.primaryAccent)
+                                    
+                                    Slider(value: $timerDuration, in: 60...600, step: 30)
+                                        .tint(Color.primaryAccent)
+                                }
+                                .transition(.opacity.combined(with: .move(edge: .top)))
+                            }
                         }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16)
+                        .background(Color.secondaryBackground)
+                        .cornerRadius(16)
+                        .padding(.horizontal, 24)
+                        
+                        // Two Unknowns Option (always visible, disabled until 4+ players)
+                        VStack(spacing: 12) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Two Unknowns")
+                                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                        .foregroundColor(manager.players.count >= 4 ? .primaryText : .secondaryText)
+                                    
+                                    Text(manager.players.count >= 4 ? "Play with 2 unknown players for more challenge" : "Add 4+ players to enable")
+                                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                                        .foregroundColor(.secondaryText)
+                                }
+                                
+                                Spacer()
+                                
+                                Toggle("", isOn: $useTwoUnknowns)
+                                    .tint(Color.primaryAccent)
+                                    .disabled(manager.players.count < 4)
+                            }
+                            .opacity(manager.players.count >= 4 ? 1.0 : 0.6)
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 16)
+                        .background(Color.secondaryBackground)
+                        .cornerRadius(16)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 16)
                     }
-                    .padding(.horizontal, 24)
                 }
-                .padding(.top, 16)
                 
                 Spacer()
                 
@@ -166,9 +243,17 @@ struct ActNaturalPlayerSetupView: View {
             }
         }
         .navigationBarHidden(true)
+        .onAppear {
+            // Load existing players if provided
+            if let existing = existingPlayers {
+                for name in existing {
+                    manager.addPlayer(name: name)
+                }
+            }
+        }
         .background(
             NavigationLink(
-                destination: ActNaturalRevealView(manager: manager, deck: deck),
+                destination: ActNaturalPlayView(manager: manager, deck: deck),
                 isActive: $navigateToReveal
             ) {
                 EmptyView()
@@ -195,9 +280,29 @@ struct ActNaturalPlayerSetupView: View {
     }
     
     private func startGame() {
+        // Set timer duration if enabled
+        manager.timerDuration = timerEnabled ? Int(timerDuration) : nil
+        
+        // Set unknown count based on option
+        if useTwoUnknowns && manager.players.count >= 4 {
+            manager.unknownCount = 2
+        } else {
+            manager.unknownCount = manager.players.count >= 6 ? 2 : 1
+        }
+        
         manager.startGame()
         navigateToReveal = true
         HapticManager.shared.mediumImpact()
+    }
+    
+    private func formatTimerDuration(_ seconds: Int) -> String {
+        let minutes = seconds / 60
+        let remainingSeconds = seconds % 60
+        if minutes > 0 {
+            return "\(minutes) min \(remainingSeconds > 0 ? "\(remainingSeconds) sec" : "")"
+        } else {
+            return "\(seconds) sec"
+        }
     }
 }
 
@@ -213,7 +318,8 @@ struct ActNaturalPlayerSetupView: View {
                 type: .other,
                 cards: [],
                 availableCategories: []
-            )
+            ),
+            existingPlayers: nil
         )
     }
 }

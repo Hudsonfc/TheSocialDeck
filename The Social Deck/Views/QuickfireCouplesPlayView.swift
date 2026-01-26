@@ -369,18 +369,21 @@ struct QuickfireCouplesCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0))
+                .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
-            VStack {
-                Image(systemName: "questionmark.circle.fill")
+            VStack(spacing: 16) {
+                Image(systemName: "heart.2.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(.white)
-                    .padding(.bottom, 20)
+                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                
+                Text("Quickfire Couples")
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
                 
                 Text("Tap to reveal")
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
             }
         }
     }
@@ -394,101 +397,81 @@ struct QuickfireCouplesCardBackView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0))
+                .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
-            VStack(spacing: 24) {
-                Text("This or That")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .padding(.top, 24)
-                
-                VStack(spacing: 20) {
-                    // Option A - Tappable
-                    Button(action: {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                            selectedOption = "A"
-                        }
-                    }) {
-                        VStack(spacing: 8) {
-                            Text(optionA)
-                                .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
-                            
-                            if selectedOption == "A" {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.system(size: 24, weight: .semibold))
-                                    .foregroundColor(Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0))
-                                    .padding(.top, 4)
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 20)
-                        .background(selectedOption == "A" ? Color.white : Color.white.opacity(0.9))
-                        .cornerRadius(16)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(selectedOption == "A" ? Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0) : Color.white.opacity(0.3), lineWidth: selectedOption == "A" ? 3 : 2)
-                        )
-                        .shadow(color: selectedOption == "A" ? Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0).opacity(0.3) : Color.black.opacity(0.1), radius: selectedOption == "A" ? 8 : 4, x: 0, y: 2)
+            VStack(spacing: 20) {
+                // Option A - Tappable
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        selectedOption = "A"
                     }
-                    .buttonStyle(PlainButtonStyle())
-                    
-                    // Divider
-                    HStack {
-                        Rectangle()
-                            .fill(Color.white.opacity(0.8))
-                            .frame(height: 2)
-                            .frame(width: 40)
+                }) {
+                    VStack(spacing: 8) {
+                        Text(optionA)
+                            .font(.system(size: 18, weight: .medium, design: .rounded))
+                            .foregroundColor(.primaryText)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(nil)
+                            .fixedSize(horizontal: false, vertical: true)
                         
-                        Text("OR")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 12)
-                        
-                        Rectangle()
-                            .fill(Color.white.opacity(0.8))
-                            .frame(height: 2)
-                            .frame(width: 40)
-                    }
-                    
-                    // Option B - Tappable
-                    Button(action: {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                            selectedOption = "B"
+                        if selectedOption == "A" {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 24, weight: .semibold))
+                                .foregroundColor(.primaryText)
                         }
-                    }) {
-                        VStack(spacing: 8) {
-                            Text(optionB)
-                                .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
-                            
-                            if selectedOption == "B" {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.system(size: 24, weight: .semibold))
-                                    .foregroundColor(Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0))
-                                    .padding(.top, 4)
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 20)
-                        .background(selectedOption == "B" ? Color.white : Color.white.opacity(0.9))
-                        .cornerRadius(16)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(selectedOption == "B" ? Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0) : Color.white.opacity(0.3), lineWidth: selectedOption == "B" ? 3 : 2)
-                        )
-                        .shadow(color: selectedOption == "B" ? Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0).opacity(0.3) : Color.black.opacity(0.1), radius: selectedOption == "B" ? 8 : 4, x: 0, y: 2)
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+                    .padding(.horizontal, 24)
+                    .background(selectedOption == "A" ? Color.white : Color.white)
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(selectedOption == "A" ? Color.primaryText : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: selectedOption == "A" ? 2 : 1)
+                    )
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 24)
+                .buttonStyle(PlainButtonStyle())
+                
+                // Divider
+                Text("or")
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                
+                // Option B - Tappable
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        selectedOption = "B"
+                    }
+                }) {
+                    VStack(spacing: 8) {
+                        Text(optionB)
+                            .font(.system(size: 18, weight: .medium, design: .rounded))
+                            .foregroundColor(.primaryText)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(nil)
+                            .fixedSize(horizontal: false, vertical: true)
+                        
+                        if selectedOption == "B" {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 24, weight: .semibold))
+                                .foregroundColor(.primaryText)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+                    .padding(.horizontal, 24)
+                    .background(selectedOption == "B" ? Color.white : Color.white)
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(selectedOption == "B" ? Color.primaryText : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: selectedOption == "B" ? 2 : 1)
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
             }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 32)
         }
     }
 }
