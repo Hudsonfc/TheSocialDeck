@@ -12,7 +12,13 @@ struct StoryChainEndView: View {
     let storySentences: [StorySentence]
     @State private var navigateToHome: Bool = false
     @State private var navigateToPlayAgain: Bool = false
+    @State private var navigateToNewPlayers: Bool = false
     @Environment(\.dismiss) private var dismiss
+    
+    // Store player names to pass back to setup
+    private var playerNames: [String] {
+        storySentences.compactMap { $0.author }
+    }
     
     var body: some View {
         ZStack {
@@ -116,7 +122,7 @@ struct StoryChainEndView: View {
                         HapticManager.shared.mediumImpact()
                         navigateToPlayAgain = true
                     }) {
-                        Text("Play Again")
+                        Text("Play Again with Same Players")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
@@ -127,9 +133,9 @@ struct StoryChainEndView: View {
                     
                     Button(action: {
                         HapticManager.shared.mediumImpact()
-                        navigateToHome = true
+                        navigateToNewPlayers = true
                     }) {
-                        Text("Home")
+                        Text("New Players")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundColor(Color.buttonBackground)
                             .frame(maxWidth: .infinity)
@@ -153,8 +159,16 @@ struct StoryChainEndView: View {
         )
         .background(
             NavigationLink(
-                destination: StoryChainSetupView(deck: deck),
+                destination: StoryChainSetupView(deck: deck, existingPlayers: playerNames),
                 isActive: $navigateToPlayAgain
+            ) {
+                EmptyView()
+            }
+        )
+        .background(
+            NavigationLink(
+                destination: StoryChainSetupView(deck: deck, existingPlayers: nil),
+                isActive: $navigateToNewPlayers
             ) {
                 EmptyView()
             }

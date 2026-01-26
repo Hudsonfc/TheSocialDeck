@@ -9,10 +9,16 @@ import SwiftUI
 
 struct StoryChainSetupView: View {
     let deck: Deck
+    let existingPlayers: [String]?
     @State private var players: [String] = []
     @State private var newPlayerName: String = ""
     @State private var navigateToPlay: Bool = false
     @Environment(\.dismiss) private var dismiss
+    
+    init(deck: Deck, existingPlayers: [String]? = nil) {
+        self.deck = deck
+        self.existingPlayers = existingPlayers
+    }
     
     private let minPlayers = 2
     private let maxPlayers = 12
@@ -158,6 +164,12 @@ struct StoryChainSetupView: View {
             }
         }
         .navigationBarHidden(true)
+        .onAppear {
+            // Load existing players if provided
+            if let existing = existingPlayers {
+                players = existing
+            }
+        }
         .background(
             NavigationLink(
                 destination: StoryChainPlayView(
@@ -200,7 +212,8 @@ struct StoryChainSetupView: View {
                 type: .storyChain,
                 cards: allStoryChainCards,
                 availableCategories: []
-            )
+            ),
+            existingPlayers: nil
         )
     }
 }

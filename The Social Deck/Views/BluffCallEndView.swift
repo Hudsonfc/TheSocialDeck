@@ -11,14 +11,17 @@ struct BluffCallEndView: View {
     let deck: Deck
     let selectedCategories: [String]
     let roundsPlayed: Int
+    let players: [String]
     @State private var navigateToHome: Bool = false
     @State private var navigateToPlayAgain: Bool = false
+    @State private var navigateToNewPlayers: Bool = false
     @Environment(\.dismiss) private var dismiss
     
-    init(deck: Deck, selectedCategories: [String], roundsPlayed: Int = 0) {
+    init(deck: Deck, selectedCategories: [String], roundsPlayed: Int = 0, players: [String] = []) {
         self.deck = deck
         self.selectedCategories = selectedCategories
         self.roundsPlayed = roundsPlayed
+        self.players = players
     }
     
     var body: some View {
@@ -89,7 +92,7 @@ struct BluffCallEndView: View {
                         HapticManager.shared.mediumImpact()
                         navigateToPlayAgain = true
                     }) {
-                        Text("Play Again")
+                        Text("Play Again with Same Players")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
@@ -100,9 +103,9 @@ struct BluffCallEndView: View {
                     
                     Button(action: {
                         HapticManager.shared.mediumImpact()
-                        navigateToHome = true
+                        navigateToNewPlayers = true
                     }) {
-                        Text("Home")
+                        Text("New Players")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundColor(Color.buttonBackground)
                             .frame(maxWidth: .infinity)
@@ -126,8 +129,16 @@ struct BluffCallEndView: View {
         )
         .background(
             NavigationLink(
-                destination: BluffCallCategorySelectionView(deck: deck),
+                destination: BluffCallSetupView(deck: deck, selectedCategories: selectedCategories, existingPlayers: players),
                 isActive: $navigateToPlayAgain
+            ) {
+                EmptyView()
+            }
+        )
+        .background(
+            NavigationLink(
+                destination: BluffCallCategorySelectionView(deck: deck),
+                isActive: $navigateToNewPlayers
             ) {
                 EmptyView()
             }

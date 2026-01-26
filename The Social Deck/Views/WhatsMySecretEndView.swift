@@ -13,9 +13,20 @@ struct WhatsMySecretEndView: View {
     let groupWins: Int
     let secretPlayerWins: Int
     let totalRounds: Int
+    let players: [String]
     @State private var navigateToHome: Bool = false
     @State private var navigateToPlayAgain: Bool = false
+    @State private var navigateToNewPlayers: Bool = false
     @Environment(\.dismiss) private var dismiss
+    
+    init(deck: Deck, selectedCategories: [String], groupWins: Int, secretPlayerWins: Int, totalRounds: Int, players: [String] = []) {
+        self.deck = deck
+        self.selectedCategories = selectedCategories
+        self.groupWins = groupWins
+        self.secretPlayerWins = secretPlayerWins
+        self.totalRounds = totalRounds
+        self.players = players
+    }
     
     var body: some View {
         ZStack {
@@ -86,7 +97,7 @@ struct WhatsMySecretEndView: View {
                         HapticManager.shared.mediumImpact()
                         navigateToPlayAgain = true
                     }) {
-                        Text("Play Again")
+                        Text("Play Again with Same Players")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
@@ -97,9 +108,9 @@ struct WhatsMySecretEndView: View {
                     
                     Button(action: {
                         HapticManager.shared.mediumImpact()
-                        navigateToHome = true
+                        navigateToNewPlayers = true
                     }) {
-                        Text("Home")
+                        Text("New Players")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundColor(Color.buttonBackground)
                             .frame(maxWidth: .infinity)
@@ -123,8 +134,16 @@ struct WhatsMySecretEndView: View {
         )
         .background(
             NavigationLink(
-                destination: WhatsMySecretSetupView(deck: deck),
+                destination: WhatsMySecretSetupView(deck: deck, existingPlayers: players),
                 isActive: $navigateToPlayAgain
+            ) {
+                EmptyView()
+            }
+        )
+        .background(
+            NavigationLink(
+                destination: WhatsMySecretSetupView(deck: deck, existingPlayers: nil),
+                isActive: $navigateToNewPlayers
             ) {
                 EmptyView()
             }
@@ -162,7 +181,8 @@ struct WhatsMySecretEndView: View {
             selectedCategories: [],
             groupWins: 5,
             secretPlayerWins: 3,
-            totalRounds: 8
+            totalRounds: 8,
+            players: []
         )
     }
 }

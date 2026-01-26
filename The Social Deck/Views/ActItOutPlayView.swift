@@ -193,7 +193,7 @@ struct ActItOutPlayView: View {
         .background(
             Group {
                 NavigationLink(
-                    destination: ActItOutEndView(deck: deck, selectedCategories: selectedCategories, roundsPlayed: manager.cards.count),
+                    destination: ActItOutEndView(deck: deck, selectedCategories: selectedCategories, roundsPlayed: manager.cards.count, players: manager.players),
                     isActive: $showEndView
                 ) {
                     EmptyView()

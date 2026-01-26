@@ -35,10 +35,13 @@ struct RiddleMeThisSetupView: View {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.primaryText)
+                            .frame(width: 44, height: 44)
+                            .background(Color.tertiaryBackground)
+                            .clipShape(Circle())
                     }
                     Spacer()
                 }
-                .padding(.horizontal, 40)
+                .padding(.horizontal, 24)
                 .padding(.top, 20)
                 
                 VStack(spacing: 0) {

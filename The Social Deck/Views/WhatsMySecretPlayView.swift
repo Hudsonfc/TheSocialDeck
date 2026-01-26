@@ -129,7 +129,8 @@ struct WhatsMySecretPlayView: View {
                         selectedCategories: selectedCategories,
                         groupWins: manager.groupWins,
                         secretPlayerWins: manager.secretPlayerWins,
-                        totalRounds: manager.roundNumber - 1
+                        totalRounds: manager.roundNumber - 1,
+                        players: manager.players
                     ),
                     isActive: $showEndView
                 ) {

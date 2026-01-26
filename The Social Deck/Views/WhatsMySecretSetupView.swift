@@ -10,11 +10,17 @@ import UIKit
 
 struct WhatsMySecretSetupView: View {
     let deck: Deck
+    let existingPlayers: [String]?
     @State private var selectedCategories: [String] = []
     @State private var players: [String] = []
     @State private var newPlayerName: String = ""
     @State private var navigateToPlay: Bool = false
     @Environment(\.dismiss) private var dismiss
+    
+    init(deck: Deck, existingPlayers: [String]? = nil) {
+        self.deck = deck
+        self.existingPlayers = existingPlayers
+    }
     
     private let minCards: Int = 1
     private let maxCards: Int = 15
@@ -217,6 +223,10 @@ struct WhatsMySecretSetupView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
+            // Load existing players if provided
+            if let existing = existingPlayers {
+                players = existing
+            }
             // Initialize selectedCategories with all available categories
             if selectedCategories.isEmpty {
                 selectedCategories = deck.availableCategories
@@ -279,7 +289,8 @@ struct WhatsMySecretSetupView: View {
                 type: .whatsMySecret,
                 cards: [],
                 availableCategories: ["Party", "Wild"]
-            )
+            ),
+            existingPlayers: nil
         )
     }
 }

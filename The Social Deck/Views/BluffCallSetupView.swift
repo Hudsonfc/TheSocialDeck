@@ -10,8 +10,15 @@ import SwiftUI
 struct BluffCallSetupView: View {
     let deck: Deck
     let selectedCategories: [String]
+    let existingPlayers: [String]?
     @State private var navigateToPlay: Bool = false
     @Environment(\.dismiss) private var dismiss
+    
+    init(deck: Deck, selectedCategories: [String], existingPlayers: [String]? = nil) {
+        self.deck = deck
+        self.selectedCategories = selectedCategories
+        self.existingPlayers = existingPlayers
+    }
     
     // Player management
     @State private var players: [String] = []
@@ -252,6 +259,10 @@ struct BluffCallSetupView: View {
         .navigationBarHidden(true)
         .onAppear {
             updateInitialCardCount()
+            // Load existing players if provided
+            if let existing = existingPlayers {
+                players = existing
+            }
         }
         .background(
             NavigationLink(
@@ -306,7 +317,8 @@ struct BluffCallSetupView: View {
                 cards: [],
                 availableCategories: []
             ),
-            selectedCategories: ["Party", "Wild"]
+            selectedCategories: ["Party", "Wild"],
+            existingPlayers: nil
         )
     }
 }

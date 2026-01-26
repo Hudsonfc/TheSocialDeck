@@ -11,6 +11,7 @@ import UIKit
 struct ActItOutSetupView: View {
     let deck: Deck
     let selectedCategories: [String]
+    let existingPlayers: [String]?
     @State private var players: [String] = []
     @State private var newPlayerName: String = ""
     @State private var navigateToPlay: Bool = false
@@ -18,6 +19,12 @@ struct ActItOutSetupView: View {
     @State private var timerDuration: Double = 60
     @State private var useDefaultPlayers: Bool = true
     @Environment(\.dismiss) private var dismiss
+    
+    init(deck: Deck, selectedCategories: [String], existingPlayers: [String]? = nil) {
+        self.deck = deck
+        self.selectedCategories = selectedCategories
+        self.existingPlayers = existingPlayers
+    }
     
     // Calculate max cards available from selected categories
     private var maxCardsAvailable: Int {
@@ -318,6 +325,11 @@ struct ActItOutSetupView: View {
         .navigationBarHidden(true)
         .onAppear {
             updateInitialCardCount()
+            // Load existing players if provided
+            if let existing = existingPlayers {
+                players = existing
+                useDefaultPlayers = false
+            }
         }
         .background(
             NavigationLink(
