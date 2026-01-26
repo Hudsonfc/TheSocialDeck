@@ -26,6 +26,7 @@ struct WhatsMySecretSetupView: View {
     private let maxCards: Int = 15
     
     @State private var selectedCardCount: Double = 5
+    @State private var timerDuration: Double = 120.0 // in seconds
     
     var body: some View {
         ZStack {
@@ -182,6 +183,35 @@ struct WhatsMySecretSetupView: View {
                             .padding(.horizontal, 40)
                             .padding(.bottom, 32)
                             
+                            // Timer Duration Selector
+                            VStack(spacing: 12) {
+                                Text("Timer Duration")
+                                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                                    .foregroundColor(.secondaryText)
+                                
+                                VStack(spacing: 8) {
+                                    Text(formatTimerDuration(timerDuration))
+                                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                        .foregroundColor(.primaryText)
+                                    
+                                    Slider(value: $timerDuration, in: 30...300, step: 30)
+                                        .tint(Color.primaryAccent)
+                                    
+                                    HStack {
+                                        Text("30s")
+                                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                                            .foregroundColor(.secondaryText)
+                                        Spacer()
+                                        Text("5m")
+                                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                                            .foregroundColor(.secondaryText)
+                                    }
+                                }
+                                .padding(.horizontal, 20)
+                            }
+                            .padding(.horizontal, 40)
+                            .padding(.bottom, 32)
+                            
                             // Tips section
                             if players.count >= 2 {
                                 VStack(alignment: .leading, spacing: 12) {
@@ -239,7 +269,8 @@ struct WhatsMySecretSetupView: View {
                         deck: deck,
                         selectedCategories: deck.availableCategories,
                         cardCount: Int(selectedCardCount),
-                        players: players
+                        players: players,
+                        timerDuration: timerDuration
                     ),
                     deck: deck,
                     selectedCategories: deck.availableCategories
@@ -260,6 +291,19 @@ struct WhatsMySecretSetupView: View {
             && players.count < 12 {
             players.append(trimmedName)
             newPlayerName = ""
+        }
+    }
+    
+    private func formatTimerDuration(_ seconds: Double) -> String {
+        let minutes = Int(seconds) / 60
+        let remainingSeconds = Int(seconds) % 60
+        
+        if minutes > 0 && remainingSeconds > 0 {
+            return "\(minutes)m \(remainingSeconds)s"
+        } else if minutes > 0 {
+            return "\(minutes)m"
+        } else {
+            return "\(remainingSeconds)s"
         }
     }
     

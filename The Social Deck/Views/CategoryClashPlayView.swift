@@ -141,7 +141,7 @@ struct CategoryClashPlayView: View {
                             perspective: 0.5
                         )
                         .onTapGesture {
-                            if !isTransitioning && !isFlipped {
+                            if !isTransitioning {
                                 flipCard()
                             }
                         }
@@ -233,11 +233,23 @@ struct CategoryClashPlayView: View {
     }
     
     private func flipCard() {
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
-            cardRotation = 180
-        }
-        if manager.timerEnabled {
-            manager.startTimer()
+        HapticManager.shared.lightImpact()
+        
+        if isFlipped {
+            // Flip back to front
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
+                cardRotation = 0
+            }
+        } else {
+            // Flip to back
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
+                cardRotation = 180
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                if manager.timerEnabled {
+                    manager.startTimer()
+                }
+            }
         }
     }
     

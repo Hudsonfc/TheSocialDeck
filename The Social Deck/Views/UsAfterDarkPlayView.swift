@@ -116,7 +116,7 @@ struct UsAfterDarkPlayView: View {
                     .offset(x: cardOffset + dragOffset)
                     .id(currentCard.id) // Force SwiftUI to treat each card as unique
                     .onTapGesture {
-                        if !isTransitioning && !manager.isFlipped {
+                        if !isTransitioning {
                             toggleCard()
                         }
                     }
@@ -217,6 +217,8 @@ struct UsAfterDarkPlayView: View {
     }
     
     private func toggleCard() {
+        HapticManager.shared.lightImpact()
+        
         if manager.isFlipped {
             // Flip back to front
             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {

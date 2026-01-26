@@ -155,7 +155,7 @@ struct PlayerTurnView: View {
             
             ZStack {
                 RoundedRectangle(cornerRadius: 24)
-                    .fill(Color.appBackground)
+                    .fill(Color.white)
                     .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
                 
                 VStack(spacing: 20) {
@@ -179,7 +179,7 @@ struct PlayerTurnView: View {
                                     
                                     Text(optionA)
                                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.primaryText)
+                                        .foregroundColor(Color.black)
                                         .multilineTextAlignment(.center)
                                         .padding(.horizontal, 24)
                                     
@@ -192,7 +192,7 @@ struct PlayerTurnView: View {
                                 }
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 20)
-                                .background(manager.playerAnswer == "A" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.tertiaryBackground)
+                                .background(manager.playerAnswer == "A" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.white)
                                 .cornerRadius(16)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 16)
@@ -217,7 +217,7 @@ struct PlayerTurnView: View {
                                     
                                     Text(optionB)
                                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.primaryText)
+                                        .foregroundColor(Color.black)
                                         .multilineTextAlignment(.center)
                                         .padding(.horizontal, 24)
                                     
@@ -230,7 +230,7 @@ struct PlayerTurnView: View {
                                 }
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 20)
-                                .background(manager.playerAnswer == "B" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.tertiaryBackground)
+                                .background(manager.playerAnswer == "B" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.white)
                                 .cornerRadius(16)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 16)
@@ -246,7 +246,7 @@ struct PlayerTurnView: View {
                         VStack(spacing: 20) {
                             Text(card.text)
                                 .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                .foregroundColor(.primaryText)
+                                .foregroundColor(Color.black)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 24)
                                 .padding(.top, 24)
@@ -260,7 +260,7 @@ struct PlayerTurnView: View {
                                     VStack(spacing: 8) {
                                         Text("I have")
                                             .font(.system(size: 20, weight: .bold, design: .rounded))
-                                            .foregroundColor(manager.playerAnswer == "I have" ? .white : .primaryText)
+                                            .foregroundColor(manager.playerAnswer == "I have" ? .white : Color.black)
                                         
                                         if manager.playerAnswer == "I have" {
                                             Image(systemName: "checkmark.circle.fill")
@@ -270,7 +270,7 @@ struct PlayerTurnView: View {
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 20)
-                                    .background(manager.playerAnswer == "I have" ? Color.buttonBackground : Color.tertiaryBackground)
+                                    .background(manager.playerAnswer == "I have" ? Color.buttonBackground : Color.white)
                                     .cornerRadius(16)
                                 }
                                 .buttonStyle(PlainButtonStyle())
@@ -283,7 +283,7 @@ struct PlayerTurnView: View {
                                     VStack(spacing: 8) {
                                         Text("I haven't")
                                             .font(.system(size: 20, weight: .bold, design: .rounded))
-                                            .foregroundColor(manager.playerAnswer == "I haven't" ? .white : .primaryText)
+                                            .foregroundColor(manager.playerAnswer == "I haven't" ? .white : Color.black)
                                         
                                         if manager.playerAnswer == "I haven't" {
                                             Image(systemName: "checkmark.circle.fill")
@@ -293,7 +293,7 @@ struct PlayerTurnView: View {
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 20)
-                                    .background(manager.playerAnswer == "I haven't" ? Color.buttonBackground : Color.tertiaryBackground)
+                                    .background(manager.playerAnswer == "I haven't" ? Color.buttonBackground : Color.white)
                                     .cornerRadius(16)
                                 }
                                 .buttonStyle(PlainButtonStyle())
@@ -577,7 +577,7 @@ struct RevealView: View {
             
             ZStack {
                 RoundedRectangle(cornerRadius: 24)
-                    .fill(Color.appBackground)
+                    .fill(Color.white)
                     .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
                 
                 ScrollView {

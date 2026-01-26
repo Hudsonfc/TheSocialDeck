@@ -167,7 +167,7 @@ struct ActNaturalDiscussionView: View {
                 .frame(maxWidth: .infinity)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.white)
+                        .fill(Color.secondaryBackground)
                         .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
                 )
                 .padding(.horizontal, 24)
@@ -207,7 +207,7 @@ struct ActNaturalDiscussionView: View {
                 .frame(maxWidth: .infinity)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.white)
+                        .fill(Color.secondaryBackground)
                         .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
                 )
                 .padding(.horizontal, 24)

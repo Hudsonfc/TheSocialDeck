@@ -243,6 +243,8 @@ struct MLTPlayView: View {
     }
     
     private func toggleCard() {
+        HapticManager.shared.lightImpact()
+        
         if manager.isFlipped {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
                 cardRotation = 0

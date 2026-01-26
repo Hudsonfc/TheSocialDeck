@@ -123,7 +123,7 @@ struct QuickfireCouplesPlayView: View {
                     .offset(x: cardOffset + dragOffset)
                     .id(currentCard.id) // Force SwiftUI to treat each card as unique
                     .onTapGesture {
-                        if !isTransitioning && !manager.isFlipped {
+                        if !isTransitioning {
                             toggleCard()
                         }
                     }
@@ -257,6 +257,8 @@ struct QuickfireCouplesPlayView: View {
     }
     
     private func toggleCard() {
+        HapticManager.shared.lightImpact()
+        
         if manager.isFlipped {
             // Flip back to front
             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
@@ -375,11 +377,11 @@ struct QuickfireCouplesCardFrontView: View {
             VStack(spacing: 16) {
                 Image(systemName: "heart.2.fill")
                     .font(.system(size: 60))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                    .foregroundColor(Color.black)
                 
                 Text("Quickfire Couples")
                     .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                    .foregroundColor(Color.black)
                 
                 Text("Tap to reveal")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
@@ -410,7 +412,7 @@ struct QuickfireCouplesCardBackView: View {
                     VStack(spacing: 8) {
                         Text(optionA)
                             .font(.system(size: 18, weight: .medium, design: .rounded))
-                            .foregroundColor(.primaryText)
+                            .foregroundColor(Color.black)
                             .multilineTextAlignment(.center)
                             .lineLimit(nil)
                             .fixedSize(horizontal: false, vertical: true)
@@ -418,17 +420,17 @@ struct QuickfireCouplesCardBackView: View {
                         if selectedOption == "A" {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.system(size: 24, weight: .semibold))
-                                .foregroundColor(.primaryText)
+                                .foregroundColor(Color.black)
                         }
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 20)
                     .padding(.horizontal, 24)
-                    .background(selectedOption == "A" ? Color.white : Color.white)
+                    .background(Color.white)
                     .cornerRadius(12)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(selectedOption == "A" ? Color.primaryText : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: selectedOption == "A" ? 2 : 1)
+                            .stroke(selectedOption == "A" ? Color.black : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: selectedOption == "A" ? 2 : 1)
                     )
                 }
                 .buttonStyle(PlainButtonStyle())
@@ -447,7 +449,7 @@ struct QuickfireCouplesCardBackView: View {
                     VStack(spacing: 8) {
                         Text(optionB)
                             .font(.system(size: 18, weight: .medium, design: .rounded))
-                            .foregroundColor(.primaryText)
+                            .foregroundColor(Color.black)
                             .multilineTextAlignment(.center)
                             .lineLimit(nil)
                             .fixedSize(horizontal: false, vertical: true)
@@ -455,17 +457,17 @@ struct QuickfireCouplesCardBackView: View {
                         if selectedOption == "B" {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.system(size: 24, weight: .semibold))
-                                .foregroundColor(.primaryText)
+                                .foregroundColor(Color.black)
                         }
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 20)
                     .padding(.horizontal, 24)
-                    .background(selectedOption == "B" ? Color.white : Color.white)
+                    .background(Color.white)
                     .cornerRadius(12)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(selectedOption == "B" ? Color.primaryText : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: selectedOption == "B" ? 2 : 1)
+                            .stroke(selectedOption == "B" ? Color.black : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: selectedOption == "B" ? 2 : 1)
                     )
                 }
                 .buttonStyle(PlainButtonStyle())

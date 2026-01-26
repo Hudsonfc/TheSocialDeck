@@ -25,7 +25,7 @@ class WhatsMySecretGameManager: ObservableObject {
     
     private var timer: Timer?
     private var pausedTimeRemaining: TimeInterval = 0
-    private let roundDuration: TimeInterval = 120.0 // 2 minutes per round
+    private var roundDuration: TimeInterval = 120.0 // 2 minutes per round (configurable)
     
     enum GamePhase {
         case playersTurn // Show "Player's Turn" screen
@@ -37,13 +37,16 @@ class WhatsMySecretGameManager: ObservableObject {
     
     @Published var gamePhase: GamePhase = .playersTurn
     
-    init(deck: Deck, selectedCategories: [String], cardCount: Int, players: [String]) {
+    init(deck: Deck, selectedCategories: [String], cardCount: Int, players: [String], timerDuration: TimeInterval = 120.0) {
         // Initialize players - randomize order
         if players.isEmpty {
             self.players = ["Player 1"]
         } else {
             self.players = players.shuffled()
         }
+        
+        // Set timer duration
+        self.roundDuration = timerDuration
         
         // Get cards - use all categories (combine all)
         let categoriesToUse = selectedCategories.isEmpty ? deck.availableCategories : selectedCategories

@@ -232,6 +232,8 @@ struct ActItOutPlayView: View {
     }
     
     private func toggleCard() {
+        HapticManager.shared.lightImpact()
+        
         if manager.isFlipped {
             // Flip back to front
             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {

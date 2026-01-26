@@ -153,6 +153,8 @@ struct ActNaturalPlayView: View {
     }
     
     private func toggleCard() {
+        HapticManager.shared.lightImpact()
+        
         if showingBack {
             // Flip back to front
             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {

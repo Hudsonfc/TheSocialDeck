@@ -196,7 +196,7 @@ struct RhymeTimeActiveGameView: View {
                     
                     Text("\(Int(manager.timeRemaining) + 1)")
                         .font(.system(size: 36, weight: .bold, design: .rounded))
-                        .foregroundColor(manager.timeRemaining < 3.0 ? Color.red : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(manager.timeRemaining < 3.0 ? Color.red : Color.primaryText)
                 }
             }
             
@@ -264,18 +264,6 @@ struct RhymeTimeActiveGameView: View {
                     .background(Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0))
                     .cornerRadius(12)
                     .shadow(color: Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0).opacity(0.3), radius: 8, x: 0, y: 4)
-                }
-                
-                Button(action: {
-                    // Haptic feedback
-                    let impactFeedback = UIImpactFeedbackGenerator(style: .light)
-                    impactFeedback.impactOccurred()
-                    
-                    manager.passWithoutRhyme()
-                }) {
-                    Text("Can't Think of One")
-                        .font(.system(size: 16, weight: .medium, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                 }
             }
             .padding(.horizontal, 40)
