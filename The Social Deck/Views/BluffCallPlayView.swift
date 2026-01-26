@@ -181,6 +181,8 @@ struct PlayerTurnView: View {
                                         .font(.system(size: 18, weight: .semibold, design: .rounded))
                                         .foregroundColor(Color.black)
                                         .multilineTextAlignment(.center)
+                                        .lineLimit(nil)
+                                        .fixedSize(horizontal: false, vertical: true)
                                         .padding(.horizontal, 24)
                                     
                                     if manager.playerAnswer == "A" {
@@ -196,8 +198,9 @@ struct PlayerTurnView: View {
                                 .cornerRadius(16)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 16)
-                                        .stroke(manager.playerAnswer == "A" ? Color.buttonBackground : Color.clear, lineWidth: 2)
+                                        .stroke(manager.playerAnswer == "A" ? Color.buttonBackground : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: manager.playerAnswer == "A" ? 2 : 1)
                                 )
+                                .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                             }
                             .buttonStyle(PlainButtonStyle())
                             
@@ -219,6 +222,8 @@ struct PlayerTurnView: View {
                                         .font(.system(size: 18, weight: .semibold, design: .rounded))
                                         .foregroundColor(Color.black)
                                         .multilineTextAlignment(.center)
+                                        .lineLimit(nil)
+                                        .fixedSize(horizontal: false, vertical: true)
                                         .padding(.horizontal, 24)
                                     
                                     if manager.playerAnswer == "B" {
@@ -234,8 +239,9 @@ struct PlayerTurnView: View {
                                 .cornerRadius(16)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 16)
-                                        .stroke(manager.playerAnswer == "B" ? Color.buttonBackground : Color.clear, lineWidth: 2)
+                                        .stroke(manager.playerAnswer == "B" ? Color.buttonBackground : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: manager.playerAnswer == "B" ? 2 : 1)
                                 )
+                                .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                             }
                             .buttonStyle(PlainButtonStyle())
                         }
@@ -260,18 +266,23 @@ struct PlayerTurnView: View {
                                     VStack(spacing: 8) {
                                         Text("I have")
                                             .font(.system(size: 20, weight: .bold, design: .rounded))
-                                            .foregroundColor(manager.playerAnswer == "I have" ? .white : Color.black)
+                                            .foregroundColor(Color.black)
                                         
                                         if manager.playerAnswer == "I have" {
                                             Image(systemName: "checkmark.circle.fill")
                                                 .font(.system(size: 20, weight: .semibold))
-                                                .foregroundColor(.white)
+                                                .foregroundColor(Color.buttonBackground)
                                         }
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 20)
-                                    .background(manager.playerAnswer == "I have" ? Color.buttonBackground : Color.white)
+                                    .background(manager.playerAnswer == "I have" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.white)
                                     .cornerRadius(16)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .stroke(manager.playerAnswer == "I have" ? Color.buttonBackground : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: manager.playerAnswer == "I have" ? 2 : 1)
+                                    )
+                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                                 }
                                 .buttonStyle(PlainButtonStyle())
                                 
@@ -283,18 +294,23 @@ struct PlayerTurnView: View {
                                     VStack(spacing: 8) {
                                         Text("I haven't")
                                             .font(.system(size: 20, weight: .bold, design: .rounded))
-                                            .foregroundColor(manager.playerAnswer == "I haven't" ? .white : Color.black)
+                                            .foregroundColor(Color.black)
                                         
                                         if manager.playerAnswer == "I haven't" {
                                             Image(systemName: "checkmark.circle.fill")
                                                 .font(.system(size: 20, weight: .semibold))
-                                                .foregroundColor(.white)
+                                                .foregroundColor(Color.buttonBackground)
                                         }
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 20)
-                                    .background(manager.playerAnswer == "I haven't" ? Color.buttonBackground : Color.white)
+                                    .background(manager.playerAnswer == "I haven't" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.white)
                                     .cornerRadius(16)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .stroke(manager.playerAnswer == "I haven't" ? Color.buttonBackground : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: manager.playerAnswer == "I haven't" ? 2 : 1)
+                                    )
+                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                                 }
                                 .buttonStyle(PlainButtonStyle())
                             }
@@ -349,7 +365,7 @@ struct GroupDecisionView: View {
                 // Show the prompt they're deciding about
                 ZStack {
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.tertiaryBackground)
+                        .fill(Color.white)
                     
                     VStack(spacing: 12) {
                         if let optionA = card.optionA, let optionB = card.optionB {
@@ -362,12 +378,12 @@ struct GroupDecisionView: View {
                                 if manager.playerAnswer == "A" {
                                     Text(optionA)
                                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.primaryText)
+                                        .foregroundColor(Color.black)
                                         .multilineTextAlignment(.center)
                                 } else {
                                     Text(optionB)
                                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.primaryText)
+                                        .foregroundColor(Color.black)
                                         .multilineTextAlignment(.center)
                                 }
                             }
@@ -382,7 +398,7 @@ struct GroupDecisionView: View {
                                 
                                 Text(card.text)
                                     .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                    .foregroundColor(.primaryText)
+                                    .foregroundColor(Color.black)
                                     .multilineTextAlignment(.center)
                                 
                                 Text(manager.playerAnswer ?? "")
@@ -401,7 +417,7 @@ struct GroupDecisionView: View {
                     VStack(spacing: 16) {
                         Text("Do you believe \(manager.currentPlayer)?")
                             .font(.system(size: 18, weight: .semibold, design: .rounded))
-                            .foregroundColor(.primaryText)
+                            .foregroundColor(Color.black)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 40)
                         
@@ -419,7 +435,7 @@ struct GroupDecisionView: View {
                     VStack(spacing: 16) {
                         Text("Do you believe \(manager.currentPlayer)?")
                             .font(.system(size: 18, weight: .semibold, design: .rounded))
-                            .foregroundColor(.primaryText)
+                            .foregroundColor(Color.black)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 40)
                         
@@ -498,7 +514,7 @@ struct PlayerVoteCard: View {
         VStack(spacing: 12) {
             Text(player)
                 .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundColor(.primaryText)
+                .foregroundColor(Color.black)
             
             if hasVoted {
                 // Show their vote
@@ -509,7 +525,7 @@ struct PlayerVoteCard: View {
                     
                     Text(currentVote == .believe ? "Believed" : "Called Bluff")
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                        .foregroundColor(.primaryText)
+                        .foregroundColor(Color.black)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
@@ -552,7 +568,7 @@ struct PlayerVoteCard: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
-        .background(Color.appBackground)
+        .background(Color.white)
         .cornerRadius(16)
         .shadow(color: Color.shadowColor, radius: 8, x: 0, y: 4)
     }
@@ -624,7 +640,7 @@ struct RevealView: View {
                             if let optionA = card.optionA, let optionB = card.optionB {
                                 Text(manager.playerAnswer == "A" ? optionA : optionB)
                                     .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                    .foregroundColor(.primaryText)
+                                    .foregroundColor(Color.black)
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 24)
                             } else {
@@ -638,7 +654,7 @@ struct RevealView: View {
                                     
                                     Text(manager.playerAnswer ?? "")
                                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.primaryText)
+                                        .foregroundColor(Color.black)
                                 }
                             }
                         }
@@ -659,7 +675,7 @@ struct RevealView: View {
                                         HStack(spacing: 12) {
                                             Text(player)
                                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                                .foregroundColor(.primaryText)
+                                                .foregroundColor(Color.black)
                                             
                                             Spacer()
                                             
@@ -773,7 +789,7 @@ struct RevealView: View {
                                 // For 2 players, use the original text
                                 Text(manager.getConsequenceText())
                                     .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                    .foregroundColor(.primaryText)
+                                    .foregroundColor(Color.black)
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 24)
                                 
