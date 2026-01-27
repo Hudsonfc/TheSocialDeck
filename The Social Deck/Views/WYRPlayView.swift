@@ -426,18 +426,19 @@ struct WYRCardBackView: View {
                             if selectedOption == "A" {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.system(size: 24, weight: .semibold))
-                                    .foregroundColor(Color.black)
+                                    .foregroundColor(Color.buttonBackground)
                             }
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 20)
                         .padding(.horizontal, 24)
-                        .background(Color.white)
+                        .background(selectedOption == "A" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.white)
                         .cornerRadius(12)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(selectedOption == "A" ? Color.black : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: selectedOption == "A" ? 2 : 1)
+                                .stroke(selectedOption == "A" ? Color.buttonBackground : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: selectedOption == "A" ? 2 : 1)
                         )
+                        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                     }
                     .buttonStyle(PlainButtonStyle())
                     
@@ -463,18 +464,19 @@ struct WYRCardBackView: View {
                             if selectedOption == "B" {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.system(size: 24, weight: .semibold))
-                                    .foregroundColor(Color.black)
+                                    .foregroundColor(Color.buttonBackground)
                             }
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 20)
                         .padding(.horizontal, 24)
-                        .background(Color.white)
+                        .background(selectedOption == "B" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.white)
                         .cornerRadius(12)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(selectedOption == "B" ? Color.black : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: selectedOption == "B" ? 2 : 1)
+                                .stroke(selectedOption == "B" ? Color.buttonBackground : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: selectedOption == "B" ? 2 : 1)
                         )
+                        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
