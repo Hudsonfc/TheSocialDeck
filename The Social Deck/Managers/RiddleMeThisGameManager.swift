@@ -62,6 +62,9 @@ class RiddleMeThisGameManager: ObservableObject {
         let correctAnswer = currentAnswer.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         let userAnswerLower = userAnswer.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         
+        // If correct answer is empty (nil), no answer can be correct
+        guard !correctAnswer.isEmpty else { return false }
+        
         // Exact match
         if userAnswerLower == correctAnswer {
             return true

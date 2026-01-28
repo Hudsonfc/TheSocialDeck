@@ -34,9 +34,9 @@ struct ActItOutPlayView: View {
                         dismiss()
                     }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 15, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.primaryText)
-                            .frame(width: 40, height: 40)
+                            .frame(width: 44, height: 44)
                             .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }

@@ -84,7 +84,7 @@ struct Play2View: View {
         Deck(
             title: "Most Likely To",
             description: "Find out who's most likely to do crazy things. Vote on which friend is most likely to do outrageous scenarios. Funny, revealing, and perfect for groups. Discover who your friends think would do the wildest things!",
-            numberOfCards: 635,
+            numberOfCards: 626,
             estimatedTime: "30-45 min",
             imageName: "MLT 2.0",
             type: .mostLikelyTo,
@@ -98,7 +98,7 @@ struct Play2View: View {
         Deck(
             title: "Rhyme Time",
             description: "Say a word that rhymes with the base word before time runs out! Challenge your vocabulary and quick thinking. Repeat a rhyme or hesitate and you're out. Choose your difficulty level and see how long you can last in this word battle!",
-            numberOfCards: 549,
+            numberOfCards: 482,
             estimatedTime: "10-15 min",
             imageName: "RT 2.0",
             type: .rhymeTime,
@@ -118,7 +118,7 @@ struct Play2View: View {
         Deck(
             title: "What's My Secret?",
             description: "One player gets a secret rule to follow. Can the group figure out what it is? The secret player must act according to hidden rules while others try to guess. Pick categories like Party, Wild, Social, Actions, or Behavior. Think fast and stay sharp!",
-            numberOfCards: 567,
+            numberOfCards: 562,
             estimatedTime: "5-10 min",
             imageName: "WMS 2.0",
             type: .whatsMySecret,
@@ -128,7 +128,7 @@ struct Play2View: View {
         Deck(
             title: "Riddle Me This",
             description: "Solve riddles quickly! The first player to say the correct answer wins the round. Test your problem-solving skills with tricky riddles. Wrong answers lock you out, so think carefully. Brain teasers that challenge your logic and creativity!",
-            numberOfCards: 449,
+            numberOfCards: 391,
             estimatedTime: "5-10 min",
             imageName: "RMT 2.0",
             type: .riddleMeThis,
@@ -138,7 +138,7 @@ struct Play2View: View {
         Deck(
             title: "Act It Out",
             description: "Act out prompts silently while others guess! First to guess correctly wins the round. Challenge your acting skills with categories like Actions & Verbs, Animals, Emotions, Daily Activities, Sports, Objects, Food, Famous Concepts, Movie Genres, and Nature. No talking, only acting!",
-            numberOfCards: 586,
+            numberOfCards: 556,
             estimatedTime: "15-30 min",
             imageName: "AIO 2.0",
             type: .actItOut,
@@ -158,7 +158,7 @@ struct Play2View: View {
         Deck(
             title: "Category Clash",
             description: "Name items in a category before time runs out! Hesitate or repeat an answer and you're out. Choose from categories like Food & Drink, Pop Culture, General, Sports & Activities, or Animals & Nature. The pace gets faster each round, turning it into a hilarious pressure game!",
-            numberOfCards: 535,
+            numberOfCards: 512,
             estimatedTime: "15-20 min",
             imageName: "CC 2.0",
             type: .categoryClash,
@@ -198,7 +198,7 @@ struct Play2View: View {
         Deck(
             title: "Bluff Call",
             description: "Convince the group your answer is true, or call their bluff! One player sees a prompt and must convince others their answer is true. The group decides whether to believe or call the bluff. Pick categories like Party, Wild, Couples, Teens, Dirty, or Friends. Deception meets deduction!",
-            numberOfCards: 608,
+            numberOfCards: 584,
             estimatedTime: "15-20 min",
             imageName: "BC 2.0",
             type: .bluffCall,
@@ -212,7 +212,7 @@ struct Play2View: View {
         Deck(
             title: "Quickfire Couples",
             description: "Fast-paced \"this or that\" choices for couples. Answer instantly to reveal preferences and chemistry.",
-            numberOfCards: 430,
+            numberOfCards: 408,
             estimatedTime: "15-25 min",
             imageName: "Quickfire Couples",
             type: .quickfireCouples,
@@ -222,7 +222,7 @@ struct Play2View: View {
         Deck(
             title: "Closer Than Ever",
             description: "Meaningful questions designed to deepen connection and strengthen emotional bonds. Explore love languages, shared memories, values, and future dreams through thoughtful conversation.",
-            numberOfCards: 425,
+            numberOfCards: 394,
             estimatedTime: "30-45 min",
             imageName: "Closer than ever",
             type: .closerThanEver,
@@ -232,7 +232,7 @@ struct Play2View: View {
         Deck(
             title: "Us After Dark",
             description: "A deeper, intimate couples game focused on honesty, curiosity, and emotional closeness. Questions explore desires, boundaries, memories, and what makes your connection special.",
-            numberOfCards: 434,
+            numberOfCards: 236,
             estimatedTime: "30-45 min",
             imageName: "us after dark",
             type: .usAfterDark,

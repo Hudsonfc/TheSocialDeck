@@ -261,7 +261,7 @@ class WhatsMySecretGameManager: ObservableObject {
     }
     
     func previousRound() {
-        guard canGoBack else { return }
+        guard canGoBack, !players.isEmpty else { return }
         
         // Move to previous card
         currentCardIndex -= 1

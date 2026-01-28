@@ -103,7 +103,7 @@ class RhymeTimeGameManager: ObservableObject {
     }
     
     func submitRhyme() {
-        guard isGameActive && !timerExpired else { return }
+        guard isGameActive && !timerExpired, !players.isEmpty else { return }
         
         // Player confirmed they said a rhyme out loud
         // Note: We can't validate the actual word, so we rely on group honesty

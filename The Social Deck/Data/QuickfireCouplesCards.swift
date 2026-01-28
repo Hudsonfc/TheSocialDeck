@@ -184,7 +184,6 @@ let allQuickfireCouplesCards: [Card] = [
     Card(text: "", category: "Preferences", optionA: "Breakfast", optionB: "Brunch"),
     
     // More Personality cards
-    Card(text: "", category: "Personality", optionA: "Early riser", optionB: "Sleep in"),
     Card(text: "", category: "Personality", optionA: "Morning workout", optionB: "Evening workout"),
     Card(text: "", category: "Personality", optionA: "Workout", optionB: "Rest day"),
     Card(text: "", category: "Personality", optionA: "Gym", optionB: "Home workout"),
@@ -195,7 +194,6 @@ let allQuickfireCouplesCards: [Card] = [
     Card(text: "", category: "Personality", optionA: "Traveler", optionB: "Home lover"),
     Card(text: "", category: "Personality", optionA: "Explorer", optionB: "Routine lover"),
     Card(text: "", category: "Personality", optionA: "Spontaneous", optionB: "Planned"),
-    Card(text: "", category: "Personality", optionA: "Impulsive", optionB: "Thoughtful"),
     Card(text: "", category: "Personality", optionA: "Risk taker", optionB: "Safe player"),
     Card(text: "", category: "Personality", optionA: "Bold", optionB: "Cautious"),
     Card(text: "", category: "Personality", optionA: "Confident", optionB: "Humble"),
@@ -305,7 +303,6 @@ let allQuickfireCouplesCards: [Card] = [
     Card(text: "", category: "Light & Fun", optionA: "Live music", optionB: "Quiet evening"),
     Card(text: "", category: "Light & Fun", optionA: "Dancing", optionB: "Karaoke"),
     Card(text: "", category: "Light & Fun", optionA: "Outdoor concert", optionB: "Indoor show"),
-    Card(text: "", category: "Light & Fun", optionA: "Festival", optionB: "Quiet dinner"),
     Card(text: "", category: "Light & Fun", optionA: "Adventure sports", optionB: "Relaxing activities"),
     Card(text: "", category: "Light & Fun", optionA: "Try new things", optionB: "Stick to favorites"),
     
@@ -323,15 +320,7 @@ let allQuickfireCouplesCards: [Card] = [
     
     // Additional Personality questions
     Card(text: "", category: "Personality", optionA: "Talkative", optionB: "Quiet"),
-    Card(text: "", category: "Personality", optionA: "Expressive", optionB: "Reserved"),
-    Card(text: "", category: "Personality", optionA: "Emotional", optionB: "Logical"),
-    Card(text: "", category: "Personality", optionA: "Spontaneous", optionB: "Planned"),
-    Card(text: "", category: "Personality", optionA: "Adventurous", optionB: "Cautious"),
-    Card(text: "", category: "Personality", optionA: "Social", optionB: "Solo"),
     Card(text: "", category: "Personality", optionA: "Optimistic", optionB: "Realistic"),
-    Card(text: "", category: "Personality", optionA: "Flexible", optionB: "Structured"),
-    Card(text: "", category: "Personality", optionA: "Impulsive", optionB: "Thoughtful"),
-    Card(text: "", category: "Personality", optionA: "Independent", optionB: "Interdependent"),
     
     // Additional Date Ideas questions
     Card(text: "", category: "Date Ideas", optionA: "Sunset picnic", optionB: "Sunrise hike"),
@@ -347,8 +336,6 @@ let allQuickfireCouplesCards: [Card] = [
     
     // Additional Relationship questions
     Card(text: "", category: "Relationship", optionA: "Share everything", optionB: "Keep some privacy"),
-    Card(text: "", category: "Relationship", optionA: "Be vulnerable early", optionB: "Build trust first"),
-    Card(text: "", category: "Relationship", optionA: "Talk daily", optionB: "Space between calls"),
     Card(text: "", category: "Relationship", optionA: "See each other often", optionB: "Maintain independence"),
     Card(text: "", category: "Relationship", optionA: "Merge friend groups", optionB: "Keep separate friends"),
     Card(text: "", category: "Relationship", optionA: "Share hobbies", optionB: "Have separate interests"),
@@ -358,7 +345,6 @@ let allQuickfireCouplesCards: [Card] = [
     Card(text: "", category: "Relationship", optionA: "Be best friends", optionB: "Keep separate best friends"),
     
     // 300+ additional Quickfire Couples cards
-    Card(text: "", category: "Light & Fun", optionA: "Pancakes", optionB: "Waffles"),
     Card(text: "", category: "Light & Fun", optionA: "Bacon", optionB: "Sausage"),
     Card(text: "", category: "Light & Fun", optionA: "Orange juice", optionB: "Apple juice"),
     Card(text: "", category: "Light & Fun", optionA: "Cereal", optionB: "Oatmeal"),
@@ -366,7 +352,6 @@ let allQuickfireCouplesCards: [Card] = [
     Card(text: "", category: "Light & Fun", optionA: "French toast", optionB: "Pancakes"),
     Card(text: "", category: "Light & Fun", optionA: "Scrambled eggs", optionB: "Fried eggs"),
     Card(text: "", category: "Light & Fun", optionA: "Toast", optionB: "English muffin"),
-    Card(text: "", category: "Light & Fun", optionA: "Smoothie", optionB: "Juice"),
     Card(text: "", category: "Light & Fun", optionA: "Yogurt", optionB: "Cottage cheese"),
     Card(text: "", category: "Light & Fun", optionA: "Tacos", optionB: "Burritos"),
     Card(text: "", category: "Light & Fun", optionA: "Sushi", optionB: "Ramen"),
@@ -389,18 +374,15 @@ let allQuickfireCouplesCards: [Card] = [
     Card(text: "", category: "Light & Fun", optionA: "Matcha", optionB: "Chai"),
     Card(text: "", category: "Light & Fun", optionA: "Bubble tea", optionB: "Smoothie"),
     Card(text: "", category: "Preferences", optionA: "Morning coffee together", optionB: "Evening wind-down together"),
-    Card(text: "", category: "Preferences", optionA: "Surprise date", optionB: "Planned date"),
     Card(text: "", category: "Preferences", optionA: "Fancy dinner", optionB: "Casual dinner"),
     Card(text: "", category: "Preferences", optionA: "Home-cooked meal", optionB: "Restaurant"),
     Card(text: "", category: "Preferences", optionA: "Try new things together", optionB: "Stick to favorites"),
     Card(text: "", category: "Preferences", optionA: "Adventure travel", optionB: "Relaxing vacation"),
     Card(text: "", category: "Preferences", optionA: "City break", optionB: "Beach holiday"),
-    Card(text: "", category: "Preferences", optionA: "Road trip", optionB: "Flight"),
     Card(text: "", category: "Preferences", optionA: "Hotel", optionB: "Airbnb"),
     Card(text: "", category: "Preferences", optionA: "Luxury trip", optionB: "Budget trip"),
     Card(text: "", category: "Personality", optionA: "Romantic", optionB: "Practical"),
     Card(text: "", category: "Personality", optionA: "Adventurous", optionB: "Homebody"),
-    Card(text: "", category: "Personality", optionA: "Spontaneous", optionB: "Planned"),
     Card(text: "", category: "Personality", optionA: "Affectionate", optionB: "Reserved"),
     Card(text: "", category: "Personality", optionA: "Verbal", optionB: "Actions"),
     Card(text: "", category: "Personality", optionA: "Gift giver", optionB: "Experience giver"),
@@ -412,8 +394,6 @@ let allQuickfireCouplesCards: [Card] = [
     Card(text: "", category: "Date Ideas", optionA: "Takeout", optionB: "Cook together"),
     Card(text: "", category: "Date Ideas", optionA: "Walk in park", optionB: "Hike"),
     Card(text: "", category: "Date Ideas", optionA: "Bike ride", optionB: "Drive"),
-    Card(text: "", category: "Date Ideas", optionA: "Brunch", optionB: "Dinner"),
-    Card(text: "", category: "Date Ideas", optionA: "Coffee date", optionB: "Drinks date"),
     Card(text: "", category: "Date Ideas", optionA: "Game night", optionB: "Movie night"),
     Card(text: "", category: "Date Ideas", optionA: "Dance class", optionB: "Cooking class"),
     Card(text: "", category: "Date Ideas", optionA: "Escape room", optionB: "Mini golf"),
@@ -454,7 +434,6 @@ let allQuickfireCouplesCards: [Card] = [
     Card(text: "", category: "Personality", optionA: "Needy", optionB: "Self-sufficient"),
     Card(text: "", category: "Personality", optionA: "Sensitive", optionB: "Thick-skinned"),
     Card(text: "", category: "Personality", optionA: "Emotional", optionB: "Stoic"),
-    Card(text: "", category: "Personality", optionA: "Expressive", optionB: "Reserved"),
     Card(text: "", category: "Personality", optionA: "Open book", optionB: "Private"),
     Card(text: "", category: "Personality", optionA: "Vulnerable", optionB: "Guarded"),
     Card(text: "", category: "Personality", optionA: "Forgiving", optionB: "Holds grudges"),
@@ -470,7 +449,6 @@ let allQuickfireCouplesCards: [Card] = [
     Card(text: "", category: "Date Ideas", optionA: "Stand-up show", optionB: "Theater"),
     Card(text: "", category: "Relationship", optionA: "Argue in person", optionB: "Argue over text"),
     Card(text: "", category: "Relationship", optionA: "Cool off alone", optionB: "Talk it out immediately"),
-    Card(text: "", category: "Relationship", optionA: "Apologize first", optionB: "Wait for apology"),
     Card(text: "", category: "Relationship", optionA: "Forgive quickly", optionB: "Need time to forgive"),
     Card(text: "", category: "Relationship", optionA: "Bring up past", optionB: "Focus on present"),
     Card(text: "", category: "Relationship", optionA: "Give ultimatums", optionB: "Compromise"),

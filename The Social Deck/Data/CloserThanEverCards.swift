@@ -174,7 +174,6 @@ let allCloserThanEverCards: [Card] = [
     Card(text: "What's a dream you have for yourself outside of our relationship?", category: "Personal Growth", cardType: nil),
     Card(text: "What's something you need time alone for?", category: "Personal Growth", cardType: nil),
     Card(text: "What's a way we could balance togetherness and independence?", category: "Personal Growth", cardType: nil),
-    Card(text: "What's something you're passionate about that I should know more about?", category: "Personal Growth", cardType: nil),
     Card(text: "What's a way I could encourage your personal growth?", category: "Personal Growth", cardType: nil),
     
     // Additional Love Languages & Appreciation
@@ -232,7 +231,6 @@ let allCloserThanEverCards: [Card] = [
     Card(text: "What's a way we could feel more emotionally connected?", category: "Intimacy", cardType: nil),
     Card(text: "What's something that makes you feel most intimate with me?", category: "Intimacy", cardType: nil),
     Card(text: "What's a way we could create more special moments together?", category: "Intimacy", cardType: nil),
-    Card(text: "What's something intimate you'd like to share with me?", category: "Intimacy", cardType: nil),
     Card(text: "What's a way we could be more present with each other?", category: "Intimacy", cardType: nil),
     
     // Additional Trust
@@ -247,7 +245,6 @@ let allCloserThanEverCards: [Card] = [
     Card(text: "What's a love language you'd like to receive more of?", category: "Love Languages", cardType: nil),
     Card(text: "What's a small gesture that would make you feel most loved right now?", category: "Love Languages", cardType: nil),
     Card(text: "What's a way I express love that you appreciate most?", category: "Love Languages", cardType: nil),
-    Card(text: "What's a love language you think I need more of?", category: "Love Languages", cardType: nil),
     
     // Additional Memories
     Card(text: "What's a memory from our first few dates that stands out?", category: "Memories", cardType: nil),
@@ -257,44 +254,21 @@ let allCloserThanEverCards: [Card] = [
     Card(text: "What's a memory that shows our chemistry together?", category: "Memories", cardType: nil),
     
     // Additional Values
-    Card(text: "What's a value you've learned from me that you appreciate?", category: "Values", cardType: nil),
     Card(text: "What's a principle we both share that strengthens our relationship?", category: "Values", cardType: nil),
-    Card(text: "What's a value you'd like us to practice more together?", category: "Values", cardType: nil),
     Card(text: "What's a belief you have that I've helped you understand better?", category: "Values", cardType: nil),
     Card(text: "What's a value that's important to both of us in our relationship?", category: "Values", cardType: nil),
     
     // Additional Dreams
-    Card(text: "What's a dream we've talked about that you're most excited about?", category: "Dreams", cardType: nil),
-    Card(text: "What's a goal we could work toward together this year?", category: "Dreams", cardType: nil),
-    Card(text: "What's a dream you have that I could help make reality?", category: "Dreams", cardType: nil),
-    Card(text: "What's something you want to experience together before we're old?", category: "Dreams", cardType: nil),
-    Card(text: "What's a dream that involves both of us growing together?", category: "Dreams", cardType: nil),
     
     // Additional Communication
-    Card(text: "What's a topic you'd like us to discuss more deeply?", category: "Communication", cardType: nil),
-    Card(text: "What's a way we could have more meaningful conversations?", category: "Communication", cardType: nil),
-    Card(text: "What's something you wish I asked you about more?", category: "Communication", cardType: nil),
-    Card(text: "What's a conversation you've been avoiding that we should have?", category: "Communication", cardType: nil),
-    Card(text: "What's a way I could listen to you better?", category: "Communication", cardType: nil),
     
     // Additional Gratitude
-    Card(text: "What's something I did recently that you're grateful for?", category: "Gratitude", cardType: nil),
-    Card(text: "What's a quality in me that you're most thankful for?", category: "Gratitude", cardType: nil),
-    Card(text: "What's a way I've surprised you in a good way?", category: "Gratitude", cardType: nil),
-    Card(text: "What's something about our relationship you don't take for granted?", category: "Gratitude", cardType: nil),
-    Card(text: "What's a moment when you felt most grateful to be with me?", category: "Gratitude", cardType: nil),
     
     // Additional Intimacy
-    Card(text: "What's a way we could feel more emotionally connected?", category: "Intimacy", cardType: nil),
-    Card(text: "What's something that makes you feel most intimate with me?", category: "Intimacy", cardType: nil),
-    Card(text: "What's a way we could create more special moments together?", category: "Intimacy", cardType: nil),
-    Card(text: "What's something intimate you'd like to share with me?", category: "Intimacy", cardType: nil),
-    Card(text: "What's a way we could be more present with each other?", category: "Intimacy", cardType: nil),
     
     // Additional Growth
     Card(text: "What's something you'd like to work on together as a couple this year?", category: "Growth", cardType: nil),
     Card(text: "What's a way we could grow closer in the next few months?", category: "Growth", cardType: nil),
-    Card(text: "What's a habit you'd like us to develop together?", category: "Growth", cardType: nil),
     Card(text: "What's a skill you'd like us to learn together?", category: "Growth", cardType: nil),
     Card(text: "What's a way we could better support each other's personal growth?", category: "Growth", cardType: nil),
     
@@ -321,7 +295,6 @@ let allCloserThanEverCards: [Card] = [
     
     // Additional Personal Growth
     Card(text: "What's a personal goal you have that I could help support?", category: "Personal Growth", cardType: nil),
-    Card(text: "What's something you're working on personally that I should know about?", category: "Personal Growth", cardType: nil),
     Card(text: "What's a way I could encourage your individual growth?", category: "Personal Growth", cardType: nil),
     Card(text: "What's a dream you have for yourself that I could support?", category: "Personal Growth", cardType: nil),
     Card(text: "What's a way we could balance togetherness and independence better?", category: "Personal Growth", cardType: nil),
@@ -432,7 +405,6 @@ let allCloserThanEverCards: [Card] = [
     Card(text: "What's something you're proud of about us that you don't say enough?", category: "Gratitude", cardType: nil),
     Card(text: "What's a boundary you'd want us to set together?", category: "Values", cardType: nil),
     Card(text: "What's something you need me to understand about your love language?", category: "Love Languages", cardType: nil),
-    Card(text: "What's a way we could make up better after a disagreement?", category: "Conflict", cardType: nil),
     Card(text: "What's a dream you have that involves us building something together?", category: "Dreams", cardType: nil),
     Card(text: "What's something you've been meaning to tell me but haven't found the right time?", category: "Communication", cardType: nil),
     Card(text: "What's a way I could make you feel more appreciated in our day-to-day?", category: "Love Languages", cardType: nil),
@@ -470,7 +442,6 @@ let allCloserThanEverCards: [Card] = [
     Card(text: "What's something you need when you're feeling overwhelmed?", category: "Love Languages", cardType: nil),
     Card(text: "What's a dream you have for us that feels achievable soon?", category: "Dreams", cardType: nil),
     Card(text: "What's something you're grateful for about our relationship that you don't say enough?", category: "Gratitude", cardType: nil),
-    Card(text: "What's a way we could handle disagreements better?", category: "Conflict", cardType: nil),
     Card(text: "What's something you'd want me to know about how you give love?", category: "Love Languages", cardType: nil),
     Card(text: "What's a memory you'd want to make with me that we haven't yet?", category: "Memories", cardType: nil),
     Card(text: "What's a topic you'd want us to never stop talking about?", category: "Communication", cardType: nil),
@@ -495,13 +466,11 @@ let allCloserThanEverCards: [Card] = [
     Card(text: "What's something you need from me when you're feeling distant?", category: "Love Languages", cardType: nil),
     Card(text: "What's a dream you have that we could start working toward now?", category: "Dreams", cardType: nil),
     Card(text: "What's something you're grateful for about how we fight and make up?", category: "Gratitude", cardType: nil),
-    Card(text: "What's a way we could be more playful together?", category: "Fun", cardType: nil),
     Card(text: "What's something you'd want me to do when you're feeling unappreciated?", category: "Love Languages", cardType: nil),
     Card(text: "What's a memory of us that you'd want to frame or keep forever?", category: "Memories", cardType: nil),
     Card(text: "What's something you'd want us to promise each other?", category: "Values", cardType: nil),
     Card(text: "What's a way we could make our relationship feel more like a partnership?", category: "Growth", cardType: nil),
     Card(text: "What's something you need from me when you're feeling lonely?", category: "Love Languages", cardType: nil),
     Card(text: "What's a dream you have for us that you're scared to say out loud?", category: "Dreams", cardType: nil),
-    Card(text: "What's something you're grateful for about our relationship that you've never said?", category: "Gratitude", cardType: nil),
 ]
 

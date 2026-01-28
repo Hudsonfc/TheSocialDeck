@@ -17,7 +17,7 @@ class BluffCallGameManager: ObservableObject {
     
     // Game state
     @Published var gamePhase: GamePhase = .playerTurn
-    @Published var playerAnswer: String? = nil // "A", "B", or "Yes"/"No" for questions
+    @Published var playerAnswer: String? = nil // "A", "B", or "I have"/"I haven't" for questions
     @Published var groupDecision: GroupDecision? = nil // .believe or .callBluff
     @Published var revealedAnswer: String? = nil // The actual answer
     @Published var playerVotes: [String: GroupDecision] = [:] // Individual player votes when 3+ players

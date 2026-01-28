@@ -125,6 +125,9 @@ class ActNaturalGameManager: ObservableObject {
                 self.timeRemaining -= 1
             } else {
                 self.timer?.invalidate()
+                self.timer = nil
+                // Timer expired - game phase remains .discussion
+                // UI can check timeRemaining == 0 to show expiration state
             }
         }
     }
