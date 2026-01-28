@@ -16,7 +16,9 @@ struct RiddleMeThisSetupView: View {
     @Environment(\.dismiss) private var dismiss
     
     private let minCards: Int = 1
-    private let maxCards: Int = 50
+    private var maxCards: Int {
+        return deck.numberOfCards
+    }
     
     @State private var selectedCardCount: Double = 10
     

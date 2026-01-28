@@ -15,7 +15,9 @@ struct UsAfterDarkSetupView: View {
     @Environment(\.dismiss) private var dismiss
     
     private let minCards: Int = 10
-    private let maxCards: Int = 200
+    private var maxCards: Int {
+        return deck.numberOfCards
+    }
     
     var body: some View {
         ZStack {

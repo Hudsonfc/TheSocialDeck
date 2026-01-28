@@ -23,7 +23,9 @@ struct WhatsMySecretSetupView: View {
     }
     
     private let minCards: Int = 1
-    private let maxCards: Int = 15
+    private var maxCards: Int {
+        return deck.numberOfCards
+    }
     
     @State private var selectedCardCount: Double = 5
     @State private var timerDuration: Double = 120.0 // in seconds
