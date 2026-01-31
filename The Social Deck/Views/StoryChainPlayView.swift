@@ -85,7 +85,7 @@ struct StoryChainPlayView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 40)
+                .responsiveHorizontalPadding()
                 .padding(.top, 20)
                 .padding(.bottom, 32)
                 

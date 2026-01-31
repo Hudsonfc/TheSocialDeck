@@ -59,7 +59,7 @@ struct WhatsMySecretPlayView: View {
                             .foregroundColor(.primaryText)
                     }
                 }
-                .padding(.horizontal, 40)
+                .responsiveHorizontalPadding()
                 .padding(.top, 20)
                 .padding(.bottom, 32)
                 
@@ -230,7 +230,7 @@ struct ShowingSecretView: View {
                             .opacity(cardRotation >= 90 ? 1 : 0)
                             .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
                     }
-                    .frame(width: 320, height: 400)
+                    .frame(width: ResponsiveSize.cardWidth, height: ResponsiveSize.bluffCallCardHeight)
                     .rotation3DEffect(
                         .degrees(cardRotation),
                         axis: (x: 0, y: 1, z: 0),
@@ -354,6 +354,8 @@ struct SecretCardFrontView: View {
                     .font(.system(size: 24, weight: .semibold, design: .rounded))
                     .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                     .multilineTextAlignment(.center)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 32)
                 
                 Text("Follow this rule without revealing it!")
@@ -419,7 +421,7 @@ struct TimerRunningView: View {
                     .rotationEffect(.degrees(-90))
                     .animation(.linear(duration: 0.1), value: manager.timeRemaining)
             }
-            .frame(width: 120, height: 120)
+            .frame(width: ResponsiveSize.timerSize, height: ResponsiveSize.timerSize)
             
             // Action buttons
             VStack(spacing: 12) {
@@ -490,7 +492,7 @@ struct GuessingView: View {
                             .multilineTextAlignment(.center)
                             .padding(32)
                     }
-                    .frame(width: 320, height: 300)
+                    .frame(width: ResponsiveSize.cardWidth, height: ResponsiveSize.categoryCardHeight)
                     
                     Text("Did the group guess correctly?")
                         .font(.system(size: 18, weight: .medium, design: .rounded))

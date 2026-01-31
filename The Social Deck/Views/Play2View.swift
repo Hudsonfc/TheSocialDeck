@@ -350,7 +350,7 @@ struct Play2View: View {
                                 }
                         }
                     }
-                    .padding(.horizontal, 40)
+                    .responsiveHorizontalPadding()
                 }
                 .animation(.spring(response: 0.4, dampingFraction: 0.8), value: categories)
                 .padding(.top, 20)
@@ -376,7 +376,7 @@ struct Play2View: View {
                                     }
                                 }
                             }
-                            .padding(.horizontal, 40)
+                            .responsiveHorizontalPadding()
                             .padding(.top, 20)
                             .padding(.bottom, 30)
                         }
@@ -889,10 +889,10 @@ struct GameCardView: View {
     // Card dimensions based on actual image ratio (420 x 577)
     private let imageAspectRatio: CGFloat = 420.0 / 577.0
     private var cardWidth: CGFloat {
-        min(UIScreen.main.bounds.width - 80, 320)
+        ResponsiveSize.play2CardWidth
     }
     private var cardHeight: CGFloat {
-        cardWidth / imageAspectRatio
+        ResponsiveSize.play2CardHeight
     }
     
     // Check if showing front or back
@@ -1052,10 +1052,10 @@ struct GridGameTile: View {
     // Card dimensions based on actual image ratio (420 x 577)
     private let imageAspectRatio: CGFloat = 420.0 / 577.0
     private var tileWidth: CGFloat {
-        (UIScreen.main.bounds.width - 80 - 16) / 2
+        ResponsiveSize.gridTileWidth
     }
     private var tileHeight: CGFloat {
-        tileWidth / imageAspectRatio
+        ResponsiveSize.gridTileHeight
     }
     
     var body: some View {
@@ -1170,7 +1170,7 @@ struct GameDescriptionOverlay: View {
                             .clipShape(Circle())
                     }
                 }
-                .padding(.horizontal, 40)
+                .responsiveHorizontalPadding()
                 .padding(.top, 20)
                 .padding(.bottom, 16)
                 
@@ -1194,7 +1194,7 @@ struct GameDescriptionOverlay: View {
                     .multilineTextAlignment(.center)
                     .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 40)
+                    .responsiveHorizontalPadding()
                     .padding(.bottom, 16)
                 
                 Text(deck.description)
@@ -1204,7 +1204,7 @@ struct GameDescriptionOverlay: View {
                     .lineSpacing(6)
                     .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 40)
+                    .responsiveHorizontalPadding()
                     .padding(.bottom, 24)
                 
                 Spacer()
@@ -1220,7 +1220,7 @@ struct GameDescriptionOverlay: View {
                                 }
                             }
                         }
-                        .padding(.horizontal, 40)
+                        .responsiveHorizontalPadding()
                         .padding(.bottom, 40)
                     } else if deck.type == .spinTheBottle {
                         PrimaryButton(title: "Play") {
@@ -1232,7 +1232,7 @@ struct GameDescriptionOverlay: View {
                                 }
                             }
                         }
-                        .padding(.horizontal, 40)
+                        .responsiveHorizontalPadding()
                         .padding(.bottom, 40)
                     } else if deck.type == .storyChain {
                         PrimaryButton(title: "Play") {
@@ -1244,7 +1244,7 @@ struct GameDescriptionOverlay: View {
                                 navigateToStoryChainSetup = deck
                             }
                         }
-                        .padding(.horizontal, 40)
+                        .responsiveHorizontalPadding()
                         .padding(.bottom, 40)
                     } else if deck.type == .memoryMaster {
                         PrimaryButton(title: "Play") {
@@ -1256,7 +1256,7 @@ struct GameDescriptionOverlay: View {
                                 navigateToMemoryMasterSetup = deck
                             }
                         }
-                        .padding(.horizontal, 40)
+                        .responsiveHorizontalPadding()
                         .padding(.bottom, 40)
                     } else if deck.type == .rhymeTime {
                         PrimaryButton(title: "Play") {
@@ -1268,7 +1268,7 @@ struct GameDescriptionOverlay: View {
                                 navigateToRhymeTimeSetup = deck
                             }
                         }
-                        .padding(.horizontal, 40)
+                        .responsiveHorizontalPadding()
                         .padding(.bottom, 40)
                     } else if deck.type == .tapDuel {
                         PrimaryButton(title: "Play") {
@@ -1280,7 +1280,7 @@ struct GameDescriptionOverlay: View {
                                 navigateToTapDuelSetup = deck
                             }
                         }
-                        .padding(.horizontal, 40)
+                        .responsiveHorizontalPadding()
                         .padding(.bottom, 40)
                     } else if deck.type == .riddleMeThis {
                         PrimaryButton(title: "Play") {
@@ -1292,7 +1292,7 @@ struct GameDescriptionOverlay: View {
                                 navigateToRiddleMeThisSetup = deck
                             }
                         }
-                        .padding(.horizontal, 40)
+                        .responsiveHorizontalPadding()
                         .padding(.bottom, 40)
                     } else if deck.type == .actNatural {
                         PrimaryButton(title: "Play") {
@@ -1304,7 +1304,7 @@ struct GameDescriptionOverlay: View {
                                 }
                             }
                         }
-                        .padding(.horizontal, 40)
+                        .responsiveHorizontalPadding()
                         .padding(.bottom, 40)
                     } else if deck.type == .quickfireCouples {
                         PrimaryButton(title: "Play") {
@@ -1316,7 +1316,7 @@ struct GameDescriptionOverlay: View {
                                 navigateToQuickfireCouplesSetup = deck
                             }
                         }
-                        .padding(.horizontal, 40)
+                        .responsiveHorizontalPadding()
                         .padding(.bottom, 40)
                     } else if deck.type == .closerThanEver {
                         PrimaryButton(title: "Play") {
@@ -1328,7 +1328,7 @@ struct GameDescriptionOverlay: View {
                                 navigateToCloserThanEverSetup = deck
                             }
                         }
-                        .padding(.horizontal, 40)
+                        .responsiveHorizontalPadding()
                         .padding(.bottom, 40)
                     } else if deck.type == .usAfterDark {
                         PrimaryButton(title: "Play") {
@@ -1348,7 +1348,7 @@ struct GameDescriptionOverlay: View {
                                 selectedDeck = nil
                             }
                         }
-                        .padding(.horizontal, 40)
+                        .responsiveHorizontalPadding()
                         .padding(.bottom, 40)
                     }
             }

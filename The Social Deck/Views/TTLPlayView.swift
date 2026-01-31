@@ -115,7 +115,7 @@ struct TTLPlayView: View {
                             .opacity(cardRotation >= 90 ? 1 : 0)
                             .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
                     }
-                    .frame(width: 320, height: 480)
+                    .frame(width: ResponsiveSize.cardWidth, height: ResponsiveSize.cardHeight)
                     .rotation3DEffect(
                         .degrees(cardRotation),
                         axis: (x: 0, y: 1, z: 0),

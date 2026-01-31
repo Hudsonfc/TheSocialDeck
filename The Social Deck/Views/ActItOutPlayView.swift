@@ -76,7 +76,7 @@ struct ActItOutPlayView: View {
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundColor(.primaryText)
                 }
-                .padding(.horizontal, 20)
+                .responsiveHorizontalPadding()
                 .padding(.top, 12)
                 .padding(.bottom, 12)
                 
@@ -116,7 +116,7 @@ struct ActItOutPlayView: View {
                             .opacity(cardRotation >= 90 ? 1 : 0)
                             .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
                     }
-                    .frame(width: 320, height: 480)
+                    .frame(width: ResponsiveSize.cardWidth, height: ResponsiveSize.cardHeight)
                     .rotation3DEffect(
                         .degrees(cardRotation),
                         axis: (x: 0, y: 1, z: 0),
@@ -410,11 +410,13 @@ struct ActItOutCardBackView: View {
                     .font(.system(size: 20, weight: .bold, design: .rounded))
                     .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
                 
-                Text(text)
-                    .font(.system(size: 28, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
+                                Text(text)
+                                    .font(.system(size: 28, weight: .semibold, design: .rounded))
+                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .multilineTextAlignment(.center)
+                                    .lineLimit(nil)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                    .padding(.horizontal, 32)
                 
                 Text("Act this out!")
                     .font(.system(size: 14, weight: .medium, design: .rounded))

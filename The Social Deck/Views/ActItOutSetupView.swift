@@ -100,7 +100,7 @@ struct ActItOutSetupView: View {
                                 .interpolation(.high)
                                 .antialiased(true)
                                 .scaledToFit()
-                                .frame(width: 120, height: 165)
+                                .frame(width: ResponsiveSize.setupArtworkWidth, height: ResponsiveSize.setupArtworkHeight)
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
                                 .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
                                 .padding(.top, 20)

@@ -82,7 +82,7 @@ struct CategoryClashPlayView: View {
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundColor(.primaryText)
                 }
-                .padding(.horizontal, 40)
+                .responsiveHorizontalPadding()
                 .padding(.top, 20)
                 .padding(.bottom, 32)
                 
@@ -101,7 +101,7 @@ struct CategoryClashPlayView: View {
                             ZStack {
                                 Circle()
                                     .stroke(Color.tertiaryBackground, lineWidth: 8)
-                                    .frame(width: 80, height: 80)
+                                    .frame(width: ResponsiveSize.timerSize, height: ResponsiveSize.timerSize)
                                 
                                 Circle()
                                     .trim(from: 0, to: manager.timeRemaining / Double(manager.timerDuration))
@@ -109,7 +109,7 @@ struct CategoryClashPlayView: View {
                                         manager.timeRemaining <= 5 ? Color.red : Color.buttonBackground,
                                         style: StrokeStyle(lineWidth: 8, lineCap: .round)
                                     )
-                                    .frame(width: 80, height: 80)
+                                    .frame(width: ResponsiveSize.timerSize, height: ResponsiveSize.timerSize)
                                     .rotationEffect(.degrees(-90))
                                     .animation(.linear(duration: 0.1), value: manager.timeRemaining)
                                 
@@ -134,7 +134,7 @@ struct CategoryClashPlayView: View {
                                 .opacity(cardRotation >= 90 ? 1 : 0)
                                 .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
                         }
-                        .frame(width: 320, height: 220)
+                        .frame(width: ResponsiveSize.cardWidth, height: ResponsiveSize.categoryCardHeight)
                         .rotation3DEffect(
                             .degrees(cardRotation),
                             axis: (x: 0, y: 1, z: 0),
@@ -342,12 +342,14 @@ private struct CategoryClashCardBackView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            Text(categoryText)
-                .font(.system(size: 26, weight: .bold, design: .rounded))
-                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                .multilineTextAlignment(.center)
-                .lineSpacing(6)
-                .padding(.horizontal, 32)
+                Text(categoryText)
+                                .font(.system(size: 26, weight: .bold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .multilineTextAlignment(.center)
+                                .lineLimit(nil)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .lineSpacing(6)
+                                .padding(.horizontal, 32)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(

@@ -73,7 +73,7 @@ struct TruthOrDrinkSetupView: View {
                     Image(deck.imageName)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 160, height: 220)
+                        .frame(width: ResponsiveSize.setupArtworkWidth, height: ResponsiveSize.setupArtworkHeight)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     

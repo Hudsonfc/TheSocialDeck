@@ -55,7 +55,7 @@ struct RhymeTimePlayView: View {
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundColor(.primaryText)
                 }
-                .padding(.horizontal, 40)
+                .responsiveHorizontalPadding()
                 .padding(.top, 20)
                 .padding(.bottom, 32)
                 
@@ -182,7 +182,7 @@ struct RhymeTimeActiveGameView: View {
                 ZStack {
                     Circle()
                         .stroke(Color.tertiaryBackground, lineWidth: 12)
-                        .frame(width: 120, height: 120)
+                        .frame(width: ResponsiveSize.timerSize, height: ResponsiveSize.timerSize)
                     
                     Circle()
                         .trim(from: 0, to: CGFloat(manager.timeRemaining / 10.0))
@@ -190,7 +190,7 @@ struct RhymeTimeActiveGameView: View {
                             manager.timeRemaining < 3.0 ? Color.red : Color.buttonBackground,
                             style: StrokeStyle(lineWidth: 12, lineCap: .round)
                         )
-                        .frame(width: 120, height: 120)
+                        .frame(width: ResponsiveSize.timerSize, height: ResponsiveSize.timerSize)
                         .rotationEffect(.degrees(-90))
                         .animation(.linear(duration: 0.1), value: manager.timeRemaining)
                     

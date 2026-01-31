@@ -58,7 +58,7 @@ struct BluffCallPlayView: View {
                             .foregroundColor(.primaryText)
                     }
                 }
-                .padding(.horizontal, 40)
+                .responsiveHorizontalPadding()
                 .padding(.top, 20)
                 .padding(.bottom, 32)
                 
@@ -320,7 +320,7 @@ struct PlayerTurnView: View {
                     }
                 }
             }
-            .frame(width: 320, height: 400)
+            .frame(width: ResponsiveSize.cardWidth, height: ResponsiveSize.bluffCallCardHeight)
             
             if manager.playerAnswer != nil {
                 VStack(spacing: 12) {
@@ -804,7 +804,7 @@ struct RevealView: View {
                     }
                 }
             }
-            .frame(width: 320, height: 400)
+            .frame(width: ResponsiveSize.cardWidth, height: ResponsiveSize.bluffCallCardHeight)
             
             PrimaryButton(title: "Next Round") {
                 withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {

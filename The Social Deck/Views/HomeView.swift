@@ -94,7 +94,7 @@ struct HomeView: View {
                                 .tag(3)
                             }
                             .tabViewStyle(.page(indexDisplayMode: .never))
-                            .frame(width: 320, height: 200)
+                            .frame(width: ResponsiveSize.heroBannerWidth, height: ResponsiveSize.heroBannerHeight)
                             .cornerRadius(16, corners: [.topLeft, .topRight])
                             .onAppear {
                                 startSlideshow()
@@ -128,7 +128,7 @@ struct HomeView: View {
                                 .padding(.bottom, 12)
                             }
                         }
-                        .frame(width: 320, height: 200)
+                        .frame(width: ResponsiveSize.heroBannerWidth, height: ResponsiveSize.heroBannerHeight)
                         
                         HStack {
                             VStack(alignment: .leading, spacing: 5) {
@@ -561,7 +561,7 @@ struct HeroWelcomeSlide: View {
             }
             .padding(.top, 8)
         }
-        .frame(width: 320, height: 200)
+        .frame(width: ResponsiveSize.heroBannerWidth, height: ResponsiveSize.heroBannerHeight)
         .cornerRadius(16, corners: [.topLeft, .topRight])
     }
 }
@@ -611,7 +611,7 @@ struct HeroWhyWeBuiltSlide: View {
                 .padding(.vertical, 20)
             }
         }
-        .frame(width: 320, height: 200)
+        .frame(width: ResponsiveSize.heroBannerWidth, height: ResponsiveSize.heroBannerHeight)
         .cornerRadius(16, corners: [.topLeft, .topRight])
     }
 }
@@ -654,7 +654,7 @@ struct HeroQuoteSlide: View {
             }
             .padding(.vertical, 32)
         }
-        .frame(width: 320, height: 200)
+        .frame(width: ResponsiveSize.heroBannerWidth, height: ResponsiveSize.heroBannerHeight)
         .cornerRadius(16, corners: [.topLeft, .topRight])
     }
 }
@@ -717,7 +717,7 @@ struct HeroGameOfTheDaySlide: View {
                 Spacer()
             }
         }
-        .frame(width: 320, height: 200)
+        .frame(width: ResponsiveSize.heroBannerWidth, height: ResponsiveSize.heroBannerHeight)
         .cornerRadius(16, corners: [.topLeft, .topRight])
     }
 }

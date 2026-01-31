@@ -79,7 +79,7 @@ struct RiddleMeThisPlayView: View {
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundColor(.primaryText)
                 }
-                .padding(.horizontal, 40)
+                .responsiveHorizontalPadding()
                 .padding(.top, 20)
                 .padding(.bottom, 16)
                 
@@ -224,7 +224,7 @@ struct RiddleView: View {
                         .opacity(cardRotation >= 90 ? 1 : 0)
                         .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
                 }
-                .frame(width: 320, height: 480)
+                .frame(width: ResponsiveSize.cardWidth, height: ResponsiveSize.cardHeight)
                 .rotation3DEffect(
                     .degrees(cardRotation),
                     axis: (x: 0, y: 1, z: 0),
@@ -362,7 +362,7 @@ struct SolutionView: View {
             // Card showing answer
             if let riddle = manager.currentRiddle {
                 RiddleCardAnswerView(text: riddle.text, answer: manager.currentAnswer)
-                    .frame(width: 320, height: 480)
+                    .frame(width: ResponsiveSize.cardWidth, height: ResponsiveSize.cardHeight)
             }
             
             Spacer()
@@ -403,6 +403,8 @@ struct RiddleCardFrontView: View {
                     .font(.system(size: 24, weight: .semibold, design: .rounded))
                     .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                     .multilineTextAlignment(.center)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 32)
             }
         }
