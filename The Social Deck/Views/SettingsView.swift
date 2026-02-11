@@ -90,6 +90,26 @@ struct SettingsView: View {
                     .padding(.horizontal, 40)
                     }
                     
+                // Instagram link
+                if let instagramURL = URL(string: "https://www.instagram.com/thesocialdeckapp/") {
+                    Button(action: {
+                        HapticManager.shared.lightImpact()
+                        UIApplication.shared.open(instagramURL)
+                    }) {
+                        InstagramIconView(size: 22)
+                            .foregroundColor(.primaryText)
+                            .frame(width: 44, height: 44)
+                            .background(Color.secondaryBackground)
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle()
+                                    .strokeBorder(Color.borderColor, lineWidth: 1)
+                            )
+                    }
+                    .buttonStyle(InstagramButtonStyle())
+                    .padding(.bottom, 20)
+                }
+                
                 // App Version
                 VStack(spacing: 4) {
                     Text("The Social Deck")
@@ -142,6 +162,38 @@ struct SettingsView: View {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
             SKStoreReviewController.requestReview(in: windowScene)
         }
+    }
+}
+
+// Scale-down on press for Instagram button
+struct InstagramButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.92 : 1.0)
+            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
+    }
+}
+
+// Minimalist Instagram glyph: rounded square + lens circle + viewfinder dot
+struct InstagramIconView: View {
+    var size: CGFloat = 24
+    
+    var body: some View {
+        let strokeWidth = max(1.5, size * 0.08)
+        let cornerRadius = size * 0.22
+        ZStack(alignment: .center) {
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .strokeBorder(lineWidth: strokeWidth)
+                .frame(width: size, height: size)
+            Circle()
+                .strokeBorder(lineWidth: strokeWidth)
+                .frame(width: size * 0.52, height: size * 0.52)
+            Circle()
+                .strokeBorder(lineWidth: strokeWidth)
+                .frame(width: size * 0.2, height: size * 0.2)
+                .offset(x: size * 0.28, y: -size * 0.28)
+        }
+        .frame(width: size, height: size)
     }
 }
 

@@ -65,33 +65,19 @@ struct HomeView: View {
                         // Hero Banner
                         ZStack {
                             TabView(selection: $currentSlideIndex) {
-                                // Welcome Card Slide (Index 0)
-                                NavigationLink(destination: WhatsNewView()) {
-                                    HeroWelcomeSlide()
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                                .tag(0)
-                                
-                                // Why We Built Slide (Index 1)
-                                NavigationLink(destination: WhatsNewView()) {
-                                    HeroWhyWeBuiltSlide()
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                                .tag(1)
-                                
-                                // Quote Slide (Index 2)
+                                // Quote Slide (Index 0)
                                 NavigationLink(destination: WhatsNewView()) {
                                     HeroQuoteSlide(quote: currentQuote)
                                 }
                                 .buttonStyle(PlainButtonStyle())
-                                .tag(2)
+                                .tag(0)
                                 
-                                // Game of the Day Slide (Index 3)
+                                // Game of the Day Slide (Index 1)
                                 NavigationLink(destination: Play2View()) {
                                     HeroGameOfTheDaySlide(game: gameOfTheDay)
                                 }
                                 .buttonStyle(PlainButtonStyle())
-                                .tag(3)
+                                .tag(1)
                             }
                             .tabViewStyle(.page(indexDisplayMode: .never))
                             .frame(width: ResponsiveSize.heroBannerWidth, height: ResponsiveSize.heroBannerHeight)
@@ -107,7 +93,7 @@ struct HomeView: View {
                                 DragGesture(minimumDistance: 30, coordinateSpace: .local)
                                     .onEnded { value in
                                         // Right swipe on last slide wraps to first
-                                        if currentSlideIndex == 3 && value.translation.width > 80 {
+                                        if currentSlideIndex == 1 && value.translation.width > 80 {
                                             withAnimation(.easeInOut(duration: 0.3)) {
                                                 currentSlideIndex = 0
                                             }
@@ -119,7 +105,7 @@ struct HomeView: View {
                             VStack {
                                 Spacer()
                                 HStack(spacing: 6) {
-                                    ForEach(0..<4, id: \.self) { index in
+                                    ForEach(0..<2, id: \.self) { index in
                                         Circle()
                                             .fill(index == currentSlideIndex ? Color(light: Color.black, dark: Color.black) : Color(light: Color.black.opacity(0.4), dark: Color.black.opacity(0.4)))
                                             .frame(width: 6, height: 6)
@@ -311,7 +297,7 @@ struct HomeView: View {
         stopSlideshow() // Stop any existing timer
         slideshowTimer = Timer.scheduledTimer(withTimeInterval: 6.0, repeats: true) { _ in
             withAnimation(.easeInOut(duration: 0.6)) {
-                currentSlideIndex = (currentSlideIndex + 1) % 4
+                currentSlideIndex = (currentSlideIndex + 1) % 2
             }
         }
     }
