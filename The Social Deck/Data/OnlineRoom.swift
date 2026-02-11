@@ -143,6 +143,7 @@ extension DeckType {
         case .truthOrDare: return "truthOrDare"
         case .wouldYouRather: return "wouldYouRather"
         case .mostLikelyTo: return "mostLikelyTo"
+        case .takeItPersonally: return "takeItPersonally"
         case .twoTruthsAndALie: return "twoTruthsAndALie"
         case .popCultureTrivia: return "popCultureTrivia"
         case .historyTrivia: return "historyTrivia"
@@ -179,6 +180,7 @@ extension DeckType {
         case "truthOrDare": self = .truthOrDare
         case "wouldYouRather": self = .wouldYouRather
         case "mostLikelyTo": self = .mostLikelyTo
+        case "takeItPersonally": self = .takeItPersonally
         case "twoTruthsAndALie": self = .twoTruthsAndALie
         case "popCultureTrivia": self = .popCultureTrivia
         case "historyTrivia": self = .historyTrivia

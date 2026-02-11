@@ -96,6 +96,16 @@ struct Play2View: View {
     // Social Deck Games decks with 2.0 artwork
     let socialDeckGamesDecks: [Deck] = [
         Deck(
+            title: "Take It Personally",
+            description: "Bold statements about someone in the group. Quick prompts that create reactions, tension, and laughter. Each card calls out someone with funny, dramatic, or slightly chaotic observations. Big energy, bigger reactions!",
+            numberOfCards: 60,
+            estimatedTime: "20-30 min",
+            imageName: "take it personally",
+            type: .takeItPersonally,
+            cards: allTIPCards,
+            availableCategories: ["Party", "Wild", "Friends", "Couples"]
+        ),
+        Deck(
             title: "Rhyme Time",
             description: "Say a word that rhymes with the base word before time runs out! Challenge your vocabulary and quick thinking. Repeat a rhyme or hesitate and you're out. Choose your difficulty level and see how long you can last in this word battle!",
             numberOfCards: 482,
@@ -766,6 +776,8 @@ struct Play2View: View {
                 WYRCategorySelectionView(deck: deck)
             case .mostLikelyTo:
                 MLTCategorySelectionView(deck: deck)
+            case .takeItPersonally:
+                TIPCategorySelectionView(deck: deck)
             // Social Deck Games
             case .rhymeTime:
                 RhymeTimeSetupView(deck: deck)
@@ -987,8 +999,8 @@ struct GameCardView: View {
                 deck.type == .mostLikelyTo || deck.type == .actItOut ? Color(red: 0xB0/255.0, green: 0xE9/255.0, blue: 0x8D/255.0) :
                 // Pink games
                 deck.type == .whatsMySecret || deck.type == .categoryClash ? Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0) :
-                // Yellow game
-                deck.type == .wouldYouRather ? Color(red: 0xFE/255.0, green: 0xFE/255.0, blue: 0xAC/255.0) :
+                // Yellow games
+                deck.type == .wouldYouRather || deck.type == .takeItPersonally ? Color(red: 0xFE/255.0, green: 0xFE/255.0, blue: 0xAC/255.0) :
                 // Orange game
                 deck.type == .storyChain ? Color(red: 0xFE/255.0, green: 0xB1/255.0, blue: 0x87/255.0) :
                 // White background games
@@ -1210,7 +1222,7 @@ struct GameDescriptionOverlay: View {
                 Spacer()
                 
                 // Play button - handle all game types
-                if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .popCultureTrivia || deck.type == .historyTrivia || deck.type == .scienceTrivia || deck.type == .sportsTrivia || deck.type == .movieTrivia || deck.type == .musicTrivia || deck.type == .truthOrDrink || deck.type == .categoryClash || deck.type == .bluffCall || deck.type == .whatsMySecret || deck.type == .actItOut {
+                if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .takeItPersonally || deck.type == .popCultureTrivia || deck.type == .historyTrivia || deck.type == .scienceTrivia || deck.type == .sportsTrivia || deck.type == .movieTrivia || deck.type == .musicTrivia || deck.type == .truthOrDrink || deck.type == .categoryClash || deck.type == .bluffCall || deck.type == .whatsMySecret || deck.type == .actItOut {
                         PrimaryButton(title: "Play") {
                             // Navigate first, then dismiss overlay after navigation completes
                             navigateToCategorySelection = deck

@@ -19,6 +19,7 @@ struct SelectedGameDisplayCard: View {
         case .truthOrDare: return "Truth or Dare"
         case .wouldYouRather: return "Would You Rather"
         case .mostLikelyTo: return "Most Likely To"
+        case .takeItPersonally: return "Take It Personally"
         case .twoTruthsAndALie: return "Two Truths and a Lie"
         case .popCultureTrivia: return "Pop Culture Trivia"
         case .historyTrivia: return "History Trivia"

@@ -37,6 +37,7 @@ enum DeckType: String {
     case quickfireCouples
     case closerThanEver
     case usAfterDark
+    case takeItPersonally
     case other
 }
 
