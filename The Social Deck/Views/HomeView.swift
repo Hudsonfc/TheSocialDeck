@@ -212,14 +212,13 @@ struct HomeView: View {
                     .padding(.bottom, 30)
                     
                     // App Version
-                    if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
-                       let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
-                        Text("Version \(version) (\(build))")
+                    if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+                        Text("Version \(version)")
                             .font(.system(size: 12, weight: .regular, design: .rounded))
                             .foregroundColor(.tertiaryText)
                             .padding(.bottom, 20)
                     } else {
-                        Text("Version 1.0")
+                        Text("Version 1.1")
                             .font(.system(size: 12, weight: .regular, design: .rounded))
                             .foregroundColor(.tertiaryText)
                             .padding(.bottom, 20)

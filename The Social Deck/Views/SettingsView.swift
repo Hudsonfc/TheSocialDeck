@@ -17,12 +17,9 @@ struct SettingsView: View {
     
     // App version info
     private var appVersion: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.1"
     }
     
-    private var buildNumber: String {
-        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
-    }
     
     var body: some View {
         ZStack {
@@ -115,7 +112,7 @@ struct SettingsView: View {
                     Text("The Social Deck")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .foregroundColor(.secondaryText)
-                    Text("Version \(appVersion) (\(buildNumber))")
+                    Text("Version \(appVersion)")
                         .font(.system(size: 12, weight: .regular, design: .rounded))
                         .foregroundColor(.tertiaryText)
                 }
