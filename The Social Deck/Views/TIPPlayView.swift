@@ -364,7 +364,7 @@ struct TIPCardFrontView: View {
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
             
             VStack(spacing: 16) {
-                Image(systemName: "megaphone.fill")
+                Image(systemName: "hand.point.up.left.fill")
                     .font(.system(size: 60))
                     .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
                 
@@ -396,19 +396,6 @@ struct TIPCardBackView: View {
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
                 .padding(.horizontal, 40)
-            
-            // Category badge at top
-            VStack {
-                Text(card.category)
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(Color.buttonBackground)
-                    .cornerRadius(20)
-                Spacer()
-            }
-            .padding(.top, 24)
         }
     }
 }

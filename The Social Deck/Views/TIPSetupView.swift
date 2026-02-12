@@ -81,50 +81,58 @@ struct TIPSetupView: View {
                                 .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
                                 .padding(.top, 20)
                             
-                            VStack(spacing: 16) {
-                                // Title
-                                Text("Game Setup")
-                                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                                    .foregroundColor(.primaryText)
+                            // Selected categories chips (same as NHIE)
+                            VStack(spacing: 12) {
+                                Text("Selected Categories")
+                                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                                    .foregroundColor(.secondaryText)
                                 
-                                // Selected categories
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text("Selected Categories:")
-                                        .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.secondaryText)
-                                    
-                                    Text(selectedCategories.joined(separator: ", "))
-                                        .font(.system(size: 14, weight: .regular, design: .rounded))
-                                        .foregroundColor(.primaryText)
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            }
-                            .padding(.horizontal, 40)
-                            
-                            VStack(spacing: 24) {
-                                // Card count selection
-                                VStack(alignment: .leading, spacing: 16) {
-                                    HStack {
-                                        Text("Number of Cards:")
-                                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                            .foregroundColor(.primaryText)
-                                        
-                                        Spacer()
-                                        
-                                        Text("\(Int(selectedCardCount))")
-                                            .font(.system(size: 20, weight: .bold, design: .rounded))
-                                            .foregroundColor(.primaryAccent)
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 8) {
+                                        ForEach(selectedCategories, id: \.self) { category in
+                                            Text(category)
+                                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                                .foregroundColor(Color.primaryAccent)
+                                                .padding(.horizontal, 12)
+                                                .padding(.vertical, 6)
+                                                .background(Color.primaryAccent.opacity(0.1))
+                                                .cornerRadius(16)
+                                        }
                                     }
+                                    .padding(.horizontal, 40)
+                                }
+                            }
+                            .padding(.bottom, 20)
+                            
+                            // Card Count Selector (same as NHIE)
+                            VStack(spacing: 12) {
+                                Text("Number of Cards")
+                                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                                    .foregroundColor(.secondaryText)
+                                
+                                VStack(spacing: 8) {
+                                    Text("\(Int(selectedCardCount)) cards")
+                                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                        .foregroundColor(.primaryText)
                                     
                                     Slider(value: $selectedCardCount, in: Double(minCards)...Double(maxCards), step: 1)
-                                        .accentColor(.primaryAccent)
+                                        .tint(Color.primaryAccent)
+                                    
+                                    HStack {
+                                        Text("\(minCards)")
+                                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                                            .foregroundColor(.secondaryText)
+                                        Spacer()
+                                        Text("\(maxCards)")
+                                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                                            .foregroundColor(.secondaryText)
+                                    }
                                 }
-                                .padding(.horizontal, 40)
+                                .padding(.horizontal, 20)
                             }
-                            
-                            Spacer()
+                            .padding(.bottom, 32)
                         }
-                        .padding(.bottom, 20)
+                        .padding(.horizontal, 40)
                     }
                     
                     // Play button fixed at bottom

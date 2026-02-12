@@ -98,7 +98,7 @@ struct Play2View: View {
         Deck(
             title: "Take It Personally",
             description: "Bold statements about someone in the group. Quick prompts that create reactions, tension, and laughter. Each card calls out someone with funny, dramatic, or slightly chaotic observations. Big energy, bigger reactions!",
-            numberOfCards: 60,
+            numberOfCards: 260,
             estimatedTime: "20-30 min",
             imageName: "take it personally",
             type: .takeItPersonally,
@@ -912,11 +912,11 @@ struct GameCardView: View {
         flipDegrees < 90 || flipDegrees > 270
     }
     
-    // Helper to determine if background is light colored
+    // Helper to determine if background is light colored (use black text on back)
     private var isLightBackground: Bool {
         deck.type == .quickfireCouples || deck.type == .closerThanEver || 
         deck.type == .usAfterDark || deck.type == .wouldYouRather || 
-        deck.type == .mostLikelyTo || deck.type == .tapDuel || 
+        deck.type == .takeItPersonally || deck.type == .mostLikelyTo || deck.type == .tapDuel || 
         deck.type == .spinTheBottle || deck.type == .bluffCall ||
         deck.type == .storyChain || deck.type == .actItOut ||
         deck.type == .whatsMySecret || deck.type == .categoryClash
@@ -1016,21 +1016,47 @@ struct GameCardView: View {
             .opacity(showingFront ? 0 : 1)
             .zIndex(showingFront ? 0 : 1)
             
-            // Front of card (image) - uses exact image aspect ratio
-            Image(deck.imageName)
-                .resizable()
-                .interpolation(.high)
-                .antialiased(true)
-                .aspectRatio(imageAspectRatio, contentMode: .fit)
-                .frame(width: cardWidth, height: cardHeight)
-                .clipShape(RoundedRectangle(cornerRadius: 20))
-                .shadow(color: Color.cardShadowColor, radius: 12, x: 0, y: 6)
-                .rotation3DEffect(
-                    .degrees(flipDegrees),
-                    axis: (x: 0, y: -1, z: 0)
-                )
-                .opacity(showingFront ? 1 : 0)
-                .zIndex(showingFront ? 1 : 0)
+            // Front of card (image) - uses exact image aspect ratio (shadow on image only so badge has none behind it)
+            ZStack(alignment: .topTrailing) {
+                Image(deck.imageName)
+                    .resizable()
+                    .interpolation(.high)
+                    .antialiased(true)
+                    .aspectRatio(imageAspectRatio, contentMode: .fit)
+                    .frame(width: cardWidth, height: cardHeight)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .shadow(color: Color.cardShadowColor, radius: 12, x: 0, y: 6)
+                
+                // New badge for Take It Personally (no shadow)
+                if deck.type == .takeItPersonally {
+                    Text("NEW")
+                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                        .tracking(0.8)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            LinearGradient(
+                                colors: [Color.primaryAccent, Color.primaryAccent.opacity(0.85)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .clipShape(Capsule())
+                        .overlay(
+                            Capsule()
+                                .strokeBorder(Color.white.opacity(0.5), lineWidth: 1)
+                        )
+                        .padding(.top, 22)
+                        .padding(.trailing, 22)
+                }
+            }
+            .rotation3DEffect(
+                .degrees(flipDegrees),
+                axis: (x: 0, y: -1, z: 0)
+            )
+            .opacity(showingFront ? 1 : 0)
+            .zIndex(showingFront ? 1 : 0)
         }
         .frame(width: cardWidth, height: cardHeight)
         .contentShape(Rectangle())
