@@ -162,7 +162,7 @@ struct CategoryClashEndView: View {
                 cards: [],
                 availableCategories: []
             ),
-            selectedCategories: ["Food & Drink", "Pop Culture"],
+            selectedCategories: ["Food & Beverages", "Pop Culture"],
             roundsPlayed: 15
         )
     }

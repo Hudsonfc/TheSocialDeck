@@ -517,8 +517,8 @@ struct TTLCardBackView: View {
                     imageName: "Art 1.4",
                     type: .twoTruthsAndALie,
                     cards: [
-                        Card(text: "I once danced on a bar", category: "Party", cardType: nil, optionA: "I've never been drunk", optionB: "I've been to 50+ parties"),
-                        Card(text: "I blacked out at a party", category: "Party", cardType: nil, optionA: "I've never played beer pong", optionB: "I've kissed 10 strangers")
+                        Card(text: "I once danced on a table", category: "Party", cardType: nil, optionA: "I've never been to 50+ parties", optionB: "I've been to 50+ parties"),
+                        Card(text: "I stayed at a party until sunrise", category: "Party", cardType: nil, optionA: "I've never played a party game", optionB: "I've kissed 10 strangers")
                     ],
                     availableCategories: ["Party"]
                 ),

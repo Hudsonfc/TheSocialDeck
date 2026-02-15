@@ -145,13 +145,6 @@ extension DeckType {
         case .mostLikelyTo: return "mostLikelyTo"
         case .takeItPersonally: return "takeItPersonally"
         case .twoTruthsAndALie: return "twoTruthsAndALie"
-        case .popCultureTrivia: return "popCultureTrivia"
-        case .historyTrivia: return "historyTrivia"
-        case .scienceTrivia: return "scienceTrivia"
-        case .sportsTrivia: return "sportsTrivia"
-        case .movieTrivia: return "movieTrivia"
-        case .musicTrivia: return "musicTrivia"
-        case .truthOrDrink: return "truthOrDrink"
         case .categoryClash: return "categoryClash"
         case .spinTheBottle: return "spinTheBottle"
         case .storyChain: return "storyChain"
@@ -182,13 +175,6 @@ extension DeckType {
         case "mostLikelyTo": self = .mostLikelyTo
         case "takeItPersonally": self = .takeItPersonally
         case "twoTruthsAndALie": self = .twoTruthsAndALie
-        case "popCultureTrivia": self = .popCultureTrivia
-        case "historyTrivia": self = .historyTrivia
-        case "scienceTrivia": self = .scienceTrivia
-        case "sportsTrivia": self = .sportsTrivia
-        case "movieTrivia": self = .movieTrivia
-        case "musicTrivia": self = .musicTrivia
-        case "truthOrDrink": self = .truthOrDrink
         case "categoryClash": self = .categoryClash
         case "spinTheBottle": self = .spinTheBottle
         case "storyChain": self = .storyChain

@@ -500,7 +500,7 @@ struct WYRCardBackView: View {
                     type: .wouldYouRather,
                     cards: [
                         Card(text: "", category: "Party", optionA: "Dance on a table", optionB: "Sing karaoke"),
-                        Card(text: "", category: "Party", optionA: "Take a shot", optionB: "Play beer pong"),
+                        Card(text: "", category: "Party", optionA: "Take a selfie", optionB: "Play a party game"),
                         Card(text: "", category: "Wild", optionA: "Skydive", optionB: "Bungee jump")
                     ],
                     availableCategories: ["Party", "Wild"]

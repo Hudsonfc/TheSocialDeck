@@ -32,7 +32,7 @@ let actNaturalWords: [ActNaturalWord] = [
     ActNaturalWord(word: "Jellyfish", category: "Animals"),
     ActNaturalWord(word: "Chameleon", category: "Animals"),
     
-    // Food & Drinks
+    // Food & Beverages
     ActNaturalWord(word: "Pizza", category: "Food"),
     ActNaturalWord(word: "Sushi", category: "Food"),
     ActNaturalWord(word: "Taco", category: "Food"),
@@ -169,7 +169,7 @@ let actNaturalWords: [ActNaturalWord] = [
     ActNaturalWord(word: "Spring Break", category: "Holidays"),
     
     // Emotions & States
-    ActNaturalWord(word: "Hangover", category: "States"),
+    ActNaturalWord(word: "Rough morning", category: "States"),
     ActNaturalWord(word: "Jet Lag", category: "States"),
     ActNaturalWord(word: "First Date", category: "States"),
     ActNaturalWord(word: "Job Interview", category: "States"),
@@ -274,9 +274,9 @@ let actNaturalWords: [ActNaturalWord] = [
     ActNaturalWord(word: "Cappuccino", category: "Food"),
     ActNaturalWord(word: "Matcha", category: "Food"),
     ActNaturalWord(word: "Bubble Tea", category: "Food"),
-    ActNaturalWord(word: "Wine", category: "Food"),
-    ActNaturalWord(word: "Beer", category: "Food"),
-    ActNaturalWord(word: "Cocktail", category: "Food"),
+    ActNaturalWord(word: "Grape juice", category: "Food"),
+    ActNaturalWord(word: "Soda", category: "Food"),
+    ActNaturalWord(word: "Smoothie", category: "Food"),
     ActNaturalWord(word: "Mojito", category: "Food"),
     ActNaturalWord(word: "Margarita", category: "Food"),
     ActNaturalWord(word: "Stadium", category: "Places"),
@@ -295,7 +295,7 @@ let actNaturalWords: [ActNaturalWord] = [
     ActNaturalWord(word: "Library", category: "Places"),
     ActNaturalWord(word: "Bookstore", category: "Places"),
     ActNaturalWord(word: "Coffee Shop", category: "Places"),
-    ActNaturalWord(word: "Bar", category: "Places"),
+    ActNaturalWord(word: "Cafe", category: "Places"),
     ActNaturalWord(word: "Pub", category: "Places"),
     ActNaturalWord(word: "Club", category: "Places"),
     ActNaturalWord(word: "Lounge", category: "Places"),
@@ -478,7 +478,7 @@ let actNaturalWords: [ActNaturalWord] = [
     ActNaturalWord(word: "Costume Party", category: "Activities"),
     ActNaturalWord(word: "Theme Party", category: "Activities"),
     ActNaturalWord(word: "Dinner Party", category: "Activities"),
-    ActNaturalWord(word: "Cocktail Party", category: "Activities"),
+    ActNaturalWord(word: "Dinner party", category: "Activities"),
     ActNaturalWord(word: "House Party", category: "Activities"),
     ActNaturalWord(word: "Block Party", category: "Activities"),
     ActNaturalWord(word: "Rave", category: "Activities"),

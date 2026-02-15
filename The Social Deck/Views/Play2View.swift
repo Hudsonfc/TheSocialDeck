@@ -167,13 +167,13 @@ struct Play2View: View {
         ),
         Deck(
             title: "Category Clash",
-            description: "Name items in a category before time runs out! Hesitate or repeat an answer and you're out. Choose from categories like Food & Drink, Pop Culture, General, Sports & Activities, or Animals & Nature. The pace gets faster each round, turning it into a hilarious pressure game!",
+            description: "Name items in a category before time runs out! Hesitate or repeat an answer and you're out. Choose from categories like Food & Beverages, Pop Culture, General, Sports & Activities, or Animals & Nature. The pace gets faster each round, turning it into a hilarious pressure game!",
             numberOfCards: 512,
             estimatedTime: "15-20 min",
             imageName: "CC 2.0",
             type: .categoryClash,
             cards: allCategoryClashCards,
-            availableCategories: ["Food & Drink", "Pop Culture", "General", "Sports & Activities", "Animals & Nature"]
+            availableCategories: ["Food & Beverages", "Pop Culture", "General", "Sports & Activities", "Animals & Nature"]
         ),
         Deck(
             title: "Spin the Bottle",
@@ -250,71 +250,6 @@ struct Play2View: View {
             availableCategories: []
         )
     ]
-    
-    // Trivia Games decks with 2.0 artwork
-    let triviaGamesDecks: [Deck] = [
-        Deck(
-            title: "Pop Culture Trivia",
-            description: "Test your knowledge of movies, music, and celebrities. Challenge yourself with questions about the latest trends, classic films, chart-topping hits, and famous faces. Choose from Easy, Medium, or Hard difficulty levels. Perfect for pop culture enthusiasts!",
-            numberOfCards: 1200,
-            estimatedTime: "10-15 min",
-            imageName: "pop culture 2.0",
-            type: .popCultureTrivia,
-            cards: allPopCultureTriviaCards,
-            availableCategories: ["Easy", "Medium", "Hard"]
-        ),
-        Deck(
-            title: "History Trivia",
-            description: "Challenge yourself with historical facts and events. Travel through time with questions about world history, famous figures, major events, and historical moments. Choose Easy, Medium, or Hard difficulty. Perfect for history buffs and curious minds!",
-            numberOfCards: 620,
-            estimatedTime: "10-15 min",
-            imageName: "History 2.0",
-            type: .historyTrivia,
-            cards: allHistoryTriviaCards,
-            availableCategories: ["Easy", "Medium", "Hard"]
-        ),
-        Deck(
-            title: "Science Trivia",
-            description: "Explore the world of science and discovery. Test your knowledge of biology, chemistry, physics, space, and groundbreaking discoveries. Choose from Easy, Medium, or Hard difficulty levels. Perfect for science lovers and curious minds!",
-            numberOfCards: 640,
-            estimatedTime: "10-15 min",
-            imageName: "science 2.0",
-            type: .scienceTrivia,
-            cards: allScienceTriviaCards,
-            availableCategories: ["Easy", "Medium", "Hard"]
-        ),
-        Deck(
-            title: "Sports Trivia",
-            description: "Show off your sports knowledge. Challenge yourself with questions about professional sports, famous athletes, championships, records, and sports history. Choose Easy, Medium, or Hard difficulty. Perfect for sports fans and trivia enthusiasts!",
-            numberOfCards: 920,
-            estimatedTime: "10-15 min",
-            imageName: "sports 2.0",
-            type: .sportsTrivia,
-            cards: allSportsTriviaCards,
-            availableCategories: ["Easy", "Medium", "Hard"]
-        ),
-        Deck(
-            title: "Movie Trivia",
-            description: "Test your movie knowledge with film questions. Answer questions about classic films, blockbusters, actors, directors, quotes, and movie history. Choose from Easy, Medium, or Hard difficulty levels. Perfect for film buffs and movie lovers!",
-            numberOfCards: 600,
-            estimatedTime: "10-15 min",
-            imageName: "movies 2.0",
-            type: .movieTrivia,
-            cards: allMovieTriviaCards,
-            availableCategories: ["Easy", "Medium", "Hard"]
-        ),
-        Deck(
-            title: "Music Trivia",
-            description: "Guess songs, artists, and music facts. Test your knowledge of hit songs, famous artists, music genres, lyrics, and music history across decades. Choose Easy, Medium, or Hard difficulty. Perfect for music lovers and playlist creators!",
-            numberOfCards: 600,
-            estimatedTime: "10-15 min",
-            imageName: "music 2.0",
-            type: .musicTrivia,
-            cards: allMusicTriviaCards,
-            availableCategories: ["Easy", "Medium", "Hard"]
-        )
-    ]
-    
     
     // Current decks based on selected category
     var currentDecks: [Deck] {
@@ -789,19 +724,6 @@ struct Play2View: View {
                 RiddleMeThisSetupView(deck: deck)
             case .actItOut:
                 ActItOutCategorySelectionView(deck: deck)
-            // Trivia Games
-            case .popCultureTrivia:
-                PopCultureTriviaCategorySelectionView(deck: deck)
-            case .historyTrivia:
-                HistoryTriviaCategorySelectionView(deck: deck)
-            case .scienceTrivia:
-                ScienceTriviaCategorySelectionView(deck: deck)
-            case .sportsTrivia:
-                SportsTriviaCategorySelectionView(deck: deck)
-            case .movieTrivia:
-                MovieTriviaCategorySelectionView(deck: deck)
-            case .musicTrivia:
-                MusicTriviaCategorySelectionView(deck: deck)
             // Social Deck Games (formerly Party Games)
             case .actNatural:
                 ActNaturalPlayerSetupView(deck: deck)
@@ -1248,7 +1170,7 @@ struct GameDescriptionOverlay: View {
                 Spacer()
                 
                 // Play button - handle all game types
-                if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .takeItPersonally || deck.type == .popCultureTrivia || deck.type == .historyTrivia || deck.type == .scienceTrivia || deck.type == .sportsTrivia || deck.type == .movieTrivia || deck.type == .musicTrivia || deck.type == .truthOrDrink || deck.type == .categoryClash || deck.type == .bluffCall || deck.type == .whatsMySecret || deck.type == .actItOut {
+                if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .takeItPersonally || deck.type == .categoryClash || deck.type == .bluffCall || deck.type == .whatsMySecret || deck.type == .actItOut {
                         PrimaryButton(title: "Play") {
                             // Navigate first, then dismiss overlay after navigation completes
                             navigateToCategorySelection = deck

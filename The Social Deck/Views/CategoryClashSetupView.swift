@@ -217,7 +217,7 @@ struct CategoryClashSetupView: View {
                 cards: [],
                 availableCategories: []
             ),
-            selectedCategories: ["Food & Drink", "Pop Culture"]
+            selectedCategories: ["Food & Beverages", "Pop Culture"]
         )
     }
 }

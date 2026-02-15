@@ -127,7 +127,7 @@ struct CategoryClashCategorySelectionView: View {
             imageName: "CC artwork",
             type: .categoryClash,
             cards: [],
-            availableCategories: ["Food & Drink", "Pop Culture", "General", "Sports & Activities", "Animals & Nature"]
+            availableCategories: ["Food & Beverages", "Pop Culture", "General", "Sports & Activities", "Animals & Nature"]
         ))
     }
 }

@@ -372,13 +372,13 @@ private struct CategoryClashCardBackView: View {
                     imageName: "CC artwork",
                     type: .categoryClash,
                     cards: [
-                        Card(text: "Types of beers", category: "Food & Drink", cardType: nil),
-                        Card(text: "Things that are red", category: "Food & Drink", cardType: nil),
-                        Card(text: "Types of pizza toppings", category: "Food & Drink", cardType: nil)
+                        Card(text: "Types of sodas", category: "Food & Beverages", cardType: nil),
+                        Card(text: "Things that are red", category: "Food & Beverages", cardType: nil),
+                        Card(text: "Types of pizza toppings", category: "Food & Beverages", cardType: nil)
                     ],
-                    availableCategories: ["Food & Drink"]
+                    availableCategories: ["Food & Beverages"]
                 ),
-                selectedCategories: ["Food & Drink"]
+                selectedCategories: ["Food & Beverages"]
             ),
             deck: Deck(
                 title: "Category Clash",
@@ -390,7 +390,7 @@ private struct CategoryClashCardBackView: View {
                 cards: [],
                 availableCategories: []
             ),
-            selectedCategories: ["Food & Drink"]
+            selectedCategories: ["Food & Beverages"]
         )
     }
 }

@@ -13,13 +13,6 @@ enum DeckType: String {
     case wouldYouRather
     case mostLikelyTo
     case twoTruthsAndALie
-    case popCultureTrivia
-    case historyTrivia
-    case scienceTrivia
-    case sportsTrivia
-    case movieTrivia
-    case musicTrivia
-    case truthOrDrink
     case categoryClash
     case spinTheBottle
     case storyChain

@@ -24,7 +24,7 @@ let allRiddleMeThisCards: [Card] = [
     Card(text: "A man is looking at a photograph of someone. His friend asks who it is. The man replies, 'Brothers and sisters, I have none. But that man's father is my father's son.' Who is in the photograph?", category: "Logic", correctAnswer: "His son"),
     Card(text: "A rooster lays an egg on top of a barn roof. Which way does it roll?", category: "Logic", correctAnswer: "Roosters don't lay eggs"),
     Card(text: "There are three houses. One is red, one is blue, and one is white. If the red house is to the left of the house in the middle, and the blue house is to the right of the house in the middle, where is the white house?", category: "Logic", correctAnswer: "In Washington, D.C."),
-    Card(text: "A man walks into a bar and asks for a glass of water. The bartender pulls out a gun and points it at him. The man says 'thank you' and walks out. Why?", category: "Logic", correctAnswer: "The man had hiccups"),
+    Card(text: "A man walks into a café and asks for a glass of water. The server sprays him with a water bottle. The man says 'thank you' and walks out. Why?", category: "Logic", correctAnswer: "The man had hiccups"),
     Card(text: "What belongs to you but others use it more than you do?", category: "Logic", correctAnswer: "Your name"),
     Card(text: "I am taken from a mine and shut up in a wooden case, from which I am never released, and yet I am used by almost everyone. What am I?", category: "Logic", correctAnswer: "Pencil lead"),
     Card(text: "The more there is, the less you see. What is it?", category: "Logic", correctAnswer: "Darkness"),
@@ -70,7 +70,7 @@ let allRiddleMeThisCards: [Card] = [
     // Food Riddles
     Card(text: "I'm yellow and curved, monkeys love me. What am I?", category: "Food", correctAnswer: "A banana"),
     Card(text: "I'm round, red, and sometimes green. I'm a fruit that's also a color. What am I?", category: "Food", correctAnswer: "An apple"),
-    Card(text: "I'm white and you drink me. I come from cows. What am I?", category: "Food", correctAnswer: "Milk"),
+    Card(text: "I'm white and you pour me. I come from cows. What am I?", category: "Food", correctAnswer: "Milk"),
     Card(text: "I'm a vegetable that's green and looks like a tree. What am I?", category: "Food", correctAnswer: "Broccoli"),
     Card(text: "I'm sweet and come in bars. I'm a treat that kids love. What am I?", category: "Food", correctAnswer: "Chocolate"),
     

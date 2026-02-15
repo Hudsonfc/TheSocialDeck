@@ -12,8 +12,8 @@ import Foundation
 // The lie will be indicated in a separate property if needed, or we can use the first one as truth by default
 let allTTLCards: [Card] = [
     // Party cards - placeholder
-    Card(text: "I once danced on a bar", category: "Party", cardType: nil, optionA: "I've never been drunk", optionB: "I've been to 50+ parties"),
-    Card(text: "I blacked out at a party", category: "Party", cardType: nil, optionA: "I've never played beer pong", optionB: "I've kissed 10 strangers"),
+    Card(text: "I once danced on a table", category: "Party", cardType: nil, optionA: "I've never been to a concert", optionB: "I've been to 50+ parties"),
+    Card(text: "I stayed until the very end of a party", category: "Party", cardType: nil, optionA: "I've never played ping pong", optionB: "I've kissed 10 strangers"),
     
     // Wild cards - placeholder
     Card(text: "I've been skydiving", category: "Wild", cardType: nil, optionA: "I've never traveled alone", optionB: "I've been to 20+ countries"),

@@ -405,7 +405,7 @@ struct MLTCardBackView: View {
                     type: .mostLikelyTo,
                     cards: [
                         Card(text: "dance on a table", category: "Party", cardType: nil),
-                        Card(text: "get too drunk", category: "Party", cardType: nil),
+                        Card(text: "stay at the party way too late", category: "Party", cardType: nil),
                         Card(text: "go skydiving", category: "Wild", cardType: nil)
                     ],
                     availableCategories: ["Party", "Wild"]
