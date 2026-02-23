@@ -854,89 +854,89 @@ struct GameCardView: View {
         isLightBackground ? Color.black.opacity(0.75) : Color.white.opacity(0.9)
     }
     
+    private var backCardBackgroundColor: Color {
+        if deck.type == .quickfireCouples { return Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0) }
+        if deck.type == .closerThanEver { return Color(red: 0xFF/255.0, green: 0x84/255.0, blue: 0x84/255.0) }
+        if deck.type == .usAfterDark { return Color(red: 0xA1/255.0, green: 0xC2/255.0, blue: 0xFF/255.0) }
+        if deck.type == .neverHaveIEver || deck.type == .rhymeTime || deck.type == .memoryMaster { return Color(red: 0xFF/255.0, green: 0x84/255.0, blue: 0x84/255.0) }
+        if deck.type == .truthOrDare || deck.type == .riddleMeThis || deck.type == .actNatural { return Color(red: 0xA1/255.0, green: 0xC2/255.0, blue: 0xFF/255.0) }
+        if deck.type == .mostLikelyTo || deck.type == .actItOut { return Color(red: 0xB0/255.0, green: 0xE9/255.0, blue: 0x8D/255.0) }
+        if deck.type == .whatsMySecret || deck.type == .categoryClash { return Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0) }
+        if deck.type == .wouldYouRather || deck.type == .takeItPersonally { return Color(red: 0xFE/255.0, green: 0xFE/255.0, blue: 0xAC/255.0) }
+        if deck.type == .storyChain { return Color(red: 0xFE/255.0, green: 0xB1/255.0, blue: 0x87/255.0) }
+        if deck.type == .tapDuel || deck.type == .spinTheBottle || deck.type == .bluffCall { return Color.white }
+        return Color.cardBackground
+    }
+    
+    private var backCardContentPanel: some View {
+        VStack(spacing: 18) {
+            Text(deck.title)
+                .font(.system(size: 22, weight: .semibold, design: .rounded))
+                .tracking(0.35)
+                .foregroundColor(titleColor)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+            
+            Text(deck.description)
+                .font(.system(size: 15, weight: .regular, design: .rounded))
+                .foregroundColor(descriptionColor)
+                .multilineTextAlignment(.center)
+                .lineSpacing(7)
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
+            
+            Button(action: {
+                HapticManager.shared.lightImpact()
+                onSelect()
+            }) {
+                Text("Play")
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Color.buttonBackground)
+                    .clipShape(Capsule())
+                    .shadow(color: Color.black.opacity(0.12), radius: 4, x: 0, y: 2)
+            }
+            .padding(.top, 2)
+        }
+        .padding(26)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 22)
+                .fill(isLightBackground ? Color.white.opacity(0.38) : Color.black.opacity(0.15))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 22)
+                        .strokeBorder(isLightBackground ? Color.white.opacity(0.55) : Color.white.opacity(0.26), lineWidth: 1)
+                )
+                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+        )
+        .padding(.horizontal, 22)
+    }
+    
+    private var cardBackView: some View {
+        ZStack(alignment: .topTrailing) {
+            VStack(spacing: 0) {
+                Spacer()
+                backCardContentPanel
+                Spacer()
+            }
+            FavoriteButton(deck: deck)
+                .padding(20)
+        }
+        .frame(width: cardWidth, height: cardHeight)
+        .background(backCardBackgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 30))
+        .shadow(color: Color.cardShadowColor, radius: 12, x: 0, y: 6)
+        .rotation3DEffect(.degrees(flipDegrees + 180), axis: (x: 0, y: -1, z: 0))
+        .opacity(showingFront ? 0 : 1)
+        .zIndex(showingFront ? 0 : 1)
+    }
+    
     var body: some View {
         ZStack {
-            // Back of card (description and select button) - behind front
-            ZStack(alignment: .topTrailing) {
-                VStack(spacing: 16) {
-                    Spacer()
-                    
-                    // Title
-                    Text(deck.title)
-                        .font(.system(size: 30, weight: .bold, design: .rounded))
-                        .foregroundColor(titleColor)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(nil)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.horizontal, 24)
-                    
-                    Text(deck.description)
-                        .font(.system(size: 15, weight: .medium, design: .rounded))
-                        .foregroundColor(descriptionColor)
-                        .multilineTextAlignment(.center)
-                        .lineSpacing(5)
-                        .lineLimit(nil)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.horizontal, 28)
-                    
-                    // Play Button
-                    Button(action: {
-                        HapticManager.shared.lightImpact()
-                        onSelect()
-                    }) {
-                        Text("Play")
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
-                            .frame(width: 200)
-                            .padding(.vertical, 16)
-                            .background(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [Color.buttonBackground, Color.buttonBackground.opacity(0.85)]),
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
-                            .cornerRadius(16)
-                            .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
-                    }
-                    .padding(.top, 8)
-                    
-                    Spacer()
-                }
-                
-                // Favorite button - top right
-                FavoriteButton(deck: deck)
-                    .padding(20)
-            }
-            .frame(width: cardWidth, height: cardHeight)
-            .background(
-                deck.type == .quickfireCouples ? Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0) :
-                deck.type == .closerThanEver ? Color(red: 0xFF/255.0, green: 0x84/255.0, blue: 0x84/255.0) :
-                deck.type == .usAfterDark ? Color(red: 0xA1/255.0, green: 0xC2/255.0, blue: 0xFF/255.0) :
-                // Red games
-                deck.type == .neverHaveIEver || deck.type == .rhymeTime || deck.type == .memoryMaster ? Color(red: 0xFF/255.0, green: 0x84/255.0, blue: 0x84/255.0) :
-                // Blue games
-                deck.type == .truthOrDare || deck.type == .riddleMeThis || deck.type == .actNatural ? Color(red: 0xA1/255.0, green: 0xC2/255.0, blue: 0xFF/255.0) :
-                // Green games
-                deck.type == .mostLikelyTo || deck.type == .actItOut ? Color(red: 0xB0/255.0, green: 0xE9/255.0, blue: 0x8D/255.0) :
-                // Pink games
-                deck.type == .whatsMySecret || deck.type == .categoryClash ? Color(red: 0xFF/255.0, green: 0xB5/255.0, blue: 0xEF/255.0) :
-                // Yellow games
-                deck.type == .wouldYouRather || deck.type == .takeItPersonally ? Color(red: 0xFE/255.0, green: 0xFE/255.0, blue: 0xAC/255.0) :
-                // Orange game
-                deck.type == .storyChain ? Color(red: 0xFE/255.0, green: 0xB1/255.0, blue: 0x87/255.0) :
-                // White background games
-                deck.type == .tapDuel || deck.type == .spinTheBottle || deck.type == .bluffCall ? Color.white :
-                Color.cardBackground
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 30))
-            .shadow(color: Color.cardShadowColor, radius: 12, x: 0, y: 6)
-            .rotation3DEffect(
-                .degrees(flipDegrees + 180),
-                axis: (x: 0, y: -1, z: 0)
-            )
-            .opacity(showingFront ? 0 : 1)
-            .zIndex(showingFront ? 0 : 1)
+            cardBackView
             
             // Front of card (image) - uses exact image aspect ratio (shadow on image only so badge has none behind it)
             ZStack(alignment: .topTrailing) {
@@ -949,28 +949,17 @@ struct GameCardView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 20))
                     .shadow(color: Color.cardShadowColor, radius: 12, x: 0, y: 6)
                 
-                // New badge for Take It Personally (no shadow)
+                // New badge for Take It Personally (matches FavoriteButton style)
                 if deck.type == .takeItPersonally {
                     Text("NEW")
-                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                        .tracking(0.8)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(
-                            LinearGradient(
-                                colors: [Color.primaryAccent, Color.primaryAccent.opacity(0.85)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule()
-                                .strokeBorder(Color.white.opacity(0.5), lineWidth: 1)
-                        )
-                        .padding(.top, 22)
-                        .padding(.trailing, 22)
+                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .tracking(0.5)
+                        .foregroundColor(.primaryAccent)
+                        .frame(width: 40, height: 40)
+                        .background(Color.primaryAccent.opacity(0.1))
+                        .clipShape(Circle())
+                        .padding(.top, 20)
+                        .padding(.trailing, 20)
                 }
             }
             .rotation3DEffect(
