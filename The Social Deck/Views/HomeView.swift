@@ -32,6 +32,7 @@ struct HomeView: View {
     @AppStorage("hasSeenRateUsView") private var hasSeenRateUsView: Bool = false
     @State private var showRateUsView: Bool = false
     @State private var showPlusPopUp: Bool = false
+    @State private var plusSlideOffset: CGFloat = 0
     
     // Curated quotes for The Social Deck
     private let quotes = [
@@ -273,8 +274,31 @@ struct HomeView: View {
                 }
             }
             .navigationBarHidden(true)
-            .sheet(isPresented: $showPlusPopUp) {
-                TheSocialDeckPlusPopUpView()
+            .overlay {
+                GeometryReader { geo in
+                    if showPlusPopUp {
+                        TheSocialDeckPlusPopUpView(onDismiss: {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                                plusSlideOffset = -geo.size.height
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                                showPlusPopUp = false
+                                plusSlideOffset = -geo.size.height
+                            }
+                        })
+                        .frame(width: geo.size.width, height: geo.size.height)
+                        .offset(y: plusSlideOffset)
+                        .onAppear {
+                            plusSlideOffset = -geo.size.height
+                            DispatchQueue.main.async {
+                                withAnimation(.spring(response: 0.42, dampingFraction: 0.82)) {
+                                    plusSlideOffset = 0
+                                }
+                            }
+                        }
+                    }
+                }
+                .ignoresSafeArea()
             }
             .onAppear {
                 startAnimations()
