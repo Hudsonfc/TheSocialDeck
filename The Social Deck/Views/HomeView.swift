@@ -31,6 +31,7 @@ struct HomeView: View {
     @State private var tooltipTimer: Timer?
     @AppStorage("hasSeenRateUsView") private var hasSeenRateUsView: Bool = false
     @State private var showRateUsView: Bool = false
+    @State private var showPlusPopUp: Bool = false
     
     // Curated quotes for The Social Deck
     private let quotes = [
@@ -226,6 +227,19 @@ struct HomeView: View {
                 }
             }
             }
+            .overlay(alignment: .topLeading) {
+                Button(action: {
+                    showPlusPopUp = true
+                    HapticManager.shared.lightImpact()
+                }) {
+                    Image(systemName: "crown.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .frame(width: 44, height: 44)
+                }
+                .padding(.top, 10)
+                .padding(.leading, 20)
+            }
             .overlay(alignment: .topTrailing) {
                 // User Avatar Button in top right (Hidden for first version)
                 if authManager.isAuthenticated {
@@ -259,6 +273,9 @@ struct HomeView: View {
                 }
             }
             .navigationBarHidden(true)
+            .sheet(isPresented: $showPlusPopUp) {
+                TheSocialDeckPlusPopUpView()
+            }
             .onAppear {
                 startAnimations()
                 // Select random quote
