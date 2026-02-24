@@ -29,6 +29,18 @@ struct Play2View: View {
     @State private var showWelcomeView: Bool = false
     @State private var isGridView: Bool = false // Track layout mode
     @State private var selectedDeckForDescription: Deck? = nil // Track deck for description overlay
+
+    // MARK: - TheSocialDeck+ gating
+    @StateObject private var subManager = SubscriptionManager()
+    @State private var showPlusPaywall = false
+
+    private let plusLockedTypes: Set<DeckType> = [
+        .mostLikelyTo, .takeItPersonally, .whatsMySecret, .bluffCall, .memoryMaster, .closerThanEver
+    ]
+
+    private func isLocked(_ deck: Deck) -> Bool {
+        plusLockedTypes.contains(deck.type)
+    }
     
     // All category names (Favorites shown dynamically when items exist)
     var categories: [String] {
@@ -313,7 +325,10 @@ struct Play2View: View {
                             
                             LazyVGrid(columns: columns, spacing: 20) {
                                 ForEach(Array(currentDecks.enumerated()), id: \.element.id) { index, deck in
-                                    GridGameTile(deck: deck) {
+                                    GridGameTile(
+                                        deck: deck,
+                                        isLocked: isLocked(deck)
+                                    ) {
                                         HapticManager.shared.lightImpact()
                                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                             selectedDeckForDescription = deck
@@ -334,13 +349,18 @@ struct Play2View: View {
                             GameCardView(
                                 deck: currentDecks[currentCardIndex],
                                 isFlipped: $cardFlippedStates[currentCardIndex],
+                                isLocked: isLocked(currentDecks[currentCardIndex]),
                                 onSelect: {
-                                    // Reset flip state before navigating
-                                    if currentCardIndex < cardFlippedStates.count {
-                                        cardFlippedStates[currentCardIndex] = false
-                                    }
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                        navigateToCategorySelection = currentDecks[currentCardIndex]
+                                    let deck = currentDecks[currentCardIndex]
+                                    if isLocked(deck) && !subManager.isPlus {
+                                        showPlusPaywall = true
+                                    } else {
+                                        if currentCardIndex < cardFlippedStates.count {
+                                            cardFlippedStates[currentCardIndex] = false
+                                        }
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                            navigateToCategorySelection = deck
+                                        }
                                     }
                                 },
                                 allowInteraction: true
@@ -539,6 +559,9 @@ struct Play2View: View {
                 GameDescriptionOverlay(
                     deck: deck,
                     selectedDeck: $selectedDeckForDescription,
+                    isLocked: isLocked(deck),
+                    isLockedAndNotPlus: isLocked(deck) && !subManager.isPlus,
+                    onShowPaywall: { showPlusPaywall = true },
                     navigateToCategorySelection: $navigateToCategorySelection,
                     navigateToPlayView: $navigateToPlayView,
                     navigateToStoryChainSetup: $navigateToStoryChainSetup,
@@ -615,6 +638,11 @@ struct Play2View: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        .sheet(isPresented: $showPlusPaywall, onDismiss: {
+            Task { await subManager.refreshEntitlements() }
+        }) {
+            TheSocialDeckPlusPopUpView(onDismiss: { showPlusPaywall = false })
+        }
     }
     
     @ViewBuilder
@@ -815,6 +843,7 @@ struct FavoriteButton: View {
 struct GameCardView: View {
     let deck: Deck
     @Binding var isFlipped: Bool
+    let isLocked: Bool
     let onSelect: () -> Void
     let allowInteraction: Bool
     @State private var flipDegrees: Double = 0
@@ -890,14 +919,20 @@ struct GameCardView: View {
                 HapticManager.shared.lightImpact()
                 onSelect()
             }) {
-                Text("Play")
-                    .font(.system(size: 17, weight: .semibold, design: .rounded))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(Color.buttonBackground)
-                    .clipShape(Capsule())
-                    .shadow(color: Color.black.opacity(0.12), radius: 4, x: 0, y: 2)
+                HStack(spacing: 6) {
+                    if isLocked {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 13, weight: .semibold))
+                    }
+                    Text("Play")
+                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(Color.buttonBackground)
+                .clipShape(Capsule())
+                .shadow(color: Color.black.opacity(0.12), radius: 4, x: 0, y: 2)
             }
             .padding(.top, 2)
         }
@@ -962,6 +997,22 @@ struct GameCardView: View {
                         .padding(.trailing, 20)
                 }
             }
+            .overlay(alignment: .bottomLeading) {
+                if isLocked {
+                    HStack(spacing: 3) {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 9, weight: .bold))
+                        Text("PLUS")
+                            .font(.system(size: 9, weight: .bold, design: .rounded))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 4)
+                    .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .clipShape(Capsule())
+                    .padding(14)
+                }
+            }
             .rotation3DEffect(
                 .degrees(flipDegrees),
                 axis: (x: 0, y: -1, z: 0)
@@ -994,6 +1045,7 @@ struct GameCardView: View {
 // Grid Game Tile Component
 struct GridGameTile: View {
     let deck: Deck
+    let isLocked: Bool
     let onTap: () -> Void
     @ObservedObject private var favoritesManager = FavoritesManager.shared
     @State private var isPressed = false
@@ -1035,7 +1087,25 @@ struct GridGameTile: View {
                         .aspectRatio(imageAspectRatio, contentMode: .fit)
                         .frame(width: tileWidth, height: tileHeight)
                         .cornerRadius(16)
-                    
+                        .opacity(isLocked ? 0.85 : 1.0)
+
+                    // Plus badge for locked games
+                    if isLocked {
+                        HStack(spacing: 3) {
+                            Image(systemName: "crown.fill")
+                                .font(.system(size: 9, weight: .bold))
+                            Text("PLUS")
+                                .font(.system(size: 9, weight: .bold, design: .rounded))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 4)
+                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .clipShape(Capsule())
+                        .padding(8)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+                    }
+
                     // Favorite button
                     Button(action: {
                         favoritesManager.toggleFavorite(deck.type)
@@ -1069,6 +1139,9 @@ struct GridGameTile: View {
 struct GameDescriptionOverlay: View {
     let deck: Deck
     @Binding var selectedDeck: Deck?
+    let isLocked: Bool
+    let isLockedAndNotPlus: Bool
+    let onShowPaywall: () -> Void
     @Binding var navigateToCategorySelection: Deck?
     @Binding var navigateToPlayView: Deck?
     @Binding var navigateToStoryChainSetup: Deck?
@@ -1131,7 +1204,24 @@ struct GameDescriptionOverlay: View {
                     .aspectRatio(420.0 / 577.0, contentMode: .fit)
                     .frame(width: min(180, UIScreen.main.bounds.width - 120))
                     .cornerRadius(12)
+                    .opacity(isLocked ? 0.88 : 1.0)
                     .shadow(color: Color.shadowColor, radius: 8, x: 0, y: 4)
+                    .overlay(alignment: .bottomLeading) {
+                        if isLocked {
+                            HStack(spacing: 3) {
+                                Image(systemName: "crown.fill")
+                                    .font(.system(size: 9, weight: .bold))
+                                Text("PLUS")
+                                    .font(.system(size: 9, weight: .bold, design: .rounded))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 4)
+                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .clipShape(Capsule())
+                            .padding(8)
+                        }
+                    }
                     .padding(.bottom, 20)
                 
                 Spacer()
@@ -1158,8 +1248,26 @@ struct GameDescriptionOverlay: View {
                 
                 Spacer()
                 
-                // Play button - handle all game types
-                if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .takeItPersonally || deck.type == .categoryClash || deck.type == .bluffCall || deck.type == .whatsMySecret || deck.type == .actItOut {
+                // Play button - locked games show paywall; unlocked games navigate normally
+                if isLockedAndNotPlus {
+                    Button(action: { onShowPaywall() }) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "crown.fill")
+                                .font(.system(size: 15, weight: .semibold))
+                            Text("Unlock with Plus")
+                                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .clipShape(Capsule())
+                        .shadow(color: Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.3),
+                                radius: 8, x: 0, y: 4)
+                    }
+                    .responsiveHorizontalPadding()
+                    .padding(.bottom, 40)
+                } else if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .takeItPersonally || deck.type == .categoryClash || deck.type == .bluffCall || deck.type == .whatsMySecret || deck.type == .actItOut {
                         PrimaryButton(title: "Play") {
                             // Navigate first, then dismiss overlay after navigation completes
                             navigateToCategorySelection = deck

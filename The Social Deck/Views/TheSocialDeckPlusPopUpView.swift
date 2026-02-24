@@ -4,30 +4,44 @@
 //
 
 import SwiftUI
+import StoreKit
 
 // MARK: - Brand tokens
-private let soDeckRed   = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
-private let soDeckBlack = Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0)
-private let soDeckGray  = Color(red: 0x5A/255.0, green: 0x5A/255.0, blue: 0x5A/255.0)
+private let soDeckRed       = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+private let soDeckBlack     = Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0)
+private let soDeckGray      = Color(red: 0x5A/255.0, green: 0x5A/255.0, blue: 0x5A/255.0)
 private let soDeckLightGray = Color(red: 0xAA/255.0, green: 0xAA/255.0, blue: 0xAA/255.0)
 
-// MARK: - Plan model
-private enum PlusPlan { case monthly, yearly }
-
-// MARK: - Main view
+// MARK: - Paywall view
 struct TheSocialDeckPlusPopUpView: View {
     var onDismiss: () -> Void
 
-    @State private var selectedPlan: PlusPlan = .yearly
+    // One manager per paywall presentation
+    @StateObject private var subManager = SubscriptionManager()
+
+    // Derived display values
+    private var yearlyPrice: String {
+        subManager.yearlyProduct?.displayPrice.appending("/year") ?? "$29.99/year"
+    }
+    private var monthlyPrice: String {
+        subManager.monthlyProduct?.displayPrice.appending("/month") ?? "$4.99/month"
+    }
+
+    // CTA button label
+    private var ctaLabel: String {
+        if subManager.isPlus { return "Unlocked ✓" }
+        switch subManager.selectedPlan {
+        case .yearly:  return "Continue with Yearly"
+        case .monthly: return "Continue with Monthly"
+        }
+    }
 
     var body: some View {
         ZStack {
             // Subtle background gradient
             LinearGradient(
-                colors: [
-                    Color.white,
-                    Color(red: 0xF5/255.0, green: 0xF5/255.0, blue: 0xF5/255.0)
-                ],
+                colors: [Color.white,
+                         Color(red: 0xF5/255.0, green: 0xF5/255.0, blue: 0xF5/255.0)],
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -36,7 +50,7 @@ struct TheSocialDeckPlusPopUpView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 0) {
 
-                    // ── Close button row ──────────────────────────────────
+                    // ── Close row ─────────────────────────────────────────
                     HStack {
                         Spacer()
                         Button(action: { onDismiss() }) {
@@ -45,14 +59,14 @@ struct TheSocialDeckPlusPopUpView: View {
                                 .symbolRenderingMode(.hierarchical)
                                 .foregroundStyle(soDeckGray)
                         }
+                        .disabled(subManager.isLoading)
                     }
                     .padding(.horizontal, 24)
                     .padding(.top, 64)
                     .padding(.bottom, 20)
 
-                    // ── SECTION 1: Header ─────────────────────────────────
+                    // ── SECTION 1: Header ──────────────────────────────────
                     VStack(spacing: 10) {
-                        // Crown in soft red circle
                         ZStack {
                             Circle()
                                 .fill(soDeckRed.opacity(0.10))
@@ -74,7 +88,6 @@ struct TheSocialDeckPlusPopUpView: View {
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 24)
 
-                        // Feature bullets
                         VStack(alignment: .leading, spacing: 10) {
                             PlusFeatureRow(text: "Access exclusive Plus games")
                             PlusFeatureRow(text: "Advanced game controls")
@@ -88,31 +101,29 @@ struct TheSocialDeckPlusPopUpView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, 36)
 
-                    // ── SECTION 2: Plan selection ─────────────────────────
+                    // ── SECTION 2: Plan cards ──────────────────────────────
                     VStack(spacing: 20) {
-                        // Yearly first (emphasized)
                         PlusPlanCard(
                             title: "Yearly",
-                            price: "$29.99/year",
-                            detail: "Just $2.50/month",
+                            price: yearlyPrice,
+                            detail: "Billed annually",
                             showBestValue: true,
-                            isSelected: selectedPlan == .yearly
+                            isSelected: subManager.selectedPlan == .yearly
                         ) {
                             withAnimation(.easeInOut(duration: 0.2)) {
-                                selectedPlan = .yearly
+                                subManager.selectedPlan = .yearly
                             }
                         }
 
-                        // Monthly
                         PlusPlanCard(
                             title: "Monthly",
-                            price: "$4.99/month",
+                            price: monthlyPrice,
                             detail: "Billed monthly",
                             showBestValue: false,
-                            isSelected: selectedPlan == .monthly
+                            isSelected: subManager.selectedPlan == .monthly
                         ) {
                             withAnimation(.easeInOut(duration: 0.2)) {
-                                selectedPlan = .monthly
+                                subManager.selectedPlan = .monthly
                             }
                         }
                     }
@@ -121,27 +132,62 @@ struct TheSocialDeckPlusPopUpView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, 36)
 
-                    // ── SECTION 3: CTA ────────────────────────────────────
+                    // ── SECTION 3: CTA ─────────────────────────────────────
                     VStack(spacing: 14) {
-                        // Dynamic continue button
-                        Button(action: {}) {
-                            Text(selectedPlan == .yearly ? "Continue with Yearly" : "Continue with Monthly")
-                                .font(.system(size: 17, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 20)
-                                .background(soDeckRed)
-                                .cornerRadius(24)
-                                .shadow(color: soDeckRed.opacity(0.30), radius: 12, x: 0, y: 6)
+                        // Continue / Unlocked button
+                        Button {
+                            guard !subManager.isPlus else { onDismiss(); return }
+                            Task { await subManager.purchaseSelectedPlan() }
+                        } label: {
+                            ZStack {
+                                Text(ctaLabel)
+                                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .opacity(subManager.isLoading ? 0 : 1)
+
+                                if subManager.isLoading {
+                                    ProgressView()
+                                        .progressViewStyle(.circular)
+                                        .tint(.white)
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 20)
+                            .background(
+                                subManager.isPlus
+                                    ? Color.green.opacity(0.85)
+                                    : soDeckRed.opacity(subManager.isLoading ? 0.6 : 1)
+                            )
+                            .cornerRadius(24)
+                            .shadow(
+                                color: (subManager.isPlus ? Color.green : soDeckRed).opacity(0.30),
+                                radius: 12, x: 0, y: 6
+                            )
                         }
-                        .animation(.easeInOut(duration: 0.2), value: selectedPlan)
+                        .disabled(subManager.isLoading)
+                        .animation(.easeInOut(duration: 0.2), value: subManager.selectedPlan)
+                        .animation(.easeInOut(duration: 0.3), value: subManager.isPlus)
                         .padding(.horizontal, 20)
 
-                        Button(action: {}) {
+                        // Error message (animated)
+                        if let error = subManager.errorMessage {
+                            Text(error)
+                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                .foregroundColor(soDeckRed)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 24)
+                                .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
+
+                        // Restore purchases
+                        Button {
+                            Task { await subManager.restorePurchases() }
+                        } label: {
                             Text("Restore Purchases")
                                 .font(.system(size: 14, weight: .medium, design: .rounded))
                                 .foregroundColor(soDeckRed)
                         }
+                        .disabled(subManager.isLoading)
                         .padding(.top, 2)
 
                         Text("Terms of Service  ·  Privacy Policy")
@@ -150,6 +196,23 @@ struct TheSocialDeckPlusPopUpView: View {
                             .multilineTextAlignment(.center)
                     }
                     .padding(.bottom, 48)
+                    .animation(.easeInOut(duration: 0.25), value: subManager.errorMessage)
+                }
+            }
+        }
+        // Auto-dismiss after a short celebration moment when purchase succeeds
+        .onChange(of: subManager.isPlus) { _, isNowPlus in
+            if isNowPlus {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    onDismiss()
+                }
+            }
+        }
+        // If already subscribed when the sheet opens, dismiss immediately
+        .onAppear {
+            if subManager.isPlus {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    onDismiss()
                 }
             }
         }
@@ -159,7 +222,6 @@ struct TheSocialDeckPlusPopUpView: View {
 // MARK: - Feature bullet row
 private struct PlusFeatureRow: View {
     let text: String
-
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: "checkmark.circle.fill")
@@ -189,7 +251,9 @@ private struct PlusPlanCard: View {
                     ZStack {
                         Circle()
                             .stroke(
-                                isSelected ? soDeckRed : Color(red: 0xCC/255.0, green: 0xCC/255.0, blue: 0xCC/255.0),
+                                isSelected
+                                    ? soDeckRed
+                                    : Color(red: 0xCC/255.0, green: 0xCC/255.0, blue: 0xCC/255.0),
                                 lineWidth: 2
                             )
                             .frame(width: 22, height: 22)
@@ -200,7 +264,6 @@ private struct PlusPlanCard: View {
                         }
                     }
 
-                    // Label + detail
                     VStack(alignment: .leading, spacing: 3) {
                         Text(title)
                             .font(.system(size: 17, weight: .semibold, design: .rounded))
@@ -212,11 +275,9 @@ private struct PlusPlanCard: View {
 
                     Spacer(minLength: 8)
 
-                    // Price
                     Text(price)
                         .font(.system(size: 16, weight: .bold, design: .rounded))
                         .foregroundColor(isSelected ? soDeckRed : soDeckBlack)
-                        .padding(.trailing, showBestValue ? 0 : 0)
                 }
                 .padding(.horizontal, 18)
                 .padding(.vertical, 20)
@@ -235,24 +296,20 @@ private struct PlusPlanCard: View {
                         .padding(.trailing, 16)
                 }
             }
-            .background(
-                isSelected
-                    ? soDeckRed.opacity(0.06)
-                    : Color.white
-            )
+            .background(isSelected ? soDeckRed.opacity(0.06) : Color.white)
             .cornerRadius(20)
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
                     .stroke(
-                        isSelected ? soDeckRed : Color(red: 0xE5/255.0, green: 0xE5/255.0, blue: 0xE5/255.0),
+                        isSelected
+                            ? soDeckRed
+                            : Color(red: 0xE5/255.0, green: 0xE5/255.0, blue: 0xE5/255.0),
                         lineWidth: isSelected ? 2 : 1
                     )
             )
             .shadow(
                 color: isSelected ? soDeckRed.opacity(0.14) : Color.black.opacity(0.05),
-                radius: isSelected ? 14 : 6,
-                x: 0,
-                y: isSelected ? 4 : 2
+                radius: isSelected ? 14 : 6, x: 0, y: isSelected ? 4 : 2
             )
         }
         .buttonStyle(.plain)
