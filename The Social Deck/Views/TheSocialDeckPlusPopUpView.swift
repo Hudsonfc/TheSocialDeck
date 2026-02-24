@@ -16,8 +16,10 @@ private let soDeckLightGray = Color(red: 0xAA/255.0, green: 0xAA/255.0, blue: 0x
 struct TheSocialDeckPlusPopUpView: View {
     var onDismiss: () -> Void
 
-    // One manager per paywall presentation
-    @StateObject private var subManager = SubscriptionManager()
+    @EnvironmentObject private var subManager: SubscriptionManager
+    @State private var showTerms = false
+    @State private var showPrivacy = false
+    @State private var showWelcome = false
 
     // Derived display values
     private var yearlyPrice: String {
@@ -25,6 +27,17 @@ struct TheSocialDeckPlusPopUpView: View {
     }
     private var monthlyPrice: String {
         subManager.monthlyProduct?.displayPrice.appending("/month") ?? "$4.99/month"
+    }
+
+    /// Effective monthly rate for yearly plan, e.g. "$2.50 monthly"
+    private var yearlyEffectiveMonthlyLine: String? {
+        guard let yearly = subManager.yearlyProduct else { return nil }
+        let perMonth = yearly.price / 12
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.locale = Locale.current
+        guard let str = formatter.string(from: perMonth as NSDecimalNumber) else { return nil }
+        return "\(str) monthly"
     }
 
     // CTA button label
@@ -107,6 +120,7 @@ struct TheSocialDeckPlusPopUpView: View {
                             title: "Yearly",
                             price: yearlyPrice,
                             detail: "Billed annually",
+                            subtitle: yearlyEffectiveMonthlyLine,
                             showBestValue: true,
                             isSelected: subManager.selectedPlan == .yearly
                         ) {
@@ -190,21 +204,42 @@ struct TheSocialDeckPlusPopUpView: View {
                         .disabled(subManager.isLoading)
                         .padding(.top, 2)
 
-                        Text("Terms of Service  ·  Privacy Policy")
+                        Text("Subscription auto-renews. Cancel anytime in\nSettings > Apple ID > Subscriptions.")
                             .font(.system(size: 11, weight: .regular, design: .rounded))
                             .foregroundColor(soDeckLightGray)
                             .multilineTextAlignment(.center)
+                            .padding(.horizontal, 16)
+
+                        HStack(spacing: 4) {
+                            Button("Terms of Service") { showTerms = true }
+                            Text("·")
+                            Button("Privacy Policy") { showPrivacy = true }
+                        }
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .foregroundColor(soDeckLightGray)
                     }
                     .padding(.bottom, 48)
                     .animation(.easeInOut(duration: 0.25), value: subManager.errorMessage)
                 }
             }
         }
-        // Auto-dismiss after a short celebration moment when purchase succeeds
+        .sheet(isPresented: $showTerms) {
+            NavigationStack { TermsOfServiceView() }
+        }
+        .sheet(isPresented: $showPrivacy) {
+            NavigationStack { PrivacyPolicyView() }
+        }
+        // Welcome screen shown right after a successful purchase
+        .fullScreenCover(isPresented: $showWelcome) {
+            TheSocialDeckPlusWelcomeView {
+                showWelcome = false
+                onDismiss()
+            }
+        }
         .onChange(of: subManager.isPlus) { _, isNowPlus in
             if isNowPlus {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    onDismiss()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    showWelcome = true
                 }
             }
         }
@@ -239,6 +274,7 @@ private struct PlusPlanCard: View {
     let title: String
     let price: String
     let detail: String
+    var subtitle: String? = nil
     let showBestValue: Bool
     let isSelected: Bool
     let onTap: () -> Void
@@ -271,6 +307,11 @@ private struct PlusPlanCard: View {
                         Text(detail)
                             .font(.system(size: 13, weight: .regular, design: .rounded))
                             .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        if let subtitle = subtitle {
+                            Text(subtitle)
+                                .font(.system(size: 12, weight: .medium, design: .rounded))
+                                .foregroundColor(soDeckGray)
+                        }
                     }
 
                     Spacer(minLength: 8)

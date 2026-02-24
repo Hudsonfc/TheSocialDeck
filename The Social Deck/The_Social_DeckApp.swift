@@ -13,6 +13,7 @@ import FirebaseCore
 struct The_Social_DeckApp: App {
     @StateObject private var authManager = AuthManager.shared
     @StateObject private var gameCenterService = GameCenterService.shared
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     
     init() {
         FirebaseApp.configure()
@@ -36,6 +37,7 @@ struct The_Social_DeckApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(authManager)
+                .environmentObject(subscriptionManager)
         }
         .modelContainer(sharedModelContainer)
     }

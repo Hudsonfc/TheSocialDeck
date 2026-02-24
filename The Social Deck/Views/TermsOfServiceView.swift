@@ -121,6 +121,31 @@ struct TermsOfServiceView: View {
                             .padding(.horizontal, 24)
                             .padding(.vertical, 8)
                         
+                        Divider()
+                            .background(Color.borderColor)
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 8)
+
+                        // TheSocialDeck+ Subscriptions
+                        PolicySection(
+                            title: "TheSocialDeck+ Subscriptions",
+                            content: [
+                                "TheSocialDeck+ is an auto-renewable subscription that unlocks premium games and features.",
+                                "Subscription options: Monthly ($4.99/month) and Yearly ($29.99/year). Prices may vary by region and are displayed in your local currency at checkout.",
+                                "Payment is charged to your Apple ID account at confirmation of purchase.",
+                                "Subscriptions automatically renew unless auto-renew is turned off at least 24 hours before the end of the current period.",
+                                "Your account will be charged for renewal within 24 hours prior to the end of the current period.",
+                                "You can manage and cancel subscriptions in your Apple ID Account Settings at any time after purchase.",
+                                "Any unused portion of a free trial period will be forfeited when a subscription is purchased.",
+                                "Cancelling a subscription does not provide a refund for the current billing period."
+                            ]
+                        )
+
+                        Divider()
+                            .background(Color.borderColor)
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 8)
+
                         // Updates
                         PolicySection(
                             title: "Updates",

@@ -10,10 +10,12 @@ import StoreKit
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var subManager: SubscriptionManager
     @State private var generalButtonPressed = false
     @State private var whatsNewButtonPressed = false
     @State private var feedbackButtonPressed = false
     @State private var rateUsButtonPressed = false
+    @State private var showPlusPaywall = false
     
     // App version info
     private var appVersion: String {
@@ -37,6 +39,36 @@ struct SettingsView: View {
                         .padding(.top, 20)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         
+                        // TheSocialDeck+ button
+                        Button(action: {
+                            HapticManager.shared.lightImpact()
+                            if subManager.isPlus {
+                                if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                                    UIApplication.shared.open(url)
+                                }
+                            } else {
+                                showPlusPaywall = true
+                            }
+                        }) {
+                            ZStack {
+                                Color.buttonBackground
+                                    .cornerRadius(16)
+                                HStack(spacing: 8) {
+                                    Image(systemName: "crown.fill")
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    Text(subManager.isPlus ? "TheSocialDeck+ · Active" : "TheSocialDeck+")
+                                        .font(.system(size: 18, weight: .regular, design: .rounded))
+                                        .foregroundColor(.white)
+                                }
+                            }
+                            .frame(width: UIScreen.main.bounds.width * 0.85, height: 60)
+                        }
+                        .sheet(isPresented: $showPlusPaywall) {
+                            TheSocialDeckPlusPopUpView(onDismiss: { showPlusPaywall = false })
+                                .environmentObject(SubscriptionManager.shared)
+                        }
+
                         // General Settings Button
                         SettingsNavigationButton(
                             title: "General",

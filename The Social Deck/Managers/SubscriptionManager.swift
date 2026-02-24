@@ -21,6 +21,9 @@ enum SubscriptionProductID {
 @MainActor
 final class SubscriptionManager: ObservableObject {
 
+    // Shared instance used app-wide as an @EnvironmentObject
+    static let shared = SubscriptionManager()
+
     // MARK: - Published state
     @Published var isPlus: Bool = false
     @Published var monthlyProduct: Product?

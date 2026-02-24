@@ -110,6 +110,22 @@ struct PrivacyPolicyView: View {
                             .padding(.horizontal, 24)
                             .padding(.vertical, 8)
                         
+                        // In-App Purchases
+                        PolicySection(
+                            title: "In-App Purchases & Subscriptions",
+                            content: [
+                                "TheSocialDeck+ is an auto-renewable subscription processed entirely by Apple via the App Store.",
+                                "We do not collect, store, or have access to your payment details. All billing is handled securely by Apple.",
+                                "We receive only a non-identifiable confirmation of your subscription status from Apple's StoreKit framework to unlock features on your device.",
+                                "No personal financial information is shared with The Social Deck."
+                            ]
+                        )
+
+                        Divider()
+                            .background(Color.borderColor)
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 8)
+
                         // Changes
                         PolicySection(
                             title: "Changes",

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var authManager: AuthManager
+    @EnvironmentObject var subManager: SubscriptionManager
     @State private var titleOpacity: Double = 0
     @State private var featuredCardScale: CGFloat = 0.95
     @State private var featuredCardOpacity: Double = 0
@@ -230,13 +231,28 @@ struct HomeView: View {
             }
             .overlay(alignment: .topLeading) {
                 Button(action: {
-                    showPlusPopUp = true
                     HapticManager.shared.lightImpact()
+                    if subManager.isPlus {
+                        // Already subscribed — open App Store subscription management
+                        if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                            UIApplication.shared.open(url)
+                        }
+                    } else {
+                        showPlusPopUp = true
+                    }
                 }) {
-                    Image(systemName: "crown.fill")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                        .frame(width: 44, height: 44)
+                    ZStack {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        if subManager.isPlus {
+                            Circle()
+                                .fill(Color.green)
+                                .frame(width: 9, height: 9)
+                                .offset(x: 10, y: -10)
+                        }
+                    }
+                    .frame(width: 44, height: 44)
                 }
                 .padding(.top, 10)
                 .padding(.leading, 20)
@@ -286,6 +302,7 @@ struct HomeView: View {
                                 plusSlideOffset = -geo.size.height
                             }
                         })
+                        .environmentObject(SubscriptionManager.shared)
                         .frame(width: geo.size.width, height: geo.size.height)
                         .offset(y: plusSlideOffset)
                         .onAppear {

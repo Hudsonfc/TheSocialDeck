@@ -31,11 +31,11 @@ struct Play2View: View {
     @State private var selectedDeckForDescription: Deck? = nil // Track deck for description overlay
 
     // MARK: - TheSocialDeck+ gating
-    @StateObject private var subManager = SubscriptionManager()
+    @EnvironmentObject private var subManager: SubscriptionManager
     @State private var showPlusPaywall = false
 
     private let plusLockedTypes: Set<DeckType> = [
-        .mostLikelyTo, .takeItPersonally, .whatsMySecret, .bluffCall, .memoryMaster, .closerThanEver
+        .mostLikelyTo, .takeItPersonally, .whatsMySecret, .bluffCall, .memoryMaster, .closerThanEver, .tapDuel
     ]
 
     private func isLocked(_ deck: Deck) -> Bool {
@@ -642,6 +642,7 @@ struct Play2View: View {
             Task { await subManager.refreshEntitlements() }
         }) {
             TheSocialDeckPlusPopUpView(onDismiss: { showPlusPaywall = false })
+                .environmentObject(SubscriptionManager.shared)
         }
     }
     
