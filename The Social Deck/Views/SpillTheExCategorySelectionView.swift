@@ -13,14 +13,15 @@ struct SpillTheExCategorySelectionView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var subManager: SubscriptionManager
 
-    private let plusCategories: Set<String> = ["Wild Side"]
+    // Spill the Ex is a Plus game; all categories are available once you have access
+    private let plusCategories: Set<String> = []
 
     private var freeCategories: Set<String> {
-        Set(deck.availableCategories.filter { !plusCategories.contains($0) })
+        Set(deck.availableCategories)
     }
 
     private func isLocked(_ category: String) -> Bool {
-        plusCategories.contains(category) && !subManager.isPlus
+        false
     }
 
     var body: some View {

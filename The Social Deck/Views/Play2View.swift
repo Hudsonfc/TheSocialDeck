@@ -30,7 +30,7 @@ struct Play2View: View {
     @State private var showPlusPaywall = false
 
     private let plusLockedTypes: Set<DeckType> = [
-        .mostLikelyTo, .takeItPersonally, .whatsMySecret, .bluffCall, .memoryMaster, .closerThanEver, .tapDuel
+        .mostLikelyTo, .takeItPersonally, .whatsMySecret, .bluffCall, .memoryMaster, .closerThanEver, .tapDuel, .spillTheEx
     ]
 
     private func isLocked(_ deck: Deck) -> Bool {
