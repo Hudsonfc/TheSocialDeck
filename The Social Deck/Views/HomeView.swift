@@ -34,6 +34,7 @@ struct HomeView: View {
     @State private var showRateUsView: Bool = false
     @State private var showPlusPopUp: Bool = false
     @State private var plusSlideOffset: CGFloat = 0
+    @AppStorage("plusCrownDotDismissed") private var plusCrownDotDismissed: Bool = false
     
     // Curated quotes for The Social Deck
     private let quotes = [
@@ -233,6 +234,7 @@ struct HomeView: View {
                 Button(action: {
                     HapticManager.shared.lightImpact()
                     if subManager.isPlus {
+                        plusCrownDotDismissed = true
                         // Already subscribed — open App Store subscription management
                         if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
                             UIApplication.shared.open(url)
@@ -245,7 +247,7 @@ struct HomeView: View {
                         Image(systemName: "crown.fill")
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                        if subManager.isPlus {
+                        if subManager.isPlus && !plusCrownDotDismissed {
                             Circle()
                                 .fill(Color.green)
                                 .frame(width: 9, height: 9)
@@ -345,6 +347,11 @@ struct HomeView: View {
             .onChange(of: showRateUsView) { oldValue, newValue in
                 if !newValue && !hasSeenRateUsView {
                     hasSeenRateUsView = true
+                }
+            }
+            .onChange(of: subManager.isPlus) { _, isPlus in
+                if !isPlus {
+                    plusCrownDotDismissed = false
                 }
             }
         }
