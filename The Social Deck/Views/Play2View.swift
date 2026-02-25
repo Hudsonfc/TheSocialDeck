@@ -71,7 +71,7 @@ struct Play2View: View {
             imageName: "NHIE 2.0",
             type: .neverHaveIEver,
             cards: allNHIECards,
-            availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
+            availableCategories: ["Party", "Wild", "Couples", "Social", "Dirty", "Friends"]
         ),
         Deck(
             title: "Truth or Dare",
@@ -81,7 +81,7 @@ struct Play2View: View {
             imageName: "TOD 2.0",
             type: .truthOrDare,
             cards: allTORCards,
-            availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
+            availableCategories: ["Party", "Wild", "Couples", "Social", "Dirty", "Friends"]
         ),
         Deck(
             title: "Would You Rather",
@@ -91,7 +91,7 @@ struct Play2View: View {
             imageName: "WYR 2.0",
             type: .wouldYouRather,
             cards: allWYRCards,
-            availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
+            availableCategories: ["Party", "Wild", "Couples", "Social", "Dirty", "Friends"]
         ),
         Deck(
             title: "Most Likely To",
@@ -101,7 +101,7 @@ struct Play2View: View {
             imageName: "MLT 2.0",
             type: .mostLikelyTo,
             cards: allMLTCards,
-            availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
+            availableCategories: ["Party", "Wild", "Couples", "Social", "Dirty", "Friends"]
         )
     ]
     
@@ -225,7 +225,7 @@ struct Play2View: View {
             imageName: "BC 2.0",
             type: .bluffCall,
             cards: allBluffCallCards,
-            availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
+            availableCategories: ["Party", "Wild", "Couples", "Social", "Dirty", "Friends"]
         )
     ]
     
@@ -984,19 +984,6 @@ struct GameCardView: View {
                     .frame(width: cardWidth, height: cardHeight)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
                     .shadow(color: Color.cardShadowColor, radius: 12, x: 0, y: 6)
-                
-                // New badge for Take It Personally (matches FavoriteButton style)
-                if deck.type == .takeItPersonally {
-                    Text("NEW")
-                        .font(.system(size: 11, weight: .semibold, design: .rounded))
-                        .tracking(0.5)
-                        .foregroundColor(.primaryAccent)
-                        .frame(width: 40, height: 40)
-                        .background(Color.primaryAccent.opacity(0.1))
-                        .clipShape(Circle())
-                        .padding(.top, 20)
-                        .padding(.trailing, 20)
-                }
             }
             .overlay(alignment: .bottomLeading) {
                 if isLocked {

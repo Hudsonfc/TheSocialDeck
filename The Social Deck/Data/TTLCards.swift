@@ -22,8 +22,8 @@ let allTTLCards: [Card] = [
     // Couples cards - placeholder
     Card(text: "I've been in a long-distance relationship", category: "Couples", cardType: nil, optionA: "I've never been cheated on", optionB: "I've been engaged twice"),
     
-    // Teens cards - placeholder
-    Card(text: "I skipped school regularly", category: "Teens", cardType: nil, optionA: "I never got detention", optionB: "I was valedictorian"),
+    // Social cards
+    Card(text: "I once talked to a stranger for an hour at a party and never learned their name", category: "Social", cardType: nil, optionA: "I've never forgotten someone's name immediately after meeting them", optionB: "I remember every face but forget every name"),
     
     // Dirty cards - placeholder
     Card(text: "I've sent nudes", category: "Dirty", cardType: nil, optionA: "I've never watched porn", optionB: "I've had a threesome"),

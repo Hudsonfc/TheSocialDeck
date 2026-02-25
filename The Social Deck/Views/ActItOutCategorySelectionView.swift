@@ -2,8 +2,6 @@
 //  ActItOutCategorySelectionView.swift
 //  The Social Deck
 //
-//  Created by Hudson Ferreira on 12/31/24.
-//
 
 import SwiftUI
 
@@ -11,20 +9,28 @@ struct ActItOutCategorySelectionView: View {
     let deck: Deck
     @State private var selectedCategories: Set<String> = []
     @State private var navigateToSetup: Bool = false
+    @State private var showPlusPaywall = false
     @Environment(\.dismiss) private var dismiss
-    
+    @EnvironmentObject private var subManager: SubscriptionManager
+
+    private let plusCategories: Set<String> = ["Famous Concepts", "Movie Genres", "Food & Cooking", "Animals"]
+
+    private var freeCategories: Set<String> {
+        Set(deck.availableCategories.filter { !plusCategories.contains($0) })
+    }
+
+    private func isLocked(_ category: String) -> Bool {
+        plusCategories.contains(category) && !subManager.isPlus
+    }
+
     var body: some View {
         ZStack {
-            // Dark adaptive background
             Color.appBackground
                 .ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
-                // Back button at top left
                 HStack {
-                    Button(action: {
-                        dismiss()
-                    }) {
+                    Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.primaryText)
@@ -33,10 +39,9 @@ struct ActItOutCategorySelectionView: View {
                 }
                 .padding(.horizontal, 40)
                 .padding(.top, 20)
-                
+
                 ScrollView {
                     VStack(spacing: 0) {
-                        // Game artwork - regular card image
                         Image(deck.imageName)
                             .resizable()
                             .scaledToFit()
@@ -45,27 +50,28 @@ struct ActItOutCategorySelectionView: View {
                             .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
                             .padding(.top, 20)
                             .padding(.bottom, 32)
-                        
-                        // Title
+
                         Text("Select Categories")
                             .font(.system(size: 24, weight: .bold, design: .rounded))
                             .foregroundColor(.primaryText)
                             .padding(.bottom, 8)
-                        
+
                         Text("Choose which types of prompts to include")
                             .font(.system(size: 14, weight: .regular, design: .rounded))
                             .foregroundColor(.secondaryText)
                             .padding(.bottom, 24)
-                        
-                        // Category buttons
+
                         VStack(spacing: 12) {
                             ForEach(deck.availableCategories, id: \.self) { category in
                                 CategoryButton(
                                     title: category,
                                     isSelected: selectedCategories.contains(category),
+                                    isLocked: isLocked(category),
                                     cardCount: deck.cards.filter { $0.category == category }.count
                                 ) {
-                                    if selectedCategories.contains(category) {
+                                    if isLocked(category) {
+                                        showPlusPaywall = true
+                                    } else if selectedCategories.contains(category) {
                                         selectedCategories.remove(category)
                                     } else {
                                         selectedCategories.insert(category)
@@ -75,22 +81,26 @@ struct ActItOutCategorySelectionView: View {
                         }
                         .padding(.horizontal, 40)
                         .padding(.bottom, 24)
-                        
-                        // Select All button
+
                         Button(action: {
-                            if selectedCategories.count == deck.availableCategories.count {
+                            let available = subManager.isPlus
+                                ? Set(deck.availableCategories)
+                                : freeCategories
+                            if selectedCategories == available {
                                 selectedCategories.removeAll()
                             } else {
-                                selectedCategories = Set(deck.availableCategories)
+                                selectedCategories = available
                             }
                         }) {
-                            Text(selectedCategories.count == deck.availableCategories.count ? "Deselect All" : "Select All")
+                            let available = subManager.isPlus
+                                ? Set(deck.availableCategories)
+                                : freeCategories
+                            Text(selectedCategories == available ? "Deselect All" : "Select All")
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                                 .foregroundColor(.primaryAccent)
                         }
                         .padding(.bottom, 24)
-                        
-                        // Continue button
+
                         PrimaryButton(title: "Continue") {
                             HapticManager.shared.lightImpact()
                             navigateToSetup = true
@@ -104,6 +114,10 @@ struct ActItOutCategorySelectionView: View {
             }
         }
         .navigationBarHidden(true)
+        .sheet(isPresented: $showPlusPaywall) {
+            TheSocialDeckPlusPopUpView(onDismiss: { showPlusPaywall = false })
+                .environmentObject(SubscriptionManager.shared)
+        }
         .background(
             NavigationLink(
                 destination: ActItOutSetupView(
@@ -118,30 +132,52 @@ struct ActItOutCategorySelectionView: View {
     }
 }
 
-// Category button component
+// MARK: - Category button (shared across all category selection views)
 struct CategoryButton: View {
     let title: String
     let isSelected: Bool
+    var isLocked: Bool = false
     let cardCount: Int
     let action: () -> Void
-    
+
+    private let soDeckRed = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+
     var body: some View {
         Button(action: action) {
             HStack {
                 Text(title)
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundColor(isSelected ? .white : .primaryText)
-                
+
                 Spacer()
-                
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 24))
-                    .foregroundColor(isSelected ? .white : .primaryAccent)
+
+                if isLocked {
+                    HStack(spacing: 3) {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 9, weight: .bold))
+                        Text("PLUS")
+                            .font(.system(size: 9, weight: .bold, design: .rounded))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 4)
+                    .background(soDeckRed)
+                    .clipShape(Capsule())
+                } else {
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                        .font(.system(size: 24))
+                        .foregroundColor(isSelected ? .white : .primaryAccent)
+                }
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
-            .background(isSelected ? .primaryAccent : Color.tertiaryBackground)
+            .background(
+                isLocked
+                    ? Color.tertiaryBackground.opacity(0.6)
+                    : (isSelected ? Color.primaryAccent : Color.tertiaryBackground)
+            )
             .cornerRadius(12)
+            .opacity(isLocked ? 0.8 : 1.0)
         }
     }
 }
@@ -160,6 +196,6 @@ struct CategoryButton: View {
                 availableCategories: ["Actions & Verbs", "Animals", "Emotions & Expressions", "Daily Activities", "Sports & Activities", "Objects & Tools", "Food & Cooking", "Famous Concepts", "Movie Genres", "Nature & Weather"]
             )
         )
+        .environmentObject(SubscriptionManager.shared)
     }
 }
-

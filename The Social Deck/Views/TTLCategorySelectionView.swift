@@ -127,7 +127,7 @@ struct TTLCategorySelectionView: View {
             imageName: "Art 1.4",
             type: .twoTruthsAndALie,
             cards: [],
-            availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
+            availableCategories: ["Party", "Wild", "Couples", "Social", "Dirty", "Friends"]
         ))
     }
 }

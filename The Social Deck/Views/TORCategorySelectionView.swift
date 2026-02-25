@@ -2,8 +2,6 @@
 //  TORCategorySelectionView.swift
 //  The Social Deck
 //
-//  Created by Hudson Ferreira on 11/23/25.
-//
 
 import SwiftUI
 
@@ -11,20 +9,28 @@ struct TORCategorySelectionView: View {
     let deck: Deck
     @State private var selectedCategories: Set<String> = []
     @State private var navigateToSetup: Bool = false
+    @State private var showPlusPaywall = false
     @Environment(\.dismiss) private var dismiss
-    
+    @EnvironmentObject private var subManager: SubscriptionManager
+
+    private let plusCategories: Set<String> = ["Dirty", "Couples", "Wild"]
+
+    private var freeCategories: Set<String> {
+        Set(deck.availableCategories.filter { !plusCategories.contains($0) })
+    }
+
+    private func isLocked(_ category: String) -> Bool {
+        plusCategories.contains(category) && !subManager.isPlus
+    }
+
     var body: some View {
         ZStack {
-            // Dark adaptive background
             Color.appBackground
                 .ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
-                // Back button at top left
                 HStack {
-                    Button(action: {
-                        dismiss()
-                    }) {
+                    Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.primaryText)
@@ -33,10 +39,9 @@ struct TORCategorySelectionView: View {
                 }
                 .padding(.horizontal, 40)
                 .padding(.top, 20)
-                
+
                 ScrollView {
                     VStack(spacing: 0) {
-                        // Game artwork
                         Image(deck.imageName)
                             .resizable()
                             .interpolation(.high)
@@ -47,27 +52,28 @@ struct TORCategorySelectionView: View {
                             .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
                             .padding(.top, 20)
                             .padding(.bottom, 32)
-                        
-                        // Title
+
                         Text("Select Categories")
                             .font(.system(size: 24, weight: .bold, design: .rounded))
                             .foregroundColor(.primaryText)
                             .padding(.bottom, 8)
-                        
+
                         Text("Choose which types of prompts to include")
                             .font(.system(size: 14, weight: .regular, design: .rounded))
                             .foregroundColor(.secondaryText)
                             .padding(.bottom, 24)
-                        
-                        // Category buttons
+
                         VStack(spacing: 12) {
                             ForEach(deck.availableCategories, id: \.self) { category in
                                 CategoryButton(
                                     title: category,
                                     isSelected: selectedCategories.contains(category),
+                                    isLocked: isLocked(category),
                                     cardCount: deck.cards.filter { $0.category == category }.count
                                 ) {
-                                    if selectedCategories.contains(category) {
+                                    if isLocked(category) {
+                                        showPlusPaywall = true
+                                    } else if selectedCategories.contains(category) {
                                         selectedCategories.remove(category)
                                     } else {
                                         selectedCategories.insert(category)
@@ -77,22 +83,26 @@ struct TORCategorySelectionView: View {
                         }
                         .padding(.horizontal, 40)
                         .padding(.bottom, 24)
-                        
-                        // Select All button
+
                         Button(action: {
-                            if selectedCategories.count == deck.availableCategories.count {
+                            let available = subManager.isPlus
+                                ? Set(deck.availableCategories)
+                                : freeCategories
+                            if selectedCategories == available {
                                 selectedCategories.removeAll()
                             } else {
-                                selectedCategories = Set(deck.availableCategories)
+                                selectedCategories = available
                             }
                         }) {
-                            Text(selectedCategories.count == deck.availableCategories.count ? "Deselect All" : "Select All")
+                            let available = subManager.isPlus
+                                ? Set(deck.availableCategories)
+                                : freeCategories
+                            Text(selectedCategories == available ? "Deselect All" : "Select All")
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                                 .foregroundColor(.primaryAccent)
                         }
                         .padding(.bottom, 24)
-                        
-                        // Continue button
+
                         PrimaryButton(title: "Continue") {
                             HapticManager.shared.lightImpact()
                             navigateToSetup = true
@@ -106,6 +116,10 @@ struct TORCategorySelectionView: View {
             }
         }
         .navigationBarHidden(true)
+        .sheet(isPresented: $showPlusPaywall) {
+            TheSocialDeckPlusPopUpView(onDismiss: { showPlusPaywall = false })
+                .environmentObject(SubscriptionManager.shared)
+        }
         .background(
             NavigationLink(
                 destination: TORSetupView(deck: deck, selectedCategories: Array(selectedCategories)),
@@ -127,8 +141,8 @@ struct TORCategorySelectionView: View {
             imageName: "TOD artwork",
             type: .truthOrDare,
             cards: [],
-            availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
+            availableCategories: ["Party", "Wild", "Couples", "Social", "Dirty", "Friends"]
         ))
+        .environmentObject(SubscriptionManager.shared)
     }
 }
-

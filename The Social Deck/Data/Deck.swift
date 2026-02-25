@@ -43,5 +43,5 @@ struct Deck: Identifiable {
     let imageName: String
     let type: DeckType
     let cards: [Card]
-    let availableCategories: [String] // e.g., ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
+    let availableCategories: [String] // e.g., ["Party", "Wild", "Couples", "Social", "Dirty", "Friends"]
 }

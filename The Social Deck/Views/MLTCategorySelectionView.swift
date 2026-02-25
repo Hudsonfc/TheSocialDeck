@@ -127,7 +127,7 @@ struct MLTCategorySelectionView: View {
             imageName: "MLT artwork",
             type: .mostLikelyTo,
             cards: [],
-            availableCategories: ["Party", "Wild", "Couples", "Teens", "Dirty", "Friends"]
+            availableCategories: ["Party", "Wild", "Couples", "Social", "Dirty", "Friends"]
         ))
     }
 }
