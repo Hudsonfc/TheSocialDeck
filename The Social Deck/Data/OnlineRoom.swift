@@ -162,6 +162,7 @@ extension DeckType {
         case .quickfireCouples: return "quickfireCouples"
         case .closerThanEver: return "closerThanEver"
         case .usAfterDark: return "usAfterDark"
+        case .spillTheEx: return "spillTheEx"
         case .other: return "other"
         }
     }
@@ -191,6 +192,7 @@ extension DeckType {
         case "quickfireCouples": self = .quickfireCouples
         case "closerThanEver": self = .closerThanEver
         case "usAfterDark": self = .usAfterDark
+        case "spillTheEx": self = .spillTheEx
         case "other": self = .other
         default: return nil
         }

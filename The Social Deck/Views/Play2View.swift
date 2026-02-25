@@ -10,7 +10,6 @@ import SwiftUI
 struct Play2View: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var favoritesManager = FavoritesManager.shared
-    @State private var currentCardIndex = 0
     @State private var selectedCategory = "Classic Games"
     @State private var navigateToCategorySelection: Deck? = nil
     @State private var navigateToPlayView: Deck? = nil
@@ -22,13 +21,9 @@ struct Play2View: View {
     @State private var navigateToQuickfireCouplesSetup: Deck? = nil
     @State private var navigateToCloserThanEverSetup: Deck? = nil
     @State private var navigateToUsAfterDarkSetup: Deck? = nil
-    @State private var cardFlippedStates: [Bool] = []
-    @State private var cardOffset: CGFloat = 0
-    @State private var isDragging = false
     @AppStorage("hasSeenWelcomeView") private var hasSeenWelcomeView: Bool = false
     @State private var showWelcomeView: Bool = false
-    @State private var isGridView: Bool = false // Track layout mode
-    @State private var selectedDeckForDescription: Deck? = nil // Track deck for description overlay
+    @State private var selectedDeckForDescription: Deck? = nil
 
     // MARK: - TheSocialDeck+ gating
     @EnvironmentObject private var subManager: SubscriptionManager
@@ -39,7 +34,7 @@ struct Play2View: View {
     ]
 
     private func isLocked(_ deck: Deck) -> Bool {
-        plusLockedTypes.contains(deck.type)
+        plusLockedTypes.contains(deck.type) && !subManager.isPlus
     }
     
     // All category names (Favorites shown dynamically when items exist)
@@ -107,6 +102,16 @@ struct Play2View: View {
     
     // Social Deck Games decks with 2.0 artwork
     let socialDeckGamesDecks: [Deck] = [
+        Deck(
+            title: "Spill the Ex",
+            description: "Spill the Ex is a bold, laugh-out-loud party game where the tea is hot and nobody's past is completely safe. Each round, players respond to juicy relationship prompts — from harmless confessions to slightly messy moments — and the group has to guess who the story belongs to.",
+            numberOfCards: 100,
+            estimatedTime: "20-30 min",
+            imageName: "Spill the Ex",
+            type: .spillTheEx,
+            cards: allSpillTheExCards,
+            availableCategories: ["Confessions", "Situationship", "The Breakup", "Wild Side"]
+        ),
         Deck(
             title: "Take It Personally",
             description: "Bold statements about someone in the group. Quick prompts that create reactions, tension, and laughter. Each card calls out someone with funny, dramatic, or slightly chaotic observations. Big energy, bigger reactions!",
@@ -299,8 +304,6 @@ struct Play2View: View {
                                     if selectedCategory != category {
                                         withAnimation(.easeInOut(duration: 0.3)) {
                                             selectedCategory = category
-                                            currentCardIndex = 0
-                                            cardOffset = 0
                                         }
                                         HapticManager.shared.lightImpact()
                                     }
@@ -313,138 +316,33 @@ struct Play2View: View {
                 .padding(.top, 20)
                 .padding(.bottom, 16)
                 
-                // Content area - Card view or Grid view
-                if isGridView {
-                    // Grid View - Show all games at once
-                    ScrollView(.vertical, showsIndicators: false) {
-                        if !currentDecks.isEmpty {
-                            let columns = [
-                                GridItem(.flexible(), spacing: 16),
-                                GridItem(.flexible(), spacing: 16)
-                            ]
-                            
-                            LazyVGrid(columns: columns, spacing: 20) {
-                                ForEach(Array(currentDecks.enumerated()), id: \.element.id) { index, deck in
-                                    GridGameTile(
-                                        deck: deck,
-                                        isLocked: isLocked(deck)
-                                    ) {
-                                        HapticManager.shared.lightImpact()
-                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                            selectedDeckForDescription = deck
-                                        }
+                // Grid View
+                ScrollView(.vertical, showsIndicators: false) {
+                    if !currentDecks.isEmpty {
+                        let columns = [
+                            GridItem(.flexible(), spacing: 16),
+                            GridItem(.flexible(), spacing: 16)
+                        ]
+
+                        LazyVGrid(columns: columns, spacing: 20) {
+                            ForEach(Array(currentDecks.enumerated()), id: \.element.id) { index, deck in
+                                GridGameTile(
+                                    deck: deck,
+                                    isLocked: isLocked(deck)
+                                ) {
+                                    HapticManager.shared.lightImpact()
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                        selectedDeckForDescription = deck
                                     }
                                 }
                             }
-                            .responsiveHorizontalPadding()
-                            .padding(.top, 20)
-                            .padding(.bottom, 30)
                         }
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    // Card Deck - Simple horizontal scroll with current card only
-                    ZStack {
-                        if !currentDecks.isEmpty && currentCardIndex < currentDecks.count && currentCardIndex < cardFlippedStates.count {
-                            GameCardView(
-                                deck: currentDecks[currentCardIndex],
-                                isFlipped: $cardFlippedStates[currentCardIndex],
-                                isLocked: isLocked(currentDecks[currentCardIndex]),
-                                onSelect: {
-                                    let deck = currentDecks[currentCardIndex]
-                                    if isLocked(deck) && !subManager.isPlus {
-                                        showPlusPaywall = true
-                                    } else {
-                                        if currentCardIndex < cardFlippedStates.count {
-                                            cardFlippedStates[currentCardIndex] = false
-                                        }
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                            navigateToCategorySelection = deck
-                                        }
-                                    }
-                                },
-                                allowInteraction: true
-                            )
-                            .id("\(selectedCategory)-\(currentCardIndex)") // Force view update on category change
-                            .offset(x: cardOffset)
-                            .transition(.asymmetric(
-                                insertion: .opacity.combined(with: .scale(scale: 0.95)),
-                                removal: .opacity.combined(with: .scale(scale: 0.95))
-                            ))
-                            .gesture(
-                                DragGesture(minimumDistance: 20)
-                                    .onChanged { value in
-                                        // Allow drag regardless of flip state
-                                        isDragging = true
-                                        cardOffset = value.translation.width
-                                    }
-                                    .onEnded { value in
-                                        isDragging = false
-                                        // Allow swipe regardless of flip state
-                                        if value.translation.width < -80 && currentCardIndex < currentDecks.count - 1 {
-                                            // Swipe left - go to next card (reset flip state)
-                                            if currentCardIndex < cardFlippedStates.count {
-                                                cardFlippedStates[currentCardIndex] = false
-                                            }
-                                            withAnimation(.easeOut(duration: 0.25)) {
-                                                cardOffset = -UIScreen.main.bounds.width
-                                            }
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                                                currentCardIndex += 1
-                                                cardOffset = UIScreen.main.bounds.width
-                                                withAnimation(.easeOut(duration: 0.25)) {
-                                                    cardOffset = 0
-                                                }
-                                            }
-                                            HapticManager.shared.lightImpact()
-                                        } else if value.translation.width > 80 && currentCardIndex > 0 {
-                                            // Swipe right - go to previous card (reset flip state)
-                                            cardFlippedStates[currentCardIndex] = false
-                                            withAnimation(.easeOut(duration: 0.25)) {
-                                                cardOffset = UIScreen.main.bounds.width
-                                            }
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                                                currentCardIndex -= 1
-                                                cardOffset = -UIScreen.main.bounds.width
-                                                withAnimation(.easeOut(duration: 0.25)) {
-                                                    cardOffset = 0
-                                                }
-                                            }
-                                            HapticManager.shared.lightImpact()
-                                        } else {
-                                            // Snap back to center
-                                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                                cardOffset = 0
-                                            }
-                                        }
-                                    }
-                            )
-                        }
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .clipped() // Hide cards when they slide off screen
-                    
-                // Placeholder text under cards (hidden when grid view or no decks)
-                if !currentDecks.isEmpty && !isGridView {
-                    Text("Tap card to flip and see details")
-                        .font(.system(size: 14, weight: .regular, design: .rounded))
-                        .foregroundColor(.tertiaryText)
-                        .padding(.top, 16)
-                }
-                
-                // Card Counter (hidden when grid view)
-                if !currentDecks.isEmpty && !isGridView {
-                        HStack(spacing: 8) {
-                            ForEach(0..<currentDecks.count, id: \.self) { index in
-                                Circle()
-                                    .fill(index == currentCardIndex ? Color.primaryAccent : Color.borderColor)
-                                    .frame(width: 8, height: 8)
-                            }
-                        }
-                        .padding(.top, 8)
+                        .responsiveHorizontalPadding()
+                        .padding(.top, 20)
                         .padding(.bottom, 30)
                     }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             
             // Navigation links for category selection and setup views
@@ -554,8 +452,8 @@ struct Play2View: View {
                 WelcomeView(isPresented: $showWelcomeView)
             }
             
-            // Game Description Overlay for Grid View
-            if isGridView, let deck = selectedDeckForDescription {
+            // Game Description Overlay
+            if let deck = selectedDeckForDescription {
                 GameDescriptionOverlay(
                     deck: deck,
                     selectedDeck: $selectedDeckForDescription,
@@ -588,14 +486,6 @@ struct Play2View: View {
                 hasSeenWelcomeView = true
             }
         }
-        .onChange(of: selectedCategory) { oldValue, newValue in
-            // Update cardFlippedStates size when category changes
-            cardFlippedStates = Array(repeating: false, count: max(currentDecks.count, 1))
-        }
-        .task {
-            // Initialize cardFlippedStates when view appears
-            cardFlippedStates = Array(repeating: false, count: max(currentDecks.count, 1))
-        }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
@@ -606,34 +496,6 @@ struct Play2View: View {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.primaryAccent)
-                }
-            }
-            
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    HapticManager.shared.lightImpact()
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                        isGridView.toggle()
-                        // Reset card index when switching layouts
-                        if !isGridView {
-                            currentCardIndex = 0
-                            cardOffset = 0
-                            cardFlippedStates = Array(repeating: false, count: max(currentDecks.count, 1))
-                        }
-                    }
-                }) {
-                    if isGridView {
-                        // When in grid view, show rotated rectangle.stack to switch back to card view
-                        Image(systemName: "rectangle.stack")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(.primaryAccent)
-                            .rotationEffect(.degrees(90))
-                    } else {
-                        // When in card view, show grid icon to switch to grid view
-                        Image(systemName: "square.grid.2x2")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(.primaryAccent)
-                    }
                 }
             }
         }
@@ -766,6 +628,8 @@ struct Play2View: View {
                 MemoryMasterSetupView(deck: deck)
             case .bluffCall:
                 BluffCallCategorySelectionView(deck: deck)
+            case .spillTheEx:
+                SpillTheExCategorySelectionView(deck: deck)
             // Date/Couples Games
             case .quickfireCouples:
                 QuickfireCouplesSetupView(deck: deck, selectedCategories: [])
@@ -1255,7 +1119,7 @@ struct GameDescriptionOverlay: View {
                     }
                     .responsiveHorizontalPadding()
                     .padding(.bottom, 40)
-                } else if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .takeItPersonally || deck.type == .categoryClash || deck.type == .bluffCall || deck.type == .whatsMySecret || deck.type == .actItOut {
+                } else if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .takeItPersonally || deck.type == .categoryClash || deck.type == .bluffCall || deck.type == .whatsMySecret || deck.type == .actItOut || deck.type == .spillTheEx {
                         PrimaryButton(title: "Play") {
                             // Navigate first, then dismiss overlay after navigation completes
                             navigateToCategorySelection = deck

@@ -31,6 +31,7 @@ enum DeckType: String {
     case closerThanEver
     case usAfterDark
     case takeItPersonally
+    case spillTheEx
     case other
 }
 

@@ -38,6 +38,7 @@ struct SelectedGameDisplayCard: View {
         case .quickfireCouples: return "Quickfire Couples"
         case .closerThanEver: return "Closer Than Ever"
         case .usAfterDark: return "Us After Dark"
+        case .spillTheEx: return "Spill the Ex"
         case .other: return "Game"
         }
     }
@@ -59,6 +60,7 @@ struct SelectedGameDisplayCard: View {
         case .spinTheBottle: return "STB artwork"
         case .tapDuel: return "TD artwork"
         case .flip21: return "Art 1.4"
+        case .spillTheEx: return "Spill the Ex"
         default: return nil
         }
     }
