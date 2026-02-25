@@ -745,14 +745,17 @@ struct HeroGameOfTheDaySlide: View {
                         .foregroundColor(Color.white)
                         .lineLimit(2)
                     
-                    // Game Description
-                    Text(game.description)
-                        .font(.system(size: 12, weight: .regular, design: .rounded))
-                        .foregroundColor(Color.white.opacity(0.9))
-                        .lineLimit(3)
-                        .fixedSize(horizontal: false, vertical: true)
+                    // Game Description — scrollable so full text is always shown, never cut off
+                    ScrollView(.vertical, showsIndicators: false) {
+                        Text(game.description)
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                            .foregroundColor(Color.white.opacity(0.9))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxHeight: 90)
                     
-                    Spacer()
+                    Spacer(minLength: 0)
                 }
                 .padding(.trailing, 20)
                 .padding(.top, 16)
