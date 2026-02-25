@@ -55,12 +55,19 @@ struct SettingsView: View {
                                     .cornerRadius(16)
                                 HStack(spacing: 8) {
                                     Image(systemName: "crown.fill")
-                                        .font(.system(size: 15, weight: .semibold))
+                                        .font(.system(size: 16, weight: .medium))
                                         .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                        .frame(height: 20)
+                                        .clipped()
                                     Text(subManager.isPlus ? "TheSocialDeck+ · Active" : "TheSocialDeck+")
                                         .font(.system(size: 18, weight: .regular, design: .rounded))
                                         .foregroundColor(.white)
+                                        .lineLimit(1)
+                                        .fixedSize(horizontal: true, vertical: true)
+                                        .baselineOffset(0.5)
                                 }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .offset(x: -11)
                             }
                             .frame(width: UIScreen.main.bounds.width * 0.85, height: 60)
                         }
