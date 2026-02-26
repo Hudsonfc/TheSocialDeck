@@ -26,7 +26,7 @@ struct PrivacyPolicyView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
                     // Version header
-                    Text("The Social Deck – Version 1.0")
+                    Text("The Social Deck – Version 1.1")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundColor(.secondaryText)
                         .frame(maxWidth: .infinity, alignment: .leading)

@@ -26,7 +26,7 @@ struct TermsOfServiceView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
                     // Version header
-                    Text("The Social Deck – Version 1.0")
+                    Text("The Social Deck – Version 1.1")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundColor(.secondaryText)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -112,7 +112,8 @@ struct TermsOfServiceView: View {
                         PolicySection(
                             title: "Intellectual Property",
                             content: [
-                                "All app content, design, and branding belong to The Social Deck and may not be copied or redistributed without permission."
+                                "All app content, design, and branding belong to The Social Deck and may not be copied or redistributed without permission.",
+                                "Game names and concepts used in the app (e.g. Never Have I Ever, Truth or Dare, Would You Rather) are classic party games in the public domain. The Social Deck does not claim ownership of those game ideas or names and is not affiliated with any other brand or product that may use similar names."
                             ]
                         )
                         
@@ -120,6 +121,15 @@ struct TermsOfServiceView: View {
                             .background(Color.borderColor)
                             .padding(.horizontal, 24)
                             .padding(.vertical, 8)
+                        
+                        // Entertainment & Disclaimer
+                        PolicySection(
+                            title: "Entertainment & Disclaimer",
+                            content: [
+                                "The app and all games, prompts, and content are for entertainment only. They are not professional, legal, medical, or therapeutic advice.",
+                                "You use the app at your own risk. To the fullest extent permitted by law, The Social Deck shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the app or any content within it."
+                            ]
+                        )
                         
                         Divider()
                             .background(Color.borderColor)
