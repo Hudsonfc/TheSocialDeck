@@ -260,19 +260,25 @@ struct HomeView: View {
                 .padding(.leading, 20)
             }
             .overlay(alignment: .topTrailing) {
-                // User Avatar Button in top right (Hidden for first version)
-                if authManager.isAuthenticated {
-                    NavigationLink(destination: ProfileView()) {
+                // Account: avatar when signed in, account icon when signed out
+                NavigationLink(destination: ProfileView()) {
+                    if authManager.isAuthenticated {
                         AvatarView(
                             avatarType: authManager.userProfile?.avatarType ?? "person.fill",
                             avatarColor: authManager.userProfile?.avatarColor ?? "red",
                             size: 44
                         )
+                    } else {
+                        Image(systemName: "person.crop.circle")
+                            .font(.system(size: 28, weight: .medium))
+                            .foregroundColor(.primaryText)
+                            .frame(width: 44, height: 44)
+                            .background(Color.tertiaryBackground)
+                            .clipShape(Circle())
                     }
-                    .padding(.top, 10)
-                    .padding(.trailing, 20)
-                    .hidden()
                 }
+                .padding(.top, 10)
+                .padding(.trailing, 20)
             }
             .overlay(alignment: .bottomTrailing) {
                 ZStack(alignment: .bottomTrailing) {

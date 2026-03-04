@@ -12,150 +12,114 @@ import FirebaseAuth
 
 struct SignInView: View {
     @EnvironmentObject var authManager: AuthManager
+    @Environment(\.colorScheme) private var colorScheme
     @State private var currentNonce: String?
     @State private var showError = false
     
+    private let benefits: [(title: String, subtitle: String)] = [
+        ("Your profile", "Pick an avatar and display name"),
+        ("Friends", "Add friends and play together"),
+        ("Stats", "Track games and progress")
+    ]
+    
     var body: some View {
         ZStack {
-            Color.white
+            Color.appBackground
                 .ignoresSafeArea()
             
-            ScrollView {
-            VStack(spacing: 32) {
-                    // Logo
-                    Image("TheSocialDeckLogo")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 180, height: 180)
-                        .padding(.top, 20)
-                    
-                    // Title and subtitle
-                    VStack(spacing: 8) {
-                Text("The Social Deck")
-                            .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                
-                Text("Sign in to continue")
-                            .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(Color.gray)
-                    }
-                    
-                    // Info about signing in
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 0) {
+                    // Hero
                     VStack(spacing: 20) {
-                        HStack(alignment: .top, spacing: 16) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.1))
-                                    .frame(width: 50, height: 50)
-                                
-                                Image(systemName: "person.crop.circle.fill")
-                                    .font(.system(size: 24, weight: .semibold))
-                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            }
-                            
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Create Your Profile")
-                                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                Text("Personalize your avatar and track your progress")
-                                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color.gray)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                            
-                            Spacer()
-                        }
+                        Image("TheSocialDeckLogo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 120, height: 120)
+                            .padding(.top, 32)
                         
-                        HStack(alignment: .top, spacing: 16) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.1))
-                                    .frame(width: 50, height: 50)
-                                
-                                Image(systemName: "network")
-                                    .font(.system(size: 24, weight: .semibold))
-                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            }
+                        VStack(spacing: 8) {
+                            Text("Welcome to your account")
+                                .font(.system(size: 26, weight: .bold, design: .rounded))
+                                .foregroundColor(.primaryText)
+                                .multilineTextAlignment(.center)
                             
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Access Online Features")
-                                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                Text("Play with friends and join online rooms")
-                                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color.gray)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                            
-                            Spacer()
-                        }
-                        
-                        HStack(alignment: .top, spacing: 16) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.1))
-                                    .frame(width: 50, height: 50)
-                                
-                                Image(systemName: "chart.bar.fill")
-                                    .font(.system(size: 24, weight: .semibold))
-                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            }
-                            
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Track Your Game Stats")
-                                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                Text("See your wins, games played, and more")
-                                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                    .foregroundColor(Color.gray)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                
-                Spacer()
+                            Text("Sign in to save your profile, add friends, and get the most out of The Social Deck.")
+                                .font(.system(size: 16, weight: .regular, design: .rounded))
+                                .foregroundColor(.secondaryText)
+                                .multilineTextAlignment(.center)
+                                .lineSpacing(4)
+                                .padding(.horizontal, 8)
                         }
                     }
-                    .padding(.vertical, 28)
-                    .padding(.horizontal, 28)
-                    .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
-                            .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
-                    )
-                    .padding(.horizontal, 40)
+                    .padding(.bottom, 28)
                     
-                    // Loading indicator or Sign in button
-                    if authManager.isLoading {
-                        VStack(spacing: 16) {
-                            ProgressView()
-                                .scaleEffect(1.5)
-                                .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            Text("Signing in...")
-                                .font(.system(size: 16, weight: .regular, design: .rounded))
-                                .foregroundColor(Color.gray)
+                    // Benefit list (bullet points)
+                    VStack(alignment: .leading, spacing: 16) {
+                        ForEach(Array(benefits.enumerated()), id: \.offset) { _, benefit in
+                            HStack(alignment: .top, spacing: 14) {
+                                Text("•")
+                                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.primaryAccent)
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(benefit.title)
+                                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                                        .foregroundColor(.primaryText)
+                                    Text(benefit.subtitle)
+                                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                                        .foregroundColor(.secondaryText)
+                                }
+                                
+                                Spacer(minLength: 0)
+                            }
+                            .padding(18)
+                            .background(Color.secondaryBackground)
+                            .cornerRadius(16)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color.borderColor, lineWidth: 1)
+                            )
                         }
-                        .frame(height: 55)
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 32)
+                    
+                    // Sign in button or loading
+                    if authManager.isLoading {
+                        VStack(spacing: 14) {
+                            ProgressView()
+                                .scaleEffect(1.2)
+                                .tint(.primaryAccent)
+                            Text("Signing in...")
+                                .font(.system(size: 15, weight: .medium, design: .rounded))
+                                .foregroundColor(.secondaryText)
+                        }
                         .frame(maxWidth: .infinity)
-                        .padding(.horizontal, 40)
-                        .padding(.top, 20)
-                        .padding(.bottom, 40)
-                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                        .padding(.vertical, 24)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 32)
                     } else {
-                // Sign in with Apple Button
-                SignInWithAppleButton(.signIn) { request in
-                    let nonce = randomNonceString()
-                    currentNonce = nonce
-                    request.requestedScopes = [.fullName, .email]
-                    request.nonce = sha256(nonce)
-                } onCompletion: { result in
-                            handleSignInResult(result)
-                }
-                .signInWithAppleButtonStyle(.black)
-                .frame(height: 55)
-                .cornerRadius(12)
-                .padding(.horizontal, 40)
-                        .padding(.top, 20)
+                        VStack(spacing: 12) {
+                            SignInWithAppleButton(.signIn) { request in
+                                let nonce = randomNonceString()
+                                currentNonce = nonce
+                                request.requestedScopes = [.fullName, .email]
+                                request.nonce = sha256(nonce)
+                            } onCompletion: { result in
+                                handleSignInResult(result)
+                            }
+                            .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+                            .frame(height: 54)
+                            .cornerRadius(14)
+                            
+                            Text("Quick and private — we only use your Apple ID to create your profile.")
+                                .font(.system(size: 12, weight: .regular, design: .rounded))
+                                .foregroundColor(.tertiaryText)
+                                .multilineTextAlignment(.center)
+                                .padding(.top, 4)
+                        }
+                        .padding(.horizontal, 24)
                         .padding(.bottom, 40)
-                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
                     }
                 }
             }
