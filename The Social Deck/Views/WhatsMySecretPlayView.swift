@@ -13,6 +13,7 @@ struct WhatsMySecretPlayView: View {
     let deck: Deck
     let selectedCategories: [String]
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("totalCardsFlipped") private var totalCardsFlipped: Int = 0
     @State private var showHomeAlert: Bool = false
     @State private var navigateToHome: Bool = false
     @State private var showEndView: Bool = false
@@ -199,6 +200,7 @@ struct PlayersTurnView: View {
 // Showing Secret View - Card back shown first, can flip to see secret
 struct ShowingSecretView: View {
     @ObservedObject var manager: WhatsMySecretGameManager
+    @AppStorage("totalCardsFlipped") private var totalCardsFlipped: Int = 0
     @State private var cardRotation: Double = 0
     
     var body: some View {
@@ -239,6 +241,7 @@ struct ShowingSecretView: View {
                     .onTapGesture {
                         if !manager.isCardFlipped {
                             // Flip to show secret
+                            totalCardsFlipped += 1
                             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
                                 cardRotation = 180
                             }

@@ -11,6 +11,7 @@ struct MemoryMasterPlayView: View {
     @ObservedObject var manager: MemoryMasterGameManager
     let deck: Deck
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("totalCardsFlipped") private var totalCardsFlipped: Int = 0
     @State private var showEndView: Bool = false
     @State private var navigateToHome: Bool = false
     @State private var showHomeAlert: Bool = false
@@ -125,6 +126,7 @@ struct MemoryMasterPlayView: View {
                                 cardIndex: index,
                                 cardSize: cardSize,
                                 onTap: {
+                                    totalCardsFlipped += 1
                                     manager.flipCard(at: index)
                                 }
                             )
@@ -142,6 +144,7 @@ struct MemoryMasterPlayView: View {
                                     cardIndex: index,
                                     cardSize: cardSize,
                                     onTap: {
+                                        totalCardsFlipped += 1
                                         manager.flipCard(at: index)
                                     }
                                 )

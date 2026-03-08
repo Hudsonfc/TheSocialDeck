@@ -12,6 +12,7 @@ struct ActItOutPlayView: View {
     let deck: Deck
     let selectedCategories: [String]
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("totalCardsFlipped") private var totalCardsFlipped: Int = 0
     @State private var cardRotation: Double = 0
     @State private var showEndView: Bool = false
     @State private var navigateToHome: Bool = false
@@ -244,6 +245,7 @@ struct ActItOutPlayView: View {
             }
         } else {
             // Flip to back
+            totalCardsFlipped += 1
             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
                 cardRotation = 180
             }

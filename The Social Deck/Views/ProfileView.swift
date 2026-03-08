@@ -18,9 +18,7 @@ struct ProfileView: View {
     @State private var tempAvatarColor: String = "red"
     @State private var showSaveSuccess = false
     @State private var showSignOutConfirmation = false
-    @State private var showAddFriends = false
-    @State private var showFriendsList = false
-    @StateObject private var friendService = FriendService.shared
+    @AppStorage("totalCardsFlipped") private var totalCardsFlipped: Int = 0
     @State private var toast: ToastMessage? = nil
     
     var avatarSelectionDestination: some View {
@@ -192,136 +190,77 @@ struct ProfileView: View {
                 }
                     
                 // Stats Section
-                if let profile = authManager.userProfile {
-                    VStack(spacing: 16) {
-                        Text("Game Statistics")
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        
-                        // Compact stats in a grid
-                        HStack(spacing: 12) {
-                            // Games Played
-                            VStack(spacing: 8) {
-                                Image(systemName: "gamecontroller.fill")
-                                    .font(.system(size: 20))
-                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                Text("\(profile.gamesPlayed)")
-                                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                Text("Games")
-                                    .font(.system(size: 12, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color.gray)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
-                            .cornerRadius(12)
-                            
-                            // Win Rate
-                            VStack(spacing: 8) {
-                                Image(systemName: "trophy.fill")
-                                    .font(.system(size: 20))
-                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                Text(String(format: "%.0f%%", profile.winRate))
-                                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                Text("Win Rate")
-                                    .font(.system(size: 12, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color.gray)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
-                            .cornerRadius(12)
-                            
-                            // Cards Seen
-                            VStack(spacing: 8) {
-                                Image(systemName: "rectangle.stack.fill")
-                                    .font(.system(size: 20))
-                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                Text("\(profile.totalCardsSeen)")
-                                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                Text("Cards")
-                                    .font(.system(size: 12, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color.gray)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
-                            .cornerRadius(12)
-                        }
-                    }
-                    .padding(.horizontal, 40)
-                }
-                
-                // Friends Section
                 VStack(spacing: 16) {
-                    // Add Friends Button
-                        Button(action: {
-                        HapticManager.shared.lightImpact()
-                        showAddFriends = true
-                        }) {
-                        HStack {
-                            Image(systemName: "person.badge.plus")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(.white)
-                            
-                            Text("Add Friends")
-                                .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                .foregroundColor(.white)
-                            
-                            Spacer()
-                            
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.white.opacity(0.7))
-                        }
-                        .padding(.horizontal, 20)
-                                .padding(.vertical, 16)
-                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                .cornerRadius(12)
-                        }
-                    .buttonStyle(PlainButtonStyle())
+                    Text("Game Statistics")
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     
-                    // Added Friends Button
-                    Button(action: {
-                        HapticManager.shared.lightImpact()
-                        showFriendsList = true
-                    }) {
-                        HStack {
-                            Image(systemName: "person.2.fill")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                            
-                            Text("Added Friends")
-                                .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                            
-                            Spacer()
-                            
-                            // Friend count badge
-                            if !friendService.friends.isEmpty {
-                                Text("\(friendService.friends.count)")
-                                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                    .cornerRadius(12)
-                            }
-                            
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(Color.gray)
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 16)
-                        .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
-                        .cornerRadius(12)
+                    // Cards Flipped stat
+                    VStack(spacing: 8) {
+                        Image(systemName: "rectangle.stack.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        Text("\(totalCardsFlipped)")
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        Text("Cards Flipped")
+                            .font(.system(size: 13, weight: .regular, design: .rounded))
+                            .foregroundColor(Color.gray)
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+                    .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                    .cornerRadius(12)
+                }
+                .padding(.horizontal, 40)
+                
+                // Online Coming Soon Section
+                VStack(spacing: 12) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0),
+                                        Color(red: 0xA0/255.0, green: 0x20/255.0, blue: 0x20/255.0)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                        
+                        VStack(spacing: 12) {
+                            Image(systemName: "wifi")
+                                .font(.system(size: 28, weight: .semibold))
+                                .foregroundColor(.white)
+                            
+                            Text("Online Features")
+                                .font(.system(size: 18, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                            
+                            Text("Coming Soon to The Social Deck")
+                                .font(.system(size: 14, weight: .medium, design: .rounded))
+                                .foregroundColor(.white.opacity(0.85))
+                                .multilineTextAlignment(.center)
+                            
+                            Divider()
+                                .background(Color.white.opacity(0.3))
+                                .padding(.horizontal, 20)
+                            
+                            HStack(spacing: 8) {
+                                Image(systemName: "camera.fill")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.white.opacity(0.85))
+                                Text("Follow @thesocialdeckapp to stay tuned")
+                                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                                    .foregroundColor(.white.opacity(0.85))
+                                    .multilineTextAlignment(.center)
+                            }
+                        }
+                        .padding(.vertical, 24)
+                        .padding(.horizontal, 20)
+                    }
                 }
                 .padding(.horizontal, 40)
                 
@@ -383,21 +322,6 @@ struct ProfileView: View {
                     }
                     .hidden()
                     
-                    NavigationLink(
-                        destination: AddFriendsView(),
-                        isActive: $showAddFriends
-                    ) {
-                        EmptyView()
-                    }
-                    .hidden()
-                    
-                    NavigationLink(
-                        destination: FriendsListView(),
-                        isActive: $showFriendsList
-                    ) {
-                        EmptyView()
-                    }
-                    .hidden()
                 }
             )
             .alert("Error", isPresented: $showError) {
@@ -418,11 +342,6 @@ struct ProfileView: View {
                     showError = true
                 }
             }
-        .onAppear {
-        Task {
-                try? await friendService.loadFriends()
-            }
-        }
         .toast($toast)
     }
     

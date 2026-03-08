@@ -11,6 +11,7 @@ struct ActNaturalPlayView: View {
     @ObservedObject var manager: ActNaturalGameManager
     let deck: Deck
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("totalCardsFlipped") private var totalCardsFlipped: Int = 0
     @State private var cardRotation: Double = 0
     @State private var showingBack: Bool = false
     @State private var hasFlippedOnce: Bool = false
@@ -165,6 +166,7 @@ struct ActNaturalPlayView: View {
             }
         } else {
             // Flip to back
+            totalCardsFlipped += 1
             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
                 cardRotation = 180
             }

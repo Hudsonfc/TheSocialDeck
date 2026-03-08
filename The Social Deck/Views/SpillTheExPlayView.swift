@@ -11,6 +11,7 @@ struct SpillTheExPlayView: View {
     let selectedCategories: [String]
     @Environment(\.dismiss) private var dismiss
     @AppStorage("swipeNavigationEnabled") private var swipeNavigationEnabled = false
+    @AppStorage("totalCardsFlipped") private var totalCardsFlipped: Int = 0
     @State private var cardRotation: Double = 0
     @State private var showEndView: Bool = false
     @State private var navigateToHome: Bool = false
@@ -223,6 +224,7 @@ struct SpillTheExPlayView: View {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) { cardRotation = 0 }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { manager.flipCard() }
         } else {
+            totalCardsFlipped += 1
             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) { cardRotation = 180 }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { manager.flipCard() }
         }

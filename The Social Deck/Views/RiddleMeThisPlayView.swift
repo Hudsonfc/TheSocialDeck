@@ -12,6 +12,7 @@ struct RiddleMeThisPlayView: View {
     @ObservedObject var manager: RiddleMeThisGameManager
     let deck: Deck
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("totalCardsFlipped") private var totalCardsFlipped: Int = 0
     @State private var cardRotation: Double = 0
     @State private var showEndView: Bool = false
     @State private var navigateToHome: Bool = false
@@ -174,6 +175,7 @@ struct RiddleView: View {
     @Binding var cardRotation: Double
     @Binding var isCardFlipped: Bool
     @Binding var isTransitioning: Bool
+    @AppStorage("totalCardsFlipped") private var totalCardsFlipped: Int = 0
     
     var body: some View {
         VStack(spacing: 0) {
@@ -308,6 +310,7 @@ struct RiddleView: View {
             }
         } else {
             // Flip to back (show riddle)
+            totalCardsFlipped += 1
             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
                 cardRotation = 180
             }
