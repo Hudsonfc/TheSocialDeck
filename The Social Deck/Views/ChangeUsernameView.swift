@@ -13,9 +13,11 @@ struct ChangeUsernameView: View {
     @State private var newUsername: String = ""
     @State private var validationMessage: String = ""
     @State private var isValidating: Bool = false
+    @State private var isCheckingAvailability: Bool = false
     @State private var showError: Bool = false
     @State private var canChangeUsername: Bool = true
     @State private var daysUntilNextChange: Int = 0
+    @State private var availabilityCheckTask: Task<Void, Never>? = nil
     
     var body: some View {
         ZStack {
@@ -74,25 +76,36 @@ struct ChangeUsernameView: View {
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
                             .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                         
-                        TextField("Enter new username", text: $newUsername)
-                            .font(.system(size: 18, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 16)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(validationMessage.isEmpty ? Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0) : (validationMessage.contains("✓") ? Color.green.opacity(0.1) : Color.red.opacity(0.1)))
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(validationMessage.isEmpty ? Color.clear : (validationMessage.contains("✓") ? Color.green : Color.red), lineWidth: 2)
-                            )
-                            .autocapitalization(.none)
-                            .disableAutocorrection(true)
-                            .disabled(!canChangeUsername || authManager.isLoading)
-                            .onChange(of: newUsername) { _ in
-                                validateUsername()
+                        ZStack(alignment: .trailing) {
+                            TextField("Enter new username", text: $newUsername)
+                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .padding(.horizontal, 16)
+                                .padding(.trailing, isCheckingAvailability ? 44 : 16)
+                                .padding(.vertical, 16)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(validationMessage.isEmpty ? Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0) : (validationMessage.contains("✓") ? Color.green.opacity(0.1) : Color.red.opacity(0.1)))
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(validationMessage.isEmpty ? Color.clear : (validationMessage.contains("✓") ? Color.green : Color.red), lineWidth: 2)
+                                )
+                                .autocapitalization(.none)
+                                .disableAutocorrection(true)
+                                .disabled(!canChangeUsername || authManager.isLoading)
+                                .onChange(of: newUsername) { _ in
+                                    validateUsername()
+                                }
+                            
+                            // Availability spinner
+                            if isCheckingAvailability {
+                                ProgressView()
+                                    .scaleEffect(0.75)
+                                    .tint(Color.gray)
+                                    .padding(.trailing, 14)
                             }
+                        }
                         
                         // Validation message
                         if !validationMessage.isEmpty {
@@ -191,19 +204,20 @@ struct ChangeUsernameView: View {
     private func validateUsername() {
         let trimmed = newUsername.trimmingCharacters(in: .whitespacesAndNewlines)
         
-        // Clear validation if empty
+        // Cancel any pending availability check
+        availabilityCheckTask?.cancel()
+        isCheckingAvailability = false
+        
         if trimmed.isEmpty {
             validationMessage = ""
             return
         }
         
-        // Check if it's the same as current username
         if trimmed.lowercased() == authManager.userProfile?.username.lowercased() {
             validationMessage = ""
             return
         }
         
-        // Check length
         if trimmed.count < 3 {
             validationMessage = "Username must be at least 3 characters"
             return
@@ -214,21 +228,33 @@ struct ChangeUsernameView: View {
             return
         }
         
-        // Check for valid characters (alphanumeric, underscores, hyphens)
         let validPattern = "^[a-zA-Z0-9_-]+$"
         if trimmed.range(of: validPattern, options: .regularExpression) == nil {
             validationMessage = "Username can only contain letters, numbers, underscores, and hyphens"
             return
         }
         
-        // Check for inappropriate words
         if containsInappropriateWords(trimmed) {
             validationMessage = "Username contains inappropriate words. Please choose another."
             return
         }
         
-        // If all basic validations pass, show a positive indicator
-        validationMessage = "✓ Username format is valid"
+        // Format is valid — kick off debounced availability check
+        validationMessage = ""
+        isCheckingAvailability = true
+        availabilityCheckTask = Task {
+            // 600ms debounce
+            try? await Task.sleep(nanoseconds: 600_000_000)
+            guard !Task.isCancelled else { return }
+            let available = await authManager.isUsernameAvailableForChange(trimmed)
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                isCheckingAvailability = false
+                validationMessage = available
+                    ? "✓ \(trimmed) is available"
+                    : "That username is already taken"
+            }
+        }
     }
     
     private func containsInappropriateWords(_ text: String) -> Bool {
@@ -251,7 +277,7 @@ struct ChangeUsernameView: View {
     }
     
     private func canSave() -> Bool {
-        guard canChangeUsername else { return false }
+        guard canChangeUsername, !isCheckingAvailability else { return false }
         
         let trimmed = newUsername.trimmingCharacters(in: .whitespacesAndNewlines)
         

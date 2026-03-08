@@ -35,6 +35,7 @@ struct HomeView: View {
     @State private var showPlusPopUp: Bool = false
     @State private var plusSlideOffset: CGFloat = 0
     @AppStorage("plusCrownDotDismissed") private var plusCrownDotDismissed: Bool = false
+    @AppStorage("signInNudgeDismissed") private var signInNudgeDismissed: Bool = false
     
     // Curated quotes for The Social Deck
     private let quotes = [
@@ -164,6 +165,58 @@ struct HomeView: View {
                     .scaleEffect(featuredCardScale)
                     .opacity(featuredCardOpacity)
                     .padding(.horizontal, 40)
+                    
+                    // Sign-in nudge for signed-out users
+                    if !authManager.isAuthenticated && !signInNudgeDismissed {
+                        NavigationLink(destination: ProfileView()) {
+                            HStack(spacing: 12) {
+                                Image(systemName: "person.crop.circle.badge.plus")
+                                    .font(.system(size: 20, weight: .medium))
+                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Save your progress")
+                                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    Text("Sign in to keep your stats and favourites")
+                                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                                        .foregroundColor(Color.gray)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(Color.gray)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 14)
+                            .background(Color.cardBackground)
+                            .cornerRadius(12)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.borderColor, lineWidth: 1)
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .padding(.horizontal, 40)
+                        .overlay(alignment: .topTrailing) {
+                            Button(action: {
+                                HapticManager.shared.lightImpact()
+                                withAnimation(.easeOut(duration: 0.2)) {
+                                    signInNudgeDismissed = true
+                                }
+                            }) {
+                                Image(systemName: "xmark")
+                                    .font(.system(size: 11, weight: .bold))
+                                    .foregroundColor(Color.gray)
+                                    .padding(6)
+                                    .background(Color.secondaryBackground)
+                                    .clipShape(Circle())
+                            }
+                            .padding(.top, -8)
+                            .padding(.trailing, 30)
+                        }
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                    }
                     
                     // Separator
                     Rectangle()

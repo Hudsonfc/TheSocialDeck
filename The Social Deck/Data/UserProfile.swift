@@ -24,7 +24,11 @@ struct UserProfile: Codable, Identifiable {
     var gamesPlayed: Int
     var gamesWon: Int
     var totalCardsSeen: Int
+    var totalCardsFlipped: Int
     var favoriteGame: String?
+    
+    // Saved favourites (raw DeckType values)
+    var favoritedGames: [String]
     
     // Online stats
     var onlineGamesPlayed: Int
@@ -47,7 +51,9 @@ struct UserProfile: Codable, Identifiable {
         gamesPlayed: Int = 0,
         gamesWon: Int = 0,
         totalCardsSeen: Int = 0,
+        totalCardsFlipped: Int = 0,
         favoriteGame: String? = nil,
+        favoritedGames: [String] = [],
         onlineGamesPlayed: Int = 0,
         onlineGamesWon: Int = 0,
         lastActiveAt: Date? = nil
@@ -65,10 +71,36 @@ struct UserProfile: Codable, Identifiable {
         self.gamesPlayed = gamesPlayed
         self.gamesWon = gamesWon
         self.totalCardsSeen = totalCardsSeen
+        self.totalCardsFlipped = totalCardsFlipped
         self.favoriteGame = favoriteGame
+        self.favoritedGames = favoritedGames
         self.onlineGamesPlayed = onlineGamesPlayed
         self.onlineGamesWon = onlineGamesWon
         self.lastActiveAt = lastActiveAt
+    }
+    
+    // Custom decoder so that fields added after account creation don't break decoding
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id                  = try c.decodeIfPresent(String.self,   forKey: .id)
+        userId              = try c.decode(String.self,            forKey: .userId)
+        username            = try c.decode(String.self,            forKey: .username)
+        email               = try c.decodeIfPresent(String.self,   forKey: .email)
+        gameCenterPlayerID  = try c.decodeIfPresent(String.self,   forKey: .gameCenterPlayerID)
+        avatarType          = try c.decode(String.self,            forKey: .avatarType)
+        avatarColor         = try c.decode(String.self,            forKey: .avatarColor)
+        createdAt           = try c.decode(Date.self,              forKey: .createdAt)
+        updatedAt           = try c.decode(Date.self,              forKey: .updatedAt)
+        lastUsernameChanged = try c.decodeIfPresent(Date.self,     forKey: .lastUsernameChanged)
+        gamesPlayed         = try c.decodeIfPresent(Int.self,      forKey: .gamesPlayed)    ?? 0
+        gamesWon            = try c.decodeIfPresent(Int.self,      forKey: .gamesWon)       ?? 0
+        totalCardsSeen      = try c.decodeIfPresent(Int.self,      forKey: .totalCardsSeen) ?? 0
+        totalCardsFlipped   = try c.decodeIfPresent(Int.self,      forKey: .totalCardsFlipped) ?? 0
+        favoriteGame        = try c.decodeIfPresent(String.self,   forKey: .favoriteGame)
+        favoritedGames      = try c.decodeIfPresent([String].self, forKey: .favoritedGames) ?? []
+        onlineGamesPlayed   = try c.decodeIfPresent(Int.self,      forKey: .onlineGamesPlayed) ?? 0
+        onlineGamesWon      = try c.decodeIfPresent(Int.self,      forKey: .onlineGamesWon)    ?? 0
+        lastActiveAt        = try c.decodeIfPresent(Date.self,     forKey: .lastActiveAt)
     }
     
     var winRate: Double {

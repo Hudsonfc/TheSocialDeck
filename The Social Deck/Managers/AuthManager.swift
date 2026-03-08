@@ -401,6 +401,68 @@ class AuthManager: ObservableObject {
         }
     }
     
+    /// Syncs local UserDefaults favorites to Firestore and restores cloud favorites locally.
+    /// Local always wins if it has more entries; otherwise the cloud list is applied locally.
+    func syncFavorites(localFavorites: Set<String>) async {
+        guard let userId = authService.currentUserId,
+              let profile = userProfile else { return }
+        
+        let cloudFavorites = Set(profile.favoritedGames)
+        let merged = localFavorites.union(cloudFavorites)
+        
+        if merged != cloudFavorites {
+            do {
+                let profileRef = db.collection("profiles").document(userId)
+                try await profileRef.updateData([
+                    "favoritedGames": Array(merged),
+                    "updatedAt": Timestamp(date: Date())
+                ])
+            } catch {
+                errorMessage = "Failed to sync favorites: \(error.localizedDescription)"
+            }
+        }
+        
+        if merged != localFavorites {
+            await MainActor.run {
+                FavoritesManager.shared.favoriteGameTypes = merged
+            }
+        }
+    }
+    
+    /// Writes the full current favorites set to Firestore (called after each toggle).
+    func saveFavoritesToFirestore(_ favorites: Set<String>) async {
+        guard let userId = authService.currentUserId else { return }
+        do {
+            let profileRef = db.collection("profiles").document(userId)
+            try await profileRef.updateData([
+                "favoritedGames": Array(favorites),
+                "updatedAt": Timestamp(date: Date())
+            ])
+        } catch {
+            errorMessage = "Failed to save favorites: \(error.localizedDescription)"
+        }
+    }
+    
+    /// Syncs the local @AppStorage cardsFlipped count up to Firestore,
+    /// then keeps the local value in sync with whatever Firestore has.
+    func syncCardsFlipped(localCount: Int) async {
+        guard let userId = authService.currentUserId,
+              let profile = userProfile else { return }
+        
+        if localCount > profile.totalCardsFlipped {
+            let diff = localCount - profile.totalCardsFlipped
+            do {
+                let profileRef = db.collection("profiles").document(userId)
+                try await profileRef.updateData([
+                    "totalCardsFlipped": FieldValue.increment(Int64(diff)),
+                    "updatedAt": Timestamp(date: Date())
+                ])
+            } catch {
+                errorMessage = "Failed to sync cards flipped: \(error.localizedDescription)"
+            }
+        }
+    }
+    
     // MARK: - Cleanup
     
     nonisolated private func removeProfileListener() {

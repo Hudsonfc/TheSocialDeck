@@ -19,7 +19,6 @@ class FavoritesManager: ObservableObject {
     }
     
     private init() {
-        // Load favorites from UserDefaults
         if let saved = UserDefaults.standard.array(forKey: favoritesKey) as? [String] {
             self.favoriteGameTypes = Set(saved)
         } else {
@@ -42,6 +41,11 @@ class FavoritesManager: ObservableObject {
             favoriteGameTypes.insert(gameType.rawValue)
         }
         HapticManager.shared.lightImpact()
+        // Mirror change to Firestore for signed-in users
+        let snapshot = favoriteGameTypes
+        Task {
+            await AuthManager.shared.saveFavoritesToFirestore(snapshot)
+        }
     }
     
     func addFavorite(_ gameType: DeckType) {

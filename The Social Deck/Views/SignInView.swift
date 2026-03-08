@@ -18,8 +18,8 @@ struct SignInView: View {
     
     private let benefits: [(title: String, subtitle: String)] = [
         ("Your profile", "Pick an avatar and display name"),
-        ("Friends", "Add friends and play together"),
-        ("Stats", "Track games and progress")
+        ("Cards Flipped", "Track how many cards you've revealed"),
+        ("More coming soon", "Friends, online play and more on the way")
     ]
     
     var body: some View {
@@ -43,7 +43,7 @@ struct SignInView: View {
                                 .foregroundColor(.primaryText)
                                 .multilineTextAlignment(.center)
                             
-                            Text("Sign in to save your profile, add friends, and get the most out of The Social Deck.")
+                            Text("Sign in to save your profile and get the most out of The Social Deck.")
                                 .font(.system(size: 16, weight: .regular, design: .rounded))
                                 .foregroundColor(.secondaryText)
                                 .multilineTextAlignment(.center)

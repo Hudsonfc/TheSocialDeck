@@ -11,6 +11,13 @@ struct AvatarSelectionView: View {
     @Binding var selectedAvatarType: String
     @Binding var selectedAvatarColor: String
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var subManager: SubscriptionManager
+    
+    private let freeColors: Set<String> = ["red", "blue", "green"]
+    
+    private func isLocked(_ colorName: String) -> Bool {
+        !freeColors.contains(colorName) && !subManager.isPlus
+    }
     
     let avatarTypes = [
         "avatar 1",
@@ -96,20 +103,39 @@ struct AvatarSelectionView: View {
                     
                     // Colors Section
                     VStack(alignment: .leading, spacing: 20) {
-                        Text("Choose Color")
-                            .font(.system(size: 22, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                            .padding(.horizontal, 40)
+                        HStack(spacing: 8) {
+                            Text("Choose Color")
+                                .font(.system(size: 22, weight: .bold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            if !subManager.isPlus {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "crown.fill")
+                                        .font(.system(size: 10, weight: .bold))
+                                    Text("More with Plus")
+                                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .cornerRadius(20)
+                            }
+                        }
+                        .padding(.horizontal, 40)
                         
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 20) {
                                 ForEach(avatarColors, id: \.0) { colorName, color in
-                                    ColorButton(
-                                        color: color,
-                                        isSelected: selectedAvatarColor == colorName
-                                    ) {
-                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                            selectedAvatarColor = colorName
+                                    if isLocked(colorName) {
+                                        LockedColorButton(color: color)
+                                    } else {
+                                        ColorButton(
+                                            color: color,
+                                            isSelected: selectedAvatarColor == colorName
+                                        ) {
+                                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                                selectedAvatarColor = colorName
+                                            }
                                         }
                                     }
                                 }
@@ -229,6 +255,27 @@ struct ColorButton: View {
     }
 }
 
+// MARK: - Locked Color Button (Plus only)
+struct LockedColorButton: View {
+    let color: Color
+    
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(color.opacity(0.35))
+                .frame(width: 64, height: 64)
+            
+            Circle()
+                .stroke(Color(red: 0xE5/255.0, green: 0xE5/255.0, blue: 0xE5/255.0), lineWidth: 2.5)
+                .frame(width: 64, height: 64)
+            
+            Image(systemName: "crown.fill")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+        }
+    }
+}
+
 // MARK: - Avatar View Component
 struct AvatarView: View {
     let avatarType: String
@@ -288,6 +335,7 @@ struct AvatarView: View {
             selectedAvatarType: .constant("avatar 1"),
             selectedAvatarColor: .constant("red")
         )
+        .environmentObject(SubscriptionManager.shared)
     }
 }
 
