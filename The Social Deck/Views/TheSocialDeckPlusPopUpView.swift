@@ -8,9 +8,15 @@ import StoreKit
 
 // MARK: - Brand tokens
 private let soDeckRed       = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
-private let soDeckBlack     = Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0)
-private let soDeckGray      = Color(red: 0x5A/255.0, green: 0x5A/255.0, blue: 0x5A/255.0)
-private let soDeckLightGray = Color(red: 0xAA/255.0, green: 0xAA/255.0, blue: 0xAA/255.0)
+private let soDeckBlack     = Color(red: 0xF2/255.0, green: 0xF2/255.0, blue: 0xF2/255.0)
+private let soDeckGray      = Color(red: 0xB0/255.0, green: 0xB0/255.0, blue: 0xB8/255.0)
+private let soDeckLightGray = Color(red: 0x70/255.0, green: 0x70/255.0, blue: 0x78/255.0)
+
+// Background layers
+private let soDeckBgTop     = Color(red: 0x10/255.0, green: 0x0E/255.0, blue: 0x13/255.0)
+private let soDeckBgBottom  = Color(red: 0x1C/255.0, green: 0x18/255.0, blue: 0x22/255.0)
+private let soDeckCardBg    = Color(red: 0x22/255.0, green: 0x1E/255.0, blue: 0x28/255.0)
+private let soDeckCardBorder = Color(red: 0x38/255.0, green: 0x34/255.0, blue: 0x40/255.0)
 
 // MARK: - Paywall view
 struct TheSocialDeckPlusPopUpView: View {
@@ -51,10 +57,8 @@ struct TheSocialDeckPlusPopUpView: View {
 
     var body: some View {
         ZStack {
-            // Subtle background gradient
             LinearGradient(
-                colors: [Color.white,
-                         Color(red: 0xF5/255.0, green: 0xF5/255.0, blue: 0xF5/255.0)],
+                colors: [soDeckBgTop, soDeckBgBottom],
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -306,7 +310,7 @@ private struct PlusPlanCard: View {
                             .foregroundColor(soDeckBlack)
                         Text(detail)
                             .font(.system(size: 13, weight: .regular, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(soDeckGray)
                         if let subtitle = subtitle {
                             Text(subtitle)
                                 .font(.system(size: 12, weight: .medium, design: .rounded))
@@ -337,14 +341,12 @@ private struct PlusPlanCard: View {
                         .padding(.trailing, 16)
                 }
             }
-            .background(isSelected ? soDeckRed.opacity(0.06) : Color.white)
+            .background(isSelected ? soDeckRed.opacity(0.12) : soDeckCardBg)
             .cornerRadius(20)
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
                     .stroke(
-                        isSelected
-                            ? soDeckRed
-                            : Color(red: 0xE5/255.0, green: 0xE5/255.0, blue: 0xE5/255.0),
+                        isSelected ? soDeckRed : soDeckCardBorder,
                         lineWidth: isSelected ? 2 : 1
                     )
             )

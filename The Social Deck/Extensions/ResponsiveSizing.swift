@@ -103,7 +103,7 @@ struct ResponsiveSize {
         } else if isSmallDevice {
             return screenWidth - 48
         } else {
-            return min(screenWidth - 80, 320)
+            return screenWidth - 80
         }
     }
     

@@ -84,7 +84,7 @@ struct RateUsView: View {
                     .padding(.bottom, 36)
                 }
             }
-            .frame(width: 340)
+            .frame(width: min(340, UIScreen.main.bounds.width - 32))
             .background(Color.white)
             .cornerRadius(24)
             .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
