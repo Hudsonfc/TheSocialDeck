@@ -46,7 +46,17 @@ struct HomeView: View {
         "No phones. Just cards.",
         "Laughs guaranteed. Rules optional.",
         "Every card is a conversation.",
-        "Less scrolling. More shuffling."
+        "Less scrolling. More shuffling.",
+        "Game nights over group chats.",
+        "More face time. Less FaceTime.",
+        "Because the best moments aren’t on a screen.",
+        "The rules are simple. The stories aren’t.",
+        "Cards on the table. Walls down.",
+        "Your excuse to stay a little longer.",
+        "Turn strangers into inside jokes.",
+        "Tonight’s plans: this deck and these people.",
+        "Friends, snacks, and one good shuffle.",
+        "Real laughs. Real people. Real time."
     ]
     
     var body: some View {
