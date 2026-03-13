@@ -26,7 +26,7 @@ struct PrivacyPolicyView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
                     // Version header
-                    Text("The Social Deck – Version 1.2")
+                    Text("The Social Deck – Version 1.3")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundColor(.secondaryText)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -88,7 +88,7 @@ struct PrivacyPolicyView: View {
                         PolicySection(
                             title: "Third-Party Services",
                             content: [
-                                "The Social Deck does not use third-party analytics, advertising, or tracking services in version 1.2."
+                                "The Social Deck does not use third-party analytics, advertising, or tracking services in version 1.3."
                             ]
                         )
                         
