@@ -88,9 +88,10 @@ struct TheSocialDeckPlusPopUpView: View {
                             Circle()
                                 .fill(soDeckRed.opacity(0.10))
                                 .frame(width: 76, height: 76)
-                            Image(systemName: "crown.fill")
+                            Image(systemName: "rectangle.stack.fill")
                                 .font(.system(size: 34, weight: .semibold))
                                 .foregroundColor(soDeckRed)
+                                .rotationEffect(.degrees(90))
                         }
                         .padding(.bottom, 4)
 
