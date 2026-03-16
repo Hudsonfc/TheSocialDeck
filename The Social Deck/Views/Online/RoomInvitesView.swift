@@ -86,7 +86,7 @@ struct RoomInvitesView: View {
         .navigationBarBackButtonHidden(true)
         .background(
             NavigationLink(
-                destination: OnlineRoomView(),
+                destination: LobbyView(),
                 isActive: $navigateToRoom
             ) {
                 EmptyView()

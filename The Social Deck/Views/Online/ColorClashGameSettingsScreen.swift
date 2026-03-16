@@ -203,7 +203,7 @@ struct ColorClashGameSettingsScreen: View {
             
             // Navigation link to room
             NavigationLink(
-                destination: OnlineRoomView(),
+                destination: LobbyView(),
                 isActive: $navigateToRoom
             ) {
                 EmptyView()

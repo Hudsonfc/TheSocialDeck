@@ -39,12 +39,15 @@ struct Play2View: View {
     
     // All category names (Favorites shown dynamically when items exist)
     var categories: [String] {
-        var cats = ["Classic Games", "Social Deck Games", "Date/Couples"]
+        var cats = ["Classic Games", "Social Deck Games", "Date/Couples", "Online Only"]
         if !favoriteDecks.isEmpty {
             cats.insert("Favorites", at: 0)
         }
         return cats
     }
+    
+    // Selected online game for detail navigation
+    @State private var selectedOnlineGame: OnlineGameEntry? = nil
     
     // Get all decks
     private var allDecks: [Deck] {
@@ -318,12 +321,28 @@ struct Play2View: View {
                 
                 // Grid View
                 ScrollView(.vertical, showsIndicators: false) {
-                    if !currentDecks.isEmpty {
+                    if selectedCategory == "Online Only" {
+                        // Online Only grid — uses OnlineGameEntry data
                         let columns = [
                             GridItem(.flexible(), spacing: 16),
                             GridItem(.flexible(), spacing: 16)
                         ]
-
+                        LazyVGrid(columns: columns, spacing: 20) {
+                            ForEach(allOnlineGames) { game in
+                                OnlineGameTile(game: game) {
+                                    HapticManager.shared.lightImpact()
+                                    selectedOnlineGame = game
+                                }
+                            }
+                        }
+                        .responsiveHorizontalPadding()
+                        .padding(.top, 20)
+                        .padding(.bottom, 30)
+                    } else if !currentDecks.isEmpty {
+                        let columns = [
+                            GridItem(.flexible(), spacing: 16),
+                            GridItem(.flexible(), spacing: 16)
+                        ]
                         LazyVGrid(columns: columns, spacing: 20) {
                             ForEach(Array(currentDecks.enumerated()), id: \.element.id) { index, deck in
                                 GridGameTile(
@@ -445,6 +464,17 @@ struct Play2View: View {
             ) {
                 EmptyView()
             }
+            
+            // Online Only tab → game detail
+            NavigationLink(
+                destination: onlineGameDetailView,
+                isActive: Binding(
+                    get: { selectedOnlineGame != nil },
+                    set: { if !$0 { selectedOnlineGame = nil } }
+                )
+            ) {
+                EmptyView()
+            }
         }
         .overlay {
             // Welcome View for first-time users
@@ -505,6 +535,15 @@ struct Play2View: View {
         }) {
             TheSocialDeckPlusPopUpView(onDismiss: { showPlusPaywall = false })
                 .environmentObject(SubscriptionManager.shared)
+        }
+    }
+    
+    @ViewBuilder
+    private var onlineGameDetailView: some View {
+        if let game = selectedOnlineGame {
+            OnlineGameDetailView(game: game)
+        } else {
+            Color.appBackground.ignoresSafeArea()
         }
     }
     
@@ -1267,6 +1306,72 @@ struct GameDescriptionOverlay: View {
             removal: .scale(scale: 0.1).combined(with: .opacity)
         ))
         .zIndex(1000)
+    }
+}
+
+// MARK: - Online Game Tile
+
+/// Card tile used in the "Online Only" tab. Matches GridGameTile style but
+/// shows a wifi badge in the bottom-left corner instead of a Plus badge.
+struct OnlineGameTile: View {
+    let game: OnlineGameEntry
+    let onTap: () -> Void
+
+    @State private var isPressed = false
+
+    private let imageAspectRatio: CGFloat = 420.0 / 577.0
+    private var tileWidth: CGFloat  { ResponsiveSize.gridTileWidth }
+    private var tileHeight: CGFloat { ResponsiveSize.gridTileHeight }
+
+    var body: some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.1)) { isPressed = true }
+            onTap()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                withAnimation(.easeInOut(duration: 0.15)) { isPressed = false }
+            }
+        } label: {
+            VStack(spacing: 12) {
+                ZStack(alignment: .topTrailing) {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.tertiaryBackground)
+                        .frame(width: tileWidth, height: tileHeight)
+
+                    Image(game.imageName)
+                        .resizable()
+                        .interpolation(.high)
+                        .antialiased(true)
+                        .scaledToFill()
+                        .frame(width: tileWidth, height: tileHeight)
+                        .clipped()
+                        .cornerRadius(16)
+
+                    // Wifi / online badge — bottom-left
+                    HStack(spacing: 3) {
+                        Image(systemName: "wifi")
+                            .font(.system(size: 9, weight: .bold))
+                        Text("ONLINE")
+                            .font(.system(size: 9, weight: .bold, design: .rounded))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 4)
+                    .background(Color(red: 0x1A / 255.0, green: 0x8A / 255.0, blue: 0x4A / 255.0))
+                    .clipShape(Capsule())
+                    .padding(8)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+                }
+
+                Text(game.title)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundColor(.primaryText)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .frame(maxWidth: .infinity)
+            }
+            .scaleEffect(isPressed ? 0.97 : 1.0)
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 

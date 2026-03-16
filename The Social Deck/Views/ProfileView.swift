@@ -25,6 +25,8 @@ struct ProfileView: View {
     @State private var showMilestone = false
     @State private var milestoneText = ""
     @State private var toast: ToastMessage? = nil
+    @State private var showFriendsList = false
+    @State private var showAddFriends = false
     
     private let milestones = [50, 100, 250, 500, 1000, 2500, 5000]
     
@@ -231,22 +233,27 @@ struct ProfileView: View {
                         .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
-                    // Cards Flipped stat
-                    VStack(spacing: 8) {
-                        Image(systemName: "rectangle.stack.fill")
-                            .font(.system(size: 24))
-                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                        Text("\(displayCardsFlipped)")
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                        Text("Cards Flipped")
-                            .font(.system(size: 13, weight: .regular, design: .rounded))
-                            .foregroundColor(Color.gray)
+                    // Stat tiles row
+                    HStack(spacing: 12) {
+                        // Cards Flipped
+                        statTile(
+                            icon: "rectangle.stack.fill",
+                            value: "\(displayCardsFlipped)",
+                            label: "Cards Flipped"
+                        )
+                        // Games Played
+                        statTile(
+                            icon: "gamecontroller.fill",
+                            value: "\(authManager.userProfile?.gamesPlayed ?? 0)",
+                            label: "Games Played"
+                        )
+                        // Online Wins
+                        statTile(
+                            icon: "trophy.fill",
+                            value: "\(authManager.userProfile?.onlineGamesWon ?? 0)",
+                            label: "Online Wins"
+                        )
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 20)
-                    .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
-                    .cornerRadius(12)
                 }
                 .padding(.horizontal, 40)
                 
@@ -321,33 +328,56 @@ struct ProfileView: View {
                     .padding(.horizontal, 40)
                 }
                 
-                // Online & friends coming soon
-                HStack(alignment: .center, spacing: 14) {
-                    Image(systemName: "person.2.badge.gearshape")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(Color.gray)
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Online play & adding friends coming soon.")
-                            .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundColor(Color(red: 0x3A/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            .fixedSize(horizontal: false, vertical: true)
-                            .lineLimit(nil)
-                        HStack(spacing: 6) {
-                            InstagramIconView(size: 14)
-                                .foregroundColor(Color.gray)
-                            Text("Follow @thesocialdeckapp on Instagram")
-                                .font(.system(size: 12, weight: .regular, design: .rounded))
-                                .foregroundColor(Color.gray)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .lineLimit(nil)
+                // Friends & Find Players
+                HStack(spacing: 12) {
+                    // Friends button
+                    Button(action: {
+                        HapticManager.shared.lightImpact()
+                        showFriendsList = true
+                    }) {
+                        VStack(spacing: 8) {
+                            Image(systemName: "person.2.fill")
+                                .font(.system(size: 22, weight: .semibold))
+                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            Text("Friends")
+                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                         }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 18)
+                        .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                        .cornerRadius(14)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(Color(red: 0xE5/255.0, green: 0xE5/255.0, blue: 0xE5/255.0), lineWidth: 1)
+                        )
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    // Find Players button
+                    Button(action: {
+                        HapticManager.shared.lightImpact()
+                        showAddFriends = true
+                    }) {
+                        VStack(spacing: 8) {
+                            Image(systemName: "person.badge.plus")
+                                .font(.system(size: 22, weight: .semibold))
+                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            Text("Find Players")
+                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 18)
+                        .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                        .cornerRadius(14)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(Color(red: 0xE5/255.0, green: 0xE5/255.0, blue: 0xE5/255.0), lineWidth: 1)
+                        )
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
-                .padding(.horizontal, 18)
-                .padding(.vertical, 16)
-                .background(Color(red: 0xF5/255.0, green: 0xF5/255.0, blue: 0xF5/255.0))
-                .cornerRadius(12)
                 .padding(.top, 8)
                 .padding(.horizontal, 40)
                 
@@ -397,13 +427,13 @@ struct ProfileView: View {
             .navigationBarBackButtonHidden(true)
             .background(
                 Group {
-                NavigationLink(
-                    destination: avatarSelectionDestination,
-                    isActive: $showAvatarSelection
-                ) {
-                    EmptyView()
-                }
-                .hidden()
+                    NavigationLink(
+                        destination: avatarSelectionDestination,
+                        isActive: $showAvatarSelection
+                    ) {
+                        EmptyView()
+                    }
+                    .hidden()
                     
                     NavigationLink(
                         destination: ChangeUsernameView(),
@@ -413,6 +443,21 @@ struct ProfileView: View {
                     }
                     .hidden()
                     
+                    NavigationLink(
+                        destination: FriendsListView(),
+                        isActive: $showFriendsList
+                    ) {
+                        EmptyView()
+                    }
+                    .hidden()
+                    
+                    NavigationLink(
+                        destination: AddFriendsView(),
+                        isActive: $showAddFriends
+                    ) {
+                        EmptyView()
+                    }
+                    .hidden()
                 }
             )
             .alert("Error", isPresented: $showError) {
@@ -438,6 +483,29 @@ struct ProfileView: View {
             TheSocialDeckPlusPopUpView(onDismiss: { showPlusPaywall = false })
                 .environmentObject(subManager)
         }
+    }
+    
+    @ViewBuilder
+    private func statTile(icon: String, value: String, label: String) -> some View {
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 20))
+                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+            Text(value)
+                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
+            Text(label)
+                .font(.system(size: 11, weight: .regular, design: .rounded))
+                .foregroundColor(Color.gray)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 18)
+        .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+        .cornerRadius(12)
     }
     
     private func checkMilestone() {

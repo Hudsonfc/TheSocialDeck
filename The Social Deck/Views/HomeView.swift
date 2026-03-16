@@ -255,16 +255,6 @@ struct HomeView: View {
                             isPressed: $settingsButtonPressed
                         )
                         
-                        // Online Button (Hidden for first version)
-                        NavigationButton(
-                            title: "Online",
-                            offset: button3Offset,
-                            opacity: button3Opacity,
-                            destination: OnlineView(),
-                            isPressed: .constant(false)
-                        )
-                        .hidden()
-                        
                         // Profile Button (Hidden for first version)
                         NavigationButton(
                             title: "Profile",

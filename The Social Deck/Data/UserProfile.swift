@@ -37,6 +37,9 @@ struct UserProfile: Codable, Identifiable {
     // Activity tracking
     var lastActiveAt: Date? // Last time user was active in the app
     
+    // Presence — updated via ScenePhase
+    var isOnline: Bool
+    
     init(
         id: String? = nil,
         userId: String,
@@ -56,7 +59,8 @@ struct UserProfile: Codable, Identifiable {
         favoritedGames: [String] = [],
         onlineGamesPlayed: Int = 0,
         onlineGamesWon: Int = 0,
-        lastActiveAt: Date? = nil
+        lastActiveAt: Date? = nil,
+        isOnline: Bool = false
     ) {
         self.id = id
         self.userId = userId
@@ -77,6 +81,7 @@ struct UserProfile: Codable, Identifiable {
         self.onlineGamesPlayed = onlineGamesPlayed
         self.onlineGamesWon = onlineGamesWon
         self.lastActiveAt = lastActiveAt
+        self.isOnline = isOnline
     }
     
     // Custom decoder so that fields added after account creation don't break decoding
@@ -101,6 +106,7 @@ struct UserProfile: Codable, Identifiable {
         onlineGamesPlayed   = try c.decodeIfPresent(Int.self,      forKey: .onlineGamesPlayed) ?? 0
         onlineGamesWon      = try c.decodeIfPresent(Int.self,      forKey: .onlineGamesWon)    ?? 0
         lastActiveAt        = try c.decodeIfPresent(Date.self,     forKey: .lastActiveAt)
+        isOnline            = try c.decodeIfPresent(Bool.self,     forKey: .isOnline) ?? false
     }
     
     var winRate: Double {

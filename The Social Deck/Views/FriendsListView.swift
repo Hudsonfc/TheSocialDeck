@@ -17,11 +17,18 @@ struct FriendsListView: View {
     @State private var showRemoveConfirmation = false
     @State private var friendToRemove: FriendProfile? = nil
     @State private var toast: ToastMessage? = nil
+    @State private var showRoomInvites = false
     
     var body: some View {
         ZStack {
             Color.white
                 .ignoresSafeArea()
+            
+            // Hidden NavigationLink for Room Invites
+            NavigationLink(destination: RoomInvitesView(), isActive: $showRoomInvites) {
+                EmptyView()
+            }
+            .hidden()
             
             if friendService.isLoading {
                 // Loading state
@@ -74,7 +81,48 @@ struct FriendsListView: View {
                     }
                     .padding(.horizontal, 40)
                     .padding(.top, 20)
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 8)
+                    
+                    // Room Invites row
+                    Button(action: {
+                        HapticManager.shared.lightImpact()
+                        showRoomInvites = true
+                    }) {
+                        HStack(spacing: 12) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.1))
+                                    .frame(width: 38, height: 38)
+                                Image(systemName: "envelope.fill")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            }
+                            Text("Room Invites")
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            Spacer()
+                            if !onlineManager.pendingRoomInvites.isEmpty {
+                                Text("\(onlineManager.pendingRoomInvites.count)")
+                                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .clipShape(Capsule())
+                            }
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(Color.gray.opacity(0.5))
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.vertical, 12)
+                        .background(Color.white)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    Divider()
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 8)
                     
                     ScrollView {
                         VStack(spacing: 12) {

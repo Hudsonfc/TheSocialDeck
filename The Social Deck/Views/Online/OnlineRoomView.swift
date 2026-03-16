@@ -4,6 +4,10 @@
 //
 //  Created by Hudson Ferreira on 11/23/25.
 //
+// DEPRECATED — replaced by LobbyView.swift
+// All navigation entry points (JoinRoomView, RoomInvitesView, OnlineGameSelectionScreen,
+// ColorClashGameSettingsScreen) now navigate to LobbyView instead.
+// Do not delete yet — kept as reference until LobbyView is fully verified in production.
 
 import SwiftUI
 

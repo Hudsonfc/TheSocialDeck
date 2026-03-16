@@ -14,6 +14,7 @@ struct The_Social_DeckApp: App {
     @StateObject private var authManager = AuthManager.shared
     @StateObject private var gameCenterService = GameCenterService.shared
     @StateObject private var subscriptionManager = SubscriptionManager.shared
+    @Environment(\.scenePhase) private var scenePhase
     
     init() {
         FirebaseApp.configure()
@@ -40,5 +41,16 @@ struct The_Social_DeckApp: App {
                 .environmentObject(subscriptionManager)
         }
         .modelContainer(sharedModelContainer)
+        .onChange(of: scenePhase) { phase in
+            guard authManager.isAuthenticated else { return }
+            switch phase {
+            case .active:
+                Task { await authManager.setOnlineStatus(true) }
+            case .background, .inactive:
+                Task { await authManager.setOnlineStatus(false) }
+            @unknown default:
+                break
+            }
+        }
     }
 }

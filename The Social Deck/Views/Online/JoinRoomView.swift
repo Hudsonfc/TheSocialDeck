@@ -148,7 +148,7 @@ struct JoinRoomView: View {
         }
         .background(
             NavigationLink(
-                destination: OnlineRoomView(),
+                destination: LobbyView(),
                 isActive: $navigateToRoom
             ) {
                 EmptyView()

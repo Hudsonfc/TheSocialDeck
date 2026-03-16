@@ -55,6 +55,14 @@ struct OnlineGameContainerView: View {
                     }
                 case "flip21":
                     OnlineFlip21PlayView(roomCode: room.roomCode, myUserId: myUserId)
+                case "neverHaveIEver", "wouldYouRather", "truthOrDare",
+                     "storyChain", "mostLikelyTo", "twoTruthsAndALie":
+                    OnlineSyncedClassicGameView(
+                        roomCode: room.roomCode,
+                        gameType: gameType,
+                        isHost: room.hostId == myUserId,
+                        players: room.players
+                    )
                 default:
                     // Placeholder for other games
                     VStack(spacing: 24) {

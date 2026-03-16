@@ -4,6 +4,10 @@
 //
 //  Created by Hudson Ferreira on 11/23/25.
 //
+// DEPRECATED — no longer navigated to from HomeView.
+// Online access is now through Play → "Online Only" tab → game detail screen.
+// Room Invites are now accessible from FriendsListView.
+// Do not delete until fully verified in production.
 
 import SwiftUI
 
@@ -78,30 +82,6 @@ struct OnlineView: View {
                     }
                     .padding(.horizontal, 40)
                     .animation(.spring(response: 0.3, dampingFraction: 0.7), value: onlineManager.pendingRoomInvites.count)
-                    
-                    // Test Color Clash Button (for testing)
-                    NavigationLink(destination: ColorClashTestView()) {
-                        Text("Test Color Clash")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Color.green)
-                            .cornerRadius(16)
-                    }
-                    .padding(.horizontal, 40)
-                    
-                    // Test Flip 21 Button (for testing)
-                    NavigationLink(destination: Flip21TestView()) {
-                        Text("Test Flip 21")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Color.blue)
-                            .cornerRadius(16)
-                    }
-                    .padding(.horizontal, 40)
                     
                     Spacer()
                         .frame(height: 20)

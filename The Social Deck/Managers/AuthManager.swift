@@ -463,6 +463,22 @@ class AuthManager: ObservableObject {
         }
     }
     
+    // MARK: - Presence
+    
+    /// Sets the user's online/offline status in their Firestore profile.
+    /// Called from The_Social_DeckApp via ScenePhase changes.
+    func setOnlineStatus(_ online: Bool) async {
+        guard let userId = authService.currentUserId else { return }
+        do {
+            try await db.collection("profiles").document(userId).updateData([
+                "isOnline": online,
+                "lastActiveAt": Timestamp(date: Date())
+            ])
+        } catch {
+            // Silently fail — presence is a nice-to-have
+        }
+    }
+    
     // MARK: - Cleanup
     
     nonisolated private func removeProfileListener() {

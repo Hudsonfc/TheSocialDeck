@@ -89,63 +89,67 @@ struct OnlineGameSelectionScreen: View {
                     maxPlayers: 8
                 ),
                 OnlineGamePlaceholder(
-                    title: "Online Game 1",
-                    description: "Placeholder game description for online multiplayer gameplay",
-                    imageName: "Art 1.4",
-                    hasCategories: true,
-                    availableCategories: ["Quick", "Standard", "Extended"],
-                    minPlayers: 2,
-                    maxPlayers: 8
-                ),
-                OnlineGamePlaceholder(
-                    title: "Online Game 2",
-                    description: "Placeholder game description for online multiplayer gameplay",
-                    imageName: "Art 1.4",
+                    title: "Never Have I Ever",
+                    description: "Take turns revealing things you've never done. Get to know each other, laugh, and share stories.",
+                    imageName: "Art 1.1",
                     hasCategories: false,
                     availableCategories: [],
+                    gameType: "neverHaveIEver",
                     minPlayers: 2,
                     maxPlayers: 8
                 ),
                 OnlineGamePlaceholder(
-                    title: "Online Game 3",
-                    description: "Placeholder game description for online multiplayer gameplay",
-                    imageName: "Art 1.4",
-                    hasCategories: true,
-                    availableCategories: ["Easy", "Medium", "Hard"],
-                    minPlayers: 2,
-                    maxPlayers: 8
-                ),
-                OnlineGamePlaceholder(
-                    title: "Online Game 4",
-                    description: "Placeholder game description for online multiplayer gameplay",
-                    imageName: "Art 1.4",
+                    title: "Would You Rather",
+                    description: "Face impossible choices together. Pick your side, then defend your answer to the group.",
+                    imageName: "Art 1.2",
                     hasCategories: false,
                     availableCategories: [],
+                    gameType: "wouldYouRather",
+                    minPlayers: 2,
+                    maxPlayers: 8
+                ),
+                OnlineGamePlaceholder(
+                    title: "Truth or Dare",
+                    description: "The classic game of courage. Answer the truth — or take the dare.",
+                    imageName: "Art 1.3",
+                    hasCategories: false,
+                    availableCategories: [],
+                    gameType: "truthOrDare",
+                    minPlayers: 2,
+                    maxPlayers: 8
+                ),
+                OnlineGamePlaceholder(
+                    title: "Story Chain",
+                    description: "Build a hilarious story together, one sentence at a time. Where will it end up?",
+                    imageName: "Art 1.5",
+                    hasCategories: false,
+                    availableCategories: [],
+                    gameType: "storyChain",
                     minPlayers: 2,
                     maxPlayers: 8
                 )
             ]
         ),
         OnlineGameCategory(
-            title: "Coming Soon",
+            title: "More Games",
             games: [
                 OnlineGamePlaceholder(
-                    title: "Online Game 5",
-                    description: "Placeholder game description for online multiplayer gameplay",
+                    title: "Most Likely To",
+                    description: "Vote on who in the group is most likely to do something wild. Honest and hilarious.",
                     imageName: "Art 1.4",
-                    hasCategories: true,
-                    availableCategories: ["Casual", "Competitive"],
-                    gameType: nil,
+                    hasCategories: false,
+                    availableCategories: [],
+                    gameType: "mostLikelyTo",
                     minPlayers: 2,
                     maxPlayers: 8
                 ),
                 OnlineGamePlaceholder(
-                    title: "Online Game 6",
-                    description: "Placeholder game description for online multiplayer gameplay",
+                    title: "Two Truths & a Lie",
+                    description: "Say two truths and one lie — can your friends figure out which is which?",
                     imageName: "Art 1.4",
                     hasCategories: false,
                     availableCategories: [],
-                    gameType: nil,
+                    gameType: "twoTruthsAndALie",
                     minPlayers: 2,
                     maxPlayers: 8
                 )
@@ -299,7 +303,7 @@ struct OnlineGameSelectionScreen: View {
         .navigationBarBackButtonHidden(true)
         .background(
             NavigationLink(
-                destination: OnlineRoomView(),
+                destination: LobbyView(),
                 isActive: $navigateToRoom
             ) {
                 EmptyView()
@@ -508,13 +512,21 @@ struct ExpandedGameOverlay: View {
                     .background(
                         Group {
                             if game.gameType == "colorClash" {
-                        NavigationLink(
-                            destination: ColorClashGameSettingsScreen(game: game),
-                            isActive: $navigateToRoom
-                        ) {
-                            EmptyView()
-                        }
-                        .hidden()
+                                NavigationLink(
+                                    destination: ColorClashGameSettingsScreen(game: game),
+                                    isActive: $navigateToRoom
+                                ) {
+                                    EmptyView()
+                                }
+                                .hidden()
+                            } else {
+                                NavigationLink(
+                                    destination: LobbyView(),
+                                    isActive: $navigateToRoom
+                                ) {
+                                    EmptyView()
+                                }
+                                .hidden()
                             }
                         }
                     )
