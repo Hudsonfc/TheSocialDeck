@@ -18,14 +18,16 @@ private struct OnlineNHIEView: View {
     let isHost: Bool
     let players: [RoomPlayer]
     let currentUserId: String?
+    let cardCount: Int
 
     @StateObject private var manager: NHIEGameManager
 
-    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?) {
+    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil) {
         self.roomCode = roomCode
         self.isHost = isHost
         self.players = players
         self.currentUserId = currentUserId
+        self.cardCount = cardCount ?? 0
         let deck = Deck(
             title: "Never Have I Ever",
             description: "Reveal your wildest experiences and learn about your friends.",
@@ -36,7 +38,7 @@ private struct OnlineNHIEView: View {
             cards: allNHIECards,
             availableCategories: onlineClassicCategories
         )
-        _manager = StateObject(wrappedValue: NHIEGameManager(deck: deck, selectedCategories: onlineClassicCategories))
+        _manager = StateObject(wrappedValue: NHIEGameManager(deck: deck, selectedCategories: onlineClassicCategories, cardCount: cardCount ?? 0))
     }
 
     var body: some View {
@@ -53,14 +55,16 @@ private struct OnlineTORView: View {
     let isHost: Bool
     let players: [RoomPlayer]
     let currentUserId: String?
+    let cardCount: Int
 
     @StateObject private var manager: TORGameManager
 
-    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?) {
+    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil) {
         self.roomCode = roomCode
         self.isHost = isHost
         self.players = players
         self.currentUserId = currentUserId
+        self.cardCount = cardCount ?? 0
         let deck = Deck(
             title: "Truth or Dare",
             description: "Choose truth or dare and see where the night takes you.",
@@ -71,7 +75,7 @@ private struct OnlineTORView: View {
             cards: allTORCards,
             availableCategories: onlineClassicCategories
         )
-        _manager = StateObject(wrappedValue: TORGameManager(deck: deck, selectedCategories: onlineClassicCategories))
+        _manager = StateObject(wrappedValue: TORGameManager(deck: deck, selectedCategories: onlineClassicCategories, cardCount: cardCount ?? 0))
     }
 
     var body: some View {
@@ -88,14 +92,16 @@ private struct OnlineWYRView: View {
     let isHost: Bool
     let players: [RoomPlayer]
     let currentUserId: String?
+    let cardCount: Int
 
     @StateObject private var manager: WYRGameManager
 
-    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?) {
+    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil) {
         self.roomCode = roomCode
         self.isHost = isHost
         self.players = players
         self.currentUserId = currentUserId
+        self.cardCount = cardCount ?? 0
         let deck = Deck(
             title: "Would You Rather",
             description: "Make tough choices and discover what your friends prefer.",
@@ -106,7 +112,7 @@ private struct OnlineWYRView: View {
             cards: allWYRCards,
             availableCategories: onlineClassicCategories
         )
-        _manager = StateObject(wrappedValue: WYRGameManager(deck: deck, selectedCategories: onlineClassicCategories))
+        _manager = StateObject(wrappedValue: WYRGameManager(deck: deck, selectedCategories: onlineClassicCategories, cardCount: cardCount ?? 0))
     }
 
     var body: some View {
@@ -123,14 +129,16 @@ private struct OnlineMLTView: View {
     let isHost: Bool
     let players: [RoomPlayer]
     let currentUserId: String?
+    let cardCount: Int
 
     @StateObject private var manager: MLTGameManager
 
-    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?) {
+    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil) {
         self.roomCode = roomCode
         self.isHost = isHost
         self.players = players
         self.currentUserId = currentUserId
+        self.cardCount = cardCount ?? 0
         let deck = Deck(
             title: "Most Likely To",
             description: "Find out who's most likely to do crazy things.",
@@ -141,7 +149,7 @@ private struct OnlineMLTView: View {
             cards: allMLTCards,
             availableCategories: onlineClassicCategories
         )
-        _manager = StateObject(wrappedValue: MLTGameManager(deck: deck, selectedCategories: onlineClassicCategories))
+        _manager = StateObject(wrappedValue: MLTGameManager(deck: deck, selectedCategories: onlineClassicCategories, cardCount: cardCount ?? 0))
     }
 
     var body: some View {
@@ -204,13 +212,13 @@ struct OnlineGameContainerView: View {
                 case "flip21":
                     OnlineFlip21PlayView(roomCode: room.roomCode, myUserId: myUserId)
                 case "neverHaveIEver":
-                    OnlineNHIEView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId)
+                    OnlineNHIEView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
                 case "truthOrDare":
-                    OnlineTORView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId)
+                    OnlineTORView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
                 case "wouldYouRather":
-                    OnlineWYRView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId)
+                    OnlineWYRView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
                 case "mostLikelyTo":
-                    OnlineMLTView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId)
+                    OnlineMLTView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
                 case "storyChain", "twoTruthsAndALie":
                     OnlineSyncedClassicGameView(
                         roomCode: room.roomCode,

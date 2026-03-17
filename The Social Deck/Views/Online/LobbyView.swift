@@ -129,11 +129,24 @@ struct LobbyView: View {
 
     // MARK: - Main Scroll Content
 
+    /// Game types that support "cards to play" setting in the lobby
+    private static let classicGameTypesWithCardCount: Set<String> = [
+        "neverHaveIEver", "truthOrDare", "wouldYouRather", "mostLikelyTo"
+    ]
+
+    private var isClassicGameWithCardCount: Bool {
+        guard let type = onlineManager.currentRoom?.selectedGameType else { return false }
+        return Self.classicGameTypesWithCardCount.contains(type)
+    }
+
     private var mainContent: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 24) {
                 roomCodeCard
                 playerListSection
+                if onlineManager.isHost && isClassicGameWithCardCount {
+                    gameSettingsSection
+                }
                 actionButtons
             }
             .padding(.bottom, 40)
@@ -242,6 +255,51 @@ struct LobbyView: View {
         .padding(.horizontal, 24)
         .animation(.spring(response: 0.3, dampingFraction: 0.8),
                    value: onlineManager.currentRoom?.players.count)
+    }
+
+    // MARK: - Game Settings (host only, classic games)
+
+    private static let cardCountOptions: [Int?] = [nil, 10, 20, 30, 50]
+
+    private var gameSettingsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Game settings")
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .foregroundColor(Color(red: 0x0A / 255.0, green: 0x0A / 255.0, blue: 0x0A / 255.0))
+
+            Text("Cards to play")
+                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .foregroundColor(.gray)
+
+            let current = onlineManager.currentRoom?.cardCount
+            HStack(spacing: 10) {
+                ForEach(Array(Self.cardCountOptions.enumerated()), id: \.offset) { _, option in
+                    Button {
+                        HapticManager.shared.lightImpact()
+                        Task { await onlineManager.updateCardCount(option) }
+                    } label: {
+                        Text(option == nil ? "All" : "\(option!)")
+                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            .foregroundColor(current == option ? .white : soDeckRed)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(current == option ? soDeckRed : soDeckRed.opacity(0.08))
+                            .cornerRadius(10)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(soDeckRed.opacity(current == option ? 0 : 0.3), lineWidth: 1)
+                            )
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
+        .padding(.horizontal, 24)
     }
 
     // MARK: - Action Buttons

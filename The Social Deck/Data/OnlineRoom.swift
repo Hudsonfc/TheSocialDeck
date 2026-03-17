@@ -72,6 +72,8 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
     var isPrivate: Bool
     var selectedGameType: String? // DeckType stored as string (e.g., "neverHaveIEver")
     var selectedCategory: String? // Selected category for game
+    /// Number of cards to play for classic games; nil or 0 = use all cards
+    var cardCount: Int?
     
     // Players
     var players: [RoomPlayer]
@@ -93,6 +95,7 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         isPrivate: Bool = false,
         selectedGameType: String? = nil,
         selectedCategory: String? = nil,
+        cardCount: Int? = nil,
         players: [RoomPlayer] = [],
         hostId: String,
         gameStartedAt: Date? = nil,
@@ -109,6 +112,7 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         self.isPrivate = isPrivate
         self.selectedGameType = selectedGameType
         self.selectedCategory = selectedCategory
+        self.cardCount = cardCount
         self.players = players
         self.hostId = hostId
         self.gameStartedAt = gameStartedAt

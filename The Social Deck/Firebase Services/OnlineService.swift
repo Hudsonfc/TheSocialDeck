@@ -217,6 +217,26 @@ class OnlineService {
         
         try await roomRef.updateData(updateData)
     }
+
+    /// Updates number of cards to play for classic games (host only). nil = use all cards.
+    func updateCardCount(roomCode: String, cardCount: Int?) async throws {
+        let roomRef = db.collection("rooms").document(roomCode)
+        let snapshot = try await roomRef.getDocument()
+
+        guard snapshot.exists, let room = try? snapshot.data(as: OnlineRoom.self) else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room not found"])
+        }
+
+        guard let currentUserId = auth.currentUser?.uid, room.hostId == currentUserId else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Only the host can update game settings"])
+        }
+
+        if let count = cardCount, count > 0 {
+            try await roomRef.updateData(["cardCount": count])
+        } else {
+            try await roomRef.updateData(["cardCount": FieldValue.delete()])
+        }
+    }
     
     /// Starts the game (updates room status to .starting, then .inGame)
     func startGame(roomCode: String) async throws {

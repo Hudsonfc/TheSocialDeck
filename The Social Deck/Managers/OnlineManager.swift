@@ -263,6 +263,17 @@ class OnlineManager: ObservableObject {
         
         isLoading = false
     }
+
+    /// Updates card count for classic games (host only). nil = use all cards.
+    func updateCardCount(_ cardCount: Int?) async {
+        guard let roomCode = currentRoom?.roomCode, isHost else { return }
+        do {
+            try await onlineService.updateCardCount(roomCode: roomCode, cardCount: cardCount)
+            // Room listener will receive the updated room from Firestore
+        } catch {
+            errorMessage = "Failed to update settings"
+        }
+    }
     
     /// Starts the game (host only)
     func startGame() async {
