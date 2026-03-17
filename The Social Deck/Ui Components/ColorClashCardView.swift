@@ -105,7 +105,7 @@ struct ColorClashCardView: View {
                                 .font(.system(size: size.fontSize * 0.7, weight: .bold))
                                 .foregroundColor(cardColor)
                         case .wildDrawFour:
-                            Image("color clash artwork logo")
+                            Image("colorclash")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: size == .medium ? 50 : 35, height: size == .medium ? 50 : 35)

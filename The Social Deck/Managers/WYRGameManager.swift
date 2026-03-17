@@ -97,5 +97,13 @@ class WYRGameManager: ObservableObject {
     var canGoBack: Bool {
         return currentIndex > 0
     }
+
+    /// Jump directly to a specific card index (used for online non-host sync).
+    func goToIndex(_ index: Int) {
+        guard index >= 0 && index < cards.count else { return }
+        isFlipped = false
+        currentIndex = index
+        isFinished = false
+    }
 }
 

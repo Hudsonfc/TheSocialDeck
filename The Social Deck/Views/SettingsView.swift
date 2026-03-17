@@ -15,6 +15,7 @@ struct SettingsView: View {
     @State private var whatsNewButtonPressed = false
     @State private var feedbackButtonPressed = false
     @State private var rateUsButtonPressed = false
+    @State private var previewOnlineUIButtonPressed = false
     @State private var showPlusPaywall = false
     
     // App version info
@@ -119,6 +120,13 @@ struct SettingsView: View {
                         }
                         .scaleEffect(rateUsButtonPressed ? 0.97 : 1.0)
                         
+                        // Preview online game UI (see non-host "Waiting for host to advance…" state)
+                        SettingsNavigationButton(
+                            title: "Preview online game UI",
+                            destination: OnlineGameUIPreviewView(),
+                            isPressed: $previewOnlineUIButtonPressed
+                        )
+                        
                         // Spacer to push bottom buttons down
                         Spacer()
                             .frame(height: 40)
@@ -198,6 +206,55 @@ struct SettingsView: View {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
             SKStoreReviewController.requestReview(in: windowScene)
         }
+    }
+}
+
+// Preview of online game UI (non-host sees "Waiting for host to advance…")
+private let previewCategories = ["Party", "Wild", "Couples", "Social", "Dirty", "Friends"]
+
+struct OnlineGameUIPreviewView: View {
+    @StateObject private var manager: NHIEGameManager
+
+    private static let previewPlayers: [RoomPlayer] = [
+        RoomPlayer(id: "previewHost", username: "Alex", avatarType: "avatar 1", avatarColor: "blue", isReady: true, isHost: true),
+        RoomPlayer(id: "previewYou", username: "You", avatarType: "avatar 2", avatarColor: "red", isReady: true, isHost: false),
+        RoomPlayer(id: "preview3", username: "Jordan", avatarType: "avatar 3", avatarColor: "green", isReady: true, isHost: false)
+    ]
+
+    init() {
+        let deck = Deck(
+            title: "Never Have I Ever",
+            description: "Preview",
+            numberOfCards: allNHIECards.count,
+            estimatedTime: "30-45 min",
+            imageName: "NHIE 2.0",
+            type: .neverHaveIEver,
+            cards: allNHIECards,
+            availableCategories: previewCategories
+        )
+        _manager = StateObject(wrappedValue: NHIEGameManager(deck: deck, selectedCategories: previewCategories))
+    }
+
+    var body: some View {
+        let deck = Deck(
+            title: "Never Have I Ever",
+            description: "Preview",
+            numberOfCards: allNHIECards.count,
+            estimatedTime: "30-45 min",
+            imageName: "NHIE 2.0",
+            type: .neverHaveIEver,
+            cards: allNHIECards,
+            availableCategories: previewCategories
+        )
+        NHIEPlayView(
+            manager: manager,
+            deck: deck,
+            selectedCategories: previewCategories,
+            roomId: "preview",
+            isHost: false,
+            players: Self.previewPlayers,
+            currentUserId: "previewYou"
+        )
     }
 }
 

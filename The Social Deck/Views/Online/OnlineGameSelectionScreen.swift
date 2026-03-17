@@ -71,7 +71,7 @@ struct OnlineGameSelectionScreen: View {
                 OnlineGamePlaceholder(
                     title: "Color Clash",
                     description: "A fast-paced card game where players match colors and numbers. Be the first to empty your hand!",
-                    imageName: "color clash artwork logo",
+                    imageName: "colorclash",
                     hasCategories: false,
                     availableCategories: [],
                     gameType: "colorClash",

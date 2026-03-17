@@ -45,7 +45,7 @@ struct SelectedGameDisplayCard: View {
     
     private var gameArtwork: String? {
         switch gameType {
-        case .colorClash: return "color clash artwork logo"
+        case .colorClash: return "colorclash"
         case .categoryClash: return "CC artwork"
         case .bluffCall: return "BC artwork"
         case .hotPotato: return "HP artwork"

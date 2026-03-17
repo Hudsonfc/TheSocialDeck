@@ -20,7 +20,7 @@ struct ColorClashWalkthroughView: View {
         WalkthroughPage(
             title: "Welcome to Color Clash!",
             description: "A fast-paced card game where strategy meets speed! Match colors and numbers to play cards from your hand. The goal is simple: be the first player to empty your hand and win the game. Each turn, you can either play a card that matches the color or number of the current card, or draw a new card if you can't play. Special action cards add twists and turns to keep the game exciting!",
-            icon: "color clash artwork logo",
+            icon: "colorclash",
             isImageIcon: true
         ),
         WalkthroughPage(

@@ -22,6 +22,7 @@ class OnlineManager: ObservableObject {
     @Published var isConnected: Bool = false
     
     nonisolated(unsafe) private var roomListener: ListenerRegistration?
+    private var isLeavingRoom = false
     
     private init() {}
     
@@ -152,19 +153,21 @@ class OnlineManager: ObservableObject {
             return
         }
         
+        isLeavingRoom = true
         isLoading = true
         errorMessage = nil
         
         do {
             try await onlineService.leaveRoom(roomCode: roomCode, playerId: userId)
             cleanup()
+            errorMessage = nil
         } catch {
             errorMessage = "Failed to leave room: \(error.localizedDescription)"
-            // Still cleanup locally even if Firestore update fails
             cleanup()
         }
         
         isLoading = false
+        isLeavingRoom = false
     }
     
     // MARK: - Player Actions
@@ -311,18 +314,17 @@ class OnlineManager: ObservableObject {
                     self?.isConnected = true
                     
                     // Check if room was deleted or player was removed
-                    if let userId = self?.authManager.userProfile?.userId {
+                    if let userId = self?.authManager.userProfile?.userId, self?.isLeavingRoom != true {
                         if !room.players.contains(where: { $0.id == userId }) {
-                            // Player was removed from room
                             self?.cleanup()
                             self?.errorMessage = "You were removed from the room"
                         }
                     }
                     
                 case .failure(let error):
+                    guard self?.isLeavingRoom != true else { return }
                     let errorMsg = error.localizedDescription
                     
-                    // Check if room was deleted
                     if errorMsg.contains("not found") || errorMsg.contains("Room not found") {
                         self?.cleanup()
                         self?.errorMessage = "This room has been deleted or no longer exists"

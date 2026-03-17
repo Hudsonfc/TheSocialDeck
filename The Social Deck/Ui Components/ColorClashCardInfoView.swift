@@ -64,7 +64,7 @@ struct ColorClashCardInfoView: View {
                     cardTypeSectionWithImage(
                         title: "Wild Draw Four",
                         description: "Choose the active color. The next player must draw 4 cards and skip their turn.",
-                        imageName: "color clash artwork logo",
+                        imageName: "colorclash",
                         color: Color(red: 0x1E/255.0, green: 0x1E/255.0, blue: 0x1E/255.0)
                     )
                     

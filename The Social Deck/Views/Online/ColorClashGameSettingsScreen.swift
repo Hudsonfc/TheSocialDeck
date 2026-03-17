@@ -237,7 +237,7 @@ struct ColorClashGameSettingsScreen: View {
             game: OnlineGamePlaceholder(
                 title: "Color Clash",
                 description: "A fast-paced card game",
-                imageName: "color clash artwork logo",
+                imageName: "colorclash",
                 hasCategories: false,
                 availableCategories: [],
                 gameType: "colorClash",

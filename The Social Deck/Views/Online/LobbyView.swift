@@ -32,7 +32,7 @@ struct LobbyView: View {
             ) { EmptyView() }
             .hidden()
 
-            if onlineManager.currentRoom == nil {
+            if onlineManager.currentRoom == nil && !isLeaving {
                 roomGoneView
             } else {
                 mainContent
@@ -334,15 +334,15 @@ struct LobbyView: View {
         return Button {
             Task { await onlineManager.toggleReadyStatus() }
         } label: {
-            Text(isReady ? "Not Ready" : "Ready")
+            Text(isReady ? "Un-ready" : "Ready up")
                 .font(.system(size: 17, weight: .semibold, design: .rounded))
-                .foregroundColor(isReady ? .gray : soDeckRed)
+                .foregroundColor(soDeckRed)
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
                 .background(Color.white)
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
-                        .stroke(isReady ? Color.gray.opacity(0.3) : soDeckRed, lineWidth: 2)
+                        .stroke(soDeckRed, lineWidth: 2)
                 )
                 .cornerRadius(14)
         }

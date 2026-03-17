@@ -11,6 +11,11 @@ struct MLTPlayView: View {
     @ObservedObject var manager: MLTGameManager
     let deck: Deck
     let selectedCategories: [String]
+    var roomId: String? = nil
+    var isHost: Bool = false
+    var players: [RoomPlayer]? = nil
+    var currentUserId: String? = nil
+    @ObservedObject private var syncService = SyncService.shared
     @Environment(\.dismiss) private var dismiss
     @AppStorage("swipeNavigationEnabled") private var swipeNavigationEnabled = false
     @AppStorage("totalCardsFlipped") private var totalCardsFlipped: Int = 0
@@ -88,70 +93,76 @@ struct MLTPlayView: View {
                 }
                 .responsiveHorizontalPadding()
                 .padding(.top, 20)
-                .padding(.bottom, 32)
-                
-                Spacer()
-                
-                // "Most Likely To" label
-                Text("Most Likely To")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.buttonBackground)
-                    .padding(.bottom, 32)
-                
-                // Card
-                if let currentCard = manager.currentCard() {
-                    ZStack {
-                        // Card front - visible when rotation < 90
-                        MLTCardFrontView()
-                            .opacity(cardRotation < 90 ? 1 : 0)
-                        
-                        // Card back - visible when rotation >= 90, pre-rotated 180
-                        MLTCardBackView(text: currentCard.text)
-                            .opacity(cardRotation >= 90 ? 1 : 0)
-                            .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
-                    }
-                    .frame(width: ResponsiveSize.cardWidth, height: ResponsiveSize.cardHeight)
-                    .rotation3DEffect(
-                        .degrees(cardRotation),
-                        axis: (x: 0, y: 1, z: 0),
-                        perspective: 0.5
-                    )
-                    .offset(x: cardOffset + dragOffset)
-                    .id(currentCard.id)
-                    .onTapGesture {
-                        if !isTransitioning {
-                            toggleCard()
-                        }
-                    }
-                    .gesture(
-                        swipeNavigationEnabled ? DragGesture()
-                            .onChanged { value in
-                                if !isTransitioning {
-                                    dragOffset = value.translation.width
-                                }
-                            }
-                            .onEnded { value in
-                                if !isTransitioning {
-                                    let swipeThreshold: CGFloat = 100
-                                    if value.translation.width > swipeThreshold && manager.canGoBack {
-                                        // Swipe right - go to previous
-                                        previousCard()
-                                    } else if value.translation.width < -swipeThreshold && !manager.isFinished {
-                                        // Swipe left - go to next
-                                        nextCard()
-                                    }
-                                    dragOffset = 0
-                                }
-                            } : nil
-                    )
-                    .padding(.bottom, 32)
+                .padding(.bottom, 16)
+
+                // Online: player avatars + host/you indication (compact single line)
+                if let players = players, !players.isEmpty, roomId != nil {
+                    OnlinePlayerStripView(players: players, currentUserId: currentUserId)
+                        .padding(.bottom, 8)
                 }
-                
-                Spacer()
-                
+
+                // Card area fills remaining space so top bar and bottom hint stay visible
+                VStack(spacing: 0) {
+                    Spacer(minLength: 0)
+                    // "Most Likely To" label
+                    Text("Most Likely To")
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .foregroundColor(Color.buttonBackground)
+                        .padding(.bottom, 32)
+                    // Card
+                    if let currentCard = manager.currentCard() {
+                        ZStack {
+                            MLTCardFrontView()
+                                .opacity(cardRotation < 90 ? 1 : 0)
+                            MLTCardBackView(text: currentCard.text)
+                                .opacity(cardRotation >= 90 ? 1 : 0)
+                                .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+                        }
+                        .frame(width: ResponsiveSize.cardWidth, height: ResponsiveSize.cardHeight)
+                        .rotation3DEffect(
+                            .degrees(cardRotation),
+                            axis: (x: 0, y: 1, z: 0),
+                            perspective: 0.5
+                        )
+                        .offset(x: cardOffset + dragOffset)
+                        .id(currentCard.id)
+                        .onTapGesture {
+                            if !isTransitioning { toggleCard() }
+                        }
+                        .gesture(
+                            (swipeNavigationEnabled && (roomId == nil || isHost)) ? DragGesture()
+                                .onChanged { value in
+                                    if !isTransitioning { dragOffset = value.translation.width }
+                                }
+                                .onEnded { value in
+                                    if !isTransitioning {
+                                        let swipeThreshold: CGFloat = 100
+                                        if value.translation.width > swipeThreshold && manager.canGoBack {
+                                            previousCard()
+                                        } else if value.translation.width < -swipeThreshold && !manager.isFinished {
+                                            nextCard()
+                                        }
+                                        dragOffset = 0
+                                    }
+                                } : nil
+                        )
+                        .padding(.bottom, 32)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .frame(maxHeight: .infinity)
+
                 // Next button or swipe instruction
                 if manager.isFlipped {
-                    if swipeNavigationEnabled {
+                    if roomId != nil && !isHost {
+                        // Online non-host: host controls advancement
+                        Text("Waiting for host to advance…")
+                            .font(.system(size: 14, weight: .regular, design: .rounded))
+                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                            .padding(.bottom, 40)
+                    } else if swipeNavigationEnabled {
                         // Swipe instruction text
                         Text("Swipe right to go to next card or left to go to previous card")
                             .font(.system(size: 14, weight: .regular, design: .rounded))
@@ -236,10 +247,22 @@ struct MLTPlayView: View {
             }
         }
         .onAppear {
+            if let roomId = roomId {
+                SyncService.shared.startListening(roomId: roomId)
+            }
             if manager.isFlipped {
                 nextButtonOpacity = 1.0
                 nextButtonOffset = 0
             }
+        }
+        .onDisappear {
+            if roomId != nil {
+                SyncService.shared.stopListening()
+            }
+        }
+        .onChange(of: syncService.remoteCardIndex) { _, newIndex in
+            guard roomId != nil, !isHost, newIndex != manager.currentIndex else { return }
+            jumpToCard(newIndex)
         }
     }
     
@@ -266,72 +289,77 @@ struct MLTPlayView: View {
     
     private func previousCard() {
         isTransitioning = true
-        
-        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
-            cardRotation = 0
-        }
-        
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-            cardOffset = 500
-        }
-        
+
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) { cardRotation = 0 }
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { cardOffset = 500 }
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-            if manager.isFlipped {
-                manager.flipCard()
-            }
-            
+            if manager.isFlipped { manager.flipCard() }
             var transaction = Transaction(animation: .none)
-            withTransaction(transaction) {
-                cardOffset = -500
-            }
-            
+            withTransaction(transaction) { cardOffset = -500 }
             manager.previousCard()
-            
+
+            if let roomId = roomId, isHost {
+                Task { try? await SyncService.shared.updateCardIndex(roomId: roomId, index: manager.currentIndex) }
+            }
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                    cardOffset = 0
-                }
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    isTransitioning = false
-                }
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { cardOffset = 0 }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { isTransitioning = false }
             }
         }
     }
-    
+
     private func nextCard() {
         isTransitioning = true
-        
+
         withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
             nextButtonOpacity = 0
             nextButtonOffset = 20
             cardRotation = 0
         }
-        
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-            cardOffset = -500
-        }
-        
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { cardOffset = -500 }
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-            if manager.isFlipped {
-                manager.flipCard()
-            }
-            
+            if manager.isFlipped { manager.flipCard() }
             var transaction = Transaction(animation: .none)
-            withTransaction(transaction) {
-                cardOffset = 500
-            }
-            
+            withTransaction(transaction) { cardOffset = 500 }
             manager.nextCard()
-            
+
+            if let roomId = roomId, isHost {
+                Task { try? await SyncService.shared.updateCardIndex(roomId: roomId, index: manager.currentIndex) }
+            }
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                    cardOffset = 0
-                }
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    isTransitioning = false
-                }
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { cardOffset = 0 }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { isTransitioning = false }
+            }
+        }
+    }
+
+    // Animates directly to a target index (used for online non-host sync).
+    private func jumpToCard(_ targetIndex: Int) {
+        guard !isTransitioning else { return }
+        let isForward = targetIndex >= manager.currentIndex
+        isTransitioning = true
+
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+            nextButtonOpacity = 0
+            nextButtonOffset = 20
+            cardRotation = 0
+        }
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+            cardOffset = isForward ? -500 : 500
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            if manager.isFlipped { manager.flipCard() }
+            var transaction = Transaction(animation: .none)
+            withTransaction(transaction) { cardOffset = isForward ? 500 : -500 }
+            manager.goToIndex(targetIndex)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { cardOffset = 0 }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { isTransitioning = false }
             }
         }
     }

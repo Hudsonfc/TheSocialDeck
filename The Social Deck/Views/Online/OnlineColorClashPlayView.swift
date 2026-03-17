@@ -362,7 +362,7 @@ struct OnlineColorClashPlayView: View {
                                 RoundedRectangle(cornerRadius: 12)
                                     .fill(Color.white)
                                     .overlay(
-                                        Image("color clash artwork logo")
+                                        Image("colorclash")
                                             .resizable()
                                             .scaledToFit()
                                             .frame(width: 60, height: 60)

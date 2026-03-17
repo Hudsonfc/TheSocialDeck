@@ -40,7 +40,7 @@ struct ColorClashLoadingScreen: View {
                 Spacer()
                 
                 // Game logo with animation
-                Image("color clash artwork logo")
+                Image("colorclash")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 150, height: 150)

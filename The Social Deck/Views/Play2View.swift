@@ -40,10 +40,18 @@ struct Play2View: View {
     // All category names (Favorites shown dynamically when items exist)
     var categories: [String] {
         var cats = ["Classic Games", "Social Deck Games", "Date/Couples", "Online Only"]
-        if !favoriteDecks.isEmpty {
+        if !favoriteDecks.isEmpty || !favoriteOnlineGames.isEmpty {
             cats.insert("Favorites", at: 0)
         }
         return cats
+    }
+    
+    // Favorite online-only games (e.g. Color Clash) so they appear in Favorites tab
+    private var favoriteOnlineGames: [OnlineGameEntry] {
+        allOnlineGames.filter { game in
+            guard let deckType = DeckType(rawValue: game.gameType) else { return false }
+            return favoritesManager.isFavorite(deckType)
+        }
     }
     
     // Selected online game for detail navigation
@@ -321,7 +329,32 @@ struct Play2View: View {
                 
                 // Grid View
                 ScrollView(.vertical, showsIndicators: false) {
-                    if selectedCategory == "Online Only" {
+                    if selectedCategory == "Favorites" && (!favoriteDecks.isEmpty || !favoriteOnlineGames.isEmpty) {
+                        // Favorites: mix of favorite decks and favorite online games
+                        let columns = [
+                            GridItem(.flexible(), spacing: 16),
+                            GridItem(.flexible(), spacing: 16)
+                        ]
+                        LazyVGrid(columns: columns, spacing: 20) {
+                            ForEach(Array(favoriteDecks.enumerated()), id: \.element.id) { _, deck in
+                                GridGameTile(deck: deck, isLocked: isLocked(deck)) {
+                                    HapticManager.shared.lightImpact()
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                        selectedDeckForDescription = deck
+                                    }
+                                }
+                            }
+                            ForEach(favoriteOnlineGames) { game in
+                                OnlineGameTile(game: game) {
+                                    HapticManager.shared.lightImpact()
+                                    selectedOnlineGame = game
+                                }
+                            }
+                        }
+                        .responsiveHorizontalPadding()
+                        .padding(.top, 20)
+                        .padding(.bottom, 30)
+                    } else if selectedCategory == "Online Only" {
                         // Online Only grid — uses OnlineGameEntry data
                         let columns = [
                             GridItem(.flexible(), spacing: 16),
@@ -1044,12 +1077,27 @@ struct GameDescriptionOverlay: View {
     @Binding var navigateToCloserThanEverSetup: Deck?
     @Binding var navigateToUsAfterDarkSetup: Deck?
     @ObservedObject private var favoritesManager = FavoritesManager.shared
-    
+    @StateObject private var authManager = AuthManager.shared
+    @State private var navigateToOnline = false
+    @State private var showOnlineSignInAlert = false
+
+    // The 4 classic games that support online play
+    private var isOnlineCapable: Bool {
+        deck.type == .neverHaveIEver || deck.type == .truthOrDare ||
+        deck.type == .wouldYouRather || deck.type == .mostLikelyTo
+    }
+
     var body: some View {
         ZStack {
             // Adaptive background
             Color.appBackground
                 .ignoresSafeArea()
+
+            // Hidden NavigationLink to online room/lobby flow for capable games
+            NavigationLink(
+                destination: ClassicGameOnlineView(gameTitle: deck.title, gameType: deck.type.rawValue, imageName: deck.imageName),
+                isActive: $navigateToOnline
+            ) { EmptyView() }.hidden()
             
             VStack(spacing: 0) {
                 // Top bar with close and favorite buttons (swapped positions)
@@ -1159,17 +1207,51 @@ struct GameDescriptionOverlay: View {
                     .responsiveHorizontalPadding()
                     .padding(.bottom, 40)
                 } else if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .takeItPersonally || deck.type == .categoryClash || deck.type == .bluffCall || deck.type == .whatsMySecret || deck.type == .actItOut || deck.type == .spillTheEx {
-                        PrimaryButton(title: "Play") {
-                            // Navigate first, then dismiss overlay after navigation completes
-                            navigateToCategorySelection = deck
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                    selectedDeck = nil
+                        VStack(spacing: 12) {
+                            // Play Local — same as the original Play button
+                            PrimaryButton(title: isOnlineCapable ? "Play Local" : "Play") {
+                                navigateToCategorySelection = deck
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                        selectedDeck = nil
+                                    }
+                                }
+                            }
+
+                            // Play Online — only for the 4 online-capable classic games
+                            if isOnlineCapable {
+                                Button {
+                                    HapticManager.shared.lightImpact()
+                                    if authManager.isAuthenticated {
+                                        navigateToOnline = true
+                                    } else {
+                                        showOnlineSignInAlert = true
+                                    }
+                                } label: {
+                                    Text("Play Online")
+                                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                                        .foregroundColor(.primaryAccent)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 16)
+                                        .background(Color.appBackground)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 30)
+                                                .stroke(Color.primaryAccent, lineWidth: 2)
+                                        )
+                                        .clipShape(Capsule())
                                 }
                             }
                         }
                         .responsiveHorizontalPadding()
                         .padding(.bottom, 40)
+                        .alert("Sign in to play online", isPresented: $showOnlineSignInAlert) {
+                            Button("Cancel", role: .cancel) {}
+                            NavigationLink(destination: SignInView()) {
+                                Text("Sign In")
+                            }
+                        } message: {
+                            Text("You need a free account to create or join online rooms.")
+                        }
                     } else if deck.type == .spinTheBottle {
                         PrimaryButton(title: "Play") {
                             // Navigate first, then dismiss overlay after navigation completes
@@ -1311,17 +1393,22 @@ struct GameDescriptionOverlay: View {
 
 // MARK: - Online Game Tile
 
-/// Card tile used in the "Online Only" tab. Matches GridGameTile style but
-/// shows a wifi badge in the bottom-left corner instead of a Plus badge.
+/// Card tile used in the "Online Only" tab. Matches GridGameTile style.
 struct OnlineGameTile: View {
     let game: OnlineGameEntry
     let onTap: () -> Void
 
+    @ObservedObject private var favoritesManager = FavoritesManager.shared
     @State private var isPressed = false
 
     private let imageAspectRatio: CGFloat = 420.0 / 577.0
     private var tileWidth: CGFloat  { ResponsiveSize.gridTileWidth }
     private var tileHeight: CGFloat { ResponsiveSize.gridTileHeight }
+
+    /// DeckType for favoriting when this game has a matching type (e.g. colorClash).
+    private var favoriteDeckType: DeckType? {
+        DeckType(rawValue: game.gameType)
+    }
 
     var body: some View {
         Button {
@@ -1346,20 +1433,20 @@ struct OnlineGameTile: View {
                         .clipped()
                         .cornerRadius(16)
 
-                    // Wifi / online badge — bottom-left
-                    HStack(spacing: 3) {
-                        Image(systemName: "wifi")
-                            .font(.system(size: 9, weight: .bold))
-                        Text("ONLINE")
-                            .font(.system(size: 9, weight: .bold, design: .rounded))
+                    // Favorite button (same as GridGameTile) when this game has a DeckType
+                    if let deckType = favoriteDeckType {
+                        Button(action: {
+                            favoritesManager.toggleFavorite(deckType)
+                        }) {
+                            Image(systemName: favoritesManager.isFavorite(deckType) ? "heart.fill" : "heart")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(favoritesManager.isFavorite(deckType) ? .primaryAccent : .white)
+                                .frame(width: 32, height: 32)
+                                .background(Color.black.opacity(0.3))
+                                .clipShape(Circle())
+                        }
+                        .padding(8)
                     }
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 4)
-                    .background(Color(red: 0x1A / 255.0, green: 0x8A / 255.0, blue: 0x4A / 255.0))
-                    .clipShape(Capsule())
-                    .padding(8)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
                 }
 
                 Text(game.title)

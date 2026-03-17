@@ -173,6 +173,18 @@ class TORGameManager: ObservableObject {
         return originalCardIndex
     }
     
+    /// Jump directly to a specific card index (used for online non-host sync).
+    func goToIndex(_ index: Int) {
+        guard index >= 0 && index < cards.count else { return }
+        isFlipped = false
+        hasSeenType = false
+        hasAccepted = false
+        switchedCardIndex = nil
+        originalCardIndex = index
+        currentIndex = index
+        isFinished = false
+    }
+
     var canSwitch: Bool {
         guard let currentCard = currentCard(),
               let currentType = currentCard.cardType else { return false }
