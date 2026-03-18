@@ -19,6 +19,10 @@ class SyncService: ObservableObject {
     /// Reflects the latest card index received from Firestore.
     @Published var remoteCardIndex: Int = 0
 
+    /// True when the Firestore listener has fired an error (e.g. connection lost).
+    /// Automatically clears when a successful snapshot is received.
+    @Published var connectionLost: Bool = false
+
     private var cardIndexListener: ListenerRegistration?
 
     private init() {}
@@ -45,14 +49,22 @@ class SyncService: ObservableObject {
         cardIndexListener = db.collection("rooms")
             .document(roomId)
             .addSnapshotListener { [weak self] snapshot, error in
+                guard let self else { return }
+
+                if error != nil {
+                    Task { @MainActor in
+                        self.connectionLost = true
+                    }
+                    return
+                }
+
                 guard
-                    let self,
-                    error == nil,
                     let data = snapshot?.data(),
                     let index = data["currentCardIndex"] as? Int
                 else { return }
 
                 Task { @MainActor in
+                    self.connectionLost = false
                     self.remoteCardIndex = index
                 }
             }
@@ -62,6 +74,7 @@ class SyncService: ObservableObject {
     func stopListening() {
         cardIndexListener?.remove()
         cardIndexListener = nil
+        connectionLost = false
     }
 
     deinit {

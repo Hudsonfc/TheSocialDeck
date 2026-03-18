@@ -112,6 +112,18 @@ class QuickfireCouplesGameManager: ObservableObject {
         }
     }
     
+    func goToIndex(_ index: Int) {
+        if index == cards.count {
+            isFlipped = false
+            isFinished = true
+            return
+        }
+        guard index >= 0 && index < cards.count else { return }
+        isFlipped = false
+        currentIndex = index
+        isFinished = false
+    }
+
     var canGoBack: Bool {
         return currentIndex > 0
     }

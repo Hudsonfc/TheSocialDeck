@@ -210,7 +210,7 @@ struct SettingsView: View {
 }
 
 // Preview of online game UI (non-host sees "Waiting for host to advance…")
-private let previewCategories = ["Party", "Wild", "Couples", "Social", "Dirty", "Friends"]
+private let previewCategories = ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family"]
 
 struct OnlineGameUIPreviewView: View {
     @StateObject private var manager: NHIEGameManager

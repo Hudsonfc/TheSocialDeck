@@ -11,6 +11,11 @@ struct QuickfireCouplesPlayView: View {
     @ObservedObject var manager: QuickfireCouplesGameManager
     let deck: Deck
     let selectedCategories: [String]
+    var roomId: String? = nil
+    var isHost: Bool = false
+    var players: [RoomPlayer]? = nil
+    var currentUserId: String? = nil
+    @ObservedObject private var syncService = SyncService.shared
     @Environment(\.dismiss) private var dismiss
     @AppStorage("swipeNavigationEnabled") private var swipeNavigationEnabled = false
     @AppStorage("totalCardsFlipped") private var totalCardsFlipped: Int = 0
@@ -89,8 +94,14 @@ struct QuickfireCouplesPlayView: View {
                 }
                 .responsiveHorizontalPadding()
                 .padding(.top, 20)
-                .padding(.bottom, 32)
-                
+                .padding(.bottom, 16)
+
+                // Online: player avatars + host/you indication
+                if let players = players, !players.isEmpty, roomId != nil {
+                    OnlinePlayerStripView(players: players, currentUserId: currentUserId)
+                        .padding(.bottom, 8)
+                }
+
                 Spacer()
                 
                 // "Quickfire Couples" label
@@ -129,7 +140,7 @@ struct QuickfireCouplesPlayView: View {
                         }
                     }
                     .gesture(
-                        swipeNavigationEnabled ? DragGesture()
+                        (swipeNavigationEnabled && (roomId == nil || isHost)) ? DragGesture()
                             .onChanged { value in
                                 if !isTransitioning {
                                     dragOffset = value.translation.width
@@ -154,17 +165,27 @@ struct QuickfireCouplesPlayView: View {
                 
                 Spacer()
                 
-                // Next button or swipe instruction - only show when an option is selected
-                if manager.isFlipped && selectedOption != nil {
-                    if swipeNavigationEnabled {
-                        // Swipe instruction text
-                        Text("Swipe right to go to next card or left to go to previous card")
+                // Next button or swipe instruction
+                if manager.isFlipped {
+                    if roomId != nil && !isHost {
+                        // Online non-host: host controls advancement
+                        Text("Waiting for host to advance…")
                             .font(.system(size: 14, weight: .regular, design: .rounded))
                             .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 40)
                             .padding(.bottom, 40)
-                    } else {
+                    } else if swipeNavigationEnabled {
+                        if selectedOption != nil {
+                            // Swipe instruction text
+                            Text("Swipe right to go to next card or left to go to previous card")
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
+                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 40)
+                                .padding(.bottom, 40)
+                        }
+                    } else if selectedOption != nil {
                         // Next button
                         Button(action: {
                             if manager.isFinished {
@@ -249,11 +270,22 @@ struct QuickfireCouplesPlayView: View {
             }
         }
         .onAppear {
-            // Initialize button state
+            if let roomId = roomId {
+                SyncService.shared.startListening(roomId: roomId)
+            }
             if manager.isFlipped && selectedOption != nil {
                 nextButtonOpacity = 1.0
                 nextButtonOffset = 0
             }
+        }
+        .onDisappear {
+            if roomId != nil {
+                SyncService.shared.stopListening()
+            }
+        }
+        .onChange(of: syncService.remoteCardIndex) { _, newIndex in
+            guard roomId != nil, !isHost, newIndex != manager.currentIndex else { return }
+            jumpToCard(newIndex)
         }
     }
     
@@ -308,6 +340,10 @@ struct QuickfireCouplesPlayView: View {
             
             // Now change the card
             manager.previousCard()
+
+            if let roomId = roomId, isHost {
+                Task { try? await SyncService.shared.updateCardIndex(roomId: roomId, index: manager.currentIndex) }
+            }
             
             // Small delay to ensure the card view has updated
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
@@ -353,6 +389,10 @@ struct QuickfireCouplesPlayView: View {
             
             // Now change the card
             manager.nextCard()
+
+            if let roomId = roomId, isHost {
+                Task { try? await SyncService.shared.updateCardIndex(roomId: roomId, index: manager.currentIndex) }
+            }
             
             // Small delay to ensure the card view has updated
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
@@ -364,6 +404,33 @@ struct QuickfireCouplesPlayView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     isTransitioning = false
                 }
+            }
+        }
+    }
+
+    private func jumpToCard(_ targetIndex: Int) {
+        guard !isTransitioning else { return }
+        let isForward = targetIndex >= manager.currentIndex
+        isTransitioning = true
+
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+            nextButtonOpacity = 0
+            nextButtonOffset = 20
+            cardRotation = 0
+        }
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+            cardOffset = isForward ? -500 : 500
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            if manager.isFlipped { manager.flipCard() }
+            selectedOption = nil
+            var transaction = Transaction(animation: .none)
+            withTransaction(transaction) { cardOffset = isForward ? 500 : -500 }
+            manager.goToIndex(targetIndex)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { cardOffset = 0 }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { isTransitioning = false }
             }
         }
     }

@@ -174,7 +174,16 @@ class TORGameManager: ObservableObject {
     }
     
     /// Jump directly to a specific card index (used for online non-host sync).
+    /// If index equals cards.count the host has finished, so mark this player finished too.
     func goToIndex(_ index: Int) {
+        if index == cards.count {
+            isFlipped = false
+            hasSeenType = false
+            hasAccepted = false
+            switchedCardIndex = nil
+            isFinished = true
+            return
+        }
         guard index >= 0 && index < cards.count else { return }
         isFlipped = false
         hasSeenType = false
