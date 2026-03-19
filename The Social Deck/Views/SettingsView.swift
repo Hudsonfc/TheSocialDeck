@@ -119,14 +119,7 @@ struct SettingsView: View {
                                 .cornerRadius(16)
                         }
                         .scaleEffect(rateUsButtonPressed ? 0.97 : 1.0)
-                        
-                        // Preview online game UI (see non-host "Waiting for host to advance…" state)
-                        SettingsNavigationButton(
-                            title: "Preview online game UI",
-                            destination: OnlineGameUIPreviewView(),
-                            isPressed: $previewOnlineUIButtonPressed
-                        )
-                        
+
                         // Spacer to push bottom buttons down
                         Spacer()
                             .frame(height: 40)
@@ -255,6 +248,161 @@ struct OnlineGameUIPreviewView: View {
             players: Self.previewPlayers,
             currentUserId: "previewYou"
         )
+    }
+}
+
+struct RiddleMeThisOnlineEndPreviewView: View {
+    var body: some View {
+        RiddleMeThisOnlineEndView(
+            players: rmtPreviewPlayers,
+            playerScores: rmtPreviewScores,
+            currentUserId: rmtPreviewCurrentUserId,
+            totalRounds: 10
+        )
+    }
+}
+
+private let rmtPreviewPlayers: [RoomPlayer] = [
+    RoomPlayer(id: "rmtPreview1", username: "Maya", avatarType: "avatar 1", avatarColor: "yellow", isReady: true, isHost: true),
+    RoomPlayer(id: "rmtPreview2", username: "Chris", avatarType: "avatar 2", avatarColor: "blue", isReady: true, isHost: false),
+    RoomPlayer(id: "rmtPreview3", username: "Jordan", avatarType: "avatar 3", avatarColor: "green", isReady: true, isHost: false),
+    RoomPlayer(id: "rmtPreview4", username: "Taylor", avatarType: "avatar 4", avatarColor: "red", isReady: true, isHost: false)
+]
+
+private let rmtPreviewScores: [String: Int] = [
+    "rmtPreview2": 9, // 1st — gold
+    "rmtPreview4": 7, // 2nd — silver
+    "rmtPreview1": 5, // 3rd — bronze
+    "rmtPreview3": 3
+]
+
+private let rmtPreviewPreviousScores: [String: Int] = [
+    "rmtPreview2": 8, // +1
+    "rmtPreview4": 8, // -1
+    "rmtPreview1": 4, // +1
+    "rmtPreview3": 4  // -1
+]
+
+private let rmtPreviewAnswers: [String: String] = [
+    "rmtPreview1": "I think it is a penguin",
+    "rmtPreview2": "Penguin",
+    "rmtPreview3": "Maybe a polar bear?",
+    "rmtPreview4": "A penguin for sure"
+]
+
+private let rmtPreviewCurrentUserId = "rmtPreview4"
+private let rmtPreviewCorrectAnswer = "penguin"
+
+struct RiddleMeThisRoundResultsPreviewView: View {
+    @State private var displayedScores: [String: Int] = rmtPreviewPreviousScores
+    @State private var hasAnimatedScores = false
+
+    var body: some View {
+        ZStack {
+            Color.appBackground.ignoresSafeArea()
+
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 20) {
+                    VStack(spacing: 6) {
+                        Text("The Answer")
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .foregroundColor(.secondaryText)
+                        Text("Penguin")
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .foregroundColor(.primaryText)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 16)
+                    }
+                    .padding(.vertical, 20)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.secondaryBackground)
+                    .cornerRadius(16)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+
+                    VStack(spacing: 10) {
+                        ForEach(rmtPreviewPlayers) { player in
+                            rmtRoundResultRow(player)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                }
+                .padding(.bottom, 24)
+            }
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            guard !hasAnimatedScores else { return }
+            hasAnimatedScores = true
+            for (index, player) in rmtPreviewPlayers.enumerated() {
+                let target = rmtPreviewScores[player.id] ?? 0
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15 + (Double(index) * 0.12)) {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) {
+                        displayedScores[player.id] = target
+                    }
+                }
+            }
+        }
+    }
+
+    private func rmtRoundResultRow(_ player: RoomPlayer) -> some View {
+        let submitted = rmtPreviewAnswers[player.id]
+        let score = displayedScores[player.id] ?? 0
+        let previousScore = rmtPreviewPreviousScores[player.id] ?? 0
+        let finalScore = rmtPreviewScores[player.id] ?? 0
+        let scoreDelta = finalScore - previousScore
+        let isCorrect = (submitted ?? "")
+            .lowercased()
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .contains(rmtPreviewCorrectAnswer)
+        let isYou = player.id == rmtPreviewCurrentUserId
+
+        return HStack(spacing: 12) {
+            AvatarView(avatarType: player.avatarType, avatarColor: player.avatarColor, size: 40)
+
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 4) {
+                    Text(player.username)
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundColor(.primaryText)
+                    if isYou {
+                        Text("(You)")
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                            .foregroundColor(.secondaryText)
+                    }
+                }
+
+                Text(submitted ?? "No answer")
+                    .font(.system(size: 13, weight: .regular, design: .rounded))
+                    .foregroundColor(.secondaryText)
+                    .lineLimit(2)
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 2) {
+                Image(systemName: isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(isCorrect ? .green : .red)
+
+                if scoreDelta != 0 {
+                    Text(scoreDelta > 0 ? "+\(scoreDelta)" : "\(scoreDelta)")
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .foregroundColor(scoreDelta > 0 ? .green : .red)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background((scoreDelta > 0 ? Color.green : Color.red).opacity(0.12))
+                        .clipShape(Capsule())
+                }
+
+                Text("\(score) pt\(score == 1 ? "" : "s")")
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .foregroundColor(.secondaryText)
+            }
+        }
+        .padding(12)
+        .background(Color.secondaryBackground)
+        .cornerRadius(12)
     }
 }
 

@@ -75,6 +75,20 @@ class SpillTheExGameManager: ObservableObject {
         }
     }
 
+    // Used by online non-hosts to jump to the host's current card index.
+    // Mirrors the classic games behavior where `index == cards.count` represents "finished".
+    func goToIndex(_ index: Int) {
+        if index == cards.count {
+            isFlipped = false
+            isFinished = true
+            return
+        }
+        guard index >= 0 && index < cards.count else { return }
+        isFlipped = false
+        currentIndex = index
+        isFinished = false
+    }
+
     var canGoBack: Bool {
         return currentIndex > 0
     }

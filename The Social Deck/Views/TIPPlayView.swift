@@ -11,6 +11,11 @@ struct TIPPlayView: View {
     @ObservedObject var manager: TIPGameManager
     let deck: Deck
     let selectedCategories: [String]
+    var roomId: String? = nil
+    var isHost: Bool = false
+    var players: [RoomPlayer]? = nil
+    var currentUserId: String? = nil
+    @ObservedObject private var syncService = SyncService.shared
     @Environment(\.dismiss) private var dismiss
     @AppStorage("swipeNavigationEnabled") private var swipeNavigationEnabled = false
     @AppStorage("totalCardsFlipped") private var totalCardsFlipped: Int = 0
@@ -58,7 +63,7 @@ struct TIPPlayView: View {
                     .padding(.leading, 12)
                     
                     // Back button
-                    if manager.canGoBack {
+                    if manager.canGoBack && (roomId == nil || isHost) {
                         Button(action: {
                             previousCard()
                         }) {
@@ -86,7 +91,13 @@ struct TIPPlayView: View {
                 }
                 .responsiveHorizontalPadding()
                 .padding(.top, 20)
-                .padding(.bottom, 32)
+                .padding(.bottom, 16)
+
+                // Online: player avatars + host/you indication
+                if let players = players, !players.isEmpty, roomId != nil {
+                    OnlinePlayerStripView(players: players, currentUserId: currentUserId)
+                        .padding(.bottom, 8)
+                }
                 
                 Spacer()
                 
@@ -121,7 +132,7 @@ struct TIPPlayView: View {
                     }
                 }
                 .gesture(
-                    swipeNavigationEnabled ? DragGesture()
+                    (swipeNavigationEnabled && (roomId == nil || isHost)) ? DragGesture()
                         .onChanged { value in
                             if !isTransitioning {
                                 dragOffset = value.translation.width
@@ -147,7 +158,14 @@ struct TIPPlayView: View {
                 
                 // Next button or swipe instruction (shown when card is flipped)
                 if manager.isFlipped {
-                    if swipeNavigationEnabled {
+                    if roomId != nil && !isHost {
+                        Text("Waiting for host to advance…")
+                            .font(.system(size: 14, weight: .regular, design: .rounded))
+                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                            .padding(.bottom, 40)
+                    } else if swipeNavigationEnabled {
                         // Swipe instruction text
                         Text("Swipe right to go to next card or left to go to previous card")
                             .font(.system(size: 14, weight: .regular, design: .rounded))
@@ -237,11 +255,23 @@ struct TIPPlayView: View {
             }
         }
         .onAppear {
+            if let roomId = roomId {
+                SyncService.shared.startListening(roomId: roomId)
+            }
             // Initialize button state
             if manager.isFlipped {
                 nextButtonOpacity = 1.0
                 nextButtonOffset = 0
             }
+        }
+        .onDisappear {
+            if roomId != nil {
+                SyncService.shared.stopListening()
+            }
+        }
+        .onChange(of: syncService.remoteCardIndex) { _, newIndex in
+            guard roomId != nil, !isHost, newIndex != manager.currentIndex else { return }
+            jumpToCard(newIndex)
         }
     }
     
@@ -269,6 +299,8 @@ struct TIPPlayView: View {
     }
     
     private func previousCard() {
+        // Online non-hosts can flip/reveal locally, but card progression is host-controlled.
+        if roomId != nil && !isHost { return }
         isTransitioning = true
         
         // Reset rotation and hide buttons
@@ -296,6 +328,10 @@ struct TIPPlayView: View {
             
             // Now change the card
             manager.previousCard()
+
+            if let roomId = roomId, isHost {
+                Task { try? await SyncService.shared.updateCardIndex(roomId: roomId, index: manager.currentIndex) }
+            }
             
             // Small delay to ensure the card view has updated
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
@@ -312,6 +348,8 @@ struct TIPPlayView: View {
     }
     
     private func nextCard() {
+        // Online non-hosts can flip/reveal locally, but card progression is host-controlled.
+        if roomId != nil && !isHost { return }
         isTransitioning = true
         
         // Fade out button and reset rotation
@@ -340,6 +378,11 @@ struct TIPPlayView: View {
             
             // Now change the card
             manager.nextCard()
+
+            if let roomId = roomId, isHost {
+                let indexToSend = manager.isFinished ? manager.cards.count : manager.currentIndex
+                Task { try? await SyncService.shared.updateCardIndex(roomId: roomId, index: indexToSend) }
+            }
             
             // Small delay to ensure the card view has updated
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
@@ -351,6 +394,35 @@ struct TIPPlayView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     isTransitioning = false
                 }
+            }
+        }
+    }
+
+    // Animates directly to a target index (used for online non-host sync).
+    private func jumpToCard(_ targetIndex: Int) {
+        guard !isTransitioning else { return }
+        let isForward = targetIndex >= manager.currentIndex
+        isTransitioning = true
+
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+            nextButtonOpacity = 0
+            nextButtonOffset = 20
+            cardRotation = 0
+        }
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+            cardOffset = isForward ? -500 : 500
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            if manager.isFlipped { manager.flipCard() }
+
+            var transaction = Transaction(animation: .none)
+            withTransaction(transaction) { cardOffset = isForward ? 500 : -500 }
+            manager.goToIndex(targetIndex)
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { cardOffset = 0 }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { isTransitioning = false }
             }
         }
     }

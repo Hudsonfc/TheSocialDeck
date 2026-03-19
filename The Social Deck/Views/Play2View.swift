@@ -1086,7 +1086,9 @@ struct GameDescriptionOverlay: View {
         deck.type == .neverHaveIEver || deck.type == .truthOrDare ||
         deck.type == .wouldYouRather || deck.type == .mostLikelyTo ||
         deck.type == .quickfireCouples || deck.type == .closerThanEver ||
-        deck.type == .usAfterDark
+        deck.type == .usAfterDark ||
+        deck.type == .spillTheEx || deck.type == .takeItPersonally ||
+        deck.type == .riddleMeThis
     }
 
     var body: some View {
@@ -1315,17 +1317,46 @@ struct GameDescriptionOverlay: View {
                         .responsiveHorizontalPadding()
                         .padding(.bottom, 40)
                     } else if deck.type == .riddleMeThis {
-                        PrimaryButton(title: "Play") {
-                            // Dismiss overlay immediately, then navigate
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                selectedDeck = nil
+                        VStack(spacing: 12) {
+                            PrimaryButton(title: "Play Local") {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                    selectedDeck = nil
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    navigateToRiddleMeThisSetup = deck
+                                }
                             }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                navigateToRiddleMeThisSetup = deck
+                            Button {
+                                HapticManager.shared.lightImpact()
+                                if authManager.isAuthenticated {
+                                    navigateToOnline = true
+                                } else {
+                                    showOnlineSignInAlert = true
+                                }
+                            } label: {
+                                Text("Play Online")
+                                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.primaryAccent)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 16)
+                                    .background(Color.appBackground)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 30)
+                                            .stroke(Color.primaryAccent, lineWidth: 2)
+                                    )
+                                    .clipShape(Capsule())
                             }
                         }
                         .responsiveHorizontalPadding()
                         .padding(.bottom, 40)
+                        .alert("Sign in to play online", isPresented: $showOnlineSignInAlert) {
+                            Button("Cancel", role: .cancel) {}
+                            NavigationLink(destination: SignInView()) {
+                                Text("Sign In")
+                            }
+                        } message: {
+                            Text("You need a free account to create or join online rooms.")
+                        }
                     } else if deck.type == .actNatural {
                         PrimaryButton(title: "Play") {
                             // Navigate first, then dismiss overlay after navigation completes

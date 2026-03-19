@@ -61,7 +61,7 @@ struct CloserThanEverPlayView: View {
                     .padding(.leading, 12)
                     
                     // Back button
-                    if manager.canGoBack {
+                    if manager.canGoBack && (roomId == nil || isHost) {
                         Button(action: {
                             previousCard()
                         }) {
@@ -274,6 +274,8 @@ struct CloserThanEverPlayView: View {
     }
     
     private func previousCard() {
+        // Online non-hosts can flip/reveal locally, but card progression is host-controlled.
+        if roomId != nil && !isHost { return }
         isTransitioning = true
         
         // Reset rotation
@@ -320,6 +322,8 @@ struct CloserThanEverPlayView: View {
     }
     
     private func nextCard() {
+        // Online non-hosts can flip/reveal locally, but card progression is host-controlled.
+        if roomId != nil && !isHost { return }
         isTransitioning = true
         
         // Reset rotation

@@ -77,6 +77,25 @@ class TIPGameManager: ObservableObject {
             isFlipped = false
         }
     }
+
+    // Used by online non-hosts to jump to the host's current card index.
+    // For this game, the finished sentinel is `index == cards.count` (same rule as the classic games).
+    func goToIndex(_ index: Int) {
+        guard !cards.isEmpty else { return }
+
+        if index == cards.count {
+            isFlipped = false
+            isFinished = true
+            // Keep index within bounds so `currentCard` never crashes.
+            currentIndex = min(currentIndex, cards.count - 1)
+            return
+        }
+
+        guard index >= 0 && index < cards.count else { return }
+        currentIndex = index
+        isFlipped = false
+        isFinished = false
+    }
     
     var canGoBack: Bool {
         return currentIndex > 0

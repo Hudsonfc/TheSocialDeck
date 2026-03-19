@@ -64,7 +64,7 @@ struct QuickfireCouplesPlayView: View {
                     .padding(.leading, 12)
                     
                     // Back button
-                    if manager.canGoBack {
+                    if manager.canGoBack && (roomId == nil || isHost) {
                         Button(action: {
                             previousCard()
                         }) {
@@ -313,6 +313,8 @@ struct QuickfireCouplesPlayView: View {
     }
     
     private func previousCard() {
+        // Online non-hosts can flip/reveal locally, but card progression is host-controlled.
+        if roomId != nil && !isHost { return }
         isTransitioning = true
         
         // Reset rotation
@@ -360,6 +362,8 @@ struct QuickfireCouplesPlayView: View {
     }
     
     private func nextCard() {
+        // Online non-hosts can flip/reveal locally, but card progression is host-controlled.
+        if roomId != nil && !isHost { return }
         isTransitioning = true
         
         // Fade out button and reset rotation

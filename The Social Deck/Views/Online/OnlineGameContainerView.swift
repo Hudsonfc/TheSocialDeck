@@ -13,6 +13,9 @@ import SwiftUI
 
 private let onlineClassicCategories = ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family"]
 
+private let onlineSpillTheExCategories = ["Confessions", "Situationship", "The Breakup", "Wild Side"]
+private let onlineTIPCategories = ["Party", "Wild", "Friends", "Couples"]
+
 private struct OnlineNHIEView: View {
     let roomCode: String
     let isHost: Bool
@@ -272,12 +275,150 @@ private struct OnlineUADView: View {
     }
 }
 
+private struct OnlineSpillTheExView: View {
+    let roomCode: String
+    let isHost: Bool
+    let players: [RoomPlayer]
+    let currentUserId: String?
+    let cardCount: Int
+
+    @StateObject private var manager: SpillTheExGameManager
+
+    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil) {
+        self.roomCode = roomCode
+        self.isHost = isHost
+        self.players = players
+        self.currentUserId = currentUserId
+        self.cardCount = cardCount ?? 0
+
+        let deck = Deck(
+            title: "Spill the Ex",
+            description: "Hot takes about past relationships.",
+            numberOfCards: allSpillTheExCards.count,
+            estimatedTime: "20-30 min",
+            imageName: "Spill the Ex",
+            type: .spillTheEx,
+            cards: allSpillTheExCards,
+            availableCategories: onlineSpillTheExCategories
+        )
+        _manager = StateObject(wrappedValue: SpillTheExGameManager(deck: deck, selectedCategories: onlineSpillTheExCategories, cardCount: cardCount ?? 0))
+    }
+
+    var body: some View {
+        let deck = Deck(
+            title: "Spill the Ex",
+            description: "",
+            numberOfCards: allSpillTheExCards.count,
+            estimatedTime: "20-30 min",
+            imageName: "Spill the Ex",
+            type: .spillTheEx,
+            cards: allSpillTheExCards,
+            availableCategories: onlineSpillTheExCategories
+        )
+        SpillTheExPlayView(
+            manager: manager,
+            deck: deck,
+            selectedCategories: onlineSpillTheExCategories,
+            roomId: roomCode,
+            isHost: isHost,
+            players: players,
+            currentUserId: currentUserId
+        )
+    }
+}
+
+private struct OnlineTIPView: View {
+    let roomCode: String
+    let isHost: Bool
+    let players: [RoomPlayer]
+    let currentUserId: String?
+    let cardCount: Int
+
+    @StateObject private var manager: TIPGameManager
+
+    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil) {
+        self.roomCode = roomCode
+        self.isHost = isHost
+        self.players = players
+        self.currentUserId = currentUserId
+        self.cardCount = cardCount ?? 0
+
+        let deck = Deck(
+            title: "Take It Personally",
+            description: "Bold statements about the group",
+            numberOfCards: allTIPCards.count,
+            estimatedTime: "20-30 min",
+            imageName: "take it personally",
+            type: .takeItPersonally,
+            cards: allTIPCards,
+            availableCategories: onlineTIPCategories
+        )
+        _manager = StateObject(wrappedValue: TIPGameManager(deck: deck, selectedCategories: onlineTIPCategories, cardCount: cardCount ?? 0))
+    }
+
+    var body: some View {
+        let deck = Deck(
+            title: "Take It Personally",
+            description: "",
+            numberOfCards: allTIPCards.count,
+            estimatedTime: "20-30 min",
+            imageName: "take it personally",
+            type: .takeItPersonally,
+            cards: allTIPCards,
+            availableCategories: onlineTIPCategories
+        )
+        TIPPlayView(
+            manager: manager,
+            deck: deck,
+            selectedCategories: onlineTIPCategories,
+            roomId: roomCode,
+            isHost: isHost,
+            players: players,
+            currentUserId: currentUserId
+        )
+    }
+}
+
+private struct OnlineRMTView: View {
+    let roomCode: String
+    let isHost: Bool
+    let players: [RoomPlayer]
+    let currentUserId: String?
+    let cardCount: Int
+
+    /// Deterministic card ordering keyed to the room code so all devices agree.
+    private let cards: [Card]
+
+    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil) {
+        self.roomCode = roomCode
+        self.isHost = isHost
+        self.players = players
+        self.currentUserId = currentUserId
+        let count = cardCount ?? 0
+        let shuffled = riddleDeterministicShuffle(allRiddleMeThisCards, roomCode: roomCode)
+        self.cardCount = count
+        self.cards = count > 0 ? Array(shuffled.prefix(count)) : shuffled
+    }
+
+    var body: some View {
+        RiddleMeThisOnlinePlayView(
+            roomCode: roomCode,
+            isHost: isHost,
+            players: players,
+            currentUserId: currentUserId,
+            cards: cards
+        )
+    }
+}
+
 // MARK: -
 
 struct OnlineGameContainerView: View {
     @StateObject private var onlineManager = OnlineManager.shared
     @StateObject private var authManager = AuthManager.shared
     @ObservedObject private var syncService = SyncService.shared
+    // RMT uses its own sync service; observe it so the connection banner fires for that game too
+    @ObservedObject private var rmtSyncService = RiddleMeThisOnlineSyncService.shared
     @State private var showWalkthrough = false
     @State private var showLoadingScreen = false
     @State private var hasShownLoading = false
@@ -348,6 +489,12 @@ struct OnlineGameContainerView: View {
                         OnlineCTEView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
                     case "usAfterDark":
                         OnlineUADView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
+                    case "spillTheEx":
+                        OnlineSpillTheExView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
+                    case "takeItPersonally":
+                        OnlineTIPView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
+                    case "riddleMeThis":
+                        OnlineRMTView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
                     case "storyChain", "twoTruthsAndALie":
                         OnlineSyncedClassicGameView(
                             roomCode: room.roomCode,
@@ -378,8 +525,10 @@ struct OnlineGameContainerView: View {
                 }
             }
 
-            // Fix 2: connection-lost banner — shown to non-hosts when SyncService loses Firestore
-            if syncService.connectionLost && !onlineManager.isHost {
+            // Fix 2: connection-lost banner — shown to non-hosts when Firestore drops.
+            // Classic games use SyncService; Riddle Me This uses its own sync service.
+            // Both are checked so the banner fires regardless of which game type is active.
+            if (syncService.connectionLost || rmtSyncService.connectionLost) && !onlineManager.isHost {
                 connectionLostBanner
                     .zIndex(1)
                     .transition(.move(edge: .top).combined(with: .opacity))

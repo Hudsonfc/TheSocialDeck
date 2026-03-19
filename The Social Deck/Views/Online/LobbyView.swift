@@ -132,7 +132,8 @@ struct LobbyView: View {
     /// Game types that support "cards to play" setting in the lobby
     private static let classicGameTypesWithCardCount: Set<String> = [
         "neverHaveIEver", "truthOrDare", "wouldYouRather", "mostLikelyTo",
-        "quickfireCouples", "closerThanEver", "usAfterDark"
+        "quickfireCouples", "closerThanEver", "usAfterDark",
+        "spillTheEx", "takeItPersonally", "riddleMeThis"
     ]
 
     private var isClassicGameWithCardCount: Bool {

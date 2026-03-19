@@ -63,7 +63,7 @@ struct MLTPlayView: View {
                     .padding(.leading, 12)
                     
                     // Back button
-                    if manager.canGoBack {
+                    if manager.canGoBack && (roomId == nil || isHost) {
                         Button(action: {
                             previousCard()
                         }) {
@@ -288,6 +288,8 @@ struct MLTPlayView: View {
     }
     
     private func previousCard() {
+        // Online non-hosts can flip/reveal locally, but card progression is host-controlled.
+        if roomId != nil && !isHost { return }
         isTransitioning = true
 
         withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) { cardRotation = 0 }
@@ -311,6 +313,8 @@ struct MLTPlayView: View {
     }
 
     private func nextCard() {
+        // Online non-hosts can flip/reveal locally, but card progression is host-controlled.
+        if roomId != nil && !isHost { return }
         isTransitioning = true
 
         withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
