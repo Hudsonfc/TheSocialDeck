@@ -16,8 +16,6 @@ struct SettingsView: View {
     @State private var feedbackButtonPressed = false
     @State private var rateUsButtonPressed = false
     @State private var previewOnlineUIButtonPressed = false
-    @State private var riddleHostRoundSimulationPressed = false
-    @State private var riddleNonHostRoundSimulationPressed = false
     @State private var showPlusPaywall = false
     
     // App version info
@@ -121,18 +119,6 @@ struct SettingsView: View {
                                 .cornerRadius(16)
                         }
                         .scaleEffect(rateUsButtonPressed ? 0.97 : 1.0)
-
-                        SettingsNavigationButton(
-                            title: "Simulate a Round (Host)",
-                            destination: RiddleMeThisHostRoundSimulationView(),
-                            isPressed: $riddleHostRoundSimulationPressed
-                        )
-
-                        SettingsNavigationButton(
-                            title: "Simulate a Round (Non-Host)",
-                            destination: RiddleMeThisHostRoundSimulationView(isHostPerspective: false),
-                            isPressed: $riddleNonHostRoundSimulationPressed
-                        )
 
                         // Spacer to push bottom buttons down
                         Spacer()
