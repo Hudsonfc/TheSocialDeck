@@ -23,6 +23,10 @@ class OnlineManager: ObservableObject {
     
     nonisolated(unsafe) private var roomListener: ListenerRegistration?
     private var isLeavingRoom = false
+
+    /// Stale-room cleanup runs at most once per signed-in user per app process.
+    private static var staleRoomCleanupCompletedForUserId: String?
+    private var scheduledPostGameRoomDeletionTask: Task<Void, Never>?
     
     private init() {}
     
@@ -149,6 +153,7 @@ class OnlineManager: ObservableObject {
     func leaveRoom() async {
         guard let roomCode = currentRoom?.roomCode,
               let userId = authManager.userProfile?.userId else {
+            cancelScheduledPostGameRoomDeletion()
             cleanup()
             return
         }
@@ -156,6 +161,7 @@ class OnlineManager: ObservableObject {
         isLeavingRoom = true
         isLoading = true
         errorMessage = nil
+        cancelScheduledPostGameRoomDeletion()
         
         do {
             try await onlineService.leaveRoom(roomCode: roomCode, playerId: userId)
@@ -168,6 +174,45 @@ class OnlineManager: ObservableObject {
         
         isLoading = false
         isLeavingRoom = false
+    }
+
+    // MARK: - Stale rooms (launch)
+
+    /// Runs `OnlineService.cleanupStaleRooms()` once per app launch for each signed-in user.
+    func cleanupStaleRoomsOnLaunchIfNeeded() async {
+        guard authManager.isAuthenticated, let uid = authManager.userProfile?.userId else { return }
+        guard Self.staleRoomCleanupCompletedForUserId != uid else { return }
+        Self.staleRoomCleanupCompletedForUserId = uid
+        do {
+            try await onlineService.cleanupStaleRooms()
+        } catch {
+            // Non-fatal; avoid surfacing to the user on launch
+        }
+    }
+
+    // MARK: - Post–game-end room deletion (host)
+
+    /// After a natural game end, delete the Firestore room after `delaySeconds` so players can finish the end screen.
+    /// Only the host schedules this; deletion re-verifies host on the server read.
+    func scheduleRoomDeletionAfterGameEnd(roomCode: String, delaySeconds: UInt64 = 60) {
+        guard isHost else { return }
+        scheduledPostGameRoomDeletionTask?.cancel()
+        let code = roomCode
+        scheduledPostGameRoomDeletionTask = Task {
+            try? await Task.sleep(nanoseconds: delaySeconds * 1_000_000_000)
+            guard !Task.isCancelled else { return }
+            try? await onlineService.deleteRoomDocumentIfCurrentUserIsHost(roomCode: code)
+            await MainActor.run {
+                if OnlineManager.shared.currentRoom?.roomCode == code {
+                    OnlineManager.shared.cleanup()
+                }
+            }
+        }
+    }
+
+    func cancelScheduledPostGameRoomDeletion() {
+        scheduledPostGameRoomDeletionTask?.cancel()
+        scheduledPostGameRoomDeletionTask = nil
     }
     
     // MARK: - Player Actions
@@ -372,6 +417,7 @@ class OnlineManager: ObservableObject {
     
     /// Cleans up room state and listeners
     func cleanup() {
+        cancelScheduledPostGameRoomDeletion()
         removeRoomListener()
         currentRoom = nil
         isConnected = false

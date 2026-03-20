@@ -458,11 +458,21 @@ struct RiddleMeThisOnlinePlayView: View {
                             PrimaryButton(title: "End Game") {
                                 HapticManager.shared.mediumImpact()
                                 Task {
-                                    try? await syncService.endGame(roomId: roomCode)
-                                }
-                                // Host navigates immediately after writing
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                    showEndView = true
+                                    var didEnd = false
+                                    do {
+                                        try await syncService.endGame(roomId: roomCode)
+                                        didEnd = true
+                                    } catch {
+                                        didEnd = false
+                                    }
+                                    await MainActor.run {
+                                        if didEnd {
+                                            OnlineManager.shared.scheduleRoomDeletionAfterGameEnd(roomCode: roomCode)
+                                        }
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                            showEndView = true
+                                        }
+                                    }
                                 }
                             }
                         } else {

@@ -128,6 +128,8 @@ class AuthManager: ObservableObject {
                 self.userProfile = try document.data(as: UserProfile.self)
                     // Link Game Center player ID if authenticated with Game Center but not linked yet
                     await self.linkGameCenterIfNeeded()
+                    // One-time stale room cleanup for this signed-in user (client-side)
+                    await OnlineManager.shared.cleanupStaleRoomsOnLaunchIfNeeded()
             } catch {
                 self.errorMessage = "Failed to decode profile: \(error.localizedDescription)"
                 }

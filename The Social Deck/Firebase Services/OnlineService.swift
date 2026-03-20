@@ -127,6 +127,7 @@ class OnlineService {
     // MARK: - Room Leaving
     
     /// Leaves a room (removes player from room)
+    /// Host leaving deletes the entire room document (dissolves the room for everyone).
     func leaveRoom(roomCode: String, playerId: String) async throws {
         let roomRef = db.collection("rooms").document(roomCode)
         let snapshot = try await roomRef.getDocument()
@@ -136,36 +137,23 @@ class OnlineService {
             return
         }
         
-        // Remove player from room
+        // Host leaving: delete room immediately (no host transfer)
+        if room.hostId == playerId {
+            try await roomRef.delete()
+            return
+        }
+        
+        // Non-host: remove self from players
         room.players.removeAll { $0.id == playerId }
         
-        // If room is empty, delete it
         if room.players.isEmpty {
             try await roomRef.delete()
             return
         }
         
-        // If host left, transfer host to next player (or first player)
-        if room.hostId == playerId {
-            room.hostId = room.players.first?.id ?? ""
-            // Update the first player to be host
-            if var firstPlayer = room.players.first {
-                firstPlayer.isHost = true
-                room.players[0] = firstPlayer
-            }
-            
-            let encoder = Firestore.Encoder()
-            let playersData = try room.players.map { try encoder.encode($0) }
-            try await roomRef.updateData([
-                "players": playersData,
-                "hostId": room.hostId
-            ])
-        } else {
-            // Just update players array
-            let encoder = Firestore.Encoder()
-            let playersData = try room.players.map { try encoder.encode($0) }
-            try await roomRef.updateData(["players": playersData])
-        }
+        let encoder = Firestore.Encoder()
+        let playersData = try room.players.map { try encoder.encode($0) }
+        try await roomRef.updateData(["players": playersData])
     }
     
     // MARK: - Room Updates
@@ -649,6 +637,18 @@ class OnlineService {
         
         try await roomRef.delete()
     }
+
+    /// Deletes the room if the signed-in user is still the host (used after game end delay; may delete while `inGame`).
+    func deleteRoomDocumentIfCurrentUserIsHost(roomCode: String) async throws {
+        guard let currentUserId = auth.currentUser?.uid else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])
+        }
+        let roomRef = db.collection("rooms").document(roomCode)
+        let snapshot = try await roomRef.getDocument()
+        guard snapshot.exists, let room = try? snapshot.data(as: OnlineRoom.self) else { return }
+        guard room.hostId == currentUserId else { return }
+        try await roomRef.delete()
+    }
     
     // MARK: - Player Management
     
@@ -678,24 +678,37 @@ class OnlineService {
         try await roomRef.updateData(["players": playersData])
     }
     
-    // MARK: - Room Timeout
-    
-    /// Check and clean up inactive rooms (should be called periodically)
-    /// Note: This should ideally be handled by a Cloud Function
-    func cleanupInactiveRooms(inactivityTimeout: TimeInterval = 3600) async throws {
-        // Clean up rooms that have been inactive for more than 1 hour
-        let cutoffDate = Date().addingTimeInterval(-inactivityTimeout)
-        let cutoffTimestamp = Timestamp(date: cutoffDate)
-        
-        let query = db.collection("rooms")
-            .whereField("status", isEqualTo: RoomStatus.waiting.rawValue)
-            .whereField("createdAt", isLessThan: cutoffTimestamp)
-        
-        let snapshot = try await query.getDocuments()
-        
+    // MARK: - Stale room cleanup (client-side)
+
+    /// Deletes **only** rooms where `createdBy` is the current user. Never touches other users' rooms.
+    /// Never deletes rooms with status `inGame`.
+    ///
+    /// Deletes when ANY applies:
+    /// - (`waiting` or `ended`) AND `createdAt` older than 2 hours
+    /// - `waiting` AND at most 1 player AND `createdAt` older than 30 minutes
+    func cleanupStaleRooms() async throws {
+        guard let uid = auth.currentUser?.uid else { return }
+
+        let snapshot = try await db.collection("rooms")
+            .whereField("createdBy", isEqualTo: uid)
+            .getDocuments()
+
+        let now = Date()
+        let twoHoursAgo = now.addingTimeInterval(-2 * 60 * 60)
+        let thirtyMinutesAgo = now.addingTimeInterval(-30 * 60)
+
         for doc in snapshot.documents {
-            // Check if room has no players or is old
-            if let room = try? doc.data(as: OnlineRoom.self), room.players.isEmpty || room.createdAt < cutoffDate {
+            guard let room = try? doc.data(as: OnlineRoom.self) else { continue }
+            guard room.createdBy == uid else { continue }
+            if room.status == .inGame { continue }
+
+            let created = room.createdAt
+            let playerCount = room.players.count
+
+            let oldWaitingOrEnded = (room.status == .waiting || room.status == .ended) && created < twoHoursAgo
+            let sparseWaitingLobby = room.status == .waiting && playerCount <= 1 && created < thirtyMinutesAgo
+
+            if oldWaitingOrEnded || sparseWaitingLobby {
                 try await doc.reference.delete()
             }
         }

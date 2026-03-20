@@ -14,6 +14,7 @@ struct OnlineColorClashPlayView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedCardIds: Set<String> = []
     @State private var showWinnerView: Bool = false
+    @State private var didSchedulePostGameRoomDeletion: Bool = false
     @State private var hasDrawnThisTurn: Bool = false
     @State private var flyingCard: ColorClashCard?
     @State private var flyingCardOffset: CGSize = .zero
@@ -141,6 +142,10 @@ struct OnlineColorClashPlayView: View {
             if winnerId != nil {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     showWinnerView = true
+                }
+                if onlineManager.isHost && !didSchedulePostGameRoomDeletion {
+                    didSchedulePostGameRoomDeletion = true
+                    onlineManager.scheduleRoomDeletionAfterGameEnd(roomCode: roomCode)
                 }
             }
         }
