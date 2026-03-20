@@ -9,6 +9,7 @@
 
 import SwiftUI
 import UIKit
+import Combine
 
 struct RiddleMeThisOnlinePlayView: View {
     let roomCode: String
@@ -26,6 +27,13 @@ struct RiddleMeThisOnlinePlayView: View {
     @State private var showHomeAlert: Bool = false
     @State private var navigateToHome: Bool = false
     @State private var showEndView: Bool = false
+    /// Prevents double reveal when timer fires and host also taps Show Answer.
+    @State private var didRevealThisRound: Bool = false
+    /// Displayed scores animated per-row when results appear.
+    @State private var displayedResultScores: [String: Int] = [:]
+    @State private var didAnimateResultScores: Bool = false
+    @State private var showAnswerInputArea: Bool = false
+    @State private var showTimerChip: Bool = false
 
     // MARK: - Derived helpers
 
@@ -79,6 +87,10 @@ struct RiddleMeThisOnlinePlayView: View {
                         answeringPhaseView
                     case "results":
                         resultsPhaseView
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .trailing).combined(with: .opacity),
+                                removal: .move(edge: .leading).combined(with: .opacity)
+                            ))
                     case "ended":
                         // Phase-change handler navigates; show spinner while transitioning
                         ProgressView()
@@ -114,10 +126,45 @@ struct RiddleMeThisOnlinePlayView: View {
         .onChange(of: syncService.currentRiddleIndex) { _ in
             withAnimation(.none) { cardRotation = 0 }
             answerText = ""
+            didRevealThisRound = false
+            displayedResultScores = [:]
+            didAnimateResultScores = false
         }
         // Non-host end-of-game: host sets phase to "ended"
         .onChange(of: syncService.roundPhase) { phase in
             if phase == "ended" { showEndView = true }
+            if phase == "answering" { didRevealThisRound = false }
+            if phase != "answering" {
+                showAnswerInputArea = false
+                showTimerChip = false
+            }
+            if phase == "results" {
+                didRevealThisRound = true
+                // Snapshot pre-reveal scores (all zeroed for this round start), animate to final.
+                displayedResultScores = syncService.playerScores
+                didAnimateResultScores = false
+                animateOnlineResultScores()
+            }
+        }
+        // Host: auto Show Answer when synced countdown reaches zero
+        .onReceive(Timer.publish(every: 0.25, on: .main, in: .common).autoconnect()) { _ in
+            guard isHost, !didRevealThisRound else { return }
+            guard syncService.roundPhase == "answering",
+                  syncService.timerEnabled,
+                  let start = syncService.roundStartTimestamp,
+                  let card = currentCard else { return }
+            let elapsed = Date().timeIntervalSince(start)
+            guard elapsed >= Double(syncService.timerDuration) else { return }
+            didRevealThisRound = true
+            HapticManager.shared.mediumImpact()
+            Task {
+                try? await syncService.revealAnswer(
+                    roomId: roomCode,
+                    correctAnswer: card.correctAnswer ?? "",
+                    currentScores: syncService.playerScores,
+                    allPlayerIds: players.map { $0.id }
+                )
+            }
         }
         .alert("Leave game?", isPresented: $showHomeAlert) {
             Button("Cancel", role: .cancel) {}
@@ -198,53 +245,111 @@ struct RiddleMeThisOnlinePlayView: View {
     private var answeringPhaseView: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 20) {
+                // Reserve timer slot so card doesn't shift when timer appears.
+                ZStack {
+                    if syncService.timerEnabled && showTimerChip {
+                        TimelineView(.periodic(from: .now, by: 1.0)) { context in
+                            Group {
+                                if let countdown = answeringCountdownText(at: context.date) {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "timer")
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundColor(Color.buttonBackground)
+                                        Text(countdown)
+                                            .font(.system(size: 17, weight: .bold, design: .rounded))
+                                            .monospacedDigit()
+                                            .foregroundColor(Color.buttonBackground)
+                                    }
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 8)
+                                    .background(Color.buttonBackground.opacity(0.15))
+                                    .cornerRadius(16)
+                                }
+                            }
+                        }
+                        .transition(.asymmetric(
+                            insertion: .scale(scale: 0.82).combined(with: .opacity),
+                            removal: .scale(scale: 0.96).combined(with: .opacity)
+                        ))
+                    }
+                }
+                .frame(height: 40)
+                .padding(.top, 4)
+
                 riddleCardView
                     .padding(.top, 4)
 
-                Text("\(submittedCount) of \(players.count) answered")
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundColor(.secondaryText)
-
                 // Answer input — all players including host
-                if !hasSubmitted {
-                    VStack(spacing: 12) {
-                        TextField("Type your answer...", text: $answerText)
-                            .font(.system(size: 16, design: .rounded))
-                            .padding(14)
-                            .background(Color.secondaryBackground)
-                            .cornerRadius(12)
-                            .padding(.horizontal, 40)
+                ZStack {
+                    if !hasSubmitted && showAnswerInputArea {
+                        VStack(spacing: 12) {
+                            TextField("Type your answer...", text: $answerText)
+                                .font(.system(size: 16, design: .rounded))
+                                .padding(14)
+                                .background(Color.secondaryBackground)
+                                .cornerRadius(12)
+                                .padding(.horizontal, 40)
 
-                        PrimaryButton(title: "Submit Answer") {
-                            let trimmed = answerText.trimmingCharacters(in: .whitespacesAndNewlines)
-                            guard !trimmed.isEmpty, let uid = currentUserId else { return }
-                            HapticManager.shared.mediumImpact()
-                            Task {
-                                try? await syncService.submitAnswer(roomId: roomCode, uid: uid, answer: trimmed)
+                            PrimaryButton(title: "Submit Answer") {
+                                let trimmed = answerText.trimmingCharacters(in: .whitespacesAndNewlines)
+                                guard !trimmed.isEmpty, let uid = currentUserId else { return }
+                                HapticManager.shared.mediumImpact()
+                                Task {
+                                    try? await syncService.submitAnswer(roomId: roomCode, uid: uid, answer: trimmed)
+                                }
+                            }
+                            .padding(.horizontal, 40)
+                        }
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .bottom).combined(with: .opacity).combined(with: .scale(scale: 0.9)),
+                            removal: .move(edge: .bottom).combined(with: .opacity)
+                        ))
+                    } else {
+                        VStack(spacing: 10) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                Text("Answer submitted!")
+                                    .font(.system(size: 15, weight: .medium, design: .rounded))
+                                    .foregroundColor(.secondaryText)
+                            }
+                            .padding(.vertical, 4)
+                            .transition(.asymmetric(
+                                insertion: .scale(scale: 0.8).combined(with: .opacity),
+                                removal: .opacity
+                            ))
+
+                            // Host: when everyone is done, smoothly hand off this control
+                            // from "Submit Answer" into "Show Answer" in the same area.
+                            if isHost && allPlayersSubmitted {
+                                showAnswerButton(horizontalPadding: 40)
+                                    .transition(.asymmetric(
+                                        insertion: .move(edge: .bottom).combined(with: .scale(scale: 0.9)).combined(with: .opacity),
+                                        removal: .opacity
+                                    ))
                             }
                         }
-                        .padding(.horizontal, 40)
+                        .transition(.asymmetric(
+                            insertion: .scale(scale: 0.85).combined(with: .opacity),
+                            removal: .opacity
+                        ))
                     }
-                } else {
-                    HStack(spacing: 8) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
-                        Text("Answer submitted!")
-                            .font(.system(size: 15, weight: .medium, design: .rounded))
-                            .foregroundColor(.secondaryText)
-                    }
-                    .padding(.vertical, 12)
                 }
+                .animation(.interpolatingSpring(stiffness: 210, damping: 20), value: hasSubmitted)
+                .animation(.interpolatingSpring(stiffness: 220, damping: 22), value: allPlayersSubmitted)
+                // Reserve answer-area slot so card stays fixed.
+                .frame(minHeight: 120)
 
                 // Host-only: "Show Answer" button (always visible) +
                 //            "Everyone has answered" prompt when all submitted
                 if isHost {
                     if allPlayersSubmitted {
                         VStack(spacing: 10) {
-                            Text("Everyone has answered!")
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                .foregroundColor(.green)
-                            showAnswerButton
+                            // Avoid duplicate button: if host already submitted, button is shown
+                            // above in the same slot where Submit used to be.
+                            if !hasSubmitted {
+                                showAnswerButton
+                            }
                         }
                     } else {
                         showAnswerButton
@@ -254,11 +359,26 @@ struct RiddleMeThisOnlinePlayView: View {
                 Spacer(minLength: 40)
             }
         }
+        .onAppear {
+            showAnswerInputArea = false
+            showTimerChip = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.72)) {
+                    showAnswerInputArea = true
+                    showTimerChip = syncService.timerEnabled
+                }
+            }
+        }
     }
 
     private var showAnswerButton: some View {
+        showAnswerButton(horizontalPadding: 40)
+    }
+
+    private func showAnswerButton(horizontalPadding: CGFloat) -> some View {
         Button {
             guard let card = currentCard else { return }
+            didRevealThisRound = true
             HapticManager.shared.mediumImpact()
             Task {
                 try? await syncService.revealAnswer(
@@ -280,7 +400,23 @@ struct RiddleMeThisOnlinePlayView: View {
                 )
                 .clipShape(Capsule())
         }
-        .padding(.horizontal, 40)
+        .padding(.horizontal, horizontalPadding)
+    }
+
+    /// Remaining time for the answering-phase countdown (nil = hide chip until server timestamp arrives).
+    private func answeringCountdownText(at date: Date) -> String? {
+        guard syncService.timerEnabled,
+              syncService.roundPhase == "answering",
+              let start = syncService.roundStartTimestamp else { return nil }
+        let end = start.addingTimeInterval(TimeInterval(syncService.timerDuration))
+        let left = max(0, end.timeIntervalSince(date))
+        let totalSeconds = Int(ceil(left))
+        if totalSeconds >= 60 {
+            let m = totalSeconds / 60
+            let s = totalSeconds % 60
+            return String(format: "%d:%02d", m, s)
+        }
+        return "\(totalSeconds)s"
     }
 
     // MARK: - Phase 3: Results
@@ -360,7 +496,8 @@ struct RiddleMeThisOnlinePlayView: View {
 
     private func playerResultRow(player: RoomPlayer) -> some View {
         let submitted = syncService.playerAnswers[player.id]
-        let score = syncService.playerScores[player.id] ?? 0
+        let finalScore = syncService.playerScores[player.id] ?? 0
+        let displayedScore = displayedResultScores[player.id] ?? finalScore
         let isCorrect: Bool = {
             guard let answer = submitted, let card = currentCard else { return false }
             return RiddleMeThisOnlineSyncService.matches(
@@ -369,6 +506,8 @@ struct RiddleMeThisOnlinePlayView: View {
             )
         }()
         let isYou = player.id == currentUserId
+        // delta: +1 correct, -1 wrong/no-answer (same logic as revealAnswer)
+        let delta = isCorrect ? 1 : -1
 
         return HStack(spacing: 12) {
             AvatarView(avatarType: player.avatarType, avatarColor: player.avatarColor, size: 40)
@@ -403,14 +542,37 @@ struct RiddleMeThisOnlinePlayView: View {
                 Image(systemName: isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(isCorrect ? .green : .red)
-                Text("\(score) pt\(score == 1 ? "" : "s")")
+
+                Text(delta > 0 ? "+\(delta)" : "\(delta)")
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .foregroundColor(delta > 0 ? .green : .red)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background((delta > 0 ? Color.green : Color.red).opacity(0.12))
+                    .clipShape(Capsule())
+
+                Text("\(displayedScore) pt\(displayedScore == 1 ? "" : "s")")
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .foregroundColor(.secondaryText)
+                    .animation(.spring(response: 0.45, dampingFraction: 0.78), value: displayedScore)
             }
         }
         .padding(12)
         .background(Color.secondaryBackground)
         .cornerRadius(12)
+    }
+
+    private func animateOnlineResultScores() {
+        guard !didAnimateResultScores else { return }
+        didAnimateResultScores = true
+        for (index, player) in players.enumerated() {
+            let target = syncService.playerScores[player.id] ?? 0
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15 + Double(index) * 0.1) {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) {
+                    displayedResultScores[player.id] = target
+                }
+            }
+        }
     }
 
     // MARK: - Shared card view
@@ -444,23 +606,35 @@ struct RiddleOnlinePlayerStripView: View {
     let playerScores: [String: Int]
     let roundPhase: String
     let currentCard: Card?
+    /// Smaller avatars and strip — used by Settings previews only; default matches live online play.
+    var compactStrip: Bool = false
 
     private let soDeckRed = Color(red: 0xD9 / 255.0, green: 0x3A / 255.0, blue: 0x3A / 255.0)
 
+    private var avatarSize: CGFloat { compactStrip ? 34 : 40 }
+    private var stripHeight: CGFloat { compactStrip ? 68 : 86 }
+    private var chipSpacing: CGFloat { compactStrip ? 6 : 10 }
+    private var hostRingWidth: CGFloat { compactStrip ? 2 : 3 }
+
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
-                ForEach(players) { player in
-                    playerChip(player)
+        GeometryReader { geo in
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: chipSpacing) {
+                    ForEach(players) { player in
+                        playerChip(player)
+                    }
                 }
+                // Keep chips centered when they don't fill strip width;
+                // naturally scrolls/left-aligns once content is wider than available width.
+                .frame(minWidth: geo.size.width, alignment: .center)
+                .padding(.horizontal, compactStrip ? 0 : 4)
             }
-            .padding(.horizontal, 4)
         }
-        .frame(height: 86)
-        .padding(.vertical, 6)
-        .padding(.horizontal, 16)
+        .frame(height: stripHeight)
+        .padding(.vertical, compactStrip ? 3 : 6)
+        .padding(.horizontal, compactStrip ? 10 : 16)
         .background(Color.tertiaryBackground.opacity(0.8))
-        .cornerRadius(12)
+        .cornerRadius(compactStrip ? 10 : 12)
     }
 
     private func playerChip(_ player: RoomPlayer) -> some View {
@@ -468,62 +642,66 @@ struct RiddleOnlinePlayerStripView: View {
         let hasAnswered = playerAnswers[player.id] != nil
         let score = playerScores[player.id] ?? 0
 
-        let resultMark: String? = {
+        let resultMarkCorrectness: Bool? = {
             guard roundPhase == "results", let answer = playerAnswers[player.id],
                   let card = currentCard else { return nil }
             return RiddleMeThisOnlineSyncService.matches(
                 submitted: answer,
                 correct: card.correctAnswer ?? ""
-            ) ? "✅" : "❌"
+            )
         }()
 
-        return VStack(spacing: 3) {
+        return VStack(spacing: compactStrip ? 2 : 3) {
             ZStack(alignment: .bottomTrailing) {
                 AvatarView(
                     avatarType: player.avatarType,
                     avatarColor: player.avatarColor,
-                    size: 40
+                    size: avatarSize
                 )
                 .overlay(
                     Circle()
-                        .stroke(player.isHost ? soDeckRed : Color.clear, lineWidth: 3)
+                        .stroke(player.isHost ? soDeckRed : Color.clear, lineWidth: hostRingWidth)
                         .padding(-2)
                 )
 
                 if roundPhase == "answering" && hasAnswered {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 14))
+                        .font(.system(size: compactStrip ? 11 : 14))
                         .foregroundColor(.green)
                         .background(Color.white.clipShape(Circle()))
-                        .offset(x: 4, y: 4)
-                } else if let mark = resultMark {
-                    Text(mark)
-                        .font(.system(size: 12))
-                        .offset(x: 4, y: 4)
+                        .offset(x: compactStrip ? 3 : 4, y: compactStrip ? 3 : 4)
+                        .transition(.scale(scale: 0.4).combined(with: .opacity))
+                } else if let isCorrect = resultMarkCorrectness {
+                    Image(systemName: isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
+                        .font(.system(size: compactStrip ? 11 : 13, weight: .bold))
+                        .foregroundColor(isCorrect ? .green : .red)
+                        .background(Color.white.clipShape(Circle()))
+                        .offset(x: compactStrip ? 3 : 4, y: compactStrip ? 3 : 4)
                 } else if player.isHost {
                     Image(systemName: "crown.fill")
-                        .font(.system(size: 10))
+                        .font(.system(size: compactStrip ? 8 : 10))
                         .foregroundColor(.white)
-                        .padding(2)
+                        .padding(compactStrip ? 1 : 2)
                         .background(soDeckRed)
                         .clipShape(Circle())
-                        .offset(x: 4, y: 4)
+                        .offset(x: compactStrip ? 3 : 4, y: compactStrip ? 3 : 4)
                 }
             }
+            .animation(.spring(response: 0.28, dampingFraction: 0.65), value: hasAnswered)
 
             Text(isYou ? "You" : player.username)
-                .font(.system(size: 10, weight: .semibold, design: .rounded))
+                .font(.system(size: compactStrip ? 9 : 10, weight: .semibold, design: .rounded))
                 .foregroundColor(isYou ? .primaryText : .secondaryText)
                 .lineLimit(1)
 
             Text("\(score) pt\(score == 1 ? "" : "s")")
-                .font(.system(size: 10, weight: .medium, design: .rounded))
+                .font(.system(size: compactStrip ? 9 : 10, weight: .medium, design: .rounded))
                 .foregroundColor(.secondaryText)
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
+        .padding(.horizontal, compactStrip ? 6 : 8)
+        .padding(.vertical, compactStrip ? 3 : 4)
         .background(Color.appBackground.opacity(0.5))
-        .cornerRadius(10)
+        .cornerRadius(compactStrip ? 8 : 10)
     }
 }
 

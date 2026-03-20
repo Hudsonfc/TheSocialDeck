@@ -274,7 +274,21 @@ class OnlineManager: ObservableObject {
             errorMessage = "Failed to update settings"
         }
     }
-    
+
+    /// Updates Riddle Me This timer settings in the lobby (host only).
+    func updateRiddleTimer(enabled: Bool, durationSeconds: Int) async {
+        guard let roomCode = currentRoom?.roomCode, isHost else { return }
+        do {
+            try await onlineService.updateRiddleTimerSettings(
+                roomCode: roomCode,
+                timerEnabled: enabled,
+                timerDuration: durationSeconds
+            )
+        } catch {
+            errorMessage = "Failed to update timer settings"
+        }
+    }
+
     /// Starts the game (host only)
     func startGame() async {
         guard let roomCode = currentRoom?.roomCode else {

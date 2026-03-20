@@ -31,6 +31,12 @@ class RiddleMeThisOnlineSyncService: ObservableObject {
     /// "question" | "answering" | "results"
     @Published var roundPhase: String = "question"
 
+    /// From room document: lobby + in-game timer (Riddle Me This online).
+    @Published var timerEnabled: Bool = false
+    @Published var timerDuration: Int = 30
+    /// Server time when answering began (card flipped); all clients derive countdown locally.
+    @Published var roundStartTimestamp: Date?
+
     @Published var connectionLost: Bool = false
 
     private init() {}
@@ -67,6 +73,24 @@ class RiddleMeThisOnlineSyncService: ObservableObject {
                         }
                         self.playerScores = scores
                     }
+
+                    if let te = data["timerEnabled"] as? Bool {
+                        self.timerEnabled = te
+                    } else {
+                        self.timerEnabled = false
+                    }
+                    if let d = data["timerDuration"] as? Int {
+                        self.timerDuration = d
+                    } else if let d = data["timerDuration"] as? Int64 {
+                        self.timerDuration = Int(d)
+                    } else {
+                        self.timerDuration = 30
+                    }
+                    if let ts = data["roundStartTimestamp"] as? Timestamp {
+                        self.roundStartTimestamp = ts.dateValue()
+                    } else {
+                        self.roundStartTimestamp = nil
+                    }
                 }
             }
     }
@@ -87,6 +111,9 @@ class RiddleMeThisOnlineSyncService: ObservableObject {
         playerScores       = [:]
         roundPhase         = "question"
         connectionLost     = false
+        timerEnabled       = false
+        timerDuration      = 30
+        roundStartTimestamp = nil
     }
 
     // MARK: - Host: initialise round 0
@@ -102,17 +129,27 @@ class RiddleMeThisOnlineSyncService: ObservableObject {
             "rmtIsAnswerRevealed":   false,
             "rmtRoundPhase":         "question",
             "rmtPlayerAnswers":      [String: String](),
-            "rmtPlayerScores":       initialScores
+            "rmtPlayerScores":       initialScores,
+            "roundStartTimestamp":   FieldValue.delete()
         ])
     }
 
     // MARK: - Host: flip the card (question → answering)
 
     func flipCard(roomId: String) async throws {
-        try await db.collection("rooms").document(roomId).updateData([
-            "rmtIsCardFlipped": true,
-            "rmtRoundPhase":    "answering"
-        ])
+        if timerEnabled {
+            try await db.collection("rooms").document(roomId).updateData([
+                "rmtIsCardFlipped": true,
+                "rmtRoundPhase": "answering",
+                "roundStartTimestamp": FieldValue.serverTimestamp()
+            ])
+        } else {
+            try await db.collection("rooms").document(roomId).updateData([
+                "rmtIsCardFlipped": true,
+                "rmtRoundPhase": "answering",
+                "roundStartTimestamp": FieldValue.delete()
+            ])
+        }
     }
 
     // MARK: - All players: submit answer
@@ -144,7 +181,8 @@ class RiddleMeThisOnlineSyncService: ObservableObject {
         try await db.collection("rooms").document(roomId).updateData([
             "rmtIsAnswerRevealed": true,
             "rmtRoundPhase":       "results",
-            "rmtPlayerScores":     newScores
+            "rmtPlayerScores":     newScores,
+            "roundStartTimestamp": FieldValue.delete()
         ])
     }
 
@@ -156,7 +194,8 @@ class RiddleMeThisOnlineSyncService: ObservableObject {
             "rmtIsCardFlipped":      false,
             "rmtIsAnswerRevealed":   false,
             "rmtRoundPhase":         "question",
-            "rmtPlayerAnswers":      [String: String]()
+            "rmtPlayerAnswers":      [String: String](),
+            "roundStartTimestamp":   FieldValue.delete()
         ])
     }
 
@@ -164,7 +203,8 @@ class RiddleMeThisOnlineSyncService: ObservableObject {
 
     func endGame(roomId: String) async throws {
         try await db.collection("rooms").document(roomId).updateData([
-            "rmtRoundPhase": "ended"
+            "rmtRoundPhase": "ended",
+            "roundStartTimestamp": FieldValue.delete()
         ])
     }
 

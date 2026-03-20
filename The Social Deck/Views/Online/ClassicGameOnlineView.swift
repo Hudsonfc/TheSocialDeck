@@ -86,11 +86,20 @@ struct ClassicGameOnlineView: View {
                     .foregroundColor(.secondaryText)
                     .padding(.bottom, 8)
 
-                // One-line hint in subtle secondary style
-                Text("2–8 players • Cards sync in real time")
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                // Player count — centered with small icon (no sync copy)
+                HStack {
+                    Spacer(minLength: 0)
+                    HStack(spacing: 6) {
+                        Image(systemName: "person.2.fill")
+                            .font(.system(size: 12, weight: .semibold))
+                        Text("2–8 players")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                    }
                     .foregroundColor(.tertiaryText)
-                    .padding(.bottom, 24)
+                    Spacer(minLength: 0)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 24)
 
                 Spacer()
 

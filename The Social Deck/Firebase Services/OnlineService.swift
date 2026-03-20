@@ -237,7 +237,26 @@ class OnlineService {
             try await roomRef.updateData(["cardCount": FieldValue.delete()])
         }
     }
-    
+
+    /// Updates Riddle Me This timer lobby settings (host only). Writes immediately to Firestore.
+    func updateRiddleTimerSettings(roomCode: String, timerEnabled: Bool, timerDuration: Int) async throws {
+        let roomRef = db.collection("rooms").document(roomCode)
+        let snapshot = try await roomRef.getDocument()
+
+        guard snapshot.exists, let room = try? snapshot.data(as: OnlineRoom.self) else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room not found"])
+        }
+
+        guard let currentUserId = auth.currentUser?.uid, room.hostId == currentUserId else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Only the host can update game settings"])
+        }
+
+        try await roomRef.updateData([
+            "timerEnabled": timerEnabled,
+            "timerDuration": timerDuration
+        ])
+    }
+
     /// Starts the game (updates room status to .starting, then .inGame)
     func startGame(roomCode: String) async throws {
         let roomRef = db.collection("rooms").document(roomCode)

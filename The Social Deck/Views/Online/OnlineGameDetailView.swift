@@ -129,18 +129,23 @@ struct OnlineGameDetailView: View {
                     .responsiveHorizontalPadding()
                     .padding(.bottom, 8)
 
-                // Player count pill (e.g. 2–6 players)
-                HStack(spacing: 6) {
-                    Image(systemName: "person.2.fill")
-                        .font(.system(size: 12, weight: .semibold))
-                    Text("\(game.minPlayers)–\(game.maxPlayers) players")
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                // Player count — centered pill with small icon
+                HStack {
+                    Spacer(minLength: 0)
+                    HStack(spacing: 6) {
+                        Image(systemName: "person.2.fill")
+                            .font(.system(size: 12, weight: .semibold))
+                        Text("\(game.minPlayers)–\(game.maxPlayers) players")
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    }
+                    .foregroundColor(.primaryAccent)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.primaryAccent.opacity(0.12))
+                    .cornerRadius(20)
+                    Spacer(minLength: 0)
                 }
-                .foregroundColor(.primaryAccent)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Color.primaryAccent.opacity(0.12))
-                .cornerRadius(20)
+                .frame(maxWidth: .infinity)
                 .padding(.bottom, 16)
 
                 // Description (same as overlay)

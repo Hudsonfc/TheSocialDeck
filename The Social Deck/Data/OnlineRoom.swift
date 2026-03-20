@@ -74,6 +74,12 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
     var selectedCategory: String? // Selected category for game
     /// Number of cards to play for classic games; nil or 0 = use all cards
     var cardCount: Int?
+    /// Riddle Me This online: countdown per answering phase (host lobby). Off when nil/false.
+    var timerEnabled: Bool?
+    /// Riddle Me This online: seconds for the round timer when enabled.
+    var timerDuration: Int?
+    /// Riddle Me This online: server time when answering phase began (card flipped); drives synced countdown.
+    var roundStartTimestamp: Date?
     
     // Players
     var players: [RoomPlayer]
@@ -96,6 +102,9 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         selectedGameType: String? = nil,
         selectedCategory: String? = nil,
         cardCount: Int? = nil,
+        timerEnabled: Bool? = nil,
+        timerDuration: Int? = nil,
+        roundStartTimestamp: Date? = nil,
         players: [RoomPlayer] = [],
         hostId: String,
         gameStartedAt: Date? = nil,
@@ -113,6 +122,9 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         self.selectedGameType = selectedGameType
         self.selectedCategory = selectedCategory
         self.cardCount = cardCount
+        self.timerEnabled = timerEnabled
+        self.timerDuration = timerDuration
+        self.roundStartTimestamp = roundStartTimestamp
         self.players = players
         self.hostId = hostId
         self.gameStartedAt = gameStartedAt

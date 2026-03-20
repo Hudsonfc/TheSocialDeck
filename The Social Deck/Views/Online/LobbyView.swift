@@ -262,6 +262,17 @@ struct LobbyView: View {
     // MARK: - Game Settings (host only, classic games)
 
     private static let cardCountOptions: [Int?] = [nil, 10, 20, 30, 50]
+    private static let riddleRoundOptions: [Int] = Array(stride(from: 5, through: 50, by: 5))
+    private static let riddleTimerDurations: [Int] = [15, 30, 60, 90, 120]
+
+    private var isRiddleMeThisLobby: Bool {
+        onlineManager.currentRoom?.selectedGameType == "riddleMeThis"
+    }
+
+    private var currentRiddleRounds: Int {
+        let count = onlineManager.currentRoom?.cardCount ?? 5
+        return count > 0 ? count : 5
+    }
 
     private var gameSettingsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -269,31 +280,120 @@ struct LobbyView: View {
                 .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundColor(Color(red: 0x0A / 255.0, green: 0x0A / 255.0, blue: 0x0A / 255.0))
 
-            Text("Cards to play")
+            Text(isRiddleMeThisLobby ? "Rounds to play" : "Cards to play")
                 .font(.system(size: 14, weight: .medium, design: .rounded))
                 .foregroundColor(.gray)
 
-            let current = onlineManager.currentRoom?.cardCount
-            HStack(spacing: 10) {
-                ForEach(Array(Self.cardCountOptions.enumerated()), id: \.offset) { _, option in
-                    Button {
-                        HapticManager.shared.lightImpact()
-                        Task { await onlineManager.updateCardCount(option) }
-                    } label: {
-                        Text(option == nil ? "All" : "\(option!)")
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
-                            .foregroundColor(current == option ? .white : soDeckRed)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(current == option ? soDeckRed : soDeckRed.opacity(0.08))
-                            .cornerRadius(10)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(soDeckRed.opacity(current == option ? 0 : 0.3), lineWidth: 1)
-                            )
+            if isRiddleMeThisLobby {
+                let currentRounds = currentRiddleRounds
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(Self.riddleRoundOptions, id: \.self) { rounds in
+                            Button {
+                                HapticManager.shared.lightImpact()
+                                Task { await onlineManager.updateCardCount(rounds) }
+                            } label: {
+                                Text("\(rounds)")
+                                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                    .foregroundColor(currentRounds == rounds ? .white : soDeckRed)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 10)
+                                    .background(currentRounds == rounds ? soDeckRed : soDeckRed.opacity(0.08))
+                                    .cornerRadius(10)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(soDeckRed.opacity(currentRounds == rounds ? 0 : 0.3), lineWidth: 1)
+                                    )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .padding(.vertical, 2)
                 }
+            } else {
+                let current = onlineManager.currentRoom?.cardCount
+                HStack(spacing: 10) {
+                    ForEach(Array(Self.cardCountOptions.enumerated()), id: \.offset) { _, option in
+                        Button {
+                            HapticManager.shared.lightImpact()
+                            Task { await onlineManager.updateCardCount(option) }
+                        } label: {
+                            Text(option == nil ? "All" : "\(option!)")
+                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                .foregroundColor(current == option ? .white : soDeckRed)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(current == option ? soDeckRed : soDeckRed.opacity(0.08))
+                                .cornerRadius(10)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(soDeckRed.opacity(current == option ? 0 : 0.3), lineWidth: 1)
+                                )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+            }
+
+            if isRiddleMeThisLobby {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Timer")
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A / 255.0, green: 0x0A / 255.0, blue: 0x0A / 255.0))
+                            Text("Add urgency to each round")
+                                .font(.system(size: 12, weight: .regular, design: .rounded))
+                                .foregroundColor(.gray)
+                        }
+                        Spacer()
+                        Toggle(
+                            "",
+                            isOn: Binding(
+                                get: { onlineManager.currentRoom?.timerEnabled ?? false },
+                                set: { on in
+                                    let dur = onlineManager.currentRoom?.timerDuration ?? 30
+                                    Task { await onlineManager.updateRiddleTimer(enabled: on, durationSeconds: dur) }
+                                }
+                            )
+                        )
+                        .labelsHidden()
+                        .tint(soDeckRed)
+                    }
+
+                    if onlineManager.currentRoom?.timerEnabled == true {
+                        let selectedDur = onlineManager.currentRoom?.timerDuration ?? 30
+                        Text("\(selectedDur) seconds")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundColor(soDeckRed)
+
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 10) {
+                                ForEach(Self.riddleTimerDurations, id: \.self) { sec in
+                                    Button {
+                                        HapticManager.shared.lightImpact()
+                                        Task { await onlineManager.updateRiddleTimer(enabled: true, durationSeconds: sec) }
+                                    } label: {
+                                        Text("\(sec)s")
+                                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                            .foregroundColor(selectedDur == sec ? .white : soDeckRed)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 10)
+                                            .background(selectedDur == sec ? soDeckRed : soDeckRed.opacity(0.08))
+                                            .cornerRadius(10)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 10)
+                                                    .stroke(soDeckRed.opacity(selectedDur == sec ? 0 : 0.3), lineWidth: 1)
+                                            )
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                            }
+                            .padding(.vertical, 2)
+                        }
+                    }
+                }
+                .padding(.top, 8)
             }
         }
         .padding(20)

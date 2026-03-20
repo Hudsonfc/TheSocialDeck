@@ -394,10 +394,11 @@ private struct OnlineRMTView: View {
         self.isHost = isHost
         self.players = players
         self.currentUserId = currentUserId
-        let count = cardCount ?? 0
+        // Riddle online uses this value as number of rounds.
+        let count = (cardCount ?? 5) > 0 ? (cardCount ?? 5) : 5
         let shuffled = riddleDeterministicShuffle(allRiddleMeThisCards, roomCode: roomCode)
         self.cardCount = count
-        self.cards = count > 0 ? Array(shuffled.prefix(count)) : shuffled
+        self.cards = Array(shuffled.prefix(count))
     }
 
     var body: some View {
