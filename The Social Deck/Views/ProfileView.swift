@@ -30,6 +30,7 @@ struct ProfileView: View {
     @State private var milestoneText = ""
     @State private var toast: ToastMessage? = nil
     @State private var showFriendsList = false
+    @State private var friendsBadgePopScale: CGFloat = 1
 
     private var showFriendsBadge: Bool {
         let seenRequestIds = Set(lastSeenFriendRequestIds.split(separator: ",").map(String.init))
@@ -42,7 +43,19 @@ struct ProfileView: View {
             .contains { !seenRoomInviteIds.contains($0) }
         return hasUnseenRequest || hasUnseenRoomInvite
     }
-    
+
+    /// Total pending items (for badge count display only — visibility still uses unseen-ID logic).
+    private var friendsBadgePendingTotal: Int {
+        friendService.pendingRequests.count + onlineManager.pendingRoomInvites.count
+    }
+
+    /// `nil` = show dot only (e.g. edge case); otherwise digit or "9+".
+    private var friendsBadgeCountLabel: String? {
+        let n = friendsBadgePendingTotal
+        guard n >= 1 else { return nil }
+        return n > 9 ? "9+" : "\(n)"
+    }
+
     private let milestones = [50, 100, 250, 500, 1000, 2500, 5000]
     
     private var displayCardsFlipped: Int {
@@ -465,17 +478,64 @@ struct ProfileView: View {
             .buttonStyle(PlainButtonStyle())
 
             if showFriendsBadge {
-                Circle()
-                    .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                    .frame(width: 10, height: 10)
-                    .overlay(Circle().stroke(Color.white, lineWidth: 1.5))
-                    .offset(x: -4, y: 4)
-                    .transition(.scale.combined(with: .opacity))
-                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: showFriendsBadge)
+                profileFriendsNotificationBadge(
+                    countLabel: friendsBadgeCountLabel,
+                    popScale: friendsBadgePopScale
+                )
+                // Slightly past the rounded corner — iOS-style icon badge overlap
+                .offset(x: 10, y: -9)
+                .allowsHitTesting(false)
+                .transition(.opacity)
             }
+        }
+        .onChange(of: showFriendsBadge) { _, visible in
+            if visible { playFriendsBadgePopAnimation() }
         }
         .padding(.top, 8)
         .padding(.horizontal, 40)
+    }
+
+    private func playFriendsBadgePopAnimation() {
+        friendsBadgePopScale = 0.42
+        withAnimation(.spring(response: 0.38, dampingFraction: 0.52)) {
+            friendsBadgePopScale = 1.0
+        }
+    }
+
+    /// Red badge with white ring; numeric label when count ≥ 1, else compact dot.
+    @ViewBuilder
+    private func profileFriendsNotificationBadge(countLabel: String?, popScale: CGFloat) -> some View {
+        let brandRed = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+        let stroke: CGFloat = 2
+
+        Group {
+            if let text = countLabel {
+                Text(text)
+                    .font(.system(size: text == "9+" ? 9 : 10, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+                    .padding(.horizontal, 5)
+                    .frame(minWidth: 19, minHeight: 19)
+                    .background(
+                        Capsule()
+                            .fill(brandRed)
+                    )
+                    .overlay(
+                        Capsule()
+                            .strokeBorder(Color.white, lineWidth: stroke)
+                    )
+            } else {
+                Circle()
+                    .fill(brandRed)
+                    .frame(width: 11, height: 11)
+                    .overlay(
+                        Circle()
+                            .strokeBorder(Color.white, lineWidth: stroke)
+                    )
+            }
+        }
+        .scaleEffect(popScale)
     }
 
     @ViewBuilder

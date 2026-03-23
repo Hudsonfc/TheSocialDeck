@@ -6,14 +6,17 @@
 //  notification delivery, and in-app deep-link routing when a notification
 //  is tapped.
 //
-//  ⚠️  SECURITY NOTE — FCM Legacy HTTP API
-//  The server key below is embedded in the app binary.  Anyone who extracts
-//  it can send arbitrary messages to your users.  This is acceptable for a
-//  development / TestFlight build, but before App Store submission you should
-//  move the send logic to a Firebase Cloud Function (or any backend you
-//  control) so the key never leaves a server.
-//  Get your server key from:
-//  Firebase Console → Project Settings → Cloud Messaging → Server key
+//  Outbound sends use the FCM HTTP v1 API (legacy HTTP API is deprecated).
+//
+//  ⚠️  AUTH LIMIT (important)
+//  Google's FCM v1 `messages:send` endpoint expects a short-lived **OAuth 2.0
+//  access token** obtained with a **service account** (scope:
+//  https://www.googleapis.com/auth/firebase.messaging).
+//  A **Firebase ID token** (`getIDToken()`) is an end-user credential and is
+//  not the same token type; the API may respond with 401 Unauthorized.
+//  For production, send from Cloud Functions or your backend using the Admin
+//  SDK or service-account JWT flow. The code below follows the requested
+//  `getIDToken()` Bearer approach so you can verify behavior and migrate.
 //
 
 import Foundation
@@ -40,10 +43,12 @@ final class NotificationManager: NSObject, ObservableObject {
     // When set, FriendsListView observes this and switches to the right tab.
     @Published var pendingDeepLink: FriendsDeepLinkTab? = nil
 
-    // ── Replace this value with the real key from Firebase Console ──────────
-    // Firebase Console → Project Settings → Cloud Messaging → Server key
-    private let fcmServerKey = "YOUR_FCM_SERVER_KEY_HERE"
-    // ────────────────────────────────────────────────────────────────────────
+    /// Must match Firebase project ID (see GoogleService-Info.plist `PROJECT_ID`).
+    private let fcmProjectId = "thesocialdeck-fe6c5"
+
+    private var fcmV1SendURL: URL {
+        URL(string: "https://fcm.googleapis.com/v1/projects/\(fcmProjectId)/messages:send")!
+    }
 
     private let db = Firestore.firestore()
     private var permissionRequested = false
@@ -92,7 +97,7 @@ final class NotificationManager: NSObject, ObservableObject {
     /// Send "New Friend Request" push to the target user.
     func sendFriendRequestNotification(toUserId: String, fromUsername: String) async {
         guard let token = await fetchFCMToken(for: toUserId) else { return }
-        await sendLegacyFCM(
+        await sendFCMv1(
             to: token,
             title: "New Friend Request",
             body: "\(fromUsername) wants to be friends",
@@ -103,7 +108,7 @@ final class NotificationManager: NSObject, ObservableObject {
     /// Send "Room Invite" push to the target user.
     func sendRoomInviteNotification(toUserId: String, fromUsername: String, gameName: String) async {
         guard let token = await fetchFCMToken(for: toUserId) else { return }
-        await sendLegacyFCM(
+        await sendFCMv1(
             to: token,
             title: "Room Invite",
             body: "\(fromUsername) invited you to play \(gameName)",
@@ -120,36 +125,66 @@ final class NotificationManager: NSObject, ObservableObject {
         return token
     }
 
-    private func sendLegacyFCM(
+    /// FCM HTTP v1 — https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages/send
+    private func sendFCMv1(
         to token: String,
         title: String,
         body: String,
         data: [String: String]
     ) async {
-        guard fcmServerKey != "YOUR_FCM_SERVER_KEY_HERE" else {
-            // Server key not yet configured — skip silently in development.
+        guard let user = Auth.auth().currentUser else {
+            print("[NotificationManager] sendFCMv1: no signed-in user; cannot get ID token")
             return
         }
-        let payload: [String: Any] = [
-            "to": token,
+        let idToken: String
+        do {
+            idToken = try await user.getIDToken()
+        } catch {
+            print("[NotificationManager] sendFCMv1: getIDToken failed: \(error)")
+            return
+        }
+
+        // FCM `data` map values must be strings (already satisfied by [String: String]).
+
+        let message: [String: Any] = [
+            "token": token,
             "notification": [
                 "title": title,
-                "body": body,
-                "sound": "default"
+                "body": body
             ],
             "data": data,
             "apns": [
-                "payload": ["aps": ["badge": 1]]
+                "payload": [
+                    "aps": [
+                        "sound": "default",
+                        "badge": 1
+                    ] as [String: Any]
+                ]
             ]
         ]
-        guard let url = URL(string: "https://fcm.googleapis.com/fcm/send"),
-              let jsonData = try? JSONSerialization.data(withJSONObject: payload) else { return }
-        var request = URLRequest(url: url)
+        let payload: [String: Any] = ["message": message]
+
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: payload) else {
+            print("[NotificationManager] sendFCMv1: JSON encode failed")
+            return
+        }
+
+        var request = URLRequest(url: fcmV1SendURL)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("key=\(fcmServerKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
         request.httpBody = jsonData
-        _ = try? await URLSession.shared.data(for: request)
+
+        do {
+            let (respData, response) = try await URLSession.shared.data(for: request)
+            let code = (response as? HTTPURLResponse)?.statusCode ?? -1
+            if code < 200 || code >= 300 {
+                let bodyText = String(data: respData, encoding: .utf8) ?? "(no body)"
+                print("[NotificationManager] sendFCMv1: HTTP \(code) — \(bodyText)")
+            }
+        } catch {
+            print("[NotificationManager] sendFCMv1: request failed: \(error)")
+        }
     }
 }
 
