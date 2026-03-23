@@ -11,6 +11,7 @@ import FirebaseCore
 
 @main
 struct The_Social_DeckApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var authManager = AuthManager.shared
     @StateObject private var gameCenterService = GameCenterService.shared
     @StateObject private var subscriptionManager = SubscriptionManager.shared
@@ -18,6 +19,9 @@ struct The_Social_DeckApp: App {
     
     init() {
         FirebaseApp.configure()
+        // Set up notification delegates so the system can deliver push tokens
+        // and tap-events to NotificationManager before any view is shown.
+        NotificationManager.shared.configure()
         // GameCenterService initializes automatically on init
     }
     

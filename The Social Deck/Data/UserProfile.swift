@@ -12,6 +12,9 @@ struct UserProfile: Codable, Identifiable {
     @DocumentID var id: String?
     var userId: String
     var username: String
+    /// Lowercase copy of username — used for case-insensitive Firestore prefix search.
+    /// Populated on new profiles from app version 1.4+ only; older profiles may not have this field.
+    var usernameLower: String?
     var email: String? // From Apple Sign In (only provided on first sign-in)
     var gameCenterPlayerID: String? // Game Center player identifier
     var avatarType: String // SF Symbol name
@@ -39,11 +42,16 @@ struct UserProfile: Codable, Identifiable {
     
     // Presence — updated via ScenePhase
     var isOnline: Bool
+    // Optional subscription marker for showing Plus badge on other users' profiles
+    var isPlus: Bool?
+    // FCM token for push notifications — written by the device on every launch
+    var fcmToken: String?
     
     init(
         id: String? = nil,
         userId: String,
         username: String,
+        usernameLower: String? = nil,
         email: String? = nil,
         gameCenterPlayerID: String? = nil,
         avatarType: String = "avatar 1",
@@ -60,11 +68,14 @@ struct UserProfile: Codable, Identifiable {
         onlineGamesPlayed: Int = 0,
         onlineGamesWon: Int = 0,
         lastActiveAt: Date? = nil,
-        isOnline: Bool = false
+        isOnline: Bool = false,
+        isPlus: Bool? = nil,
+        fcmToken: String? = nil
     ) {
         self.id = id
         self.userId = userId
         self.username = username
+        self.usernameLower = usernameLower ?? username.lowercased()
         self.email = email
         self.gameCenterPlayerID = gameCenterPlayerID
         self.avatarType = avatarType
@@ -82,6 +93,8 @@ struct UserProfile: Codable, Identifiable {
         self.onlineGamesWon = onlineGamesWon
         self.lastActiveAt = lastActiveAt
         self.isOnline = isOnline
+        self.isPlus = isPlus
+        self.fcmToken = fcmToken
     }
     
     // Custom decoder so that fields added after account creation don't break decoding
@@ -90,6 +103,7 @@ struct UserProfile: Codable, Identifiable {
         id                  = try c.decodeIfPresent(String.self,   forKey: .id)
         userId              = try c.decode(String.self,            forKey: .userId)
         username            = try c.decode(String.self,            forKey: .username)
+        usernameLower       = try c.decodeIfPresent(String.self,   forKey: .usernameLower)
         email               = try c.decodeIfPresent(String.self,   forKey: .email)
         gameCenterPlayerID  = try c.decodeIfPresent(String.self,   forKey: .gameCenterPlayerID)
         avatarType          = try c.decode(String.self,            forKey: .avatarType)
@@ -107,6 +121,8 @@ struct UserProfile: Codable, Identifiable {
         onlineGamesWon      = try c.decodeIfPresent(Int.self,      forKey: .onlineGamesWon)    ?? 0
         lastActiveAt        = try c.decodeIfPresent(Date.self,     forKey: .lastActiveAt)
         isOnline            = try c.decodeIfPresent(Bool.self,     forKey: .isOnline) ?? false
+        isPlus              = try c.decodeIfPresent(Bool.self,     forKey: .isPlus)
+        fcmToken            = try c.decodeIfPresent(String.self,   forKey: .fcmToken)
     }
     
     var winRate: Double {

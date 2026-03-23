@@ -87,6 +87,16 @@ class FriendService: ObservableObject {
         )
         
         let _ = try db.collection("friendRequests").addDocument(from: friendRequest)
+
+        // Push notification — fire-and-forget, never throws to caller
+        if let senderUsername = AuthManager.shared.userProfile?.username {
+            Task {
+                await NotificationManager.shared.sendFriendRequestNotification(
+                    toUserId: userId,
+                    fromUsername: senderUsername
+                )
+            }
+        }
     }
     
     /// Accept a friend request
@@ -121,7 +131,7 @@ class FriendService: ObservableObject {
         
         // Check if reverse already exists
         let reverseQuery = db.collection("friendRequests")
-            .whereField("fromUserId", isEqualTo: request.toUserId)
+            .whereField("fromUserId", isEqualTo: currentUserId)
             .whereField("toUserId", isEqualTo: request.fromUserId)
             .limit(to: 1)
         
@@ -136,6 +146,24 @@ class FriendService: ObservableObject {
             // Create new reverse
             let _ = try db.collection("friendRequests").addDocument(from: reverseRequest)
         }
+    }
+    
+    /// Cancel a sent friend request (withdraw before it is accepted)
+    func cancelFriendRequest(_ requestId: String) async throws {
+        guard let currentUserId = auth.currentUser?.uid else {
+            throw NSError(domain: "FriendService", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])
+        }
+        
+        let requestRef = db.collection("friendRequests").document(requestId)
+        let requestSnapshot = try await requestRef.getDocument()
+        
+        guard let request = try? requestSnapshot.data(as: FriendRequest.self),
+              request.fromUserId == currentUserId,
+              request.status == .pending else {
+            throw NSError(domain: "FriendService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Cannot cancel this request"])
+        }
+        
+        try await requestRef.delete()
     }
     
     /// Reject a friend request
@@ -218,37 +246,52 @@ class FriendService: ObservableObject {
                 let profileSnapshot = try await profileRef.getDocument()
                 
                 if let profile = try? profileSnapshot.data(as: UserProfile.self) {
-                    let friendProfile = FriendProfile(profile: profile, friendRequestId: doc.documentID, isOnline: false)
+                    let friendProfile = FriendProfile(profile: profile, friendRequestId: doc.documentID, isOnline: profile.isOnline)
                     friendProfiles.append(friendProfile)
                 }
             }
             
-            // Also check requests where I'm the receiver
-            let receivedQuery = db.collection("friendRequests")
-                .whereField("status", isEqualTo: FriendRequestStatus.accepted.rawValue)
-                .whereField("toUserId", isEqualTo: currentUserId)
-            
-            let receivedSnapshot = try await receivedQuery.getDocuments()
-            
-            for doc in receivedSnapshot.documents {
-                let request = try doc.data(as: FriendRequest.self)
-                
-                // Get the friend's profile
-                let profileRef = db.collection("profiles").document(request.fromUserId)
-                let profileSnapshot = try await profileRef.getDocument()
-                
-                if let profile = try? profileSnapshot.data(as: UserProfile.self) {
-                    let friendProfile = FriendProfile(profile: profile, friendRequestId: doc.documentID, isOnline: false)
-                    // Avoid duplicates
-                    if !friendProfiles.contains(where: { $0.userId == friendProfile.userId }) {
-                        friendProfiles.append(friendProfile)
+            // Also check requests where I'm the receiver.
+            // Non-fatal: if this secondary query is denied for any reason, keep the
+            // friends loaded from the primary query so the screen still works.
+            do {
+                let receivedQuery = db.collection("friendRequests")
+                    .whereField("status", isEqualTo: FriendRequestStatus.accepted.rawValue)
+                    .whereField("toUserId", isEqualTo: currentUserId)
+
+                let receivedSnapshot = try await receivedQuery.getDocuments()
+
+                for doc in receivedSnapshot.documents {
+                    let request = try doc.data(as: FriendRequest.self)
+
+                    // Get the friend's profile
+                    let profileRef = db.collection("profiles").document(request.fromUserId)
+                    let profileSnapshot = try await profileRef.getDocument()
+
+                    if let profile = try? profileSnapshot.data(as: UserProfile.self) {
+                        let friendProfile = FriendProfile(profile: profile, friendRequestId: doc.documentID, isOnline: profile.isOnline)
+                        // Avoid duplicates
+                        if !friendProfiles.contains(where: { $0.userId == friendProfile.userId }) {
+                            friendProfiles.append(friendProfile)
+                        }
                     }
                 }
+            } catch {
+                // Keep primary results; don't fail entire Friends screen on fallback query.
             }
             
-            friends = friendProfiles
+            friends = friendProfiles.sorted {
+                if $0.isOnline != $1.isOnline { return $0.isOnline }
+                return $0.username.localizedCaseInsensitiveCompare($1.username) == .orderedAscending
+            }
             isLoading = false
         } catch {
+            let nsError = error as NSError
+            print("[FriendService.loadFriends] ERROR")
+            print("[FriendService.loadFriends] localizedDescription: \(error.localizedDescription)")
+            print("[FriendService.loadFriends] domain: \(nsError.domain)")
+            print("[FriendService.loadFriends] code: \(nsError.code)")
+            print("[FriendService.loadFriends] userInfo: \(nsError.userInfo)")
             errorMessage = "Failed to load friends: \(error.localizedDescription)"
             isLoading = false
             throw error
@@ -311,7 +354,9 @@ class FriendService: ObservableObject {
     
     // MARK: - Search Users
     
-    /// Search for users by username (case-insensitive prefix search)
+    /// Search for users by username (case-insensitive prefix search).
+    /// Prefers the `usernameLower` field (set on new profiles) with a fallback to
+    /// the raw `username` field so older accounts are still found.
     func searchUsers(by username: String, limit: Int = 20) async throws -> [UserProfile] {
         guard !username.isEmpty, username.count >= 2 else {
             return []
@@ -319,25 +364,31 @@ class FriendService: ObservableObject {
         
         let searchLower = username.lowercased()
         
-        // Firestore doesn't support case-insensitive search directly
-        // We'll do a prefix search using the lowercase version
-        // Note: This requires usernames to be stored in lowercase for optimal results
-        // For now, we'll search using the provided case and also try lowercase
-        let query = db.collection("profiles")
+        // Primary search — new profiles store a usernameLower field for reliable case-insensitive prefix search
+        let primaryQuery = db.collection("profiles")
+            .whereField("usernameLower", isGreaterThanOrEqualTo: searchLower)
+            .whereField("usernameLower", isLessThan: searchLower + "\u{f8ff}")
+            .limit(to: limit)
+        
+        let primarySnapshot = try await primaryQuery.getDocuments()
+        var results: [UserProfile] = primarySnapshot.documents.compactMap { try? $0.data(as: UserProfile.self) }
+        
+        // Fallback — query raw username for older profiles that predate usernameLower
+        let fallbackQuery = db.collection("profiles")
             .whereField("username", isGreaterThanOrEqualTo: searchLower)
             .whereField("username", isLessThan: searchLower + "\u{f8ff}")
             .limit(to: limit)
         
-        let snapshot = try await query.getDocuments()
-        
-        var results = try snapshot.documents.compactMap { doc -> UserProfile? in
-            try? doc.data(as: UserProfile.self)
+        let fallbackSnapshot = try await fallbackQuery.getDocuments()
+        for doc in fallbackSnapshot.documents {
+            if let profile = try? doc.data(as: UserProfile.self),
+               !results.contains(where: { $0.userId == profile.userId }) {
+                results.append(profile)
+            }
         }
         
-        // Filter results to include only profiles that contain the search term (case-insensitive)
-        results = results.filter { profile in
-            profile.username.lowercased().hasPrefix(searchLower)
-        }
+        // Keep only profiles whose username actually starts with the query (case-insensitive)
+        results = results.filter { $0.username.lowercased().hasPrefix(searchLower) }
         
         // Filter out blocked users
         let blockedUserIds = Set(blockedUsers.map { $0.blockedUserId })
@@ -440,6 +491,36 @@ class FriendService: ObservableObject {
     func stopListeningToPendingRequests() {
         pendingRequestsListener?.remove()
         pendingRequestsListener = nil
+    }
+
+    /// Start listening to sent requests so cancellations reflect immediately
+    func startListeningToSentRequests() {
+        guard let currentUserId = auth.currentUser?.uid else { return }
+
+        sentRequestsListener?.remove()
+
+        let query = db.collection("friendRequests")
+            .whereField("fromUserId", isEqualTo: currentUserId)
+            .whereField("status", isEqualTo: FriendRequestStatus.pending.rawValue)
+            .order(by: "createdAt", descending: true)
+
+        sentRequestsListener = query.addSnapshotListener { [weak self] snapshot, error in
+            guard let self = self else { return }
+            Task { @MainActor in
+                guard let snapshot = snapshot else { return }
+                self.sentRequests = snapshot.documents.compactMap { doc -> FriendRequest? in
+                    guard var request = try? doc.data(as: FriendRequest.self) else { return nil }
+                    request.id = doc.documentID
+                    return request
+                }
+            }
+        }
+    }
+
+    /// Stop listening to sent requests
+    func stopListeningToSentRequests() {
+        sentRequestsListener?.remove()
+        sentRequestsListener = nil
     }
     
     // MARK: - Blocking

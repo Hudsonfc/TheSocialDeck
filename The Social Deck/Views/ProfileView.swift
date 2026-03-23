@@ -11,6 +11,8 @@ struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var authManager: AuthManager
     @EnvironmentObject var subManager: SubscriptionManager
+    @ObservedObject private var friendService = FriendService.shared
+    @ObservedObject private var onlineManager = OnlineManager.shared
     @State private var showError = false
     @State private var showAvatarSelection = false
     @State private var showChangeUsername = false
@@ -22,11 +24,24 @@ struct ProfileView: View {
     @State private var showPlusPaywall = false
     @AppStorage("totalCardsFlipped") private var totalCardsFlipped: Int = 0
     @AppStorage("lastMilestoneCelebrated") private var lastMilestoneCelebrated: Int = 0
+    @AppStorage("lastSeenFriendRequestIds") private var lastSeenFriendRequestIds: String = ""
+    @AppStorage("lastSeenRoomInviteIds") private var lastSeenRoomInviteIds: String = ""
     @State private var showMilestone = false
     @State private var milestoneText = ""
     @State private var toast: ToastMessage? = nil
     @State private var showFriendsList = false
-    @State private var showAddFriends = false
+
+    private var showFriendsBadge: Bool {
+        let seenRequestIds = Set(lastSeenFriendRequestIds.split(separator: ",").map(String.init))
+        let seenRoomInviteIds = Set(lastSeenRoomInviteIds.split(separator: ",").map(String.init))
+        let hasUnseenRequest = friendService.pendingRequests
+            .compactMap(\.id)
+            .contains { !seenRequestIds.contains($0) }
+        let hasUnseenRoomInvite = onlineManager.pendingRoomInvites
+            .compactMap(\.id)
+            .contains { !seenRoomInviteIds.contains($0) }
+        return hasUnseenRequest || hasUnseenRoomInvite
+    }
     
     private let milestones = [50, 100, 250, 500, 1000, 2500, 5000]
     
@@ -125,267 +140,17 @@ struct ProfileView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 24) {
-                        // Title
-                        Text("Your Profile")
-                            .font(.system(size: 32, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                            .padding(.top, 20)
-                        
-                        // Avatar Section with edit button
-                        VStack(spacing: 16) {
-                            Button(action: {
-                                showAvatarSelection = true
-                            }) {
-                                ZStack {
-                                    AvatarView(
-                                        avatarType: authManager.userProfile?.avatarType ?? "person.fill",
-                                        avatarColor: authManager.userProfile?.avatarColor ?? "red",
-                                        size: 120
-                                    )
-                                    
-                                // Edit indicator overlay - pencil icon in white circle
-                                    VStack {
-                                        Spacer()
-                                        HStack {
-                                            Spacer()
-                                            ZStack {
-                                                Circle()
-                                                    .fill(Color.white)
-                                                .frame(width: 36, height: 36)
-                                                    .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
-                                                
-                                            Image(systemName: "pencil")
-                                                    .font(.system(size: 14, weight: .semibold))
-                                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                        }
-                                        .padding(6)
-                                    }
-                                }
-                                    .frame(width: 120, height: 120)
-                                }
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                            
-                            Text("Tap to change avatar")
-                                .font(.system(size: 12, weight: .regular, design: .rounded))
-                                .foregroundColor(Color.gray)
-                        }
-                        
-                        // Username Section
-                                VStack(spacing: 8) {
-                    // Username label
-                    Text("Username")
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(Color.gray)
-                    
-                    ZStack {
-                        // Centered username + optional Plus badge
-                        HStack(spacing: 8) {
-                            Spacer()
-                            Text(authManager.userProfile?.username ?? "Player")
-                                .font(.system(size: 26, weight: .bold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                            if subManager.isPlus {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "crown.fill")
-                                        .font(.system(size: 11, weight: .bold))
-                                    Text("Plus")
-                                        .font(.system(size: 11, weight: .bold, design: .rounded))
-                                }
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                .cornerRadius(20)
-                            }
-                            Spacer()
-                        }
-                                    
-                        // Pencil button aligned to trailing
-                        HStack {
-                            Spacer()
-                                    Button(action: {
-                                showChangeUsername = true
-                                    }) {
-                                        Image(systemName: "pencil")
-                                            .font(.system(size: 14, weight: .semibold))
-                                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                            .padding(10)
-                                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                                            .cornerRadius(10)
-                            }
-                                    }
-                                }
-                                .padding(.horizontal, 40)
-                    
-                    // Member since
-                    if let createdAt = authManager.userProfile?.createdAt {
-                        Text("Member since \(createdAt.formatted(.dateTime.month(.wide).day().year()))")
-                            .font(.system(size: 12, weight: .regular, design: .rounded))
-                            .foregroundColor(Color.gray)
-                    }
-                }
-                    
-                // Stats Section
-                VStack(spacing: 16) {
-                    Text("Game Statistics")
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    // Stat tiles row
-                    HStack(spacing: 12) {
-                        // Cards Flipped
-                        statTile(
-                            icon: "rectangle.stack.fill",
-                            value: "\(displayCardsFlipped)",
-                            label: "Cards Flipped"
-                        )
-                        // Games Played
-                        statTile(
-                            icon: "gamecontroller.fill",
-                            value: "\(authManager.userProfile?.gamesPlayed ?? 0)",
-                            label: "Games Played"
-                        )
-                        // Online Wins
-                        statTile(
-                            icon: "trophy.fill",
-                            value: "\(authManager.userProfile?.onlineGamesWon ?? 0)",
-                            label: "Online Wins"
-                        )
-                    }
-                }
-                .padding(.horizontal, 40)
-                
-                // Milestone banner
-                if showMilestone {
-                    HStack(spacing: 10) {
-                        Text("🎉")
-                            .font(.system(size: 20))
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(milestoneText)
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                            Text("Keep flipping!")
-                                .font(.system(size: 12, weight: .regular, design: .rounded))
-                                .foregroundColor(Color.gray)
-                        }
-                        Spacer()
-                        Button(action: {
-                            withAnimation(.easeOut(duration: 0.25)) { showMilestone = false }
-                        }) {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(Color.gray)
-                                .padding(6)
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 14)
-                    .background(Color(red: 0xF0/255.0, green: 0xF9/255.0, blue: 0xF0/255.0))
-                    .cornerRadius(12)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.green.opacity(0.3), lineWidth: 1)
-                    )
-                    .padding(.horizontal, 40)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                }
-                
-                // Upgrade to Plus (only shown to non-Plus users)
-                if !subManager.isPlus {
-                    Button(action: {
-                        HapticManager.shared.lightImpact()
-                        showPlusPaywall = true
-                    }) {
-                        HStack(spacing: 10) {
-                            Image(systemName: "crown.fill")
-                                .font(.system(size: 15, weight: .semibold))
-                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Upgrade to TheSocialDeck+")
-                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                                Text("Unlock exclusive Plus games")
-                                    .font(.system(size: 12, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color.gray)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundColor(Color.gray)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 14)
-                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.06))
-                        .cornerRadius(12)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.25), lineWidth: 1)
-                        )
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .padding(.horizontal, 40)
-                }
-                
-                // Friends & Find Players
-                HStack(spacing: 12) {
-                    // Friends button
-                    Button(action: {
-                        HapticManager.shared.lightImpact()
-                        showFriendsList = true
-                    }) {
-                        VStack(spacing: 8) {
-                            Image(systemName: "person.2.fill")
-                                .font(.system(size: 22, weight: .semibold))
-                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            Text("Friends")
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
-                        .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
-                        .cornerRadius(14)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color(red: 0xE5/255.0, green: 0xE5/255.0, blue: 0xE5/255.0), lineWidth: 1)
-                        )
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    
-                    // Find Players button
-                    Button(action: {
-                        HapticManager.shared.lightImpact()
-                        showAddFriends = true
-                    }) {
-                        VStack(spacing: 8) {
-                            Image(systemName: "person.badge.plus")
-                                .font(.system(size: 22, weight: .semibold))
-                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            Text("Find Players")
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
-                        .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
-                        .cornerRadius(14)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color(red: 0xE5/255.0, green: 0xE5/255.0, blue: 0xE5/255.0), lineWidth: 1)
-                        )
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-                .padding(.top, 8)
-                .padding(.horizontal, 40)
-                
-                // Spacer for spacing
+                profileHeaderSection
+                avatarEditorSection
+                usernameSection
+                statsSection
+                milestoneSection
+                plusUpgradeSection
+                friendsEntrySection
                 Spacer()
                     .frame(height: 40)
-                    }
-                    .opacity(contentOpacity)
+            }
+            .opacity(contentOpacity)
         }
         .onAppear {
             withAnimation(.easeInOut(duration: 0.5)) {
@@ -450,14 +215,6 @@ struct ProfileView: View {
                         EmptyView()
                     }
                     .hidden()
-                    
-                    NavigationLink(
-                        destination: AddFriendsView(),
-                        isActive: $showAddFriends
-                    ) {
-                        EmptyView()
-                    }
-                    .hidden()
                 }
             )
             .alert("Error", isPresented: $showError) {
@@ -485,6 +242,242 @@ struct ProfileView: View {
         }
     }
     
+    private var profileHeaderSection: some View {
+        Text("Your Profile")
+            .font(.system(size: 32, weight: .bold, design: .rounded))
+            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+            .padding(.top, 20)
+    }
+
+    private var avatarEditorSection: some View {
+        VStack(spacing: 16) {
+            Button(action: {
+                showAvatarSelection = true
+            }) {
+                ZStack {
+                    AvatarView(
+                        avatarType: authManager.userProfile?.avatarType ?? "person.fill",
+                        avatarColor: authManager.userProfile?.avatarColor ?? "red",
+                        size: 120
+                    )
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Spacer()
+                            ZStack {
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 36, height: 36)
+                                    .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
+                                Image(systemName: "pencil")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            }
+                            .padding(6)
+                        }
+                    }
+                }
+                .frame(width: 120, height: 120)
+            }
+            .buttonStyle(PlainButtonStyle())
+
+            Text("Tap to change avatar")
+                .font(.system(size: 12, weight: .regular, design: .rounded))
+                .foregroundColor(Color.gray)
+        }
+    }
+
+    private var usernameSection: some View {
+        VStack(spacing: 8) {
+            Text("Username")
+                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .foregroundColor(Color.gray)
+            ZStack {
+                HStack(spacing: 8) {
+                    Spacer()
+                    Text(authManager.userProfile?.username ?? "Player")
+                        .font(.system(size: 26, weight: .bold, design: .rounded))
+                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    if subManager.isPlus {
+                        HStack(spacing: 4) {
+                            Image(systemName: "crown.fill")
+                                .font(.system(size: 11, weight: .bold))
+                            Text("Plus")
+                                .font(.system(size: 11, weight: .bold, design: .rounded))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .cornerRadius(20)
+                    }
+                    Spacer()
+                }
+                HStack {
+                    Spacer()
+                    Button(action: { showChangeUsername = true }) {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .padding(10)
+                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .cornerRadius(10)
+                    }
+                }
+            }
+            .padding(.horizontal, 40)
+
+            if let createdAt = authManager.userProfile?.createdAt {
+                Text("Member since \(createdAt.formatted(.dateTime.month(.wide).day().year()))")
+                    .font(.system(size: 12, weight: .regular, design: .rounded))
+                    .foregroundColor(Color.gray)
+            }
+        }
+    }
+
+    private var statsSection: some View {
+        VStack(spacing: 16) {
+            Text("Game Statistics")
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                .frame(maxWidth: .infinity, alignment: .leading)
+            HStack(spacing: 12) {
+                statTile(icon: "rectangle.stack.fill", value: "\(displayCardsFlipped)", label: "Cards Flipped")
+                statTile(icon: "gamecontroller.fill", value: "\(authManager.userProfile?.gamesPlayed ?? 0)", label: "Games Played")
+                statTile(icon: "trophy.fill", value: "\(authManager.userProfile?.onlineGamesWon ?? 0)", label: "Online Wins")
+            }
+        }
+        .padding(.horizontal, 40)
+    }
+
+    @ViewBuilder
+    private var milestoneSection: some View {
+        if showMilestone {
+            HStack(spacing: 10) {
+                Text("🎉")
+                    .font(.system(size: 20))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(milestoneText)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    Text("Keep flipping!")
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                        .foregroundColor(Color.gray)
+                }
+                Spacer()
+                Button(action: {
+                    withAnimation(.easeOut(duration: 0.25)) { showMilestone = false }
+                }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(Color.gray)
+                        .padding(6)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(Color(red: 0xF0/255.0, green: 0xF9/255.0, blue: 0xF0/255.0))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.green.opacity(0.3), lineWidth: 1)
+            )
+            .padding(.horizontal, 40)
+            .transition(.move(edge: .top).combined(with: .opacity))
+        }
+    }
+
+    @ViewBuilder
+    private var plusUpgradeSection: some View {
+        if !subManager.isPlus {
+            Button(action: {
+                HapticManager.shared.lightImpact()
+                showPlusPaywall = true
+            }) {
+                HStack(spacing: 10) {
+                    Image(systemName: "crown.fill")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Upgrade to TheSocialDeck+")
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        Text("Unlock exclusive Plus games")
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                            .foregroundColor(Color.gray)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color.gray)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 14)
+                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.06))
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.25), lineWidth: 1)
+                )
+            }
+            .buttonStyle(PlainButtonStyle())
+            .padding(.horizontal, 40)
+        }
+    }
+
+    private var friendsEntrySection: some View {
+        ZStack(alignment: .topTrailing) {
+            Button(action: {
+                HapticManager.shared.lightImpact()
+                showFriendsList = true
+            }) {
+                HStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.08))
+                            .frame(width: 38, height: 38)
+                        Image(systemName: "person.2")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Friends")
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundColor(.primaryText)
+                        Text("Add friends & invites")
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                            .foregroundColor(.secondaryText)
+                    }
+                    Spacer(minLength: 8)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 13)
+                .background(Color.white)
+                .cornerRadius(14)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.45), lineWidth: 1.2)
+                )
+            }
+            .buttonStyle(PlainButtonStyle())
+
+            if showFriendsBadge {
+                Circle()
+                    .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .frame(width: 10, height: 10)
+                    .overlay(Circle().stroke(Color.white, lineWidth: 1.5))
+                    .offset(x: -4, y: 4)
+                    .transition(.scale.combined(with: .opacity))
+                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: showFriendsBadge)
+            }
+        }
+        .padding(.top, 8)
+        .padding(.horizontal, 40)
+    }
+
     @ViewBuilder
     private func statTile(icon: String, value: String, label: String) -> some View {
         VStack(spacing: 8) {

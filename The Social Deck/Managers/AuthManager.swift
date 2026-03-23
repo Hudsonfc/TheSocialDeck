@@ -130,6 +130,13 @@ class AuthManager: ObservableObject {
                     await self.linkGameCenterIfNeeded()
                     // One-time stale room cleanup for this signed-in user (client-side)
                     await OnlineManager.shared.cleanupStaleRoomsOnLaunchIfNeeded()
+                    // Keep pending-request listener alive at all times so the badge in
+                    // ProfileView is driven by live data without opening FriendsListView.
+                    FriendService.shared.startListeningToPendingRequests()
+                    // Fetch room invites once so the badge count is immediately available.
+                    await OnlineManager.shared.loadPendingRoomInvites()
+                    // Ask for push-notification permission (only after sign-in, never on cold launch).
+                    NotificationManager.shared.requestPermissionIfNeeded()
             } catch {
                 self.errorMessage = "Failed to decode profile: \(error.localizedDescription)"
                 }
@@ -210,6 +217,7 @@ class AuthManager: ObservableObject {
         let profile = UserProfile(
             userId: userId,
             username: username,
+            usernameLower: username.lowercased(),
             email: email,
             gameCenterPlayerID: gameCenterPlayerID
         )
@@ -269,6 +277,7 @@ class AuthManager: ObservableObject {
             let profileRef = db.collection("profiles").document(userId)
             try await profileRef.updateData([
                 "username": trimmedUsername,
+                "usernameLower": trimmedUsername.lowercased(),
                 "lastUsernameChanged": Timestamp(date: Date()),
                 "updatedAt": Timestamp(date: Date())
             ])

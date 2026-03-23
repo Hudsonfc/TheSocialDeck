@@ -14,10 +14,12 @@ struct RoomInvitesView: View {
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var navigateToRoom = false
+    /// When `true`, hides the nav back button (used inside Friends hub tab).
+    var embeddedInFriendsHub: Bool = false
     
     var body: some View {
         ZStack {
-            Color.white
+            (embeddedInFriendsHub ? Color.appBackground : Color.white)
                 .ignoresSafeArea()
             
             if onlineManager.isLoading && onlineManager.pendingRoomInvites.isEmpty {
@@ -65,7 +67,7 @@ struct RoomInvitesView: View {
                                 ))
                         }
                     }
-                    .padding(.horizontal, 40)
+                    .padding(.horizontal, embeddedInFriendsHub ? 20 : 40)
                     .padding(.vertical, 20)
                     .animation(.spring(response: 0.4, dampingFraction: 0.8), value: onlineManager.pendingRoomInvites.count)
                 }
@@ -73,13 +75,15 @@ struct RoomInvitesView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    dismiss()
-                }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+            if !embeddedInFriendsHub {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    }
                 }
             }
         }

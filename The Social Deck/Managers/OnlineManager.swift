@@ -472,6 +472,18 @@ class OnlineManager: ObservableObject {
                 roomName: room.roomName,
                 toUserId: toUserId
             )
+
+            // Push notification — fire-and-forget
+            if let senderUsername = authManager.userProfile?.username {
+                let gameName = room.selectedGameType ?? "a game"
+                Task {
+                    await NotificationManager.shared.sendRoomInviteNotification(
+                        toUserId: toUserId,
+                        fromUsername: senderUsername,
+                        gameName: gameName
+                    )
+                }
+            }
         } catch {
             errorMessage = "Failed to send invite: \(error.localizedDescription)"
         }

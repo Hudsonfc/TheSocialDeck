@@ -538,86 +538,89 @@ struct PendingRequestRow: View {
     @State private var toast: ToastMessage? = nil
     
     var body: some View {
-        HStack(spacing: 16) {
+        Group {
             if let profile = profile {
-                // Avatar
-                ZStack {
-                    Circle()
-                        .fill(Color.white)
-                        .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
-                    
-                    AvatarView(
-                        avatarType: profile.avatarType,
-                        avatarColor: profile.avatarColor,
-                        size: 56
-                    )
-                }
-                
-                // User info
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(profile.username)
-                        .font(.system(size: 17, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                    
-                    Text("Wants to be friends")
-                        .font(.system(size: 14, weight: .regular, design: .rounded))
-                        .foregroundColor(Color.gray)
-                }
-                
-                Spacer()
-                
-                // Action buttons
-                HStack(spacing: 10) {
-                    Button(action: {
-                        HapticManager.shared.lightImpact()
-                        Task {
-                            await rejectRequest()
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(alignment: .center, spacing: 12) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white)
+                                .shadow(color: Color.black.opacity(0.06), radius: 3, x: 0, y: 1)
+                            
+                            AvatarView(
+                                avatarType: profile.avatarType,
+                                avatarColor: profile.avatarColor,
+                                size: 48
+                            )
                         }
-                    }) {
-                        Text("Decline")
-                            .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color.gray)
-                            .frame(width: 75, height: 36)
-                            .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
-                            .cornerRadius(10)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(profile.username)
+                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .lineLimit(1)
+                            
+                            Text("Wants to be friends")
+                                .font(.system(size: 12, weight: .regular, design: .rounded))
+                                .foregroundColor(Color.gray)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .disabled(isProcessing)
                     
-                    Button(action: {
-                        HapticManager.shared.lightImpact()
-                        Task {
-                            await acceptRequest()
-                        }
-                    }) {
-                        if isProcessing {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                .scaleEffect(0.8)
-                        } else {
-                            Text("Accept")
+                    HStack(spacing: 8) {
+                        Spacer(minLength: 0)
+                        Button(action: {
+                            HapticManager.shared.lightImpact()
+                            Task {
+                                await rejectRequest()
+                            }
+                        }) {
+                            Text("Decline")
                                 .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                .foregroundColor(.white)
+                                .foregroundColor(Color.gray)
+                                .frame(width: 88, height: 36)
+                                .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                                .cornerRadius(10)
                         }
+                        .disabled(isProcessing)
+                        
+                        Button(action: {
+                            HapticManager.shared.lightImpact()
+                            Task {
+                                await acceptRequest()
+                            }
+                        }) {
+                            if isProcessing {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                    .scaleEffect(0.8)
+                            } else {
+                                Text("Accept")
+                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        .frame(width: 88, height: 36)
+                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .cornerRadius(10)
+                        .disabled(isProcessing)
                     }
-                    .frame(width: 75, height: 36)
-                    .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                    .cornerRadius(10)
-                    .disabled(isProcessing)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
                 }
             } else if isLoading {
                 HStack {
                     ProgressView()
                         .scaleEffect(0.9)
-                        Spacer()
+                    Spacer()
                 }
-                .padding(.vertical, 16)
+                .padding(.vertical, 12)
             }
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
         .background(Color.white)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 3)
+        .cornerRadius(14)
+        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
         .task {
             await loadProfile()
         }
@@ -654,6 +657,111 @@ struct PendingRequestRow: View {
             HapticManager.shared.error()
         }
         isProcessing = false
+    }
+}
+
+// MARK: - Sent friend request row (outgoing, pending)
+
+struct SentFriendRequestRow: View {
+    @StateObject private var friendService = FriendService.shared
+    let request: FriendRequest
+    @State private var profile: UserProfile?
+    @State private var isLoading = true
+    @State private var isCancelling = false
+    @State private var showCancelConfirmation = false
+
+    private let brandRed = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+
+    var body: some View {
+        HStack(spacing: 14) {
+            if let profile = profile {
+                ZStack {
+                    Circle()
+                        .fill(Color.white)
+                        .shadow(color: Color.black.opacity(0.06), radius: 3, x: 0, y: 1)
+                    AvatarView(
+                        avatarType: profile.avatarType,
+                        avatarColor: profile.avatarColor,
+                        size: 48
+                    )
+                }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(profile.username)
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .lineLimit(1)
+                    Text("Request pending")
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                        .foregroundColor(Color.gray)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                Button {
+                    HapticManager.shared.lightImpact()
+                    showCancelConfirmation = true
+                } label: {
+                    if isCancelling {
+                        ProgressView()
+                            .scaleEffect(0.75)
+                            .frame(width: 68, height: 30)
+                    } else {
+                        Text("Cancel")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundColor(Color.gray)
+                            .frame(width: 68, height: 30)
+                            .background(Color(red: 0xF0/255.0, green: 0xF0/255.0, blue: 0xF0/255.0))
+                            .cornerRadius(8)
+                    }
+                }
+                .disabled(isCancelling)
+                .buttonStyle(.plain)
+            } else if isLoading {
+                ProgressView()
+                    .scaleEffect(0.9)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 10)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 11)
+        .background(Color.white)
+        .cornerRadius(14)
+        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .confirmationDialog(
+            "Cancel request to \(profile?.username ?? "this user")?",
+            isPresented: $showCancelConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Cancel request", role: .destructive) {
+                Task { await cancelRequest() }
+            }
+            Button("Keep", role: .cancel) {}
+        }
+        .task {
+            await loadProfile()
+        }
+    }
+
+    private func loadProfile() async {
+        do {
+            profile = try await friendService.getUserProfile(userId: request.toUserId)
+            isLoading = false
+        } catch {
+            isLoading = false
+        }
+    }
+
+    private func cancelRequest() async {
+        guard let requestId = request.id else { return }
+        isCancelling = true
+        do {
+            try await friendService.cancelFriendRequest(requestId)
+            HapticManager.shared.lightImpact()
+            // The sentRequests listener/reload will remove the row automatically
+        } catch {
+            HapticManager.shared.error()
+        }
+        isCancelling = false
     }
 }
 
