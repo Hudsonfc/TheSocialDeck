@@ -96,11 +96,6 @@ struct RoomInvitesView: View {
                 EmptyView()
             }
         )
-        .onAppear {
-            Task {
-                await onlineManager.loadPendingRoomInvites()
-            }
-        }
         .alert("Error", isPresented: $showError) {
             Button("OK", role: .cancel) { }
         } message: {

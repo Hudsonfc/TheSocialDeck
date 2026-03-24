@@ -103,13 +103,9 @@ struct OnlineView: View {
         .navigationBarBackButtonHidden(true)
         .onAppear {
             HapticManager.shared.lightImpact()
-            Task {
-                await onlineManager.loadPendingRoomInvites()
-            }
         }
         .refreshable {
             HapticManager.shared.lightImpact()
-            await onlineManager.loadPendingRoomInvites()
         }
     }
 }

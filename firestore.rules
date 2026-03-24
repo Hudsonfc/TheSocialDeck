@@ -1,40 +1,83 @@
 rules_version = '2';
-// Firestore Security Rules for The Social Deck
-//
-// IMPORTANT — "Create room" will fail with "Missing or insufficient permissions"
-// until these rules are deployed to your Firebase project.
-//
-// Deploy manually:
-//   1. Open https://console.firebase.google.com → your project → Firestore Database → Rules
-//   2. Replace the rules there with the entire contents of this file (or add the rooms/roomInvites blocks if you already have rules)
-//   3. Click "Publish"
-//
-// Or from terminal (if you use Firebase CLI): firebase deploy --only firestore:rules
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isMe(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    // NOTE: Firestore rules cannot enforce field-level read access inside a single document.
+    // With the current schema, profile reads stay authenticated-only to preserve search/friend flows.
+    function validProfileWriteShape() {
+      return request.resource.data.keys().hasOnly([
+        "userId",
+        "email",
+        "gameCenterPlayerID",
+        "username",
+        "usernameLower",
+        "avatarType",
+        "avatarColor",
+        "createdAt",
+        "updatedAt",
+        "lastUsernameChanged",
+        "joinDate",
+        "gamesPlayed",
+        "gamesWon",
+        "totalCardsSeen",
+        "totalCardsFlipped",
+        "favoriteGame",
+        "cardsFlipped",
+        "onlineGamesPlayed",
+        "onlineGamesWon",
+        "favoritedGames",
+        "isOnline",
+        "isPlus",
+        "lastActiveAt",
+        "lastSeen",
+        "fcmToken"
+      ]);
+    }
+
+    function roomPlayerIds(roomData) {
+      return roomData.players.map(player, player.id);
+    }
+
+    function isExistingRoomPlayer() {
+      return signedIn() && roomPlayerIds(resource.data).hasAny([request.auth.uid]);
+    }
+
+    function isRoomHost() {
+      return signedIn() && resource.data.hostId == request.auth.uid;
+    }
+
     // User profiles: document ID = Firebase Auth UID
     match /profiles/{userId} {
-      // Any authenticated user can read profiles (needed for search/friends/request UI)
-      allow read: if request.auth != null;
-      // Only the owner can create/update/delete their own profile
-      allow create, update, delete: if request.auth != null && request.auth.uid == userId;
+      // Authenticated read is required for search + friend request UI.
+      allow read: if signedIn();
+
+      // Only the owner can create/update, and only with expected profile keys.
+      allow create, update: if isMe(userId) && validProfileWriteShape();
+      allow delete: if isMe(userId);
     }
 
     // Friend requests
     match /friendRequests/{requestId} {
       // Read if I am either side of the request
-      allow read: if request.auth != null &&
+      allow read: if signedIn() &&
         (
           resource.data.fromUserId == request.auth.uid ||
           resource.data.toUserId == request.auth.uid
         );
 
       // Create only if the sender is me
-      allow create: if request.auth != null &&
+      allow create: if signedIn() &&
         request.resource.data.fromUserId == request.auth.uid;
 
       // Update/delete if I am either side of the request
-      allow update, delete: if request.auth != null &&
+      allow update, delete: if signedIn() &&
         (
           resource.data.fromUserId == request.auth.uid ||
           resource.data.toUserId == request.auth.uid
@@ -43,12 +86,27 @@ service cloud.firestore {
 
     // Online rooms: document ID = room code
     match /rooms/{roomId} {
-      allow read, write: if request.auth != null;
+      // Needed for join-via-code and lobby/game reads.
+      allow read: if signedIn();
+
+      // Any signed-in user can create a room.
+      allow create: if signedIn();
+
+      // Only users who are already a player in this room can update it.
+      allow update: if isExistingRoomPlayer();
+
+      // Only host can delete room.
+      allow delete: if isRoomHost();
     }
 
     // Room invites (for inviting friends to rooms)
     match /roomInvites/{inviteId} {
-      allow read, write: if request.auth != null;
+      allow read, write: if signedIn();
+    }
+
+    // Default deny for any collections not explicitly covered above.
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

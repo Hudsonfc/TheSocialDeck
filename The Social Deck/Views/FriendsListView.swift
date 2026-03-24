@@ -8,10 +8,6 @@
 import SwiftUI
 import FirebaseFirestore
 
-// MARK: - Production mode
-// App Store/live builds must use real Firestore data.
-private let friendsListUsesMockData = false
-
 private enum FriendsHubTab: String, CaseIterable {
     case friends = "Friends"
     case requests = "Requests"
@@ -31,34 +27,21 @@ struct FriendsListView: View {
     @State private var toast: ToastMessage? = nil
     @State private var showSearchSheet = false
     @State private var selectedHubTab: FriendsHubTab = .friends
-    /// Mock-only: outgoing preview rows after “Add” from search sheet
-    @State private var mockSentUsernames: [String] = []
-    /// Mock-only: live preview friends shown in the Friends tab
-    @State private var mockFriendsPreview: [FriendProfile] = Self.mockFriends
-    /// Mock-only: live copy of pending incoming invites (starts from FriendsListMock, shrinks on Accept/Decline)
-    @State private var mockPendingInvites: [MockFriendInvite] = FriendsListMock.pendingFriendInvites
-    /// Mock-only: room invites preview rows in Rooms tab
-    @State private var mockRoomInvites: [MockRoomInvitePreview] = FriendsListMock.roomInvites
-    /// Mock-only: friends accepted from the Requests tab preview
-    @State private var mockAcceptedFriends: [FriendProfile] = []
-
     private let brandRed = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
 
     private var friendsToShow: [FriendProfile] {
-        friendsListUsesMockData ? mockFriendsPreview + mockAcceptedFriends : friendService.friends
+        friendService.friends
     }
 
     private var showLoadingState: Bool {
-        !friendsListUsesMockData && friendService.isLoading
+        friendService.isLoading
     }
 
     private var roomInviteBadgeCount: Int {
-        if friendsListUsesMockData { return mockRoomInvites.count }
         return onlineManager.pendingRoomInvites.count
     }
 
     private var incomingRequestBadgeCount: Int {
-        if friendsListUsesMockData { return mockPendingInvites.count }
         return friendService.pendingRequests.count
     }
 
@@ -82,13 +65,6 @@ struct FriendsListView: View {
     private var friendsTabContent: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
-                if friendsListUsesMockData {
-                    Text("Preview — mock data")
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
-                        .foregroundColor(.secondaryText)
-                        .padding(.horizontal, 4)
-                }
-
                 Text("\(friendsToShow.count) friend\(friendsToShow.count == 1 ? "" : "s")")
                     .font(.system(size: 14, weight: .regular, design: .rounded))
                     .foregroundColor(.secondaryText)
@@ -101,7 +77,7 @@ struct FriendsListView: View {
                         ForEach(friendsToShow) { friend in
                             FriendRowView(
                                 friend: friend,
-                                useMockProfileData: friendsListUsesMockData,
+                                useMockProfileData: false,
                                 onInvite: {
                                     HapticManager.shared.lightImpact()
                                     selectedFriend = friend
@@ -150,42 +126,10 @@ struct FriendsListView: View {
     // MARK: - Room invites tab
 
     private var roomInvitesTabContent: some View {
-        Group {
-            if friendsListUsesMockData {
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Preview — mock data")
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
-                            .foregroundColor(.secondaryText)
-
-                        if mockRoomInvites.isEmpty {
-                            Text("No room invites")
-                                .font(.system(size: 15, weight: .regular, design: .rounded))
-                                .foregroundColor(.secondaryText)
-                                .padding(.top, 4)
-                        } else {
-                            ForEach(mockRoomInvites) { invite in
-                                MockRoomInviteCard(invite: invite) { action in
-                                    HapticManager.shared.lightImpact()
-                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                                        mockRoomInvites.removeAll { $0.id == invite.id }
-                                    }
-                                    toast = ToastMessage(message: "Preview — \(action) room invite", type: .success)
-                                }
-                            }
-                        }
-                    }
-                    .responsiveHorizontalPadding()
-                    .padding(.top, 8)
-                    .padding(.bottom, 28)
-                }
-            } else {
-                RoomInvitesView(embeddedInFriendsHub: true)
-                    .refreshable {
-                        await refreshRoomInvitesList()
-                    }
+        RoomInvitesView(embeddedInFriendsHub: true)
+            .refreshable {
+                await refreshRoomInvitesList()
             }
-        }
     }
 
     // MARK: - Requests tab
@@ -194,41 +138,8 @@ struct FriendsListView: View {
     private var requestsTabContent: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 20) {
-                if friendsListUsesMockData {
-                    Text("Preview — mock data")
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
-                        .foregroundColor(.secondaryText)
-                }
-
                 requestsSectionHeader("Received")
-                if friendsListUsesMockData {
-                    ForEach(mockPendingInvites) { invite in
-                        MockFriendRequestRow(invite: invite) { action in
-                            HapticManager.shared.lightImpact()
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                                mockPendingInvites.removeAll { $0.id == invite.id }
-                                if action == "Accept" {
-                                    let profile = UserProfile(
-                                        userId: invite.id.uuidString,
-                                        username: invite.username,
-                                        avatarType: invite.avatarType,
-                                        avatarColor: invite.avatarColor,
-                                        isOnline: true
-                                    )
-                                    mockAcceptedFriends.append(FriendProfile(profile: profile, isOnline: true))
-                                }
-                            }
-                        }
-                    }
-                    if mockPendingInvites.isEmpty {
-                        Text("No incoming friend requests")
-                            .font(.system(size: 15, weight: .regular, design: .rounded))
-                            .foregroundColor(.secondaryText)
-                            .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.vertical, 12)
-                    }
-                } else if friendService.pendingRequests.isEmpty {
+                if friendService.pendingRequests.isEmpty {
                     Text("No incoming friend requests")
                         .font(.system(size: 15, weight: .regular, design: .rounded))
                         .foregroundColor(.secondaryText)
@@ -242,19 +153,7 @@ struct FriendsListView: View {
                 }
 
                 requestsSectionHeader("Sent")
-                if friendsListUsesMockData {
-                    ForEach(mockSentUsernames, id: \.self) { name in
-                        MockOutgoingFriendRow(username: name)
-                    }
-                    if mockSentUsernames.isEmpty {
-                        Text("Use search to add someone — they’ll show up here as a pending request.")
-                            .font(.system(size: 15, weight: .regular, design: .rounded))
-                            .foregroundColor(.secondaryText)
-                            .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.vertical, 12)
-                    }
-                } else if friendService.sentRequests.isEmpty {
+                if friendService.sentRequests.isEmpty {
                     Text("No outgoing requests")
                         .font(.system(size: 15, weight: .regular, design: .rounded))
                         .foregroundColor(.secondaryText)
@@ -285,10 +184,6 @@ struct FriendsListView: View {
 
     private func refreshFriendsList() async {
         HapticManager.shared.lightImpact()
-        if friendsListUsesMockData {
-            toast = ToastMessage(message: "Preview data — nothing to refresh", type: .success)
-            return
-        }
         do {
             try await friendService.loadFriends()
             toast = ToastMessage(message: "Friends list refreshed", type: .success)
@@ -299,10 +194,6 @@ struct FriendsListView: View {
 
     private func refreshRequestsList() async {
         HapticManager.shared.lightImpact()
-        if friendsListUsesMockData {
-            toast = ToastMessage(message: "Preview data — nothing to refresh", type: .success)
-            return
-        }
         do {
             try await friendService.loadPendingRequests()
             try await friendService.loadSentRequests()
@@ -314,11 +205,7 @@ struct FriendsListView: View {
 
     private func refreshRoomInvitesList() async {
         HapticManager.shared.lightImpact()
-        if friendsListUsesMockData {
-            toast = ToastMessage(message: "Preview data — nothing to refresh", type: .success)
-            return
-        }
-        await onlineManager.loadPendingRoomInvites()
+        // Realtime listener keeps this list live; refresh stays as a lightweight UX affordance.
         toast = ToastMessage(message: "Room invites refreshed", type: .success)
     }
 
@@ -409,11 +296,7 @@ struct FriendsListView: View {
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $showSearchSheet) {
             FriendsSearchSheet(
-                friendsListUsesMockData: friendsListUsesMockData,
                 onRequestSent: { username in
-                    if friendsListUsesMockData, let name = username, !mockSentUsernames.contains(name) {
-                        mockSentUsernames.insert(name, at: 0)
-                    }
                     selectedHubTab = .requests
                     Task {
                         try? await friendService.loadSentRequests()
@@ -422,23 +305,16 @@ struct FriendsListView: View {
             )
         }
         .onAppear {
-            // Mark badge as seen — always runs regardless of mock/real mode.
-            let seenRequestIds = friendsListUsesMockData
-                ? ""
-                : friendService.pendingRequests.compactMap(\.id).joined(separator: ",")
-            let seenRoomInviteIds = friendsListUsesMockData
-                ? ""
-                : onlineManager.pendingRoomInvites.compactMap(\.id).joined(separator: ",")
+            // Mark badge as seen based on current live data.
+            let seenRequestIds = friendService.pendingRequests.compactMap(\.id).joined(separator: ",")
+            let seenRoomInviteIds = onlineManager.pendingRoomInvites.compactMap(\.id).joined(separator: ",")
             UserDefaults.standard.set(seenRequestIds, forKey: "lastSeenFriendRequestIds")
             UserDefaults.standard.set(seenRoomInviteIds, forKey: "lastSeenRoomInviteIds")
-
-            guard !friendsListUsesMockData else { return }
             Task {
                 do {
                     try await friendService.loadFriends()
                     try await friendService.loadPendingRequests()
                     try await friendService.loadSentRequests()
-                    await onlineManager.loadPendingRoomInvites()
                     friendService.startListeningToFriends()
                     friendService.startListeningToPendingRequests()
                     friendService.startListeningToSentRequests()
@@ -457,7 +333,6 @@ struct FriendsListView: View {
             }
         }
         .onDisappear {
-            guard !friendsListUsesMockData else { return }
             friendService.stopListeningToFriends()
             friendService.stopListeningToPendingRequests()
             friendService.stopListeningToSentRequests()
@@ -474,14 +349,13 @@ struct FriendsListView: View {
             notificationManager.pendingDeepLink = nil
         }
         .onChange(of: selectedHubTab) { _, newTab in
-            guard !friendsListUsesMockData else { return }
             Task {
                 switch newTab {
                 case .requests:
                     try? await friendService.loadSentRequests()
                     try? await friendService.loadPendingRequests()
                 case .roomInvites:
-                    await onlineManager.loadPendingRoomInvites()
+                    break
                 case .friends:
                     break
                 }
@@ -513,14 +387,6 @@ struct FriendsListView: View {
     }
     
     private func removeFriend(_ friend: FriendProfile) async {
-        if friendsListUsesMockData {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                mockFriendsPreview.removeAll { $0.userId == friend.userId }
-                mockAcceptedFriends.removeAll { $0.userId == friend.userId }
-            }
-            toast = ToastMessage(message: "\(friend.username) removed (preview)", type: .success)
-            return
-        }
         do {
             try await friendService.removeFriend(friend.userId)
             HapticManager.shared.success()
@@ -531,60 +397,6 @@ struct FriendsListView: View {
         }
     }
 
-    /// Mock profiles for search sheet when `friendsListUsesMockData` is on
-    static let mockSearchPreviewProfiles: [UserProfile] = [
-        UserProfile(userId: "sr_mock_1", username: "caseyplays", avatarType: "avatar 1", avatarColor: "purple"),
-        UserProfile(userId: "sr_mock_2", username: "rileyK", avatarType: "avatar 2", avatarColor: "blue"),
-        UserProfile(userId: "sr_mock_3", username: "sam_night", avatarType: "avatar 3", avatarColor: "green")
-    ]
-
-    private static let mockFriends: [FriendProfile] = [
-        FriendProfile(
-            profile: UserProfile(
-                userId: "mock_friend_1",
-                username: "Maya",
-                avatarType: "avatar 2",
-                avatarColor: "yellow",
-                lastActiveAt: Date(),
-                isOnline: true,
-                isPlus: true
-            ),
-            isOnline: true
-        ),
-        FriendProfile(
-            profile: UserProfile(
-                userId: "mock_friend_2",
-                username: "Jordan",
-                avatarType: "avatar 3",
-                avatarColor: "green",
-                lastActiveAt: Date().addingTimeInterval(-120),
-                isOnline: true
-            ),
-            isOnline: true
-        ),
-        FriendProfile(
-            profile: UserProfile(
-                userId: "mock_friend_3",
-                username: "Chris",
-                avatarType: "avatar 1",
-                avatarColor: "blue",
-                lastActiveAt: Date().addingTimeInterval(-3600 * 3),
-                isOnline: false
-            ),
-            isOnline: false
-        ),
-        FriendProfile(
-            profile: UserProfile(
-                userId: "mock_friend_4",
-                username: "Taylor",
-                avatarType: "avatar 4",
-                avatarColor: "red",
-                lastActiveAt: Date().addingTimeInterval(-86400),
-                isOnline: false
-            ),
-            isOnline: false
-        )
-    ]
 }
 
 // MARK: - Hub tab (Play2View-style underline + optional badge)
@@ -625,7 +437,6 @@ private struct FriendsSearchSheet: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var friendService = FriendService.shared
     @StateObject private var authManager = AuthManager.shared
-    let friendsListUsesMockData: Bool
     var onRequestSent: (String?) -> Void
 
     @State private var searchText = ""
@@ -794,18 +605,6 @@ private struct FriendsSearchSheet: View {
     private func performSearch(query: String) async {
         guard query.count >= 2 else { return }
         await MainActor.run { isSearching = true }
-        if friendsListUsesMockData {
-            try? await Task.sleep(nanoseconds: 350_000_000)
-            let q = query.lowercased()
-            let mockUsers = FriendsListView.mockSearchPreviewProfiles.filter {
-                $0.username.lowercased().contains(q)
-            }
-            await MainActor.run {
-                searchResults = mockUsers
-                isSearching = false
-            }
-            return
-        }
         do {
             let results = try await friendService.searchUsers(by: query)
             let uid = authManager.userProfile?.userId
@@ -824,15 +623,6 @@ private struct FriendsSearchSheet: View {
     }
 
     private func sendRequest(to profile: UserProfile) async {
-        if friendsListUsesMockData {
-            await MainActor.run {
-                HapticManager.shared.success()
-                onRequestSent(profile.username)
-                toast = ToastMessage(message: "Request sent (preview)", type: .success)
-                dismiss()
-            }
-            return
-        }
         do {
             try await friendService.sendFriendRequest(to: profile.userId)
             await MainActor.run {
@@ -867,205 +657,6 @@ private struct FriendsSearchSheet: View {
                 toast = ToastMessage(message: "Failed to block", type: .error)
             }
         }
-    }
-}
-
-// MARK: - Mock outgoing row (preview)
-
-private struct MockOutgoingFriendRow: View {
-    let username: String
-
-    var body: some View {
-        HStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(Color.secondaryBackground)
-                    .frame(width: 48, height: 48)
-                Image(systemName: "paperplane.fill")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(Color.primaryAccent.opacity(0.7))
-            }
-            VStack(alignment: .leading, spacing: 4) {
-                Text(username)
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .foregroundColor(.primaryText)
-                Text("Request sent · waiting for them to accept")
-                    .font(.system(size: 13, weight: .regular, design: .rounded))
-                    .foregroundColor(.secondaryText)
-            }
-            Spacer()
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .background(Color.secondaryBackground)
-        .cornerRadius(16)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.borderColor.opacity(0.35), lineWidth: 1)
-        )
-    }
-}
-
-// MARK: - Mock invites metadata
-
-private enum FriendsListMock {
-    static let pendingFriendInvites: [MockFriendInvite] = [
-        MockFriendInvite(username: "Sam", avatarType: "avatar 1", avatarColor: "purple"),
-        MockFriendInvite(username: "Riley", avatarType: "avatar 2", avatarColor: "blue")
-    ]
-
-    static let roomInvites: [MockRoomInvitePreview] = [
-        MockRoomInvitePreview(
-            inviterName: "Maya",
-            inviterAvatarType: "avatar 2",
-            inviterAvatarColor: "yellow",
-            roomName: "Saturday Night",
-            roomCode: "4827"
-        ),
-        MockRoomInvitePreview(
-            inviterName: "Jordan",
-            inviterAvatarType: "avatar 3",
-            inviterAvatarColor: "teal",
-            roomName: "Quick Match",
-            roomCode: "9154"
-        )
-    ]
-}
-
-private struct MockFriendInvite: Identifiable {
-    let id = UUID()
-    let username: String
-    let avatarType: String
-    let avatarColor: String
-}
-
-private struct MockRoomInvitePreview: Identifiable {
-    let id = UUID()
-    let inviterName: String
-    let inviterAvatarType: String
-    let inviterAvatarColor: String
-    let roomName: String
-    let roomCode: String
-}
-
-private struct MockRoomInviteCard: View {
-    let invite: MockRoomInvitePreview
-    var onAction: (String) -> Void
-
-    private let brandRed = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
-
-    var body: some View {
-        VStack(spacing: 16) {
-            VStack(spacing: 10) {
-                AvatarView(
-                    avatarType: invite.inviterAvatarType,
-                    avatarColor: invite.inviterAvatarColor,
-                    size: 58
-                )
-                Text("\(invite.inviterName) invited you")
-                    .font(.system(size: 18, weight: .semibold, design: .rounded))
-                    .foregroundColor(.primaryText)
-                Text("Room: \(invite.roomName)")
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                    .foregroundColor(.secondaryText)
-            }
-
-            VStack(spacing: 6) {
-                Text("Room Code")
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundColor(.secondaryText)
-                Text(invite.roomCode)
-                    .font(.system(size: 28, weight: .bold, design: .monospaced))
-                    .foregroundColor(.primaryText)
-                    .tracking(3)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(Color.secondaryBackground)
-            .cornerRadius(12)
-
-            HStack(spacing: 10) {
-                Button("Decline") { onAction("Declined") }
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
-                    .foregroundColor(.secondaryText)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color(red: 0xF0/255.0, green: 0xF0/255.0, blue: 0xF0/255.0))
-                    .cornerRadius(10)
-
-                Button("Accept") { onAction("Accepted") }
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(brandRed)
-                    .cornerRadius(10)
-            }
-        }
-        .padding(16)
-        .background(Color.white)
-        .cornerRadius(16)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.borderColor.opacity(0.35), lineWidth: 1)
-        )
-    }
-}
-
-private struct MockFriendRequestRow: View {
-    let invite: MockFriendInvite
-    var onAction: (String) -> Void
-
-    private let brandRed = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .center, spacing: 12) {
-                AvatarView(avatarType: invite.avatarType, avatarColor: invite.avatarColor, size: 44)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(invite.username)
-                        .font(.system(size: 15, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                        .lineLimit(1)
-                    Text("Wants to be friends")
-                        .font(.system(size: 12, weight: .regular, design: .rounded))
-                        .foregroundColor(Color.gray)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-
-            HStack(spacing: 8) {
-                Spacer(minLength: 0)
-                Button("Decline") {
-                    onAction("Decline")
-                }
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .foregroundColor(Color.gray)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(Color(red: 0xF0/255.0, green: 0xF0/255.0, blue: 0xF0/255.0))
-                .cornerRadius(10)
-                .fixedSize(horizontal: true, vertical: false)
-
-                Button("Accept") {
-                    onAction("Accept")
-                }
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .foregroundColor(.white)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(brandRed)
-                .cornerRadius(10)
-                .fixedSize(horizontal: true, vertical: false)
-            }
-            .frame(maxWidth: .infinity, alignment: .trailing)
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .background(Color.white)
-        .cornerRadius(14)
-        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
     }
 }
 

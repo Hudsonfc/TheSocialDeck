@@ -89,39 +89,67 @@ class OnlineService {
         }
         
         let roomRef = db.collection("rooms").document(roomCode)
-        let snapshot = try await roomRef.getDocument()
-        
-        guard snapshot.exists, var room = try? snapshot.data(as: OnlineRoom.self) else {
+
+        // Transaction prevents race conditions when multiple users join at once.
+        _ = try await db.runTransaction { transaction, errorPointer in
+            do {
+                let snapshot = try transaction.getDocument(roomRef)
+                guard snapshot.exists, let raw = snapshot.data() else {
+                    errorPointer?.pointee = NSError(
+                        domain: "OnlineService",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: "Room not found. Please check the room code."]
+                    )
+                    return nil
+                }
+
+                let decoder = Firestore.Decoder()
+                var room = try decoder.decode(OnlineRoom.self, from: raw)
+
+                // Check if player is already in this room
+                if room.players.contains(where: { $0.id == currentUserId }) {
+                    return nil
+                }
+
+                // Check if room is full INSIDE transaction
+                guard room.players.count < room.maxPlayers else {
+                    errorPointer?.pointee = NSError(
+                        domain: "OnlineService",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: "This room is full"]
+                    )
+                    return nil
+                }
+
+                // Check if room is in game (can't join during active game)
+                guard room.status == .waiting else {
+                    errorPointer?.pointee = NSError(
+                        domain: "OnlineService",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: "Cannot join room while game is in progress"]
+                    )
+                    return nil
+                }
+
+                room.players.append(playerProfile)
+
+                // Encode players array and write atomically inside transaction.
+                let encoder = Firestore.Encoder()
+                let playersData = try room.players.map { try encoder.encode($0) }
+                transaction.updateData(["players": playersData], forDocument: roomRef)
+                return nil
+            } catch {
+                errorPointer?.pointee = error as NSError
+                return nil
+            }
+        }
+
+        // Return fresh room state after transactional join.
+        let updatedSnapshot = try await roomRef.getDocument()
+        guard updatedSnapshot.exists, let updatedRoom = try? updatedSnapshot.data(as: OnlineRoom.self) else {
             throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room not found. Please check the room code."])
         }
-        
-        // Check if player is already in this room
-        if room.players.contains(where: { $0.id == currentUserId }) {
-            return room // Already in room, return it
-        }
-        
-        // Check if player is in another room (would need to check all rooms, but for now just allow)
-        // This is a simplified check - in production you might want to check all active rooms
-        
-        // Check if room is full
-        guard room.players.count < room.maxPlayers else {
-            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room is full. Maximum \(room.maxPlayers) players allowed."])
-        }
-        
-        // Check if room is in game (can't join during active game)
-        guard room.status == .waiting else {
-            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Cannot join room while game is in progress"])
-        }
-        
-        // Add player to room
-        room.players.append(playerProfile)
-        
-        // Encode players array properly for Firestore
-        let encoder = Firestore.Encoder()
-        let playersData = try room.players.map { try encoder.encode($0) }
-        try await roomRef.updateData(["players": playersData])
-        
-        return room
+        return updatedRoom
     }
     
     // MARK: - Room Leaving

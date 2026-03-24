@@ -63,6 +63,9 @@ class AuthManager: ObservableObject {
                 } else {
                     self?.userProfile = nil
                     self?.removeProfileListener()
+                    // Prevent stale listeners (and potential permission errors) after sign-out.
+                    FriendService.shared.stopListeningToPendingRequests()
+                    OnlineManager.shared.stopListeningToRoomInvites()
                 }
             }
             .store(in: &cancellables)
@@ -133,8 +136,8 @@ class AuthManager: ObservableObject {
                     // Keep pending-request listener alive at all times so the badge in
                     // ProfileView is driven by live data without opening FriendsListView.
                     FriendService.shared.startListeningToPendingRequests()
-                    // Fetch room invites once so the badge count is immediately available.
-                    await OnlineManager.shared.loadPendingRoomInvites()
+                    // Keep room invites in sync in realtime for badges + Rooms tab.
+                    OnlineManager.shared.startListeningToRoomInvites()
                     // Ask for push-notification permission (only after sign-in, never on cold launch).
                     NotificationManager.shared.requestPermissionIfNeeded()
             } catch {

@@ -154,7 +154,7 @@ struct JoinRoomView: View {
                 EmptyView()
             }
         )
-        .alert("Error", isPresented: $showError) {
+        .alert(currentErrorTitle, isPresented: $showError) {
             Button("OK", role: .cancel) { }
             Button("Retry") {
                 Task {
@@ -220,6 +220,10 @@ struct JoinRoomView: View {
         guard let error = error else {
             return "Failed to join room"
         }
+
+        if error.hasPrefix("Room Full:") {
+            return "This room is full. Ask the host to increase the player limit or join another room."
+        }
         
         // Provide more helpful error messages
         if error.lowercased().contains("not found") || error.lowercased().contains("room not found") {
@@ -233,6 +237,13 @@ struct JoinRoomView: View {
         }
         
         return error
+    }
+
+    private var currentErrorTitle: String {
+        if onlineManager.errorMessage?.hasPrefix("Room Full:") == true {
+            return "Room Full"
+        }
+        return "Error"
     }
 }
 

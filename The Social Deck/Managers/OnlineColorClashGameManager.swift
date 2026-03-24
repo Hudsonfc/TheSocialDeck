@@ -27,6 +27,7 @@ class OnlineColorClashGameManager: ObservableObject {
     @Published var winnerId: String?
     @Published var errorMessage: String?
     @Published var isLoading: Bool = false
+    @Published var connectionLost: Bool = false
     
     // MARK: - Private Properties
     
@@ -58,8 +59,20 @@ class OnlineColorClashGameManager: ObservableObject {
                 guard let self = self else { return }
                 switch result {
                 case .success(let gameState):
+                    self.connectionLost = false
+                    NotificationCenter.default.post(
+                        name: Notification.Name("onlineColorClashConnectionStatusChanged"),
+                        object: nil,
+                        userInfo: ["connectionLost": false]
+                    )
                     self.processGameStateUpdate(gameState)
                 case .failure(let error):
+                    self.connectionLost = true
+                    NotificationCenter.default.post(
+                        name: Notification.Name("onlineColorClashConnectionStatusChanged"),
+                        object: nil,
+                        userInfo: ["connectionLost": true]
+                    )
                     self.errorMessage = "Failed to sync game state: \(error.localizedDescription)"
                 }
             }

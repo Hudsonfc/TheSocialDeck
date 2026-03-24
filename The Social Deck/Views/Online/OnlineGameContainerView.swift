@@ -420,6 +420,8 @@ struct OnlineGameContainerView: View {
     @ObservedObject private var syncService = SyncService.shared
     // RMT uses its own sync service; observe it so the connection banner fires for that game too
     @ObservedObject private var rmtSyncService = RiddleMeThisOnlineSyncService.shared
+    @State private var colorClashConnectionLost = false
+    @State private var flip21ConnectionLost = false
     @State private var showWalkthrough = false
     @State private var showLoadingScreen = false
     @State private var hasShownLoading = false
@@ -529,13 +531,19 @@ struct OnlineGameContainerView: View {
             // Fix 2: connection-lost banner — shown to non-hosts when Firestore drops.
             // Classic games use SyncService; Riddle Me This uses its own sync service.
             // Both are checked so the banner fires regardless of which game type is active.
-            if (syncService.connectionLost || rmtSyncService.connectionLost) && !onlineManager.isHost {
+            if anyConnectionLost && !onlineManager.isHost {
                 connectionLostBanner
                     .zIndex(1)
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: syncService.connectionLost)
+        .animation(.easeInOut(duration: 0.3), value: anyConnectionLost)
+        .onReceive(NotificationCenter.default.publisher(for: .onlineColorClashConnectionStatusChanged)) { notification in
+            colorClashConnectionLost = (notification.userInfo?["connectionLost"] as? Bool) ?? false
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .onlineFlip21ConnectionStatusChanged)) { notification in
+            flip21ConnectionLost = (notification.userInfo?["connectionLost"] as? Bool) ?? false
+        }
         // Fix 1: when the room disappears while a game is active, alert all players
         .onChange(of: onlineManager.currentRoom) { room in
             if room == nil && !showHostLeftAlert {
@@ -560,5 +568,17 @@ struct OnlineGameContainerView: View {
             .frame(maxWidth: .infinity)
             .background(Color.orange)
     }
+
+    private var anyConnectionLost: Bool {
+        syncService.connectionLost
+            || rmtSyncService.connectionLost
+            || colorClashConnectionLost
+            || flip21ConnectionLost
+    }
+}
+
+private extension Notification.Name {
+    static let onlineColorClashConnectionStatusChanged = Notification.Name("onlineColorClashConnectionStatusChanged")
+    static let onlineFlip21ConnectionStatusChanged = Notification.Name("onlineFlip21ConnectionStatusChanged")
 }
 

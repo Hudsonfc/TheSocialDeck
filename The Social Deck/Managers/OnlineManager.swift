@@ -13,6 +13,7 @@ import FirebaseFirestore
 class OnlineManager: ObservableObject {
     static let shared = OnlineManager()
     
+    private let db = Firestore.firestore()
     private let onlineService = OnlineService.shared
     private let authManager = AuthManager.shared
     
@@ -22,6 +23,7 @@ class OnlineManager: ObservableObject {
     @Published var isConnected: Bool = false
     
     nonisolated(unsafe) private var roomListener: ListenerRegistration?
+    nonisolated(unsafe) private var roomInvitesListener: ListenerRegistration?
     private var isLeavingRoom = false
 
     /// Stale-room cleanup runs at most once per signed-in user per app process.
@@ -140,6 +142,8 @@ class OnlineManager: ObservableObject {
             // Handle session expiry
             if let nsError = error as NSError?, nsError.code == 401 || error.localizedDescription.contains("authenticated") {
                 errorMessage = "Your session has expired. Please sign in again."
+            } else if error.localizedDescription == "This room is full" {
+                errorMessage = "Room Full: This room is full. Ask the host to increase the player limit or join another room."
             } else {
                 errorMessage = "Failed to join room: \(error.localizedDescription)"
             }
@@ -455,6 +459,45 @@ class OnlineManager: ObservableObject {
     // MARK: - Room Invites
     
     @Published var pendingRoomInvites: [RoomInvite] = []
+
+    /// Start realtime listener so invite UI/badges update instantly.
+    func startListeningToRoomInvites() {
+        guard let currentUserId = authManager.userProfile?.userId else { return }
+        stopListeningToRoomInvites()
+
+        let query = db.collection("roomInvites")
+            .whereField("toUserId", isEqualTo: currentUserId)
+            .whereField("status", isEqualTo: RoomInviteStatus.pending.rawValue)
+            .whereField("expiresAt", isGreaterThan: Timestamp(date: Date()))
+            .order(by: "createdAt", descending: true)
+
+        roomInvitesListener = query.addSnapshotListener { [weak self] snapshot, error in
+            guard let self = self else { return }
+            Task { @MainActor in
+                if let error = error {
+                    self.errorMessage = "Failed to listen to invites: \(error.localizedDescription)"
+                    return
+                }
+
+                guard let snapshot = snapshot else {
+                    self.pendingRoomInvites = []
+                    return
+                }
+
+                self.pendingRoomInvites = snapshot.documents.compactMap { doc in
+                    var invite = try? doc.data(as: RoomInvite.self)
+                    invite?.id = doc.documentID
+                    return invite
+                }
+            }
+        }
+    }
+
+    func stopListeningToRoomInvites() {
+        roomInvitesListener?.remove()
+        roomInvitesListener = nil
+        pendingRoomInvites = []
+    }
     
     /// Send a room invite to a friend
     func sendRoomInvite(toUserId: String) async {

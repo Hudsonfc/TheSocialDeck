@@ -28,13 +28,13 @@ struct OnlineSyncedClassicGameView: View {
     // Computed card deck for this game type
     private var cards: [Card] {
         switch gameType {
-        case "neverHaveIEver": return allNHIECards.shuffled()
-        case "wouldYouRather":  return allWYRCards.shuffled()
-        case "truthOrDare":     return allTORCards.shuffled()
-        case "storyChain":      return allStoryChainCards.shuffled()
-        case "mostLikelyTo":    return allMLTCards.shuffled()
-        case "twoTruthsAndALie": return allTTLCards.shuffled()
-        default:                return allNHIECards.shuffled()
+        case "neverHaveIEver": return riddleDeterministicShuffle(allNHIECards, roomCode: roomCode)
+        case "wouldYouRather":  return riddleDeterministicShuffle(allWYRCards, roomCode: roomCode)
+        case "truthOrDare":     return riddleDeterministicShuffle(allTORCards, roomCode: roomCode)
+        case "storyChain":      return riddleDeterministicShuffle(allStoryChainCards, roomCode: roomCode)
+        case "mostLikelyTo":    return riddleDeterministicShuffle(allMLTCards, roomCode: roomCode)
+        case "twoTruthsAndALie": return riddleDeterministicShuffle(allTTLCards, roomCode: roomCode)
+        default:                return riddleDeterministicShuffle(allNHIECards, roomCode: roomCode)
         }
     }
 
