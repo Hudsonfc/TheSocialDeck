@@ -131,16 +131,19 @@ struct FriendsListView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 160, height: 160)
+                .frame(maxWidth: .infinity, alignment: .center)
             Text("No friends yet")
                 .font(.system(size: 20, weight: .bold, design: .rounded))
                 .foregroundColor(.primaryText)
+                .frame(maxWidth: .infinity, alignment: .center)
             Text("Tap the search icon (top right) to find people. After you send a request, it appears under Requests.")
                 .font(.system(size: 15, weight: .regular, design: .rounded))
                 .foregroundColor(.secondaryText)
                 .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.horizontal, 8)
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, minHeight: 360, alignment: .center)
         .padding(.vertical, 32)
     }
 
@@ -221,13 +224,17 @@ struct FriendsListView: View {
                         Text("No incoming friend requests")
                             .font(.system(size: 15, weight: .regular, design: .rounded))
                             .foregroundColor(.secondaryText)
-                            .padding(.vertical, 8)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.vertical, 12)
                     }
                 } else if friendService.pendingRequests.isEmpty {
                     Text("No incoming friend requests")
                         .font(.system(size: 15, weight: .regular, design: .rounded))
                         .foregroundColor(.secondaryText)
-                        .padding(.vertical, 8)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.vertical, 12)
                 } else {
                     ForEach(pendingRequestsWithIds, id: \.0) { _, request in
                         PendingRequestRow(request: request)
@@ -243,13 +250,17 @@ struct FriendsListView: View {
                         Text("Use search to add someone — they’ll show up here as a pending request.")
                             .font(.system(size: 15, weight: .regular, design: .rounded))
                             .foregroundColor(.secondaryText)
-                            .padding(.vertical, 4)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.vertical, 12)
                     }
                 } else if friendService.sentRequests.isEmpty {
                     Text("No outgoing requests")
                         .font(.system(size: 15, weight: .regular, design: .rounded))
                         .foregroundColor(.secondaryText)
-                        .padding(.vertical, 8)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.vertical, 12)
                 } else {
                     ForEach(sentRequestsWithIds, id: \.0) { _, request in
                         SentFriendRequestRow(request: request)
