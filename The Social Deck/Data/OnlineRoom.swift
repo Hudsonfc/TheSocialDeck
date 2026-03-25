@@ -32,6 +32,10 @@ struct RoomPlayer: Codable, Identifiable, Equatable {
     var gameScore: Int? // Score for current game
     var isActive: Bool? // Is this player's turn (for turn-based games)
     
+    private enum CodingKeys: String, CodingKey {
+        case id, username, avatarType, avatarColor, isReady, joinedAt, isHost, gameScore, isActive
+    }
+    
     init(
         id: String,
         username: String,
@@ -52,6 +56,19 @@ struct RoomPlayer: Codable, Identifiable, Equatable {
         self.isHost = isHost
         self.gameScore = gameScore
         self.isActive = isActive
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        username = try container.decodeIfPresent(String.self, forKey: .username) ?? "Player"
+        avatarType = try container.decodeIfPresent(String.self, forKey: .avatarType) ?? "bear"
+        avatarColor = try container.decodeIfPresent(String.self, forKey: .avatarColor) ?? "blue"
+        isReady = try container.decodeIfPresent(Bool.self, forKey: .isReady) ?? false
+        joinedAt = try container.decodeIfPresent(Date.self, forKey: .joinedAt) ?? Date()
+        isHost = try container.decodeIfPresent(Bool.self, forKey: .isHost) ?? false
+        gameScore = try container.decodeIfPresent(Int.self, forKey: .gameScore)
+        isActive = try container.decodeIfPresent(Bool.self, forKey: .isActive)
     }
 }
 
@@ -89,6 +106,12 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
     var gameStartedAt: Date?
     var gameState: ColorClashGameState? // For Color Clash game state
     var flip21GameState: Flip21GameState? // For Flip 21 game state
+    
+    private enum CodingKeys: String, CodingKey {
+        case id, roomCode, roomName, createdBy, createdAt, status, maxPlayers, isPrivate
+        case selectedGameType, selectedCategory, cardCount, timerEnabled, timerDuration
+        case roundStartTimestamp, players, hostId, gameStartedAt, gameState, flip21GameState
+    }
     
     init(
         id: String? = nil,
@@ -130,6 +153,29 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         self.gameStartedAt = gameStartedAt
         self.gameState = gameState
         self.flip21GameState = flip21GameState
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        _id = (try? container.decode(DocumentID<String>.self, forKey: .id)) ?? DocumentID(wrappedValue: nil)
+        roomCode = try container.decode(String.self, forKey: .roomCode)
+        roomName = try container.decodeIfPresent(String.self, forKey: .roomName) ?? "Room"
+        createdBy = try container.decodeIfPresent(String.self, forKey: .createdBy) ?? ""
+        createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
+        status = try container.decodeIfPresent(RoomStatus.self, forKey: .status) ?? .waiting
+        maxPlayers = try container.decodeIfPresent(Int.self, forKey: .maxPlayers) ?? 4
+        isPrivate = try container.decodeIfPresent(Bool.self, forKey: .isPrivate) ?? false
+        selectedGameType = try container.decodeIfPresent(String.self, forKey: .selectedGameType)
+        selectedCategory = try container.decodeIfPresent(String.self, forKey: .selectedCategory)
+        cardCount = try container.decodeIfPresent(Int.self, forKey: .cardCount)
+        timerEnabled = try container.decodeIfPresent(Bool.self, forKey: .timerEnabled)
+        timerDuration = try container.decodeIfPresent(Int.self, forKey: .timerDuration)
+        roundStartTimestamp = try container.decodeIfPresent(Date.self, forKey: .roundStartTimestamp)
+        players = (try? container.decodeIfPresent([RoomPlayer].self, forKey: .players)) ?? []
+        hostId = try container.decodeIfPresent(String.self, forKey: .hostId) ?? ""
+        gameStartedAt = try container.decodeIfPresent(Date.self, forKey: .gameStartedAt)
+        gameState = (try? container.decodeIfPresent(ColorClashGameState.self, forKey: .gameState)) ?? nil
+        flip21GameState = (try? container.decodeIfPresent(Flip21GameState.self, forKey: .flip21GameState)) ?? nil
     }
     
     // Helper computed property to get current player count
@@ -203,6 +249,7 @@ extension DeckType {
         case "whatsMySecret": self = .whatsMySecret
         case "riddleMeThis": self = .riddleMeThis
         case "actItOut": self = .actItOut
+        case "actNatural": self = .actNatural
         case "colorClash": self = .colorClash
         case "flip21": self = .flip21
         case "quickfireCouples": self = .quickfireCouples

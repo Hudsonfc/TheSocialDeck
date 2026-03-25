@@ -99,7 +99,7 @@ struct ProfileView: View {
                     } else {
                     Text("Save")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .foregroundColor(.primaryAccent)
                             .transition(.scale.combined(with: .opacity))
                     }
                 }
@@ -123,16 +123,16 @@ struct ProfileView: View {
             } else if authManager.isLoading && authManager.userProfile == nil {
                 // Loading state
                 ZStack {
-                    Color.white
+                    Color.appBackground
                         .ignoresSafeArea()
                     
                     VStack(spacing: 16) {
                         ProgressView()
                             .scaleEffect(1.5)
-                            .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .tint(Color.primaryAccent)
                         Text("Loading profile...")
                             .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(Color.gray)
+                            .foregroundColor(.secondaryText)
                     }
                 }
                 .transition(.opacity)
@@ -148,8 +148,7 @@ struct ProfileView: View {
     
     private var profileContentView: some View {
         ZStack {
-            // White background
-            Color.white
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 24) {
@@ -183,7 +182,7 @@ struct ProfileView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                     }
                 }
             
@@ -197,7 +196,7 @@ struct ProfileView: View {
                 } label: {
                     Image(systemName: "ellipsis")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                         .frame(width: 44, height: 44)
                 }
             }
@@ -258,7 +257,7 @@ struct ProfileView: View {
     private var profileHeaderSection: some View {
         Text("Your Profile")
             .font(.system(size: 32, weight: .bold, design: .rounded))
-            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+            .foregroundColor(.primaryText)
             .padding(.top, 20)
     }
 
@@ -279,12 +278,12 @@ struct ProfileView: View {
                             Spacer()
                             ZStack {
                                 Circle()
-                                    .fill(Color.white)
+                                    .fill(Color.cardBackground)
                                     .frame(width: 36, height: 36)
-                                    .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
+                                    .shadow(color: Color.shadowColor, radius: 4, x: 0, y: 2)
                                 Image(systemName: "pencil")
                                     .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                    .foregroundColor(.primaryAccent)
                             }
                             .padding(6)
                         }
@@ -296,7 +295,7 @@ struct ProfileView: View {
 
             Text("Tap to change avatar")
                 .font(.system(size: 12, weight: .regular, design: .rounded))
-                .foregroundColor(Color.gray)
+                .foregroundColor(.secondaryText)
         }
     }
 
@@ -304,13 +303,13 @@ struct ProfileView: View {
         VStack(spacing: 8) {
             Text("Username")
                 .font(.system(size: 14, weight: .medium, design: .rounded))
-                .foregroundColor(Color.gray)
+                .foregroundColor(.secondaryText)
             ZStack {
                 HStack(spacing: 8) {
                     Spacer()
                     Text(authManager.userProfile?.username ?? "Player")
                         .font(.system(size: 26, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                     if subManager.isPlus {
                         HStack(spacing: 4) {
                             Image(systemName: "crown.fill")
@@ -321,7 +320,7 @@ struct ProfileView: View {
                         .foregroundColor(.white)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .background(Color.primaryAccent)
                         .cornerRadius(20)
                     }
                     Spacer()
@@ -331,9 +330,9 @@ struct ProfileView: View {
                     Button(action: { showChangeUsername = true }) {
                         Image(systemName: "pencil")
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .foregroundColor(.primaryAccent)
                             .padding(10)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .cornerRadius(10)
                     }
                 }
@@ -343,7 +342,7 @@ struct ProfileView: View {
             if let createdAt = authManager.userProfile?.createdAt {
                 Text("Member since \(createdAt.formatted(.dateTime.month(.wide).day().year()))")
                     .font(.system(size: 12, weight: .regular, design: .rounded))
-                    .foregroundColor(Color.gray)
+                    .foregroundColor(.secondaryText)
             }
         }
     }
@@ -352,7 +351,7 @@ struct ProfileView: View {
         VStack(spacing: 16) {
             Text("Game Statistics")
                 .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                .foregroundColor(.primaryText)
                 .frame(maxWidth: .infinity, alignment: .leading)
             HStack(spacing: 12) {
                 statTile(icon: "rectangle.stack.fill", value: "\(displayCardsFlipped)", label: "Cards Flipped")
@@ -372,10 +371,10 @@ struct ProfileView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(milestoneText)
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                     Text("Keep flipping!")
                         .font(.system(size: 12, weight: .regular, design: .rounded))
-                        .foregroundColor(Color.gray)
+                        .foregroundColor(.secondaryText)
                 }
                 Spacer()
                 Button(action: {
@@ -383,17 +382,17 @@ struct ProfileView: View {
                 }) {
                     Image(systemName: "xmark")
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(Color.gray)
+                        .foregroundColor(.secondaryText)
                         .padding(6)
                 }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
-            .background(Color(red: 0xF0/255.0, green: 0xF9/255.0, blue: 0xF0/255.0))
+            .background(Color.green.opacity(0.12))
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.green.opacity(0.3), lineWidth: 1)
+                    .stroke(Color.green.opacity(0.35), lineWidth: 1)
             )
             .padding(.horizontal, 40)
             .transition(.move(edge: .top).combined(with: .opacity))
@@ -410,27 +409,27 @@ struct ProfileView: View {
                 HStack(spacing: 10) {
                     Image(systemName: "crown.fill")
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .foregroundColor(.primaryAccent)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Upgrade to TheSocialDeck+")
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                         Text("Unlock exclusive Plus games")
                             .font(.system(size: 12, weight: .regular, design: .rounded))
-                            .foregroundColor(Color.gray)
+                            .foregroundColor(.secondaryText)
                     }
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(Color.gray)
+                        .foregroundColor(.secondaryText)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 14)
-                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.06))
+                .background(Color.primaryAccent.opacity(0.08))
                 .cornerRadius(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.25), lineWidth: 1)
+                        .stroke(Color.primaryAccent.opacity(0.28), lineWidth: 1)
                 )
             }
             .buttonStyle(PlainButtonStyle())
@@ -447,11 +446,11 @@ struct ProfileView: View {
                 HStack(spacing: 12) {
                     ZStack {
                         Circle()
-                            .fill(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.08))
+                            .fill(Color.primaryAccent.opacity(0.12))
                             .frame(width: 38, height: 38)
                         Image(systemName: "person.2")
                             .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .foregroundColor(.primaryAccent)
                     }
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Friends")
@@ -464,15 +463,15 @@ struct ProfileView: View {
                     Spacer(minLength: 8)
                     Image(systemName: "chevron.right")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .foregroundColor(.primaryAccent)
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 13)
-                .background(Color.white)
+                .background(Color.cardBackground)
                 .cornerRadius(14)
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
-                        .stroke(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.45), lineWidth: 1.2)
+                        .stroke(Color.primaryAccent.opacity(0.45), lineWidth: 1.2)
                 )
             }
             .buttonStyle(PlainButtonStyle())
@@ -505,7 +504,7 @@ struct ProfileView: View {
     /// Red badge with white ring; numeric label when count ≥ 1, else compact dot.
     @ViewBuilder
     private func profileFriendsNotificationBadge(countLabel: String?, popScale: CGFloat) -> some View {
-        let brandRed = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+        let brandRed = Color.primaryAccent
         let stroke: CGFloat = 2
 
         Group {
@@ -523,7 +522,7 @@ struct ProfileView: View {
                     )
                     .overlay(
                         Capsule()
-                            .strokeBorder(Color.white, lineWidth: stroke)
+                            .strokeBorder(Color.appBackground, lineWidth: stroke)
                     )
             } else {
                 Circle()
@@ -531,7 +530,7 @@ struct ProfileView: View {
                     .frame(width: 11, height: 11)
                     .overlay(
                         Circle()
-                            .strokeBorder(Color.white, lineWidth: stroke)
+                            .strokeBorder(Color.appBackground, lineWidth: stroke)
                     )
             }
         }
@@ -543,21 +542,21 @@ struct ProfileView: View {
         VStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.system(size: 20))
-                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                .foregroundColor(.primaryAccent)
             Text(value)
                 .font(.system(size: 22, weight: .bold, design: .rounded))
-                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                .foregroundColor(.primaryText)
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
             Text(label)
                 .font(.system(size: 11, weight: .regular, design: .rounded))
-                .foregroundColor(Color.gray)
+                .foregroundColor(.secondaryText)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 18)
-        .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+        .background(Color.secondaryBackground)
         .cornerRadius(12)
     }
     

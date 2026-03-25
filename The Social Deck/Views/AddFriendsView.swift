@@ -24,7 +24,7 @@ struct AddFriendsView: View {
     
     var body: some View {
         ZStack {
-            Color.white
+            Color.appBackground
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -53,7 +53,7 @@ struct AddFriendsView: View {
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
             }
         }
@@ -117,10 +117,9 @@ struct AddFriendsView: View {
     
     private var searchView: some View {
         VStack(spacing: 0) {
-            // Enhanced Search bar
             HStack(spacing: 12) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(.primaryAccent)
                     .font(.system(size: 18, weight: .medium))
                 
                 TextField("Search by username", text: $searchText)
@@ -165,11 +164,11 @@ struct AddFriendsView: View {
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 14)
-            .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+            .background(Color.secondaryBackground)
             .cornerRadius(16)
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color(red: 0xE5/255.0, green: 0xE5/255.0, blue: 0xE5/255.0), lineWidth: 1)
+                    .stroke(Color.borderColor.opacity(0.4), lineWidth: 1)
             )
             .padding(.horizontal, 40)
             .padding(.bottom, 24)
@@ -178,10 +177,10 @@ struct AddFriendsView: View {
                 VStack(spacing: 16) {
                     ProgressView()
                         .scaleEffect(1.3)
-                        .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .tint(Color.primaryAccent)
                     Text("Searching...")
                         .font(.system(size: 16, weight: .medium, design: .rounded))
-                        .foregroundColor(Color.gray)
+                        .foregroundColor(.secondaryText)
                 }
                 .padding(.top, 60)
             } else if searchText.isEmpty {
@@ -198,22 +197,22 @@ struct AddFriendsView: View {
         VStack(spacing: 24) {
             ZStack {
                 Circle()
-                    .fill(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                    .fill(Color.secondaryBackground)
                     .frame(width: 120, height: 120)
                 
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 50, weight: .light))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.6))
+                    .foregroundColor(Color.primaryAccent.opacity(0.6))
             }
             
             VStack(spacing: 8) {
                 Text("Find Friends")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                 
                 Text("Enter at least 2 characters to search\nfor friends to add")
                     .font(.system(size: 16, weight: .regular, design: .rounded))
-                    .foregroundColor(Color.gray)
+                    .foregroundColor(.secondaryText)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
             }
@@ -232,16 +231,16 @@ struct AddFriendsView: View {
             VStack(spacing: 12) {
                 Text("No Users Found")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                 
                 Text("Try searching with a different username")
                     .font(.system(size: 16, weight: .regular, design: .rounded))
-                    .foregroundColor(Color.gray)
+                    .foregroundColor(.secondaryText)
                     .multilineTextAlignment(.center)
                 
                 Text("Make sure you're typing at least 2 characters")
                     .font(.system(size: 14, weight: .regular, design: .rounded))
-                    .foregroundColor(Color.gray.opacity(0.7))
+                    .foregroundColor(.tertiaryText)
                     .multilineTextAlignment(.center)
             }
         }
@@ -281,22 +280,22 @@ struct AddFriendsView: View {
                     VStack(spacing: 24) {
                         ZStack {
                             Circle()
-                                .fill(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                                .fill(Color.secondaryBackground)
                                 .frame(width: 120, height: 120)
                             
                             Image(systemName: "bell.slash.fill")
                                 .font(.system(size: 50, weight: .light))
-                                .foregroundColor(Color.gray.opacity(0.5))
+                                .foregroundColor(.secondaryText.opacity(0.5))
                         }
                         
                         VStack(spacing: 8) {
                             Text("No Pending Requests")
                                 .font(.system(size: 24, weight: .bold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(.primaryText)
                             
                             Text("Friend requests you receive\nwill appear here")
                                 .font(.system(size: 16, weight: .regular, design: .rounded))
-                                .foregroundColor(Color.gray)
+                                .foregroundColor(.secondaryText)
                                 .multilineTextAlignment(.center)
                                 .lineSpacing(4)
                         }
@@ -397,11 +396,10 @@ struct UserSearchResultRow: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            // Avatar with shadow
             ZStack {
                 Circle()
-                    .fill(Color.white)
-                    .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
+                    .fill(Color.cardBackground)
+                    .shadow(color: Color.shadowColor, radius: 4, x: 0, y: 2)
                 
                 AvatarView(
                     avatarType: profile.avatarType,
@@ -410,18 +408,22 @@ struct UserSearchResultRow: View {
                 )
             }
             
-            // User info
             VStack(alignment: .leading, spacing: 6) {
                 Text(profile.username)
                     .font(.system(size: 17, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
                 
                 Text("@\(profile.username.lowercased())")
                     .font(.system(size: 14, weight: .regular, design: .rounded))
-                    .foregroundColor(Color.gray)
+                    .foregroundColor(.secondaryText)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
             }
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
             
-            Spacer()
+            Spacer(minLength: 8)
             
             // Action buttons
             HStack(spacing: 8) {
@@ -436,9 +438,9 @@ struct UserSearchResultRow: View {
                 } label: {
                     Image(systemName: "ellipsis")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(Color.gray)
+                        .foregroundColor(.secondaryText)
                         .frame(width: 32, height: 32)
-                        .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                        .background(Color.secondaryBackground)
                         .cornerRadius(8)
                 }
                 
@@ -470,9 +472,9 @@ struct UserSearchResultRow: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
-        .background(Color.white)
+        .background(Color.cardBackground)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 3)
+        .shadow(color: Color.shadowColor, radius: 8, x: 0, y: 3)
         .onAppear {
             checkRequestStatus()
         }
@@ -500,7 +502,7 @@ struct UserSearchResultRow: View {
         case "pending":
             return Color.green
         default:
-            return Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+            return Color.primaryAccent
         }
     }
     
@@ -544,8 +546,8 @@ struct PendingRequestRow: View {
                     HStack(alignment: .center, spacing: 12) {
                         ZStack {
                             Circle()
-                                .fill(Color.white)
-                                .shadow(color: Color.black.opacity(0.06), radius: 3, x: 0, y: 1)
+                                .fill(Color.cardBackground)
+                                .shadow(color: Color.shadowColor, radius: 3, x: 0, y: 1)
                             
                             AvatarView(
                                 avatarType: profile.avatarType,
@@ -557,12 +559,12 @@ struct PendingRequestRow: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(profile.username)
                                 .font(.system(size: 15, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(.primaryText)
                                 .lineLimit(1)
                             
                             Text("Wants to be friends")
                                 .font(.system(size: 12, weight: .regular, design: .rounded))
-                                .foregroundColor(Color.gray)
+                                .foregroundColor(.secondaryText)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -577,9 +579,9 @@ struct PendingRequestRow: View {
                         }) {
                             Text("Decline")
                                 .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color.gray)
+                                .foregroundColor(.secondaryText)
                                 .frame(width: 88, height: 36)
-                                .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                                .background(Color.secondaryBackground)
                                 .cornerRadius(10)
                         }
                         .disabled(isProcessing)
@@ -601,7 +603,7 @@ struct PendingRequestRow: View {
                             }
                         }
                         .frame(width: 88, height: 36)
-                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .background(Color.primaryAccent)
                         .cornerRadius(10)
                         .disabled(isProcessing)
                     }
@@ -618,9 +620,9 @@ struct PendingRequestRow: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(Color.cardBackground)
         .cornerRadius(14)
-        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .shadow(color: Color.shadowColor, radius: 4, x: 0, y: 2)
         .task {
             await loadProfile()
         }
@@ -677,8 +679,8 @@ struct SentFriendRequestRow: View {
             if let profile = profile {
                 ZStack {
                     Circle()
-                        .fill(Color.white)
-                        .shadow(color: Color.black.opacity(0.06), radius: 3, x: 0, y: 1)
+                        .fill(Color.cardBackground)
+                        .shadow(color: Color.shadowColor, radius: 3, x: 0, y: 1)
                     AvatarView(
                         avatarType: profile.avatarType,
                         avatarColor: profile.avatarColor,
@@ -688,11 +690,11 @@ struct SentFriendRequestRow: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(profile.username)
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                         .lineLimit(1)
                     Text("Request pending")
                         .font(.system(size: 12, weight: .regular, design: .rounded))
-                        .foregroundColor(Color.gray)
+                        .foregroundColor(.secondaryText)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -707,9 +709,9 @@ struct SentFriendRequestRow: View {
                     } else {
                         Text("Cancel")
                             .font(.system(size: 13, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color.gray)
+                            .foregroundColor(.secondaryText)
                             .frame(width: 68, height: 30)
-                            .background(Color(red: 0xF0/255.0, green: 0xF0/255.0, blue: 0xF0/255.0))
+                            .background(Color.secondaryBackground)
                             .cornerRadius(8)
                     }
                 }
@@ -724,9 +726,9 @@ struct SentFriendRequestRow: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 11)
-        .background(Color.white)
+        .background(Color.cardBackground)
         .cornerRadius(14)
-        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .shadow(color: Color.shadowColor, radius: 4, x: 0, y: 2)
         .confirmationDialog(
             "Cancel request to \(profile?.username ?? "this user")?",
             isPresented: $showCancelConfirmation,

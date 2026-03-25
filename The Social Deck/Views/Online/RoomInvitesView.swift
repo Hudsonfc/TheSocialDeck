@@ -15,43 +15,43 @@ struct RoomInvitesView: View {
     @State private var errorMessage = ""
     @State private var navigateToRoom = false
     /// When `true`, hides the nav back button (used inside Friends hub tab).
+    /// Navigation after invite accept is handled by the parent (FriendsListView).
     var embeddedInFriendsHub: Bool = false
     
     var body: some View {
         ZStack {
-            (embeddedInFriendsHub ? Color.appBackground : Color.white)
+            Color.appBackground
                 .ignoresSafeArea()
             
             if onlineManager.isLoading && onlineManager.pendingRoomInvites.isEmpty {
                 VStack(spacing: 16) {
                     ProgressView()
                         .scaleEffect(1.3)
-                        .tint(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .tint(Color.primaryAccent)
                     Text("Loading invites...")
                         .font(.system(size: 16, weight: .medium, design: .rounded))
-                        .foregroundColor(Color.gray)
+                        .foregroundColor(.secondaryText)
                 }
             } else if onlineManager.pendingRoomInvites.isEmpty {
-                // No invites
                 VStack(spacing: 24) {
                     ZStack {
                         Circle()
-                            .fill(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                            .fill(Color.secondaryBackground)
                             .frame(width: 120, height: 120)
                         
                         Image(systemName: "envelope.fill")
                             .font(.system(size: 50, weight: .light))
-                            .foregroundColor(Color.gray.opacity(0.5))
+                            .foregroundColor(.secondaryText.opacity(0.5))
                     }
                     
                     VStack(spacing: 8) {
                         Text("No Room Invites")
                             .font(.system(size: 24, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                         
                         Text("Room invites from friends\nwill appear here")
                             .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(Color.gray)
+                            .foregroundColor(.secondaryText)
                             .multilineTextAlignment(.center)
                             .lineSpacing(4)
                     }
@@ -82,18 +82,22 @@ struct RoomInvitesView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                     }
                 }
             }
         }
         .navigationBarBackButtonHidden(true)
         .background(
-            NavigationLink(
-                destination: LobbyView(),
-                isActive: $navigateToRoom
-            ) {
-                EmptyView()
+            Group {
+                if !embeddedInFriendsHub {
+                    NavigationLink(
+                        destination: LobbyView(),
+                        isActive: $navigateToRoom
+                    ) {
+                        EmptyView()
+                    }
+                }
             }
         )
         .alert("Error", isPresented: $showError) {
@@ -102,7 +106,7 @@ struct RoomInvitesView: View {
             Text(errorMessage)
         }
         .onChange(of: onlineManager.currentRoom) { room in
-            if room != nil {
+            if room != nil && !embeddedInFriendsHub {
                 navigateToRoom = true
             }
         }
@@ -127,7 +131,6 @@ struct RoomInviteCard: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            // Inviter info
             if let profile = inviterProfile {
                 VStack(spacing: 16) {
                     AvatarView(
@@ -139,13 +142,12 @@ struct RoomInviteCard: View {
                     VStack(spacing: 6) {
                         Text("\(profile.username) invited you")
                             .font(.system(size: 18, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                         
                         Text("Room: \(invite.roomName)")
                             .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(Color.gray)
+                            .foregroundColor(.secondaryText)
                         
-                        // Expiration countdown
                         if !countdownTimer.isExpired {
                             HStack(spacing: 4) {
                                 Image(systemName: "clock.fill")
@@ -182,24 +184,22 @@ struct RoomInviteCard: View {
                     .scaleEffect(0.9)
             }
             
-            // Room code
             VStack(spacing: 8) {
                 Text("Room Code")
                     .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundColor(Color.gray)
+                    .foregroundColor(.secondaryText)
                 
                 Text(invite.roomCode)
                     .font(.system(size: 32, weight: .bold, design: .monospaced))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                     .tracking(4)
             }
             .padding(.vertical, 16)
             .padding(.horizontal, 32)
             .frame(maxWidth: .infinity)
-            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+            .background(Color.tertiaryBackground)
             .cornerRadius(16)
             
-            // Action buttons
             HStack(spacing: 12) {
                 Button(action: {
                     HapticManager.shared.lightImpact()
@@ -209,10 +209,10 @@ struct RoomInviteCard: View {
                 }) {
                     Text("Decline")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color.gray)
+                        .foregroundColor(.secondaryText)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                        .background(Color.secondaryBackground)
                         .cornerRadius(12)
                 }
                 .disabled(isProcessing)
@@ -235,15 +235,15 @@ struct RoomInviteCard: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                .background(Color.primaryAccent)
                 .cornerRadius(12)
                 .disabled(isProcessing)
             }
         }
         .padding(24)
-        .background(Color.white)
+        .background(Color.cardBackground)
         .cornerRadius(20)
-        .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 4)
+        .shadow(color: Color.shadowColor, radius: 12, x: 0, y: 4)
         .task {
             await loadInviterProfile()
             countdownTimer.start()

@@ -27,6 +27,7 @@ struct FriendsListView: View {
     @State private var toast: ToastMessage? = nil
     @State private var showSearchSheet = false
     @State private var selectedHubTab: FriendsHubTab = .friends
+    @State private var navigateToLobby = false
     private let brandRed = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
 
     private var friendsToShow: [FriendProfile] {
@@ -222,6 +223,12 @@ struct FriendsListView: View {
             Color.appBackground
                 .ignoresSafeArea()
 
+            NavigationLink(
+                destination: LobbyView(),
+                isActive: $navigateToLobby
+            ) { EmptyView() }
+            .hidden()
+
             VStack(spacing: 0) {
                 // Tabs — same visual language as Play2View `CategoryTab`
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -359,6 +366,12 @@ struct FriendsListView: View {
                 case .friends:
                     break
                 }
+            }
+        }
+        .onChange(of: onlineManager.currentRoom) { _, room in
+            if room != nil && selectedHubTab == .roomInvites && !navigateToLobby {
+                print("[FriendsListView] currentRoom set after invite accept — navigating to lobby")
+                navigateToLobby = true
             }
         }
         .sheet(isPresented: $showInviteSheet) {
@@ -857,7 +870,7 @@ struct FriendRowView: View {
                     Circle()
                         .fill(friend.isOnline ? Color.green : Color.gray.opacity(0.5))
                         .frame(width: 10, height: 10)
-                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        .overlay(Circle().stroke(Color.cardBackground, lineWidth: 2))
                         .offset(x: 1, y: 1)
                 }
 
@@ -897,7 +910,7 @@ struct FriendRowView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(Color.white)
+        .background(Color.cardBackground)
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
@@ -1033,7 +1046,7 @@ struct FriendProfileView: View {
                 colors: [
                     brandRed.opacity(0.16),
                     brandRed.opacity(0.08),
-                    Color.white.opacity(0.0)
+                    Color.appBackground.opacity(0.0)
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -1047,7 +1060,7 @@ struct FriendProfileView: View {
                 )
                 .overlay(
                     Circle()
-                        .stroke(Color.white, lineWidth: 4)
+                        .stroke(Color.cardBackground, lineWidth: 4)
                 )
                 .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 6)
                 .offset(y: 36),
@@ -1081,7 +1094,7 @@ struct FriendProfileView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .background(Color.white)
+        .background(Color.cardBackground)
         .cornerRadius(18)
         .overlay(
             RoundedRectangle(cornerRadius: 18)
@@ -1120,9 +1133,9 @@ struct FriendProfileView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 18)
-        .background(Color.white)
+        .background(Color.cardBackground)
         .cornerRadius(14)
-        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .shadow(color: Color.shadowColor, radius: 5, x: 0, y: 2)
         .overlay(
             RoundedRectangle(cornerRadius: 14)
                 .stroke(Color.borderColor.opacity(0.35), lineWidth: 1)
@@ -1141,7 +1154,7 @@ struct FriendProfileView: View {
                 .foregroundColor(brandRed)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(Color.white)
+                .background(Color.cardBackground)
                 .cornerRadius(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
@@ -1213,9 +1226,9 @@ struct InviteFriendView: View {
                 VStack(spacing: 20) {
                     ZStack {
                         Circle()
-                            .fill(Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                            .fill(Color.secondaryBackground)
                             .frame(width: 120, height: 120)
-                            .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+                            .shadow(color: Color.shadowColor, radius: 8, x: 0, y: 4)
 
                         AvatarView(
                             avatarType: friend.avatarType,
@@ -1227,11 +1240,11 @@ struct InviteFriendView: View {
                     VStack(spacing: 8) {
                         Text("Invite \(friend.username)")
                             .font(.system(size: 26, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
 
                         Text("Room: \(room.roomName)")
                             .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(Color.gray)
+                            .foregroundColor(.secondaryText)
                     }
                 }
 
@@ -1239,15 +1252,15 @@ struct InviteFriendView: View {
                 VStack(spacing: 16) {
                     Text("Room Code")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(Color.gray)
+                        .foregroundColor(.secondaryText)
 
                     Text(room.roomCode)
                         .font(.system(size: 42, weight: .bold, design: .monospaced))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                         .tracking(6)
                         .padding(.horizontal, 32)
                         .padding(.vertical, 20)
-                        .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                        .background(Color.tertiaryBackground)
                         .cornerRadius(20)
                 }
                 .padding(.horizontal, 40)
@@ -1317,7 +1330,7 @@ struct InviteFriendView: View {
             }
             .sheet(isPresented: $showShareSheet) {
                 ShareSheet(activityItems: [
-                    "Join my game room '\(room.roomName)' in The Social Deck! Room Code: \(room.roomCode)"
+                    "Hey! Join my game on The Social Deck \u{1F0CF}\nRoom code: \(room.roomCode)\nDownload the app: https://apps.apple.com/app/the-social-deck/id6740043553"
                 ])
             }
         }

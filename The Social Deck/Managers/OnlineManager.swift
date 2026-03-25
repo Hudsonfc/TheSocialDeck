@@ -556,20 +556,28 @@ class OnlineManager: ObservableObject {
         do {
             let invite = pendingRoomInvites.first { $0.id == inviteId }
             guard let roomCode = invite?.roomCode else {
+                print("[OnlineManager] acceptRoomInvite — invite \(inviteId) not found in pendingRoomInvites")
                 errorMessage = "Invite not found"
                 isLoading = false
                 return
             }
             
+            print("[OnlineManager] acceptRoomInvite — marking invite \(inviteId) as accepted (room: \(roomCode))")
             try await onlineService.acceptRoomInvite(inviteId)
             
-            // Remove from pending invites
             pendingRoomInvites.removeAll { $0.id == inviteId }
             
-            // Join the room
+            print("[OnlineManager] acceptRoomInvite — joining room \(roomCode)")
             await joinRoom(roomCode: roomCode)
             
+            if currentRoom != nil {
+                print("[OnlineManager] acceptRoomInvite — joined successfully, currentRoom set")
+            } else {
+                print("[OnlineManager] acceptRoomInvite — joinRoom finished but currentRoom is nil. error: \(errorMessage ?? "none")")
+            }
+            
         } catch {
+            print("[OnlineManager] acceptRoomInvite — error: \(error)")
             errorMessage = "Failed to accept invite: \(error.localizedDescription)"
         }
         

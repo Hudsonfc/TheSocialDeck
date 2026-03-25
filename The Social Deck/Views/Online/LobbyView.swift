@@ -19,11 +19,11 @@ struct LobbyView: View {
     @State private var isLeaving = false
     @State private var navigateToGame = false
 
-    private let soDeckRed = Color(red: 0xD9 / 255.0, green: 0x3A / 255.0, blue: 0x3A / 255.0)
+    private let soDeckRed = Color.primaryAccent
 
     var body: some View {
         ZStack {
-            Color.white.ignoresSafeArea()
+            Color.appBackground.ignoresSafeArea()
 
             // Hidden NavigationLink that fires when game starts
             NavigationLink(
@@ -103,7 +103,7 @@ struct LobbyView: View {
         .sheet(isPresented: $showShareSheet) {
             if let room = onlineManager.currentRoom {
                 ShareSheet(activityItems: [
-                    "Join my room in The Social Deck!\nRoom Code: \(room.roomCode)"
+                    "Hey! Join my game on The Social Deck \u{1F0CF}\nRoom code: \(room.roomCode)\nDownload the app: https://apps.apple.com/app/the-social-deck/id6740043553"
                 ])
             }
         }
@@ -161,7 +161,7 @@ struct LobbyView: View {
         VStack(spacing: 12) {
             Text("Room Code")
                 .font(.system(size: 13, weight: .medium, design: .rounded))
-                .foregroundColor(.gray)
+                .foregroundColor(.secondaryText)
 
             Button {
                 UIPasteboard.general.string = onlineManager.currentRoom?.roomCode
@@ -174,11 +174,11 @@ struct LobbyView: View {
                 HStack(spacing: 10) {
                     Text(onlineManager.currentRoom?.roomCode ?? "")
                         .font(.system(size: 42, weight: .bold, design: .rounded))
-                        .foregroundColor(copiedCode ? .green : Color(red: 0x0A / 255.0, green: 0x0A / 255.0, blue: 0x0A / 255.0))
+                        .foregroundColor(copiedCode ? .green : .primaryText)
                         .tracking(6)
                     Image(systemName: copiedCode ? "checkmark.circle.fill" : "doc.on.doc")
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(copiedCode ? .green : .gray)
+                        .foregroundColor(copiedCode ? .green : .secondaryText)
                 }
                 .animation(.spring(response: 0.3), value: copiedCode)
             }
@@ -186,13 +186,13 @@ struct LobbyView: View {
 
             Text(copiedCode ? "Copied!" : "Tap to copy")
                 .font(.system(size: 12, weight: .regular, design: .rounded))
-                .foregroundColor(copiedCode ? .green : .gray)
+                .foregroundColor(copiedCode ? .green : .secondaryText)
                 .animation(.easeInOut(duration: 0.2), value: copiedCode)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 24)
         .padding(.horizontal, 24)
-        .background(Color(red: 0xF5 / 255.0, green: 0xF5 / 255.0, blue: 0xF5 / 255.0))
+        .background(Color.secondaryBackground)
         .cornerRadius(16)
         .padding(.horizontal, 24)
         .padding(.top, 16)
@@ -207,7 +207,7 @@ struct LobbyView: View {
 
             Text("Players (\(count)/\(max))")
                 .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundColor(Color(red: 0x0A / 255.0, green: 0x0A / 255.0, blue: 0x0A / 255.0))
+                .foregroundColor(.primaryText)
 
             if let players = onlineManager.currentRoom?.players {
                 ForEach(players) { player in
@@ -251,9 +251,9 @@ struct LobbyView: View {
             .buttonStyle(PlainButtonStyle())
         }
         .padding(20)
-        .background(Color.white)
+        .background(Color.cardBackground)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
+        .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 4)
         .padding(.horizontal, 24)
         .animation(.spring(response: 0.3, dampingFraction: 0.8),
                    value: onlineManager.currentRoom?.players.count)
@@ -278,7 +278,7 @@ struct LobbyView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Game settings")
                 .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundColor(Color(red: 0x0A / 255.0, green: 0x0A / 255.0, blue: 0x0A / 255.0))
+                .foregroundColor(.primaryText)
 
             Text(isRiddleMeThisLobby ? "Rounds to play" : "Cards to play")
                 .font(.system(size: 14, weight: .medium, design: .rounded))
@@ -341,7 +341,7 @@ struct LobbyView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Timer")
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A / 255.0, green: 0x0A / 255.0, blue: 0x0A / 255.0))
+                                .foregroundColor(.primaryText)
                             Text("Add urgency to each round")
                                 .font(.system(size: 12, weight: .regular, design: .rounded))
                                 .foregroundColor(.gray)
@@ -398,9 +398,9 @@ struct LobbyView: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white)
+        .background(Color.cardBackground)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
+        .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 4)
         .padding(.horizontal, 24)
     }
 
@@ -461,7 +461,7 @@ struct LobbyView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 54)
-                    .background(Color(red: 0xF5 / 255.0, green: 0xF5 / 255.0, blue: 0xF5 / 255.0))
+                    .background(Color.secondaryBackground)
                     .cornerRadius(14)
                 }
 
@@ -499,7 +499,7 @@ struct LobbyView: View {
                 .foregroundColor(soDeckRed)
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
-                .background(Color.white)
+                .background(Color.cardBackground)
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(soDeckRed, lineWidth: 2)
@@ -566,7 +566,7 @@ private struct LobbyPlayerRow: View {
                 HStack(spacing: 6) {
                     Text(player.username)
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A / 255.0, green: 0x0A / 255.0, blue: 0x0A / 255.0))
+                        .foregroundColor(.primaryText)
 
                     if player.isHost {
                         Text("Host")
@@ -574,7 +574,7 @@ private struct LobbyPlayerRow: View {
                             .foregroundColor(.white)
                             .padding(.horizontal, 7)
                             .padding(.vertical, 2)
-                            .background(Color(red: 0xD9 / 255.0, green: 0x3A / 255.0, blue: 0x3A / 255.0))
+                            .background(Color.primaryAccent)
                             .cornerRadius(8)
                     }
                 }
