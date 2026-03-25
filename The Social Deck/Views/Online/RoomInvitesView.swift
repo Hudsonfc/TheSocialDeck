@@ -13,16 +13,16 @@ struct RoomInvitesView: View {
     @StateObject private var authManager = AuthManager.shared
     @State private var showError = false
     @State private var errorMessage = ""
-    @State private var navigateToRoom = false
+    @State private var showLobbyFullScreen = false
     /// When `true`, hides the nav back button (used inside Friends hub tab).
     /// Navigation after invite accept is handled by the parent (FriendsListView).
     var embeddedInFriendsHub: Bool = false
-    
+
     var body: some View {
         ZStack {
             Color.appBackground
                 .ignoresSafeArea()
-            
+
             if onlineManager.isLoading && onlineManager.pendingRoomInvites.isEmpty {
                 VStack(spacing: 16) {
                     ProgressView()
@@ -38,17 +38,17 @@ struct RoomInvitesView: View {
                         Circle()
                             .fill(Color.secondaryBackground)
                             .frame(width: 120, height: 120)
-                        
+
                         Image(systemName: "envelope.fill")
                             .font(.system(size: 50, weight: .light))
                             .foregroundColor(.secondaryText.opacity(0.5))
                     }
-                    
+
                     VStack(spacing: 8) {
                         Text("No Room Invites")
                             .font(.system(size: 24, weight: .bold, design: .rounded))
                             .foregroundColor(.primaryText)
-                        
+
                         Text("Room invites from friends\nwill appear here")
                             .font(.system(size: 16, weight: .regular, design: .rounded))
                             .foregroundColor(.secondaryText)
@@ -88,26 +88,21 @@ struct RoomInvitesView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        .background(
-            Group {
-                if !embeddedInFriendsHub {
-                    NavigationLink(
-                        destination: LobbyView(),
-                        isActive: $navigateToRoom
-                    ) {
-                        EmptyView()
-                    }
-                }
-            }
-        )
         .alert("Error", isPresented: $showError) {
             Button("OK", role: .cancel) { }
         } message: {
             Text(errorMessage)
         }
         .onChange(of: onlineManager.currentRoom) { room in
-            if room != nil && !embeddedInFriendsHub {
-                navigateToRoom = true
+            print("[RoomInvitesView] onChange currentRoom — room: \(room?.roomCode ?? "nil"), embedded: \(embeddedInFriendsHub), showLobby: \(showLobbyFullScreen)")
+            if room != nil && !embeddedInFriendsHub && !showLobbyFullScreen {
+                print("[RoomInvitesView] Presenting lobby fullScreenCover (standalone mode)")
+                showLobbyFullScreen = true
+            }
+        }
+        .fullScreenCover(isPresented: $showLobbyFullScreen) {
+            NavigationStack {
+                LobbyView()
             }
         }
     }
@@ -269,12 +264,15 @@ struct RoomInviteCard: View {
     
     private func acceptInvite() async {
         guard let inviteId = invite.id, !countdownTimer.isExpired else {
+            print("[RoomInviteCard] acceptInvite guard failed — id: \(invite.id ?? "nil"), expired: \(countdownTimer.isExpired)")
             HapticManager.shared.error()
             return
         }
+        print("[RoomInviteCard] acceptInvite starting — inviteId: \(inviteId), roomCode: \(invite.roomCode)")
         isProcessing = true
         HapticManager.shared.success()
         await onlineManager.acceptRoomInvite(inviteId)
+        print("[RoomInviteCard] acceptInvite completed — currentRoom: \(onlineManager.currentRoom?.roomCode ?? "nil"), error: \(onlineManager.errorMessage ?? "none")")
         isProcessing = false
     }
     

@@ -171,11 +171,30 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         timerEnabled = try container.decodeIfPresent(Bool.self, forKey: .timerEnabled)
         timerDuration = try container.decodeIfPresent(Int.self, forKey: .timerDuration)
         roundStartTimestamp = try container.decodeIfPresent(Date.self, forKey: .roundStartTimestamp)
-        players = (try? container.decodeIfPresent([RoomPlayer].self, forKey: .players)) ?? []
+
+        do {
+            players = try container.decodeIfPresent([RoomPlayer].self, forKey: .players) ?? []
+        } catch {
+            print("[OnlineRoom.init] *** Players decode failed: \(error) — defaulting to empty array")
+            players = []
+        }
+
         hostId = try container.decodeIfPresent(String.self, forKey: .hostId) ?? ""
         gameStartedAt = try container.decodeIfPresent(Date.self, forKey: .gameStartedAt)
-        gameState = (try? container.decodeIfPresent(ColorClashGameState.self, forKey: .gameState)) ?? nil
-        flip21GameState = (try? container.decodeIfPresent(Flip21GameState.self, forKey: .flip21GameState)) ?? nil
+
+        do {
+            gameState = try container.decodeIfPresent(ColorClashGameState.self, forKey: .gameState)
+        } catch {
+            print("[OnlineRoom.init] gameState decode failed: \(error) — defaulting to nil")
+            gameState = nil
+        }
+
+        do {
+            flip21GameState = try container.decodeIfPresent(Flip21GameState.self, forKey: .flip21GameState)
+        } catch {
+            print("[OnlineRoom.init] flip21GameState decode failed: \(error) — defaulting to nil")
+            flip21GameState = nil
+        }
     }
     
     // Helper computed property to get current player count

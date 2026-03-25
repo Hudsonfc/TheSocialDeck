@@ -41,12 +41,34 @@ service cloud.firestore {
       ]);
     }
 
+    // Safe access — older room docs or bad data should not crash rule evaluation.
+    function roomPlayersList(roomData) {
+      let p = roomData.get('players', []);
+      return p is list ? p : [];
+    }
+
+    function roomPlayersSize(roomData) {
+      return roomPlayersList(roomData).size();
+    }
+
     function roomPlayerIds(roomData) {
-      return roomData.players.map(player, player.id);
+      return roomPlayersList(roomData).map(player, player.id);
     }
 
     function isExistingRoomPlayer() {
       return signedIn() && roomPlayerIds(resource.data).hasAny([request.auth.uid]);
+    }
+
+    // Joining a room updates only `players` by appending the current user — they are not
+    // in resource.data yet, so isExistingRoomPlayer() alone would block legitimate joins.
+    // Same write path is used after accepting a room invite (client then calls joinRoom).
+    // We require: only `players` changed, exactly one new entry, and that entry is this user.
+    function isJoiningByAppendingSelf() {
+      return signedIn()
+        && request.resource.data.diff(resource.data).changedKeys().hasOnly(['players'])
+        && roomPlayersSize(request.resource.data) == roomPlayersSize(resource.data) + 1
+        && roomPlayerIds(request.resource.data).hasAny([request.auth.uid])
+        && !roomPlayerIds(resource.data).hasAny([request.auth.uid]);
     }
 
     function isRoomHost() {
@@ -92,8 +114,10 @@ service cloud.firestore {
       // Any signed-in user can create a room.
       allow create: if signedIn();
 
-      // Only users who are already a player in this room can update it.
-      allow update: if isExistingRoomPlayer();
+      // Existing players can update (ready state, game fields, kick, etc.).
+      // Authenticated users who are NOT yet in the room may update only when appending
+      // themselves to `players` exactly once (join-by-code / after invite accept).
+      allow update: if isExistingRoomPlayer() || isJoiningByAppendingSelf();
 
       // Only host can delete room.
       allow delete: if isRoomHost();

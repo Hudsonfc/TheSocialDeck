@@ -11,7 +11,7 @@ struct JoinRoomView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var onlineManager = OnlineManager.shared
     @State private var roomCode: String = ""
-    @State private var navigateToRoom = false
+    @State private var showLobbyFullScreen = false
     @State private var showError = false
     @State private var isValidCode: Bool = false
     @State private var validationMessage: String = ""
@@ -85,12 +85,14 @@ struct JoinRoomView: View {
                         HapticManager.shared.mediumImpact()
                         Task {
                             await onlineManager.joinRoom(roomCode: roomCode)
-                            
+
                             if onlineManager.currentRoom != nil {
                                 HapticManager.shared.success()
-                                navigateToRoom = true
+                                print("[JoinRoomView] Join succeeded — presenting lobby")
+                                showLobbyFullScreen = true
                             } else if onlineManager.errorMessage != nil {
                                 HapticManager.shared.error()
+                                print("[JoinRoomView] Join failed — error: \(onlineManager.errorMessage ?? "unknown")")
                                 showError = true
                             }
                         }
@@ -142,14 +144,11 @@ struct JoinRoomView: View {
                 }
             }
         }
-        .background(
-            NavigationLink(
-                destination: LobbyView(),
-                isActive: $navigateToRoom
-            ) {
-                EmptyView()
+        .fullScreenCover(isPresented: $showLobbyFullScreen) {
+            NavigationStack {
+                LobbyView()
             }
-        )
+        }
         .alert(currentErrorTitle, isPresented: $showError) {
             Button("OK", role: .cancel) { }
             Button("Retry") {
@@ -157,7 +156,7 @@ struct JoinRoomView: View {
                     await onlineManager.joinRoom(roomCode: roomCode)
                     if onlineManager.currentRoom != nil {
                         HapticManager.shared.success()
-                        navigateToRoom = true
+                        showLobbyFullScreen = true
                     } else if onlineManager.errorMessage != nil {
                         showError = true
                     }

@@ -87,14 +87,17 @@ class OnlineService {
         guard let currentUserId = auth.currentUser?.uid else {
             throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])
         }
-        
+
         let roomRef = db.collection("rooms").document(roomCode)
+
+        print("[OnlineService.joinRoom] Attempting to join room: \(roomCode) as user: \(currentUserId)")
 
         // Transaction prevents race conditions when multiple users join at once.
         _ = try await db.runTransaction { transaction, errorPointer in
             do {
                 let snapshot = try transaction.getDocument(roomRef)
                 guard snapshot.exists, let raw = snapshot.data() else {
+                    print("[OnlineService.joinRoom] Room document does not exist for code: \(roomCode)")
                     errorPointer?.pointee = NSError(
                         domain: "OnlineService",
                         code: -1,
@@ -103,42 +106,88 @@ class OnlineService {
                     return nil
                 }
 
+                // DEBUG: Print raw Firestore document fields
+                print("[OnlineService.joinRoom] === RAW FIRESTORE DOCUMENT ===")
+                for (key, value) in raw {
+                    print("[OnlineService.joinRoom]   \(key): \(type(of: value)) = \(value)")
+                }
+                print("[OnlineService.joinRoom] === END RAW DOCUMENT ===")
+
                 let decoder = Firestore.Decoder()
-                var room = try decoder.decode(OnlineRoom.self, from: raw)
+                do {
+                    var room = try decoder.decode(OnlineRoom.self, from: raw)
+                    print("[OnlineService.joinRoom] Decode succeeded. Players: \(room.players.count), status: \(room.status.rawValue)")
 
-                // Check if player is already in this room
-                if room.players.contains(where: { $0.id == currentUserId }) {
+                    if room.players.contains(where: { $0.id == currentUserId }) {
+                        print("[OnlineService.joinRoom] Player already in room — no-op")
+                        return nil
+                    }
+
+                    guard room.players.count < room.maxPlayers else {
+                        print("[OnlineService.joinRoom] Room is full: \(room.players.count)/\(room.maxPlayers)")
+                        errorPointer?.pointee = NSError(
+                            domain: "OnlineService",
+                            code: -1,
+                            userInfo: [NSLocalizedDescriptionKey: "This room is full"]
+                        )
+                        return nil
+                    }
+
+                    guard room.status == .waiting else {
+                        print("[OnlineService.joinRoom] Room status is \(room.status.rawValue), cannot join")
+                        errorPointer?.pointee = NSError(
+                            domain: "OnlineService",
+                            code: -1,
+                            userInfo: [NSLocalizedDescriptionKey: "Cannot join room while game is in progress"]
+                        )
+                        return nil
+                    }
+
+                    room.players.append(playerProfile)
+
+                    let encoder = Firestore.Encoder()
+                    let playersData = try room.players.map { try encoder.encode($0) }
+                    transaction.updateData(["players": playersData], forDocument: roomRef)
+                    print("[OnlineService.joinRoom] Transaction update written with \(room.players.count) players")
+                    return nil
+                } catch {
+                    // Decode failed — print detailed error info
+                    print("[OnlineService.joinRoom] *** DECODE FAILED ***")
+                    print("[OnlineService.joinRoom] Error: \(error)")
+                    if let decodingError = error as? DecodingError {
+                        switch decodingError {
+                        case .keyNotFound(let key, let context):
+                            print("[OnlineService.joinRoom] Missing key: \(key.stringValue), path: \(context.codingPath.map(\.stringValue)), desc: \(context.debugDescription)")
+                        case .typeMismatch(let type, let context):
+                            print("[OnlineService.joinRoom] Type mismatch: expected \(type), path: \(context.codingPath.map(\.stringValue)), desc: \(context.debugDescription)")
+                        case .valueNotFound(let type, let context):
+                            print("[OnlineService.joinRoom] Value not found: \(type), path: \(context.codingPath.map(\.stringValue)), desc: \(context.debugDescription)")
+                        case .dataCorrupted(let context):
+                            print("[OnlineService.joinRoom] Data corrupted: path: \(context.codingPath.map(\.stringValue)), desc: \(context.debugDescription)")
+                        @unknown default:
+                            print("[OnlineService.joinRoom] Unknown decoding error: \(decodingError)")
+                        }
+                    }
+
+                    // Fallback: print each field's raw type/value for diagnosis
+                    print("[OnlineService.joinRoom] === RAW FIELD TYPES ===")
+                    if let players = raw["players"] as? [[String: Any]] {
+                        for (i, p) in players.enumerated() {
+                            print("[OnlineService.joinRoom]   player[\(i)]:")
+                            for (pk, pv) in p {
+                                print("[OnlineService.joinRoom]     \(pk): \(type(of: pv)) = \(pv)")
+                            }
+                        }
+                    } else {
+                        print("[OnlineService.joinRoom]   players field type: \(type(of: raw["players"] as Any))")
+                    }
+                    print("[OnlineService.joinRoom] === END RAW FIELD TYPES ===")
+
+                    errorPointer?.pointee = error as NSError
                     return nil
                 }
-
-                // Check if room is full INSIDE transaction
-                guard room.players.count < room.maxPlayers else {
-                    errorPointer?.pointee = NSError(
-                        domain: "OnlineService",
-                        code: -1,
-                        userInfo: [NSLocalizedDescriptionKey: "This room is full"]
-                    )
-                    return nil
-                }
-
-                // Check if room is in game (can't join during active game)
-                guard room.status == .waiting else {
-                    errorPointer?.pointee = NSError(
-                        domain: "OnlineService",
-                        code: -1,
-                        userInfo: [NSLocalizedDescriptionKey: "Cannot join room while game is in progress"]
-                    )
-                    return nil
-                }
-
-                room.players.append(playerProfile)
-
-                // Encode players array and write atomically inside transaction.
-                let encoder = Firestore.Encoder()
-                let playersData = try room.players.map { try encoder.encode($0) }
-                transaction.updateData(["players": playersData], forDocument: roomRef)
-                return nil
             } catch {
+                print("[OnlineService.joinRoom] Transaction outer error: \(error)")
                 errorPointer?.pointee = error as NSError
                 return nil
             }
@@ -146,10 +195,35 @@ class OnlineService {
 
         // Return fresh room state after transactional join.
         let updatedSnapshot = try await roomRef.getDocument()
-        guard updatedSnapshot.exists, let updatedRoom = try? updatedSnapshot.data(as: OnlineRoom.self) else {
-            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room not found. Please check the room code."])
+        if let rawData = updatedSnapshot.data() {
+            print("[OnlineService.joinRoom] Post-join raw doc keys: \(rawData.keys.sorted())")
         }
-        return updatedRoom
+        guard updatedSnapshot.exists else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room not found after join."])
+        }
+        do {
+            let updatedRoom = try updatedSnapshot.data(as: OnlineRoom.self)
+            print("[OnlineService.joinRoom] Post-join decode succeeded. Players: \(updatedRoom.players.count)")
+            return updatedRoom
+        } catch {
+            print("[OnlineService.joinRoom] *** POST-JOIN DECODE FAILED ***")
+            print("[OnlineService.joinRoom] Error: \(error)")
+            if let decodingError = error as? DecodingError {
+                switch decodingError {
+                case .keyNotFound(let key, let context):
+                    print("[OnlineService.joinRoom] Missing key: \(key.stringValue), path: \(context.codingPath.map(\.stringValue))")
+                case .typeMismatch(let type, let context):
+                    print("[OnlineService.joinRoom] Type mismatch: expected \(type), path: \(context.codingPath.map(\.stringValue))")
+                case .valueNotFound(let type, let context):
+                    print("[OnlineService.joinRoom] Value not found: \(type), path: \(context.codingPath.map(\.stringValue))")
+                case .dataCorrupted(let context):
+                    print("[OnlineService.joinRoom] Data corrupted: path: \(context.codingPath.map(\.stringValue))")
+                @unknown default:
+                    break
+                }
+            }
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room decode failed: \(error.localizedDescription)"])
+        }
     }
     
     // MARK: - Room Leaving
@@ -608,23 +682,31 @@ class OnlineService {
     /// Accept a room invite
     func acceptRoomInvite(_ inviteId: String) async throws {
         guard let currentUserId = auth.currentUser?.uid else {
+            print("[OnlineService.acceptRoomInvite] User not authenticated")
             throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])
         }
-        
+
+        print("[OnlineService.acceptRoomInvite] Accepting invite \(inviteId) for user \(currentUserId)")
         let inviteRef = db.collection("roomInvites").document(inviteId)
         let inviteSnapshot = try await inviteRef.getDocument()
-        
-        guard let invite = try? inviteSnapshot.data(as: RoomInvite.self),
-              invite.toUserId == currentUserId,
+
+        guard let invite = try? inviteSnapshot.data(as: RoomInvite.self) else {
+            print("[OnlineService.acceptRoomInvite] Failed to decode invite document")
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid invite — decode failed"])
+        }
+        print("[OnlineService.acceptRoomInvite] Invite decoded: room=\(invite.roomCode), status=\(invite.status.rawValue), toUser=\(invite.toUserId), expired=\(invite.isExpired)")
+
+        guard invite.toUserId == currentUserId,
               invite.status == .pending,
               !invite.isExpired else {
+            print("[OnlineService.acceptRoomInvite] Guard failed — toUser match: \(invite.toUserId == currentUserId), pending: \(invite.status == .pending), not expired: \(!invite.isExpired)")
             throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid or expired invite"])
         }
-        
-        // Update invite status
+
         try await inviteRef.updateData([
             "status": RoomInviteStatus.accepted.rawValue
         ])
+        print("[OnlineService.acceptRoomInvite] Invite status updated to accepted")
     }
     
     /// Decline a room invite

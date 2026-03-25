@@ -85,38 +85,38 @@ class OnlineManager: ObservableObject {
         guard let userId = authManager.userProfile?.userId,
               let profile = authManager.userProfile else {
             errorMessage = "You must be signed in to join a room"
-            // Check if session expired
             if !authManager.isAuthenticated {
                 errorMessage = "Your session has expired. Please sign in again."
             }
+            print("[OnlineManager.joinRoom] No profile/auth — aborting")
             return
         }
-        
-        // Check if already in a room
+
         if let currentRoom = currentRoom {
-            // If trying to join the same room, that's fine
             if currentRoom.roomCode.uppercased() == roomCode.uppercased() {
+                print("[OnlineManager.joinRoom] Already in this room — no-op")
                 return
             } else {
                 errorMessage = "You're already in a room. Please leave your current room first."
+                print("[OnlineManager.joinRoom] Already in room \(currentRoom.roomCode) — cannot join \(roomCode)")
                 return
             }
         }
-        
+
         isLoading = true
         errorMessage = nil
-        
+
         do {
-            // Normalize room code (uppercase)
             let normalizedCode = roomCode.uppercased().trimmingCharacters(in: .whitespacesAndNewlines)
-            
+
             guard !normalizedCode.isEmpty else {
                 errorMessage = "Room code cannot be empty"
                 isLoading = false
                 return
             }
-            
-            // Create RoomPlayer from UserProfile
+
+            print("[OnlineManager.joinRoom] Joining room \(normalizedCode) as \(userId) (\(profile.username))")
+
             let player = RoomPlayer(
                 id: userId,
                 username: profile.username,
@@ -126,20 +126,21 @@ class OnlineManager: ObservableObject {
                 joinedAt: Date(),
                 isHost: false
             )
-            
+
             let room = try await onlineService.joinRoom(
                 roomCode: normalizedCode,
                 playerProfile: player
             )
-            
+
+            print("[OnlineManager.joinRoom] joinRoom returned successfully. Room code: \(room.roomCode), players: \(room.players.count)")
             currentRoom = room
             isConnected = true
-            
-            // Start listening to room updates
+            print("[OnlineManager.joinRoom] currentRoom is now set: \(currentRoom != nil)")
+
             startListeningToRoom(roomCode: normalizedCode)
-            
+
         } catch {
-            // Handle session expiry
+            print("[OnlineManager.joinRoom] *** ERROR *** \(error)")
             if let nsError = error as NSError?, nsError.code == 401 || error.localizedDescription.contains("authenticated") {
                 errorMessage = "Your session has expired. Please sign in again."
             } else if error.localizedDescription == "This room is full" {
@@ -149,7 +150,7 @@ class OnlineManager: ObservableObject {
             }
             isConnected = false
         }
-        
+
         isLoading = false
     }
     

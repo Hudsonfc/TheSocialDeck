@@ -395,39 +395,37 @@ struct UserSearchResultRow: View {
     @State private var showMenu = false
     
     var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 12) {
             ZStack {
                 Circle()
                     .fill(Color.cardBackground)
                     .shadow(color: Color.shadowColor, radius: 4, x: 0, y: 2)
-                
+
                 AvatarView(
                     avatarType: profile.avatarType,
                     avatarColor: profile.avatarColor,
-                    size: 56
+                    size: 48
                 )
             }
-            
-            VStack(alignment: .leading, spacing: 6) {
+            .frame(width: 52, height: 52)
+            .fixedSize()
+
+            VStack(alignment: .leading, spacing: 4) {
                 Text(profile.username)
-                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundColor(.primaryText)
                     .lineLimit(1)
                     .truncationMode(.tail)
-                
+
                 Text("@\(profile.username.lowercased())")
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .font(.system(size: 13, weight: .regular, design: .rounded))
                     .foregroundColor(.secondaryText)
                     .lineLimit(1)
                     .truncationMode(.tail)
             }
-            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
-            
-            Spacer(minLength: 8)
-            
-            // Action buttons
-            HStack(spacing: 8) {
-                // Menu button (block option)
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            HStack(spacing: 6) {
                 Menu {
                     Button(role: .destructive, action: {
                         HapticManager.shared.lightImpact()
@@ -439,12 +437,12 @@ struct UserSearchResultRow: View {
                     Image(systemName: "ellipsis")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.secondaryText)
-                        .frame(width: 32, height: 32)
+                        .frame(width: 30, height: 30)
                         .background(Color.secondaryBackground)
                         .cornerRadius(8)
                 }
-                
-                // Add/Send button
+                .fixedSize()
+
                 Button(action: {
                     guard !isSending && requestStatus != "friend" && requestStatus != "sent" else { return }
                     HapticManager.shared.lightImpact()
@@ -454,24 +452,25 @@ struct UserSearchResultRow: View {
                         isSending = false
                     }
                 }) {
-                if isSending {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        .scaleEffect(0.8)
-                } else {
-                    Text(buttonText)
-                        .font(.system(size: 15, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white)
+                    if isSending {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .scaleEffect(0.8)
+                    } else {
+                        Text(buttonText)
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            .foregroundColor(.white)
+                    }
                 }
+                .frame(width: 80, height: 34)
+                .background(buttonColor)
+                .cornerRadius(10)
+                .disabled(requestStatus == "friend" || requestStatus == "sent" || isSending)
             }
-            .frame(width: 90, height: 36)
-            .background(buttonColor)
-            .cornerRadius(10)
-            .disabled(requestStatus == "friend" || requestStatus == "sent" || isSending)
-            }
+            .fixedSize()
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
         .background(Color.cardBackground)
         .cornerRadius(16)
         .shadow(color: Color.shadowColor, radius: 8, x: 0, y: 3)

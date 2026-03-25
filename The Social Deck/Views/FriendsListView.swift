@@ -27,7 +27,7 @@ struct FriendsListView: View {
     @State private var toast: ToastMessage? = nil
     @State private var showSearchSheet = false
     @State private var selectedHubTab: FriendsHubTab = .friends
-    @State private var navigateToLobby = false
+    @State private var showLobbyFullScreen = false
     private let brandRed = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
 
     private var friendsToShow: [FriendProfile] {
@@ -223,12 +223,6 @@ struct FriendsListView: View {
             Color.appBackground
                 .ignoresSafeArea()
 
-            NavigationLink(
-                destination: LobbyView(),
-                isActive: $navigateToLobby
-            ) { EmptyView() }
-            .hidden()
-
             VStack(spacing: 0) {
                 // Tabs — same visual language as Play2View `CategoryTab`
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -369,9 +363,17 @@ struct FriendsListView: View {
             }
         }
         .onChange(of: onlineManager.currentRoom) { _, room in
-            if room != nil && selectedHubTab == .roomInvites && !navigateToLobby {
-                print("[FriendsListView] currentRoom set after invite accept — navigating to lobby")
-                navigateToLobby = true
+            print("[FriendsListView] onChange currentRoom fired — room: \(room?.roomCode ?? "nil"), tab: \(selectedHubTab.rawValue), showLobby: \(showLobbyFullScreen)")
+            if room != nil && !showLobbyFullScreen {
+                print("[FriendsListView] currentRoom set — presenting lobby fullScreenCover")
+                showLobbyFullScreen = true
+            }
+        }
+        .fullScreenCover(isPresented: $showLobbyFullScreen, onDismiss: {
+            print("[FriendsListView] Lobby fullScreenCover dismissed")
+        }) {
+            NavigationStack {
+                LobbyView()
             }
         }
         .sheet(isPresented: $showInviteSheet) {
