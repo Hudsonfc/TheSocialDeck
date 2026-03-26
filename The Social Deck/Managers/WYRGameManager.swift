@@ -14,12 +14,12 @@ class WYRGameManager: ObservableObject {
     @Published var isFlipped: Bool = false
     @Published var isFinished: Bool = false
     
-    init(deck: Deck, selectedCategories: [String], cardCount: Int = 0) {
+    init(deck: Deck, selectedCategories: [String], cardCount: Int = 0, deterministicRoomCode: String? = nil) {
         // Group cards by category and shuffle each category
         var cardsByCategory: [String: [Card]] = [:]
         for category in selectedCategories {
             let categoryCards = deck.cards.filter { $0.category == category }
-            cardsByCategory[category] = categoryCards.shuffled()
+            cardsByCategory[category] = shuffledCardsForOnlinePlay(categoryCards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: true)
         }
         
         // If cardCount is 0, use all available cards (equal from each category)
@@ -35,7 +35,7 @@ class WYRGameManager: ObservableObject {
                     distributedCards.append(contentsOf: categoryCards.prefix(cardsToTake))
                 }
             }
-            self.cards = distributedCards.shuffled()
+            self.cards = shuffledCardsForOnlinePlay(distributedCards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: true)
             return
         }
         
@@ -52,7 +52,7 @@ class WYRGameManager: ObservableObject {
         }
         
         // Shuffle the final result to mix categories
-        distributedCards = distributedCards.shuffled()
+        distributedCards = shuffledCardsForOnlinePlay(distributedCards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: true)
         
         // Trim to exact cardCount if we have more than requested
         if distributedCards.count > cardCount {
@@ -110,6 +110,18 @@ class WYRGameManager: ObservableObject {
         isFlipped = false
         currentIndex = index
         isFinished = false
+    }
+
+    /// Apply Firestore snapshot for online Would You Rather (index + face up/down).
+    func applyOnlineSyncState(cardIndex: Int, isFlipped flipped: Bool) {
+        if cardIndex >= cards.count {
+            isFlipped = false
+            isFinished = true
+            return
+        }
+        currentIndex = cardIndex
+        isFinished = false
+        isFlipped = flipped
     }
 }
 

@@ -89,6 +89,8 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
     var isPrivate: Bool
     var selectedGameType: String? // DeckType stored as string (e.g., "neverHaveIEver")
     var selectedCategory: String? // Selected category for game
+    /// Online classic/date/couple lobby: host-selected categories to include in play.
+    var classicSelectedCategories: [String]?
     /// Number of cards to play for classic games; nil or 0 = use all cards
     var cardCount: Int?
     /// Riddle Me This online: countdown per answering phase (host lobby). Off when nil/false.
@@ -97,6 +99,8 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
     var timerDuration: Int?
     /// Riddle Me This online: server time when answering phase began (card flipped); drives synced countdown.
     var roundStartTimestamp: Date?
+    /// Online classic/date/couple games: when true, control rotates by player turn instead of staying with host.
+    var classicTurnsEnabled: Bool?
     
     // Players
     var players: [RoomPlayer]
@@ -109,7 +113,7 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
     
     private enum CodingKeys: String, CodingKey {
         case id, roomCode, roomName, createdBy, createdAt, status, maxPlayers, isPrivate
-        case selectedGameType, selectedCategory, cardCount, timerEnabled, timerDuration
+        case selectedGameType, selectedCategory, classicSelectedCategories, cardCount, timerEnabled, timerDuration, classicTurnsEnabled
         case roundStartTimestamp, players, hostId, gameStartedAt, gameState, flip21GameState
     }
     
@@ -124,10 +128,12 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         isPrivate: Bool = false,
         selectedGameType: String? = nil,
         selectedCategory: String? = nil,
+        classicSelectedCategories: [String]? = nil,
         cardCount: Int? = nil,
         timerEnabled: Bool? = nil,
         timerDuration: Int? = nil,
         roundStartTimestamp: Date? = nil,
+        classicTurnsEnabled: Bool? = nil,
         players: [RoomPlayer] = [],
         hostId: String,
         gameStartedAt: Date? = nil,
@@ -144,10 +150,12 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         self.isPrivate = isPrivate
         self.selectedGameType = selectedGameType
         self.selectedCategory = selectedCategory
+        self.classicSelectedCategories = classicSelectedCategories
         self.cardCount = cardCount
         self.timerEnabled = timerEnabled
         self.timerDuration = timerDuration
         self.roundStartTimestamp = roundStartTimestamp
+        self.classicTurnsEnabled = classicTurnsEnabled
         self.players = players
         self.hostId = hostId
         self.gameStartedAt = gameStartedAt
@@ -167,10 +175,12 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         isPrivate = try container.decodeIfPresent(Bool.self, forKey: .isPrivate) ?? false
         selectedGameType = try container.decodeIfPresent(String.self, forKey: .selectedGameType)
         selectedCategory = try container.decodeIfPresent(String.self, forKey: .selectedCategory)
+        classicSelectedCategories = try container.decodeIfPresent([String].self, forKey: .classicSelectedCategories)
         cardCount = try container.decodeIfPresent(Int.self, forKey: .cardCount)
         timerEnabled = try container.decodeIfPresent(Bool.self, forKey: .timerEnabled)
         timerDuration = try container.decodeIfPresent(Int.self, forKey: .timerDuration)
         roundStartTimestamp = try container.decodeIfPresent(Date.self, forKey: .roundStartTimestamp)
+        classicTurnsEnabled = try container.decodeIfPresent(Bool.self, forKey: .classicTurnsEnabled)
 
         do {
             players = try container.decodeIfPresent([RoomPlayer].self, forKey: .players) ?? []

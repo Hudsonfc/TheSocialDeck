@@ -14,21 +14,21 @@ class MLTGameManager: ObservableObject {
     @Published var isFlipped: Bool = false
     @Published var isFinished: Bool = false
     
-    init(deck: Deck, selectedCategories: [String], cardCount: Int = 0) {
+    init(deck: Deck, selectedCategories: [String], cardCount: Int = 0, deterministicRoomCode: String? = nil) {
         // If cardCount is 0, use all available cards
         if cardCount == 0 {
             let filteredCards = deck.cards.filter { card in
                 selectedCategories.contains(card.category)
             }
-            self.cards = filteredCards.shuffled()
+            self.cards = shuffledCardsForOnlinePlay(filteredCards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: true)
             return
         }
-        
+
         // Group cards by category and shuffle each category
         var cardsByCategory: [String: [Card]] = [:]
         for category in selectedCategories {
             let categoryCards = deck.cards.filter { $0.category == category }
-            cardsByCategory[category] = categoryCards.shuffled()
+            cardsByCategory[category] = shuffledCardsForOnlinePlay(categoryCards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: true)
         }
         
         // Calculate how many cards per category (round up to ensure we have enough)
@@ -44,7 +44,7 @@ class MLTGameManager: ObservableObject {
         }
         
         // Shuffle the final result to mix categories
-        distributedCards = distributedCards.shuffled()
+        distributedCards = shuffledCardsForOnlinePlay(distributedCards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: true)
         
         // Trim to exact cardCount if we have more than requested
         if distributedCards.count > cardCount {

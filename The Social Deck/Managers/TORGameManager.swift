@@ -20,27 +20,27 @@ class TORGameManager: ObservableObject {
     private var originalCardIndex: Int = 0
     private var switchedCardIndex: Int? = nil
     
-    init(deck: Deck, selectedCategories: [String], cardCount: Int = 0) {
+    init(deck: Deck, selectedCategories: [String], cardCount: Int = 0, deterministicRoomCode: String? = nil) {
         // If cardCount is 0, use all available cards
         if cardCount == 0 {
         let filteredCards = deck.cards.filter { card in
             selectedCategories.contains(card.category)
         }
-            self.cards = filteredCards.shuffled()
+            self.cards = shuffledCardsForOnlinePlay(filteredCards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: true)
             self.originalCardIndex = 0
             return
         }
-        
+
         // Group cards by category and shuffle each category
         var cardsByCategory: [String: [Card]] = [:]
         for category in selectedCategories {
             let categoryCards = deck.cards.filter { $0.category == category }
-            cardsByCategory[category] = categoryCards.shuffled()
+            cardsByCategory[category] = shuffledCardsForOnlinePlay(categoryCards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: true)
         }
-        
+
         // Calculate how many cards per category (round up to ensure we have enough)
         let cardsPerCategory = (cardCount + selectedCategories.count - 1) / selectedCategories.count
-        
+
         // Take equal number of cards from each selected category
         var distributedCards: [Card] = []
         for category in selectedCategories {
@@ -49,9 +49,9 @@ class TORGameManager: ObservableObject {
                 distributedCards.append(contentsOf: categoryCards.prefix(cardsToTake))
             }
         }
-        
+
         // Shuffle the final result to mix categories
-        distributedCards = distributedCards.shuffled()
+        distributedCards = shuffledCardsForOnlinePlay(distributedCards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: true)
         
         // Trim to exact cardCount if we have more than requested
         if distributedCards.count > cardCount {
@@ -115,15 +115,13 @@ class TORGameManager: ObservableObject {
                 card.category == currentCategory && card.cardType == oppositeType
             }
             
-            if let switchedCard = availableCards.randomElement() {
-                // Find the index of the switched card and store it
-                if let switchedIndex = cards.firstIndex(where: { $0.id == switchedCard.id }) {
-                    switchedCardIndex = switchedIndex
-                    currentIndex = switchedIndex
-                    hasSeenType = true // We're switching to a new card, but it's part of the same decision
-                    hasAccepted = false
-                    isFlipped = true // Keep it flipped
-                }
+            // Deterministic pick (first in deck order) so all devices agree in online play — never randomElement here.
+            if let switchedIndex = cards.firstIndex(where: { $0.category == currentCategory && $0.cardType == oppositeType }) {
+                switchedCardIndex = switchedIndex
+                currentIndex = switchedIndex
+                hasSeenType = true
+                hasAccepted = false
+                isFlipped = true
             }
         }
     }
@@ -192,6 +190,34 @@ class TORGameManager: ObservableObject {
         originalCardIndex = index
         currentIndex = index
         isFinished = false
+    }
+
+    /// Apply Firestore snapshot for online Truth or Dare (game position, optional switched card index, flip, accept).
+    func applyOnlineSyncState(gamePosition: Int, displayIndex: Int, isFlipped: Bool, hasAccepted: Bool) {
+        if gamePosition >= cards.count {
+            isFinished = true
+            self.isFlipped = false
+            hasSeenType = false
+            self.hasAccepted = false
+            switchedCardIndex = nil
+            if !cards.isEmpty {
+                originalCardIndex = cards.count - 1
+                currentIndex = originalCardIndex
+            }
+            return
+        }
+
+        isFinished = false
+        originalCardIndex = gamePosition
+        currentIndex = displayIndex
+        if displayIndex == gamePosition {
+            switchedCardIndex = nil
+        } else {
+            switchedCardIndex = displayIndex
+        }
+        self.isFlipped = isFlipped
+        self.hasAccepted = hasAccepted
+        hasSeenType = isFlipped
     }
 
     var canSwitch: Bool {

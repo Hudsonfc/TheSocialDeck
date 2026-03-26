@@ -229,31 +229,78 @@ class OnlineService {
     // MARK: - Room Leaving
     
     /// Leaves a room (removes player from room)
-    /// Host leaving deletes the entire room document (dissolves the room for everyone).
+    /// Host leaving deletes the room for most games; **Riddle Me This in-game** promotes the next player or ends cleanly if one remains.
     func leaveRoom(roomCode: String, playerId: String) async throws {
         let roomRef = db.collection("rooms").document(roomCode)
         let snapshot = try await roomRef.getDocument()
-        
+
         guard snapshot.exists, var room = try? snapshot.data(as: OnlineRoom.self) else {
-            // Room doesn't exist, that's fine - we're already out
             return
         }
-        
-        // Host leaving: delete room immediately (no host transfer)
+
+        let encoder = Firestore.Encoder()
+
         if room.hostId == playerId {
+            let isRiddleInGame = room.selectedGameType == "riddleMeThis" && room.status == .inGame
+
+            if isRiddleInGame {
+                let hostIndex = room.players.firstIndex(where: { $0.id == playerId }) ?? 0
+                let oldHostName = room.players.first(where: { $0.id == playerId })?.username ?? "Host"
+                let remainingCount = room.players.filter { $0.id != playerId }.count
+
+                if remainingCount == 0 {
+                    try await roomRef.delete()
+                    return
+                }
+
+                if remainingCount == 1 {
+                    var sole = room.players.first(where: { $0.id != playerId })!
+                    sole.isHost = true
+                    let playersData = try [sole].map { try encoder.encode($0) }
+                    try await roomRef.updateData([
+                        "players": playersData,
+                        "hostId": sole.id,
+                        "rmtRoundPhase": "ended",
+                        "rmtHostHandoffSeq": FieldValue.increment(Int64(1)),
+                        "rmtHostHandoffMessage": "\(oldHostName) left — game over",
+                        "roundStartTimestamp": FieldValue.delete()
+                    ])
+                    return
+                }
+
+                // 2+ others: next player in circular order after host becomes host.
+                let nextHostId = room.players[(hostIndex + 1) % room.players.count].id
+                let newHostName = room.players.first(where: { $0.id == nextHostId })?.username ?? "Host"
+
+                var newPlayers: [RoomPlayer] = room.players
+                    .filter { $0.id != playerId }
+                    .map { p in
+                        var q = p
+                        q.isHost = (p.id == nextHostId)
+                        return q
+                    }
+
+                let playersData = try newPlayers.map { try encoder.encode($0) }
+                try await roomRef.updateData([
+                    "players": playersData,
+                    "hostId": nextHostId,
+                    "rmtHostHandoffSeq": FieldValue.increment(Int64(1)),
+                    "rmtHostHandoffMessage": "\(oldHostName) left — \(newHostName) is now the host"
+                ])
+                return
+            }
+
             try await roomRef.delete()
             return
         }
-        
-        // Non-host: remove self from players
+
         room.players.removeAll { $0.id == playerId }
-        
+
         if room.players.isEmpty {
             try await roomRef.delete()
             return
         }
-        
-        let encoder = Firestore.Encoder()
+
         let playersData = try room.players.map { try encoder.encode($0) }
         try await roomRef.updateData(["players": playersData])
     }
@@ -328,6 +375,42 @@ class OnlineService {
         }
     }
 
+    /// Updates selected classic/date/couple categories in lobby (host only). Empty/nil clears custom selection.
+    func updateClassicSelectedCategories(roomCode: String, categories: [String]?) async throws {
+        let roomRef = db.collection("rooms").document(roomCode)
+        let snapshot = try await roomRef.getDocument()
+
+        guard snapshot.exists, let room = try? snapshot.data(as: OnlineRoom.self) else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room not found"])
+        }
+
+        guard let currentUserId = auth.currentUser?.uid, room.hostId == currentUserId else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Only the host can update game settings"])
+        }
+
+        if let categories, !categories.isEmpty {
+            try await roomRef.updateData(["classicSelectedCategories": categories])
+        } else {
+            try await roomRef.updateData(["classicSelectedCategories": FieldValue.delete()])
+        }
+    }
+
+    /// Updates online classic/date/couple turn mode setting (host only).
+    func updateClassicTurnsSetting(roomCode: String, enabled: Bool) async throws {
+        let roomRef = db.collection("rooms").document(roomCode)
+        let snapshot = try await roomRef.getDocument()
+
+        guard snapshot.exists, let room = try? snapshot.data(as: OnlineRoom.self) else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room not found"])
+        }
+
+        guard let currentUserId = auth.currentUser?.uid, room.hostId == currentUserId else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Only the host can update game settings"])
+        }
+
+        try await roomRef.updateData(["classicTurnsEnabled": enabled])
+    }
+
     /// Updates Riddle Me This timer lobby settings (host only). Writes immediately to Firestore.
     func updateRiddleTimerSettings(roomCode: String, timerEnabled: Bool, timerDuration: Int) async throws {
         let roomRef = db.collection("rooms").document(roomCode)
@@ -384,11 +467,36 @@ class OnlineService {
                 "flip21GameState": try Firestore.Encoder().encode(gameState)
             ])
         } else {
-            // Update room status to inGame and set game started time
-            try await roomRef.updateData([
+            let classicTurnEligibleTypes: Set<String> = [
+                "neverHaveIEver", "truthOrDare", "wouldYouRather", "mostLikelyTo",
+                "quickfireCouples", "closerThanEver", "usAfterDark", "spillTheEx", "takeItPersonally"
+            ]
+
+            var payload: [String: Any] = [
                 "status": RoomStatus.inGame.rawValue,
                 "gameStartedAt": Timestamp(date: Date())
-            ])
+            ]
+
+            let turnsEnabled = room.classicTurnsEnabled == true
+            if turnsEnabled,
+               let gameType = room.selectedGameType,
+               classicTurnEligibleTypes.contains(gameType),
+               let firstPlayerId = room.players.first?.id {
+                payload["classicTurnPlayerId"] = firstPlayerId
+                payload["currentCardIndex"] = 0
+                payload["classicCardFlipped"] = false
+                payload["torDisplayIndex"] = 0
+                payload["torHasAccepted"] = false
+                payload["wyrSelectedOption"] = FieldValue.delete()
+            } else {
+                payload["classicTurnPlayerId"] = FieldValue.delete()
+                payload["torDisplayIndex"] = FieldValue.delete()
+                payload["torHasAccepted"] = FieldValue.delete()
+                payload["wyrSelectedOption"] = FieldValue.delete()
+            }
+
+            // Update room status to inGame and set game started time
+            try await roomRef.updateData(payload)
         }
     }
     

@@ -19,26 +19,26 @@ class NHIEGameManager: ObservableObject {
         UserDefaults.standard.object(forKey: "shuffleCardsEnabled") as? Bool ?? true
     }
     
-    init(deck: Deck, selectedCategories: [String], cardCount: Int = 0) {
+    init(deck: Deck, selectedCategories: [String], cardCount: Int = 0, deterministicRoomCode: String? = nil) {
         // If cardCount is 0, use all available cards
         if cardCount == 0 {
         let filteredCards = deck.cards.filter { card in
             selectedCategories.contains(card.category)
         }
-            self.cards = shouldShuffle ? filteredCards.shuffled() : filteredCards
+            self.cards = shuffledCardsForOnlinePlay(filteredCards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: shouldShuffle)
             return
         }
-        
+
         // Group cards by category and optionally shuffle each category
         var cardsByCategory: [String: [Card]] = [:]
         for category in selectedCategories {
             let categoryCards = deck.cards.filter { $0.category == category }
-            cardsByCategory[category] = shouldShuffle ? categoryCards.shuffled() : categoryCards
+            cardsByCategory[category] = shuffledCardsForOnlinePlay(categoryCards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: shouldShuffle)
         }
-        
+
         // Calculate how many cards per category (round up to ensure we have enough)
         let cardsPerCategory = (cardCount + selectedCategories.count - 1) / selectedCategories.count
-        
+
         // Take equal number of cards from each selected category
         var distributedCards: [Card] = []
         for category in selectedCategories {
@@ -47,10 +47,10 @@ class NHIEGameManager: ObservableObject {
                 distributedCards.append(contentsOf: categoryCards.prefix(cardsToTake))
             }
         }
-        
+
         // Optionally shuffle the final result to mix categories
         if shouldShuffle {
-            distributedCards = distributedCards.shuffled()
+            distributedCards = shuffledCardsForOnlinePlay(distributedCards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: true)
         }
         
         // Trim to exact cardCount if we have more than requested

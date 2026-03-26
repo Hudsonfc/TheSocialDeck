@@ -19,10 +19,10 @@ class CloserThanEverGameManager: ObservableObject {
         UserDefaults.standard.object(forKey: "shuffleCardsEnabled") as? Bool ?? true
     }
     
-    init(deck: Deck, selectedCategories: [String], cardCount: Int = 0) {
+    init(deck: Deck, selectedCategories: [String], cardCount: Int = 0, deterministicRoomCode: String? = nil) {
         // If no categories selected, use all cards
         if selectedCategories.isEmpty {
-            let allCards = shouldShuffle ? deck.cards.shuffled() : deck.cards
+            let allCards = shuffledCardsForOnlinePlay(deck.cards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: shouldShuffle)
             if cardCount == 0 {
                 self.cards = allCards
             } else {
@@ -35,7 +35,7 @@ class CloserThanEverGameManager: ObservableObject {
         var cardsByCategory: [String: [Card]] = [:]
         for category in selectedCategories {
             let categoryCards = deck.cards.filter { $0.category == category }
-            cardsByCategory[category] = shouldShuffle ? categoryCards.shuffled() : categoryCards
+            cardsByCategory[category] = shuffledCardsForOnlinePlay(categoryCards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: shouldShuffle)
         }
         
         // If cardCount is 0, use all available cards (equal from each category)
@@ -51,7 +51,7 @@ class CloserThanEverGameManager: ObservableObject {
                     distributedCards.append(contentsOf: categoryCards.prefix(cardsToTake))
                 }
             }
-            self.cards = shouldShuffle ? distributedCards.shuffled() : distributedCards
+            self.cards = shuffledCardsForOnlinePlay(distributedCards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: shouldShuffle)
             return
         }
         
@@ -69,7 +69,7 @@ class CloserThanEverGameManager: ObservableObject {
         
         // Optionally shuffle the final result to mix categories
         if shouldShuffle {
-            distributedCards = distributedCards.shuffled()
+            distributedCards = shuffledCardsForOnlinePlay(distributedCards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: true)
         }
         
         // Trim to exact cardCount if we have more than requested

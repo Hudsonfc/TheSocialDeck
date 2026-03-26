@@ -39,6 +39,10 @@ class RiddleMeThisOnlineSyncService: ObservableObject {
 
     @Published var connectionLost: Bool = false
 
+    /// Incremented when the host leaves mid-game and another player becomes host (or game ends with one left).
+    @Published var hostHandoffSeq: Int = 0
+    @Published var hostHandoffMessage: String = ""
+
     private init() {}
 
     // MARK: - Listen
@@ -91,6 +95,13 @@ class RiddleMeThisOnlineSyncService: ObservableObject {
                     } else {
                         self.roundStartTimestamp = nil
                     }
+
+                    if let seq = data["rmtHostHandoffSeq"] as? Int {
+                        self.hostHandoffSeq = seq
+                    } else if let seq = data["rmtHostHandoffSeq"] as? Int64 {
+                        self.hostHandoffSeq = Int(seq)
+                    }
+                    self.hostHandoffMessage = data["rmtHostHandoffMessage"] as? String ?? ""
                 }
             }
     }
@@ -114,6 +125,8 @@ class RiddleMeThisOnlineSyncService: ObservableObject {
         timerEnabled       = false
         timerDuration      = 30
         roundStartTimestamp = nil
+        hostHandoffSeq = 0
+        hostHandoffMessage = ""
     }
 
     // MARK: - Host: initialise round 0
@@ -130,7 +143,9 @@ class RiddleMeThisOnlineSyncService: ObservableObject {
             "rmtRoundPhase":         "question",
             "rmtPlayerAnswers":      [String: String](),
             "rmtPlayerScores":       initialScores,
-            "roundStartTimestamp":   FieldValue.delete()
+            "roundStartTimestamp":   FieldValue.delete(),
+            "rmtHostHandoffSeq":     0,
+            "rmtHostHandoffMessage": FieldValue.delete()
         ])
     }
 
@@ -250,4 +265,14 @@ private struct SeededRNG: RandomNumberGenerator {
         state ^= state << 17
         return state
     }
+}
+
+// MARK: - Online classic deck order (shared with NHIE / TOR / WYR / etc.)
+
+/// When `deterministicRoomCode` is set, all devices get the same order. Otherwise matches local shuffle preference.
+func shuffledCardsForOnlinePlay(_ cards: [Card], deterministicRoomCode: String?, useRandomShuffle: Bool) -> [Card] {
+    if let code = deterministicRoomCode, !code.isEmpty {
+        return riddleDeterministicShuffle(cards, roomCode: code)
+    }
+    return useRandomShuffle ? cards.shuffled() : cards
 }

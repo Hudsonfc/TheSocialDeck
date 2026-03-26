@@ -26,6 +26,27 @@ struct CloserThanEverPlayView: View {
     @State private var cardOffset: CGFloat = 0
     @State private var isTransitioning: Bool = false
     @State private var dragOffset: CGFloat = 0
+
+    private var isTurnModeOnline: Bool {
+        roomId != nil && syncService.remoteClassicTurnsEnabled
+    }
+
+    private var canControlOnlineCard: Bool {
+        guard roomId != nil else { return true }
+        if !isTurnModeOnline { return isHost }
+        guard let me = currentUserId else { return false }
+        let turnId = syncService.remoteTurnPlayerId.trimmingCharacters(in: .whitespacesAndNewlines)
+        return turnId.isEmpty ? isHost : turnId == me
+    }
+
+    private var waitingForTurnText: String {
+        if !isTurnModeOnline { return "Waiting for host to flip card" }
+        let tid = syncService.remoteTurnPlayerId.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let list = players, let p = list.first(where: { $0.id == tid }) {
+            return "Waiting for \(p.username) to flip card"
+        }
+        return "Waiting for current player to flip card"
+    }
     
     var body: some View {
         ZStack {
@@ -60,24 +81,9 @@ struct CloserThanEverPlayView: View {
                     }
                     .padding(.leading, 12)
                     
-                    // Back button
-                    if manager.canGoBack && (roomId == nil || isHost) {
-                        Button(action: {
-                            previousCard()
-                        }) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "chevron.left")
-                                    .font(.system(size: 14, weight: .semibold))
-                                Text("Previous")
-                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            }
-                            .foregroundColor(.primaryText)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(Color.tertiaryBackground)
-                            .cornerRadius(20)
-                        }
-                        .padding(.leading, 12)
+                    if manager.canGoBack && roomId == nil {
+                        ClassicGameCompactPreviousButton(action: { previousCard() })
+                            .padding(.leading, 8)
                     }
                     
                     Spacer()
@@ -95,7 +101,11 @@ struct CloserThanEverPlayView: View {
 
                 // Online: player avatars + host/you indication
                 if let players = players, !players.isEmpty, roomId != nil {
-                    OnlinePlayerStripView(players: players, currentUserId: currentUserId)
+                    OnlinePlayerStripView(
+                        players: players,
+                        currentUserId: currentUserId,
+                        activeTurnPlayerId: isTurnModeOnline ? syncService.remoteTurnPlayerId : nil
+                    )
                         .padding(.bottom, 8)
                 }
 
@@ -128,12 +138,13 @@ struct CloserThanEverPlayView: View {
                     .offset(x: cardOffset + dragOffset)
                     .id(currentCard.id) // Force SwiftUI to treat each card as unique
                     .onTapGesture {
+                        if !canControlOnlineCard { return }
                         if !isTransitioning {
                             toggleCard()
                         }
                     }
                     .gesture(
-                        (swipeNavigationEnabled && (roomId == nil || isHost)) ? DragGesture()
+                        (swipeNavigationEnabled && canControlOnlineCard) ? DragGesture()
                             .onChanged { value in
                                 if !isTransitioning {
                                     dragOffset = value.translation.width
@@ -155,14 +166,20 @@ struct CloserThanEverPlayView: View {
                     )
                     .padding(.bottom, 32)
                 }
+                if roomId != nil && !manager.isFlipped && !canControlOnlineCard {
+                    Text(waitingForTurnText)
+                        .font(.system(size: 13, weight: .regular, design: .rounded))
+                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                }
                 
                 Spacer()
                 
                 // Next button or swipe instruction
                 if manager.isFlipped {
-                    if roomId != nil && !isHost {
-                        // Online non-host: host controls advancement
-                        Text("Waiting for host to advance…")
+                    if roomId != nil && !canControlOnlineCard {
+                        Text(waitingForTurnText)
                             .font(.system(size: 14, weight: .regular, design: .rounded))
                             .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                             .multilineTextAlignment(.center)
@@ -237,6 +254,11 @@ struct CloserThanEverPlayView: View {
         .onAppear {
             if let roomId = roomId {
                 SyncService.shared.startListening(roomId: roomId)
+                if isHost && syncService.remoteClassicTurnsEnabled {
+                    Task {
+                        try? await SyncService.shared.seedClassicTurnPlayerIfNeeded(roomId: roomId, players: players ?? [])
+                    }
+                }
             }
         }
         .onDisappear {
@@ -244,15 +266,57 @@ struct CloserThanEverPlayView: View {
                 SyncService.shared.stopListening()
             }
         }
-        .onChange(of: syncService.remoteCardIndex) { _, newIndex in
-            guard roomId != nil, !isHost, newIndex != manager.currentIndex else { return }
-            jumpToCard(newIndex)
+        .onChange(of: syncService.classicRemoteSyncVersion) { _, _ in
+            applyClassicRemoteSyncIfNonHost()
         }
     }
-    
+
+    private func applyClassicRemoteSyncIfNonHost() {
+        guard roomId != nil else { return }
+        let targetIndex = syncService.remoteCardIndex
+        let flipped = syncService.remoteClassicCardFlipped
+        if targetIndex != manager.currentIndex {
+            jumpToCard(targetIndex)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.36) {
+                self.alignCardRotationToRemoteFlipped(flipped)
+            }
+        } else {
+            alignCardRotationToRemoteFlipped(flipped)
+        }
+    }
+
+    private func alignCardRotationToRemoteFlipped(_ flipped: Bool) {
+        guard flipped != manager.isFlipped else {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                cardRotation = flipped ? 180 : 0
+            }
+            return
+        }
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
+            cardRotation = flipped ? 180 : 0
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            if flipped != self.manager.isFlipped {
+                self.manager.flipCard()
+            }
+        }
+    }
+
     private func toggleCard() {
+        if !canControlOnlineCard { return }
         HapticManager.shared.lightImpact()
-        
+
+        let willBeFlipped = !manager.isFlipped
+        if let rid = roomId {
+            if isTurnModeOnline {
+                let turn = syncService.remoteTurnPlayerId.trimmingCharacters(in: .whitespacesAndNewlines)
+                let owner = turn.isEmpty ? (currentUserId ?? "") : turn
+                Task { try? await SyncService.shared.updateClassicTurnRoundState(roomId: rid, cardIndex: manager.currentIndex, isFlipped: willBeFlipped, turnPlayerId: owner) }
+            } else if isHost {
+                Task { try? await SyncService.shared.updateClassicCardProgress(roomId: rid, index: manager.currentIndex, isFlipped: willBeFlipped) }
+            }
+        }
+
         if manager.isFlipped {
             // Flip back to front
             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
@@ -275,7 +339,7 @@ struct CloserThanEverPlayView: View {
     
     private func previousCard() {
         // Online non-hosts can flip/reveal locally, but card progression is host-controlled.
-        if roomId != nil && !isHost { return }
+        if !canControlOnlineCard { return }
         isTransitioning = true
         
         // Reset rotation
@@ -303,8 +367,13 @@ struct CloserThanEverPlayView: View {
             // Now change the card
             manager.previousCard()
 
-            if let roomId = roomId, isHost {
-                Task { try? await SyncService.shared.updateCardIndex(roomId: roomId, index: manager.currentIndex) }
+            if let roomId = roomId {
+                let turn = syncService.remoteTurnPlayerId.trimmingCharacters(in: .whitespacesAndNewlines)
+                if isTurnModeOnline {
+                    Task { try? await SyncService.shared.updateClassicTurnRoundState(roomId: roomId, cardIndex: manager.currentIndex, isFlipped: false, turnPlayerId: turn) }
+                } else if isHost {
+                    Task { try? await SyncService.shared.updateClassicCardProgress(roomId: roomId, index: manager.currentIndex, isFlipped: false) }
+                }
             }
             
             // Small delay to ensure the card view has updated
@@ -323,7 +392,7 @@ struct CloserThanEverPlayView: View {
     
     private func nextCard() {
         // Online non-hosts can flip/reveal locally, but card progression is host-controlled.
-        if roomId != nil && !isHost { return }
+        if !canControlOnlineCard { return }
         isTransitioning = true
         
         // Reset rotation
@@ -351,8 +420,15 @@ struct CloserThanEverPlayView: View {
             // Now change the card
             manager.nextCard()
 
-            if let roomId = roomId, isHost {
-                Task { try? await SyncService.shared.updateCardIndex(roomId: roomId, index: manager.currentIndex) }
+            if let roomId = roomId {
+                if isTurnModeOnline {
+                    let turn = syncService.remoteTurnPlayerId.trimmingCharacters(in: .whitespacesAndNewlines)
+                    let from = turn.isEmpty ? (currentUserId ?? "") : turn
+                    let nextTurn = SyncService.nextClockwisePlayerId(from: from, in: players ?? [])
+                    Task { try? await SyncService.shared.updateClassicTurnRoundState(roomId: roomId, cardIndex: manager.currentIndex, isFlipped: false, turnPlayerId: nextTurn) }
+                } else if isHost {
+                    Task { try? await SyncService.shared.updateClassicCardProgress(roomId: roomId, index: manager.currentIndex, isFlipped: false) }
+                }
             }
             
             // Small delay to ensure the card view has updated

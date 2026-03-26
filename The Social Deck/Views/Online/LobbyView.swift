@@ -9,12 +9,14 @@ struct LobbyView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var onlineManager = OnlineManager.shared
     @StateObject private var authManager = AuthManager.shared
+    @StateObject private var subManager = SubscriptionManager.shared
 
     @State private var showLeaveAlert = false
     @State private var showShareSheet = false
     @State private var showInviteFriends = false
     @State private var showKickAlert = false
     @State private var playerToKick: RoomPlayer? = nil
+    @State private var showCategorySelector = false
     @State private var copiedCode = false
     @State private var isLeaving = false
     @State private var navigateToGame = false
@@ -113,6 +115,17 @@ struct LobbyView: View {
                 InviteFriendsSheet(room: room)
             }
         }
+        .sheet(isPresented: $showCategorySelector) {
+            LobbyCategorySelectionSheet(
+                title: "Select Categories",
+                categories: lobbyCategoriesForSelectedGame,
+                plusLockedCategories: plusLockedCategoriesForSelectedGame,
+                selectedCategories: onlineManager.currentRoom?.classicSelectedCategories ?? []
+            ) { updated in
+                Task { await onlineManager.updateClassicSelectedCategories(updated) }
+            }
+            .environmentObject(SubscriptionManager.shared)
+        }
         // Watch for game start
         .onChange(of: onlineManager.currentRoom?.status) { status in
             if status == .inGame {
@@ -148,6 +161,8 @@ struct LobbyView: View {
                 playerListSection
                 if onlineManager.isHost && isClassicGameWithCardCount {
                     gameSettingsSection
+                } else if isClassicGameWithCardCount {
+                    gameSettingsReadOnlySection
                 }
                 actionButtons
             }
@@ -274,6 +289,47 @@ struct LobbyView: View {
         return count > 0 ? count : 5
     }
 
+    private var currentClassicTurnsEnabled: Bool {
+        onlineManager.currentRoom?.classicTurnsEnabled ?? false
+    }
+
+    private var currentGameType: String {
+        onlineManager.currentRoom?.selectedGameType ?? ""
+    }
+
+    private var lobbyCategoriesForSelectedGame: [String] {
+        switch currentGameType {
+        case "neverHaveIEver", "truthOrDare", "wouldYouRather", "mostLikelyTo":
+            return ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family"]
+        case "spillTheEx":
+            return ["Confessions", "Situationship", "The Breakup", "Wild Side"]
+        case "takeItPersonally":
+            return ["Party", "Wild", "Friends", "Couples"]
+        default:
+            return []
+        }
+    }
+
+    private var plusLockedCategoriesForSelectedGame: Set<String> {
+        switch currentGameType {
+        case "neverHaveIEver", "truthOrDare", "wouldYouRather":
+            return ["Dirty", "Couples", "Wild"]
+        default:
+            return []
+        }
+    }
+
+    private var selectedClassicCategoriesInRoom: [String] {
+        let selected = onlineManager.currentRoom?.classicSelectedCategories ?? []
+        if !selected.isEmpty { return selected }
+        if subManager.isPlus { return lobbyCategoriesForSelectedGame }
+        return lobbyCategoriesForSelectedGame.filter { !plusLockedCategoriesForSelectedGame.contains($0) }
+    }
+
+    private var hasCategorySettingForCurrentGame: Bool {
+        !lobbyCategoriesForSelectedGame.isEmpty && !isRiddleMeThisLobby
+    }
+
     private var gameSettingsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Game settings")
@@ -335,6 +391,66 @@ struct LobbyView: View {
                 }
             }
 
+            if hasCategorySettingForCurrentGame {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Categories")
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundColor(.gray)
+                    Button {
+                        HapticManager.shared.lightImpact()
+                        showCategorySelector = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Text("Select Categories")
+                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            Spacer()
+                            Text("\(selectedClassicCategoriesInRoom.count) selected")
+                                .font(.system(size: 12, weight: .medium, design: .rounded))
+                                .foregroundColor(.secondaryText)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 12, weight: .semibold))
+                        }
+                        .foregroundColor(soDeckRed)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 12)
+                        .background(soDeckRed.opacity(0.08))
+                        .cornerRadius(10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(soDeckRed.opacity(0.3), lineWidth: 1)
+                        )
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+                .padding(.top, 8)
+            }
+
+            if !isRiddleMeThisLobby {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Taking turns")
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundColor(.primaryText)
+                        Text("Rotate who flips cards each round")
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                            .foregroundColor(.gray)
+                    }
+                    Spacer()
+                    Toggle(
+                        "",
+                        isOn: Binding(
+                            get: { currentClassicTurnsEnabled },
+                            set: { on in
+                                Task { await onlineManager.updateClassicTurnsEnabled(on) }
+                            }
+                        )
+                    )
+                    .labelsHidden()
+                    .tint(soDeckRed)
+                }
+                .padding(.top, 8)
+            }
+
             if isRiddleMeThisLobby {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
@@ -394,6 +510,47 @@ struct LobbyView: View {
                     }
                 }
                 .padding(.top, 8)
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.cardBackground)
+        .cornerRadius(16)
+        .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 4)
+        .padding(.horizontal, 24)
+    }
+
+    private var gameSettingsReadOnlySection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Game settings")
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .foregroundColor(.primaryText)
+
+            if isRiddleMeThisLobby {
+                Text("Rounds: \(currentRiddleRounds)")
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .foregroundColor(.primaryText)
+            } else {
+                let current = onlineManager.currentRoom?.cardCount
+                Text("Cards: \(current == nil ? "All" : "\(current!)")")
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .foregroundColor(.primaryText)
+
+                Text("Taking turns: \(currentClassicTurnsEnabled ? "On" : "Off")")
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .foregroundColor(.primaryText)
+
+                if hasCategorySettingForCurrentGame {
+                    Text("Categories")
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundColor(.gray)
+                        .padding(.top, 4)
+
+                    let visible = selectedClassicCategoriesInRoom
+                    Text(visible.joined(separator: ", "))
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundColor(soDeckRed)
+                }
             }
         }
         .padding(20)
@@ -542,6 +699,79 @@ struct LobbyView: View {
             await onlineManager.leaveRoom()
             await MainActor.run {
                 withAnimation { dismiss() }
+            }
+        }
+    }
+}
+
+private struct LobbyCategorySelectionSheet: View {
+    let title: String
+    let categories: [String]
+    let plusLockedCategories: Set<String>
+    let selectedCategories: [String]
+    let onSave: ([String]) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var subManager: SubscriptionManager
+    @State private var showPlusPaywall = false
+    @State private var localSelected: Set<String> = []
+
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 12) {
+                ScrollView {
+                    VStack(spacing: 12) {
+                        ForEach(categories, id: \.self) { category in
+                            let locked = plusLockedCategories.contains(category) && !subManager.isPlus
+                            let selected = localSelected.contains(category)
+                            CategoryButton(
+                                title: category,
+                                isSelected: selected,
+                                isLocked: locked,
+                                cardCount: 0
+                            ) {
+                                if locked {
+                                    showPlusPaywall = true
+                                } else if selected {
+                                    localSelected.remove(category)
+                                } else {
+                                    localSelected.insert(category)
+                                }
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 10)
+                }
+            }
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Save") {
+                        onSave(Array(localSelected))
+                        dismiss()
+                    }
+                    .font(.system(size: 16, weight: .semibold))
+                }
+            }
+            .onAppear {
+                if selectedCategories.isEmpty {
+                    let available = subManager.isPlus
+                        ? Set(categories)
+                        : Set(categories.filter { !plusLockedCategories.contains($0) })
+                    localSelected = available
+                } else {
+                    localSelected = Set(selectedCategories)
+                }
+            }
+            .sheet(isPresented: $showPlusPaywall) {
+                TheSocialDeckPlusPopUpView(onDismiss: { showPlusPaywall = false })
+                    .environmentObject(SubscriptionManager.shared)
             }
         }
     }

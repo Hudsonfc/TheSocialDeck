@@ -29,7 +29,10 @@ class OnlineManager: ObservableObject {
     /// Stale-room cleanup runs at most once per signed-in user per app process.
     private static var staleRoomCleanupCompletedForUserId: String?
     private var scheduledPostGameRoomDeletionTask: Task<Void, Never>?
-    
+
+    /// True when this device called `leaveRoom()` — avoids showing "host left" after self-initiated leave in `OnlineGameContainerView`.
+    private(set) var userChoseToLeaveRoomSession = false
+
     private init() {}
     
     // MARK: - Room Lifecycle
@@ -44,7 +47,8 @@ class OnlineManager: ObservableObject {
         
         isLoading = true
         errorMessage = nil
-        
+        userChoseToLeaveRoomSession = false
+
         do {
             // Create RoomPlayer from UserProfile
             let player = RoomPlayer(
@@ -56,7 +60,7 @@ class OnlineManager: ObservableObject {
                 joinedAt: Date(),
                 isHost: true
             )
-            
+
             let room = try await onlineService.createRoom(
                 roomName: roomName,
                 maxPlayers: maxPlayers,
@@ -105,6 +109,7 @@ class OnlineManager: ObservableObject {
 
         isLoading = true
         errorMessage = nil
+        userChoseToLeaveRoomSession = false
 
         do {
             let normalizedCode = roomCode.uppercased().trimmingCharacters(in: .whitespacesAndNewlines)
@@ -167,7 +172,8 @@ class OnlineManager: ObservableObject {
         isLoading = true
         errorMessage = nil
         cancelScheduledPostGameRoomDeletion()
-        
+        userChoseToLeaveRoomSession = true
+
         do {
             try await onlineService.leaveRoom(roomCode: roomCode, playerId: userId)
             cleanup()
@@ -325,6 +331,16 @@ class OnlineManager: ObservableObject {
         }
     }
 
+    /// Updates host-selected categories for online classic/date/couple games.
+    func updateClassicSelectedCategories(_ categories: [String]?) async {
+        guard let roomCode = currentRoom?.roomCode, isHost else { return }
+        do {
+            try await onlineService.updateClassicSelectedCategories(roomCode: roomCode, categories: categories)
+        } catch {
+            errorMessage = "Failed to update categories"
+        }
+    }
+
     /// Updates Riddle Me This timer settings in the lobby (host only).
     func updateRiddleTimer(enabled: Bool, durationSeconds: Int) async {
         guard let roomCode = currentRoom?.roomCode, isHost else { return }
@@ -336,6 +352,16 @@ class OnlineManager: ObservableObject {
             )
         } catch {
             errorMessage = "Failed to update timer settings"
+        }
+    }
+
+    /// Updates classic/date/couple turn mode in the lobby (host only).
+    func updateClassicTurnsEnabled(_ enabled: Bool) async {
+        guard let roomCode = currentRoom?.roomCode, isHost else { return }
+        do {
+            try await onlineService.updateClassicTurnsSetting(roomCode: roomCode, enabled: enabled)
+        } catch {
+            errorMessage = "Failed to update turn settings"
         }
     }
 
@@ -385,6 +411,7 @@ class OnlineManager: ObservableObject {
             Task { @MainActor in
                 switch result {
                 case .success(let room):
+                    self?.userChoseToLeaveRoomSession = false
                     self?.currentRoom = room
                     self?.isConnected = true
                     

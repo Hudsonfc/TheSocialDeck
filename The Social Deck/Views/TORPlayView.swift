@@ -30,7 +30,26 @@ struct TORPlayView: View {
     @State private var cardOffset: CGFloat = 0
     @State private var isTransitioning: Bool = false
     @State private var dragOffset: CGFloat = 0
-    
+
+    /// Online TOR / WYR: only the synced turn player may control the round (host seeds turn if missing).
+    private var isMyClassicTurn: Bool {
+        guard roomId != nil, let uid = currentUserId else { return true }
+        if !syncService.remoteClassicTurnsEnabled { return isHost }
+        let tid = syncService.remoteTurnPlayerId.trimmingCharacters(in: .whitespacesAndNewlines)
+        if tid.isEmpty { return isHost }
+        return tid == uid
+    }
+
+    private var waitingForActivePlayerLine: String {
+        if !syncService.remoteClassicTurnsEnabled { return "Waiting for host…" }
+        let tid = syncService.remoteTurnPlayerId.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let pl = players, !pl.isEmpty, !tid.isEmpty,
+              let name = pl.first(where: { $0.id == tid })?.username else {
+            return "Waiting for the current player…"
+        }
+        return "Waiting for \(name)…"
+    }
+
     var body: some View {
         ZStack {
             // Dark adaptive background
@@ -64,24 +83,9 @@ struct TORPlayView: View {
                     }
                     .padding(.leading, 12)
                     
-                    // Back button
-                    if manager.canGoBack && (roomId == nil || isHost) {
-                        Button(action: {
-                            previousCard()
-                        }) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "chevron.left")
-                                    .font(.system(size: 14, weight: .semibold))
-                                Text("Previous")
-                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            }
-                            .foregroundColor(.primaryText)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(Color.tertiaryBackground)
-                            .cornerRadius(20)
-                        }
-                        .padding(.leading, 12)
+                    if manager.canGoBack && roomId == nil {
+                        ClassicGameCompactPreviousButton(action: { previousCard() })
+                            .padding(.leading, 8)
                     }
                     
                     Spacer()
@@ -97,8 +101,12 @@ struct TORPlayView: View {
 
                 // Online: player avatars + host/you indication (compact single line)
                 if let players = players, !players.isEmpty, roomId != nil {
-                    OnlinePlayerStripView(players: players, currentUserId: currentUserId)
-                        .padding(.bottom, 8)
+                    OnlinePlayerStripView(
+                        players: players,
+                        currentUserId: currentUserId,
+                        activeTurnPlayerId: syncService.remoteTurnPlayerId
+                    )
+                    .padding(.bottom, 8)
                 }
 
                 // Card area fills remaining space so top bar and bottom hint stay visible
@@ -127,10 +135,11 @@ struct TORPlayView: View {
                         .offset(x: cardOffset + dragOffset)
                         .id(currentCard.id)
                         .onTapGesture {
+                            if roomId != nil && !isMyClassicTurn { return }
                             if !isTransitioning { toggleCard() }
                         }
                         .gesture(
-                            (swipeNavigationEnabled && (roomId == nil || isHost)) ? DragGesture()
+                            (swipeNavigationEnabled && (roomId == nil || isMyClassicTurn)) ? DragGesture()
                                 .onChanged { value in
                                     if !isTransitioning { dragOffset = value.translation.width }
                                 }
@@ -148,12 +157,28 @@ struct TORPlayView: View {
                         )
                         .padding(.bottom, 32)
                     }
+                    if roomId != nil && !manager.isFlipped && !isMyClassicTurn && manager.currentCard() != nil {
+                        Text(waitingForActivePlayerLine + " to reveal the card.")
+                            .font(.system(size: 13, weight: .regular, design: .rounded))
+                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 24)
+                    }
                     Spacer(minLength: 0)
                 }
                 .frame(maxHeight: .infinity)
 
-                // Accept/Switch buttons (shown when card content is revealed but not accepted)
-                if manager.isFlipped && !manager.hasAccepted {
+                if roomId != nil && manager.isFlipped && !manager.hasAccepted && !isMyClassicTurn {
+                    Text(waitingForActivePlayerLine)
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 12)
+                }
+
+                // Accept/Switch — only the player whose turn it is (online) or anyone (local)
+                if manager.isFlipped && !manager.hasAccepted && (roomId == nil || isMyClassicTurn) {
                     HStack(spacing: 12) {
                         // Accept button
                         Button(action: {
@@ -193,11 +218,9 @@ struct TORPlayView: View {
                     .offset(y: acceptSwitchButtonsOffset)
                 }
                 
-                // Next button or swipe instruction (shown when card is accepted)
                 if manager.hasAccepted {
-                    if roomId != nil && !isHost {
-                        // Online non-host: host controls advancement
-                        Text("Waiting for host to advance…")
+                    if roomId != nil && !isMyClassicTurn {
+                        Text(waitingForActivePlayerLine)
                             .font(.system(size: 14, weight: .regular, design: .rounded))
                             .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                             .multilineTextAlignment(.center)
@@ -315,7 +338,13 @@ struct TORPlayView: View {
         .onAppear {
             if let roomId = roomId {
                 SyncService.shared.startListening(roomId: roomId)
+                if isHost && syncService.remoteClassicTurnsEnabled {
+                    Task {
+                        try? await SyncService.shared.seedClassicTurnPlayerIfNeeded(roomId: roomId, players: players ?? [])
+                    }
+                }
             }
+            applyTORFirestoreSnapshot()
             if manager.isFlipped && !manager.hasAccepted {
                 acceptSwitchButtonsOpacity = 1.0
                 acceptSwitchButtonsOffset = 0
@@ -329,15 +358,64 @@ struct TORPlayView: View {
                 SyncService.shared.stopListening()
             }
         }
-        .onChange(of: syncService.remoteCardIndex) { _, newIndex in
-            guard roomId != nil, !isHost, newIndex != manager.gamePosition else { return }
-            jumpToCard(newIndex)
+        .onChange(of: syncService.classicRemoteSyncVersion) { _, _ in
+            if roomId != nil {
+                applyTORFirestoreSnapshot()
+            }
         }
     }
-    
+
+    private func applyTORFirestoreSnapshot() {
+        guard roomId != nil else { return }
+        let gp = syncService.remoteCardIndex
+        let di = syncService.remoteTorDisplayIndex
+        let flipped = syncService.remoteClassicCardFlipped
+        let acc = syncService.remoteTorHasAccepted
+
+        if gp >= manager.cards.count {
+            manager.applyOnlineSyncState(gamePosition: gp, displayIndex: 0, isFlipped: false, hasAccepted: false)
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                cardRotation = 0
+            }
+            return
+        }
+
+        if manager.gamePosition == gp,
+           manager.currentIndex == di,
+           manager.isFlipped == flipped,
+           manager.hasAccepted == acc {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                cardRotation = flipped ? 180 : 0
+            }
+            return
+        }
+
+        manager.applyOnlineSyncState(gamePosition: gp, displayIndex: di, isFlipped: flipped, hasAccepted: acc)
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+            cardRotation = flipped ? 180 : 0
+        }
+    }
+
+    private func pushTORStateToFirestore() {
+        guard let rid = roomId, isMyClassicTurn else { return }
+        let turnId = syncService.remoteTurnPlayerId.trimmingCharacters(in: .whitespacesAndNewlines)
+        let turn = turnId.isEmpty ? (currentUserId ?? "") : turnId
+        Task {
+            try? await SyncService.shared.updateTruthOrDareOnlineState(
+                roomId: rid,
+                gamePosition: manager.gamePosition,
+                displayIndex: manager.currentIndex,
+                isFlipped: manager.isFlipped,
+                hasAccepted: manager.hasAccepted,
+                turnPlayerId: turn
+            )
+        }
+    }
+
     private func toggleCard() {
+        if roomId != nil && !isMyClassicTurn { return }
         HapticManager.shared.lightImpact()
-        
+
         if manager.isFlipped {
             // Flip back to front
             withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
@@ -345,6 +423,7 @@ struct TORPlayView: View {
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                 manager.flipCard()
+                pushTORStateToFirestore()
             }
         } else {
             // Flip to back to show full content
@@ -354,12 +433,14 @@ struct TORPlayView: View {
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                 manager.flipCard()
+                pushTORStateToFirestore()
             }
         }
     }
     
     private func acceptCard() {
         manager.acceptCard()
+        pushTORStateToFirestore()
     }
     
     private func switchToOpposite() {
@@ -373,12 +454,12 @@ struct TORPlayView: View {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                 cardRotation = 180
             }
+            pushTORStateToFirestore()
         }
     }
     
     private func previousCard() {
-        // Online non-hosts can flip/reveal locally, but card progression is host-controlled.
-        if roomId != nil && !isHost { return }
+        if roomId != nil && !isMyClassicTurn { return }
         isTransitioning = true
 
         withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
@@ -393,10 +474,7 @@ struct TORPlayView: View {
             var transaction = Transaction(animation: .none)
             withTransaction(transaction) { cardOffset = -500 }
             manager.previousCard()
-
-            if let roomId = roomId, isHost {
-                Task { try? await SyncService.shared.updateCardIndex(roomId: roomId, index: manager.gamePosition) }
-            }
+            pushTORStateToFirestore()
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { cardOffset = 0 }
@@ -406,8 +484,7 @@ struct TORPlayView: View {
     }
 
     private func nextCard() {
-        // Online non-hosts can flip/reveal locally, but card progression is host-controlled.
-        if roomId != nil && !isHost { return }
+        if roomId != nil && !isMyClassicTurn { return }
         isTransitioning = true
 
         withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
@@ -423,37 +500,25 @@ struct TORPlayView: View {
             withTransaction(transaction) { cardOffset = 500 }
             manager.nextCard()
 
-            if let roomId = roomId, isHost {
-                Task { try? await SyncService.shared.updateCardIndex(roomId: roomId, index: manager.gamePosition) }
+            if let rid = roomId {
+                let pl = players ?? []
+                let fromId = syncService.remoteTurnPlayerId.trimmingCharacters(in: .whitespacesAndNewlines)
+                let from = fromId.isEmpty ? (currentUserId ?? "") : fromId
+                let nextTurn = pl.isEmpty ? from : SyncService.nextClockwisePlayerId(from: from, in: pl)
+                let gp = manager.isFinished ? manager.cards.count : manager.gamePosition
+                let di = manager.isFinished ? max(0, manager.cards.count - 1) : manager.currentIndex
+                Task {
+                    try? await SyncService.shared.updateTruthOrDareOnlineState(
+                        roomId: rid,
+                        gamePosition: gp,
+                        displayIndex: di,
+                        isFlipped: false,
+                        hasAccepted: false,
+                        turnPlayerId: nextTurn
+                    )
+                }
             }
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { cardOffset = 0 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { isTransitioning = false }
-            }
-        }
-    }
-
-    // Animates directly to a target index (used for online non-host sync).
-    private func jumpToCard(_ targetIndex: Int) {
-        guard !isTransitioning else { return }
-        let isForward = targetIndex >= manager.gamePosition
-        isTransitioning = true
-
-        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
-            cardRotation = 0
-            acceptSwitchButtonsOpacity = 0
-            nextButtonOpacity = 0
-        }
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-            cardOffset = isForward ? -500 : 500
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-            if manager.isFlipped { manager.flipCard() }
-            var transaction = Transaction(animation: .none)
-            withTransaction(transaction) { cardOffset = isForward ? 500 : -500 }
-            manager.goToIndex(targetIndex)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { cardOffset = 0 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { isTransitioning = false }

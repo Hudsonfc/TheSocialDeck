@@ -139,7 +139,8 @@ class OnlineColorClashGameManager: ObservableObject {
             return
         }
         
-        guard let cardIndex = myHand.firstIndex(where: { $0.id == card.id }) else {
+        var hand = gameState.playerHands[myUserId] ?? []
+        guard let cardIndex = hand.firstIndex(where: { $0.id == card.id }) else {
             errorMessage = "Card not in hand"
             return
         }
@@ -162,7 +163,7 @@ class OnlineColorClashGameManager: ObservableObject {
         
         // Validate card play (checking burned color rules)
         let isValid = cardToPlay.canPlay(on: currentTopCard, currentColor: currentColor, burnedColor: burnedColor)
-        if !isValid && myHand.count > 1 {
+        if !isValid && hand.count > 1 {
             errorMessage = "Cannot play this card - must match color or number"
             return
         }
@@ -171,9 +172,10 @@ class OnlineColorClashGameManager: ObservableObject {
         errorMessage = nil
         
         do {
-            // Remove card from hand
-            myHand.remove(at: cardIndex)
-            gameState.playerHands[myUserId] = myHand
+            // Remove card from hand (use server hand as source of truth to avoid stale local state)
+            hand.remove(at: cardIndex)
+            myHand = hand
+            gameState.playerHands[myUserId] = hand
             
             // Add to discard pile
             gameState.discardPile.append(cardToPlay)
@@ -193,7 +195,7 @@ class OnlineColorClashGameManager: ObservableObject {
             processActionCard(cardToPlay, in: &gameState)
             
             // Check for win
-            if myHand.isEmpty {
+            if hand.isEmpty {
                 gameState.status = .finished
                 gameState.winnerId = myUserId
             } else {
@@ -228,29 +230,32 @@ class OnlineColorClashGameManager: ObservableObject {
         errorMessage = nil
         
         do {
+            var hand = gameState.playerHands[myUserId] ?? []
+
             // Check if there are pending draw cards (from Draw Two/Four)
             if let pendingDraw = gameState.pendingDrawCards, pendingDraw > 0 {
                 // Draw pending cards
                 for _ in 0..<pendingDraw {
                     if let card = drawCardFromDeck(in: &gameState) {
-                        myHand.append(card)
+                        hand.append(card)
                     }
                 }
                 gameState.pendingDrawCards = nil
             } else {
-                // Draw one card
+                // Draw exactly one card into the current hand (server hand is source of truth).
                 if let card = drawCardFromDeck(in: &gameState) {
-                    myHand.append(card)
+                    hand.append(card)
                 } else {
-                    // Deck is empty, reshuffle discard pile (except top card)
+                    // Draw pile empty: reshuffle discard into deck (standard UNO-style), then draw one.
                     reshuffleDeck(in: &gameState)
                     if let card = drawCardFromDeck(in: &gameState) {
-                        myHand.append(card)
+                        hand.append(card)
                     }
                 }
             }
-            
-            gameState.playerHands[myUserId] = myHand
+
+            myHand = hand
+            gameState.playerHands[myUserId] = hand
             
             // Track who drew a card and the action type
             gameState.lastActionPlayer = myUserId

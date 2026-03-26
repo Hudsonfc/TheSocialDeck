@@ -34,6 +34,7 @@ struct RiddleMeThisOnlinePlayView: View {
     @State private var didAnimateResultScores: Bool = false
     @State private var showAnswerInputArea: Bool = false
     @State private var showTimerChip: Bool = false
+    @State private var hostHandoffBannerText: String?
 
     // MARK: - Derived helpers
 
@@ -103,6 +104,25 @@ struct RiddleMeThisOnlinePlayView: View {
                 }
                 .animation(.spring(response: 0.5, dampingFraction: 0.8), value: syncService.roundPhase)
             }
+
+            if let banner = hostHandoffBannerText {
+                VStack {
+                    Text(banner)
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.primaryText)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 12)
+                        .background(Color.tertiaryBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .shadow(color: Color.black.opacity(0.12), radius: 8, x: 0, y: 4)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 12)
+                    Spacer()
+                }
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .animation(.spring(response: 0.45, dampingFraction: 0.85), value: hostHandoffBannerText)
+            }
         }
         .navigationBarHidden(true)
         .onAppear {
@@ -115,6 +135,19 @@ struct RiddleMeThisOnlinePlayView: View {
         }
         .onDisappear {
             syncService.stopListening()
+        }
+        .onChange(of: syncService.hostHandoffMessage) { _, newMsg in
+            let trimmed = newMsg.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else { return }
+            guard trimmed.localizedCaseInsensitiveContains("now the host") else { return }
+            let display = riddleHostHandoffBannerText(from: trimmed)
+            hostHandoffBannerText = display
+            let shown = display
+            DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
+                if hostHandoffBannerText == shown {
+                    hostHandoffBannerText = nil
+                }
+            }
         }
         // Animate card flip when host flips
         .onChange(of: syncService.isCardFlipped) { flipped in
@@ -186,6 +219,19 @@ struct RiddleMeThisOnlinePlayView: View {
                 isActive: $showEndView
             ) { EmptyView() }
         )
+    }
+
+    /// Prefer "you are now the host" when the promoted host is the current user.
+    private func riddleHostHandoffBannerText(from raw: String) -> String {
+        let parts = raw.components(separatedBy: " — ")
+        guard parts.count >= 2,
+              let uid = currentUserId,
+              let myName = players.first(where: { $0.id == uid })?.username else { return raw }
+        let right = parts.dropFirst().joined(separator: " — ")
+        if right == "\(myName) is now the host" {
+            return "\(parts[0]) — you are now the host"
+        }
+        return raw
     }
 
     // MARK: - Top Bar

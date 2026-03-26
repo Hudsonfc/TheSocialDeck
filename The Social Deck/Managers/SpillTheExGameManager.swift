@@ -16,17 +16,17 @@ class SpillTheExGameManager: ObservableObject {
         UserDefaults.standard.object(forKey: "shuffleCardsEnabled") as? Bool ?? true
     }
 
-    init(deck: Deck, selectedCategories: [String], cardCount: Int = 0) {
+    init(deck: Deck, selectedCategories: [String], cardCount: Int = 0, deterministicRoomCode: String? = nil) {
         if cardCount == 0 {
             let filteredCards = deck.cards.filter { selectedCategories.contains($0.category) }
-            self.cards = shouldShuffle ? filteredCards.shuffled() : filteredCards
+            self.cards = shuffledCardsForOnlinePlay(filteredCards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: shouldShuffle)
             return
         }
 
         var cardsByCategory: [String: [Card]] = [:]
         for category in selectedCategories {
             let categoryCards = deck.cards.filter { $0.category == category }
-            cardsByCategory[category] = shouldShuffle ? categoryCards.shuffled() : categoryCards
+            cardsByCategory[category] = shuffledCardsForOnlinePlay(categoryCards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: shouldShuffle)
         }
 
         let cardsPerCategory = (cardCount + selectedCategories.count - 1) / selectedCategories.count
@@ -40,7 +40,7 @@ class SpillTheExGameManager: ObservableObject {
         }
 
         if shouldShuffle {
-            distributedCards = distributedCards.shuffled()
+            distributedCards = shuffledCardsForOnlinePlay(distributedCards, deterministicRoomCode: deterministicRoomCode, useRandomShuffle: true)
         }
 
         if distributedCards.count > cardCount {

@@ -7,6 +7,14 @@
 
 import SwiftUI
 
+#if DEBUG
+/// Confirms deterministic shuffle matches across devices (compare logs on host vs guest).
+fileprivate func debugPrintOnlineDeckOrder(game: String, roomCode: String, cards: [Card]) {
+    let first = cards.prefix(3).map(\.text)
+    print("[OnlineClassic deck] game=\(game) room=\(roomCode) first3=\(first)")
+}
+#endif
+
 // MARK: - Online wrappers for the 4 classic card games
 // Each wrapper creates the full deck + manager so the play view can be launched
 // from the online flow with roomId/isHost without touching the local launch path.
@@ -22,15 +30,18 @@ private struct OnlineNHIEView: View {
     let players: [RoomPlayer]
     let currentUserId: String?
     let cardCount: Int
+    let selectedCategories: [String]
 
     @StateObject private var manager: NHIEGameManager
 
-    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil) {
+    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil, selectedCategories: [String]? = nil) {
         self.roomCode = roomCode
         self.isHost = isHost
         self.players = players
         self.currentUserId = currentUserId
         self.cardCount = cardCount ?? 0
+        let activeCategories = (selectedCategories?.isEmpty == false) ? selectedCategories! : onlineClassicCategories
+        self.selectedCategories = activeCategories
         let deck = Deck(
             title: "Never Have I Ever",
             description: "Reveal your wildest experiences and learn about your friends.",
@@ -41,15 +52,20 @@ private struct OnlineNHIEView: View {
             cards: allNHIECards,
             availableCategories: onlineClassicCategories
         )
-        _manager = StateObject(wrappedValue: NHIEGameManager(deck: deck, selectedCategories: onlineClassicCategories, cardCount: cardCount ?? 0))
+        _manager = StateObject(wrappedValue: NHIEGameManager(deck: deck, selectedCategories: activeCategories, cardCount: cardCount ?? 0, deterministicRoomCode: roomCode))
     }
 
     var body: some View {
         let deck = Deck(title: "Never Have I Ever", description: "", numberOfCards: allNHIECards.count,
                         estimatedTime: "30-45 min", imageName: "NHIE 2.0", type: .neverHaveIEver,
                         cards: allNHIECards, availableCategories: onlineClassicCategories)
-        NHIEPlayView(manager: manager, deck: deck, selectedCategories: onlineClassicCategories,
+        NHIEPlayView(manager: manager, deck: deck, selectedCategories: selectedCategories,
                      roomId: roomCode, isHost: isHost, players: players, currentUserId: currentUserId)
+            .onAppear {
+                #if DEBUG
+                debugPrintOnlineDeckOrder(game: "neverHaveIEver", roomCode: roomCode, cards: manager.cards)
+                #endif
+            }
     }
 }
 
@@ -59,15 +75,18 @@ private struct OnlineTORView: View {
     let players: [RoomPlayer]
     let currentUserId: String?
     let cardCount: Int
+    let selectedCategories: [String]
 
     @StateObject private var manager: TORGameManager
 
-    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil) {
+    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil, selectedCategories: [String]? = nil) {
         self.roomCode = roomCode
         self.isHost = isHost
         self.players = players
         self.currentUserId = currentUserId
         self.cardCount = cardCount ?? 0
+        let activeCategories = (selectedCategories?.isEmpty == false) ? selectedCategories! : onlineClassicCategories
+        self.selectedCategories = activeCategories
         let deck = Deck(
             title: "Truth or Dare",
             description: "Choose truth or dare and see where the night takes you.",
@@ -78,15 +97,20 @@ private struct OnlineTORView: View {
             cards: allTORCards,
             availableCategories: onlineClassicCategories
         )
-        _manager = StateObject(wrappedValue: TORGameManager(deck: deck, selectedCategories: onlineClassicCategories, cardCount: cardCount ?? 0))
+        _manager = StateObject(wrappedValue: TORGameManager(deck: deck, selectedCategories: activeCategories, cardCount: cardCount ?? 0, deterministicRoomCode: roomCode))
     }
 
     var body: some View {
         let deck = Deck(title: "Truth or Dare", description: "", numberOfCards: allTORCards.count,
                         estimatedTime: "30-45 min", imageName: "TOD 2.0", type: .truthOrDare,
                         cards: allTORCards, availableCategories: onlineClassicCategories)
-        TORPlayView(manager: manager, deck: deck, selectedCategories: onlineClassicCategories,
+        TORPlayView(manager: manager, deck: deck, selectedCategories: selectedCategories,
                     roomId: roomCode, isHost: isHost, players: players, currentUserId: currentUserId)
+            .onAppear {
+                #if DEBUG
+                debugPrintOnlineDeckOrder(game: "truthOrDare", roomCode: roomCode, cards: manager.cards)
+                #endif
+            }
     }
 }
 
@@ -96,15 +120,18 @@ private struct OnlineWYRView: View {
     let players: [RoomPlayer]
     let currentUserId: String?
     let cardCount: Int
+    let selectedCategories: [String]
 
     @StateObject private var manager: WYRGameManager
 
-    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil) {
+    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil, selectedCategories: [String]? = nil) {
         self.roomCode = roomCode
         self.isHost = isHost
         self.players = players
         self.currentUserId = currentUserId
         self.cardCount = cardCount ?? 0
+        let activeCategories = (selectedCategories?.isEmpty == false) ? selectedCategories! : onlineClassicCategories
+        self.selectedCategories = activeCategories
         let deck = Deck(
             title: "Would You Rather",
             description: "Make tough choices and discover what your friends prefer.",
@@ -115,15 +142,20 @@ private struct OnlineWYRView: View {
             cards: allWYRCards,
             availableCategories: onlineClassicCategories
         )
-        _manager = StateObject(wrappedValue: WYRGameManager(deck: deck, selectedCategories: onlineClassicCategories, cardCount: cardCount ?? 0))
+        _manager = StateObject(wrappedValue: WYRGameManager(deck: deck, selectedCategories: activeCategories, cardCount: cardCount ?? 0, deterministicRoomCode: roomCode))
     }
 
     var body: some View {
         let deck = Deck(title: "Would You Rather", description: "", numberOfCards: allWYRCards.count,
                         estimatedTime: "30-45 min", imageName: "WYR 2.0", type: .wouldYouRather,
                         cards: allWYRCards, availableCategories: onlineClassicCategories)
-        WYRPlayView(manager: manager, deck: deck, selectedCategories: onlineClassicCategories,
+        WYRPlayView(manager: manager, deck: deck, selectedCategories: selectedCategories,
                     roomId: roomCode, isHost: isHost, players: players, currentUserId: currentUserId)
+            .onAppear {
+                #if DEBUG
+                debugPrintOnlineDeckOrder(game: "wouldYouRather", roomCode: roomCode, cards: manager.cards)
+                #endif
+            }
     }
 }
 
@@ -133,15 +165,18 @@ private struct OnlineMLTView: View {
     let players: [RoomPlayer]
     let currentUserId: String?
     let cardCount: Int
+    let selectedCategories: [String]
 
     @StateObject private var manager: MLTGameManager
 
-    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil) {
+    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil, selectedCategories: [String]? = nil) {
         self.roomCode = roomCode
         self.isHost = isHost
         self.players = players
         self.currentUserId = currentUserId
         self.cardCount = cardCount ?? 0
+        let activeCategories = (selectedCategories?.isEmpty == false) ? selectedCategories! : onlineClassicCategories
+        self.selectedCategories = activeCategories
         let deck = Deck(
             title: "Most Likely To",
             description: "Find out who's most likely to do crazy things.",
@@ -152,15 +187,20 @@ private struct OnlineMLTView: View {
             cards: allMLTCards,
             availableCategories: onlineClassicCategories
         )
-        _manager = StateObject(wrappedValue: MLTGameManager(deck: deck, selectedCategories: onlineClassicCategories, cardCount: cardCount ?? 0))
+        _manager = StateObject(wrappedValue: MLTGameManager(deck: deck, selectedCategories: activeCategories, cardCount: cardCount ?? 0, deterministicRoomCode: roomCode))
     }
 
     var body: some View {
         let deck = Deck(title: "Most Likely To", description: "", numberOfCards: allMLTCards.count,
                         estimatedTime: "30-45 min", imageName: "MLT 2.0", type: .mostLikelyTo,
                         cards: allMLTCards, availableCategories: onlineClassicCategories)
-        MLTPlayView(manager: manager, deck: deck, selectedCategories: onlineClassicCategories,
+        MLTPlayView(manager: manager, deck: deck, selectedCategories: selectedCategories,
                     roomId: roomCode, isHost: isHost, players: players, currentUserId: currentUserId)
+            .onAppear {
+                #if DEBUG
+                debugPrintOnlineDeckOrder(game: "mostLikelyTo", roomCode: roomCode, cards: manager.cards)
+                #endif
+            }
     }
 }
 
@@ -189,7 +229,7 @@ private struct OnlineQFCView: View {
             cards: allQuickfireCouplesCards,
             availableCategories: []
         )
-        _manager = StateObject(wrappedValue: QuickfireCouplesGameManager(deck: deck, selectedCategories: [], cardCount: cardCount ?? 0))
+        _manager = StateObject(wrappedValue: QuickfireCouplesGameManager(deck: deck, selectedCategories: [], cardCount: cardCount ?? 0, deterministicRoomCode: roomCode))
     }
 
     var body: some View {
@@ -198,6 +238,11 @@ private struct OnlineQFCView: View {
                         cards: allQuickfireCouplesCards, availableCategories: [])
         QuickfireCouplesPlayView(manager: manager, deck: deck, selectedCategories: [],
                                  roomId: roomCode, isHost: isHost, players: players, currentUserId: currentUserId)
+            .onAppear {
+                #if DEBUG
+                debugPrintOnlineDeckOrder(game: "quickfireCouples", roomCode: roomCode, cards: manager.cards)
+                #endif
+            }
     }
 }
 
@@ -226,7 +271,7 @@ private struct OnlineCTEView: View {
             cards: allCloserThanEverCards,
             availableCategories: []
         )
-        _manager = StateObject(wrappedValue: CloserThanEverGameManager(deck: deck, selectedCategories: [], cardCount: cardCount ?? 0))
+        _manager = StateObject(wrappedValue: CloserThanEverGameManager(deck: deck, selectedCategories: [], cardCount: cardCount ?? 0, deterministicRoomCode: roomCode))
     }
 
     var body: some View {
@@ -235,6 +280,11 @@ private struct OnlineCTEView: View {
                         cards: allCloserThanEverCards, availableCategories: [])
         CloserThanEverPlayView(manager: manager, deck: deck, selectedCategories: [],
                                roomId: roomCode, isHost: isHost, players: players, currentUserId: currentUserId)
+            .onAppear {
+                #if DEBUG
+                debugPrintOnlineDeckOrder(game: "closerThanEver", roomCode: roomCode, cards: manager.cards)
+                #endif
+            }
     }
 }
 
@@ -263,7 +313,7 @@ private struct OnlineUADView: View {
             cards: allUsAfterDarkCards,
             availableCategories: []
         )
-        _manager = StateObject(wrappedValue: UsAfterDarkGameManager(deck: deck, selectedCategories: [], cardCount: cardCount ?? 0))
+        _manager = StateObject(wrappedValue: UsAfterDarkGameManager(deck: deck, selectedCategories: [], cardCount: cardCount ?? 0, deterministicRoomCode: roomCode))
     }
 
     var body: some View {
@@ -272,6 +322,11 @@ private struct OnlineUADView: View {
                         cards: allUsAfterDarkCards, availableCategories: [])
         UsAfterDarkPlayView(manager: manager, deck: deck, selectedCategories: [],
                             roomId: roomCode, isHost: isHost, players: players, currentUserId: currentUserId)
+            .onAppear {
+                #if DEBUG
+                debugPrintOnlineDeckOrder(game: "usAfterDark", roomCode: roomCode, cards: manager.cards)
+                #endif
+            }
     }
 }
 
@@ -281,15 +336,18 @@ private struct OnlineSpillTheExView: View {
     let players: [RoomPlayer]
     let currentUserId: String?
     let cardCount: Int
+    let selectedCategories: [String]
 
     @StateObject private var manager: SpillTheExGameManager
 
-    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil) {
+    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil, selectedCategories: [String]? = nil) {
         self.roomCode = roomCode
         self.isHost = isHost
         self.players = players
         self.currentUserId = currentUserId
         self.cardCount = cardCount ?? 0
+        let activeCategories = (selectedCategories?.isEmpty == false) ? selectedCategories! : onlineSpillTheExCategories
+        self.selectedCategories = activeCategories
 
         let deck = Deck(
             title: "Spill the Ex",
@@ -301,7 +359,7 @@ private struct OnlineSpillTheExView: View {
             cards: allSpillTheExCards,
             availableCategories: onlineSpillTheExCategories
         )
-        _manager = StateObject(wrappedValue: SpillTheExGameManager(deck: deck, selectedCategories: onlineSpillTheExCategories, cardCount: cardCount ?? 0))
+        _manager = StateObject(wrappedValue: SpillTheExGameManager(deck: deck, selectedCategories: activeCategories, cardCount: cardCount ?? 0, deterministicRoomCode: roomCode))
     }
 
     var body: some View {
@@ -318,12 +376,17 @@ private struct OnlineSpillTheExView: View {
         SpillTheExPlayView(
             manager: manager,
             deck: deck,
-            selectedCategories: onlineSpillTheExCategories,
+            selectedCategories: selectedCategories,
             roomId: roomCode,
             isHost: isHost,
             players: players,
             currentUserId: currentUserId
         )
+        .onAppear {
+            #if DEBUG
+            debugPrintOnlineDeckOrder(game: "spillTheEx", roomCode: roomCode, cards: manager.cards)
+            #endif
+        }
     }
 }
 
@@ -333,15 +396,18 @@ private struct OnlineTIPView: View {
     let players: [RoomPlayer]
     let currentUserId: String?
     let cardCount: Int
+    let selectedCategories: [String]
 
     @StateObject private var manager: TIPGameManager
 
-    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil) {
+    init(roomCode: String, isHost: Bool, players: [RoomPlayer], currentUserId: String?, cardCount: Int? = nil, selectedCategories: [String]? = nil) {
         self.roomCode = roomCode
         self.isHost = isHost
         self.players = players
         self.currentUserId = currentUserId
         self.cardCount = cardCount ?? 0
+        let activeCategories = (selectedCategories?.isEmpty == false) ? selectedCategories! : onlineTIPCategories
+        self.selectedCategories = activeCategories
 
         let deck = Deck(
             title: "Take It Personally",
@@ -353,7 +419,7 @@ private struct OnlineTIPView: View {
             cards: allTIPCards,
             availableCategories: onlineTIPCategories
         )
-        _manager = StateObject(wrappedValue: TIPGameManager(deck: deck, selectedCategories: onlineTIPCategories, cardCount: cardCount ?? 0))
+        _manager = StateObject(wrappedValue: TIPGameManager(deck: deck, selectedCategories: activeCategories, cardCount: cardCount ?? 0, deterministicRoomCode: roomCode))
     }
 
     var body: some View {
@@ -370,12 +436,17 @@ private struct OnlineTIPView: View {
         TIPPlayView(
             manager: manager,
             deck: deck,
-            selectedCategories: onlineTIPCategories,
+            selectedCategories: selectedCategories,
             roomId: roomCode,
             isHost: isHost,
             players: players,
             currentUserId: currentUserId
         )
+        .onAppear {
+            #if DEBUG
+            debugPrintOnlineDeckOrder(game: "takeItPersonally", roomCode: roomCode, cards: manager.cards)
+            #endif
+        }
     }
 }
 
@@ -409,6 +480,11 @@ private struct OnlineRMTView: View {
             currentUserId: currentUserId,
             cards: cards
         )
+        .onAppear {
+            #if DEBUG
+            debugPrintOnlineDeckOrder(game: "riddleMeThis", roomCode: roomCode, cards: cards)
+            #endif
+        }
     }
 }
 
@@ -479,13 +555,13 @@ struct OnlineGameContainerView: View {
                     case "flip21":
                         OnlineFlip21PlayView(roomCode: room.roomCode, myUserId: myUserId)
                     case "neverHaveIEver":
-                        OnlineNHIEView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
+                        OnlineNHIEView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount, selectedCategories: room.classicSelectedCategories)
                     case "truthOrDare":
-                        OnlineTORView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
+                        OnlineTORView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount, selectedCategories: room.classicSelectedCategories)
                     case "wouldYouRather":
-                        OnlineWYRView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
+                        OnlineWYRView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount, selectedCategories: room.classicSelectedCategories)
                     case "mostLikelyTo":
-                        OnlineMLTView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
+                        OnlineMLTView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount, selectedCategories: room.classicSelectedCategories)
                     case "quickfireCouples":
                         OnlineQFCView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
                     case "closerThanEver":
@@ -493,9 +569,9 @@ struct OnlineGameContainerView: View {
                     case "usAfterDark":
                         OnlineUADView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
                     case "spillTheEx":
-                        OnlineSpillTheExView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
+                        OnlineSpillTheExView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount, selectedCategories: room.classicSelectedCategories)
                     case "takeItPersonally":
-                        OnlineTIPView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
+                        OnlineTIPView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount, selectedCategories: room.classicSelectedCategories)
                     case "riddleMeThis":
                         OnlineRMTView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
                     case "storyChain", "twoTruthsAndALie":
@@ -544,10 +620,12 @@ struct OnlineGameContainerView: View {
         .onReceive(NotificationCenter.default.publisher(for: .onlineFlip21ConnectionStatusChanged)) { notification in
             flip21ConnectionLost = (notification.userInfo?["connectionLost"] as? Bool) ?? false
         }
-        // Fix 1: when the room disappears while a game is active, alert all players
-        .onChange(of: onlineManager.currentRoom) { room in
-            if room == nil && !showHostLeftAlert {
-                showHostLeftAlert = true
+        // When the room disappears, alert unless this device intentionally left (avoids false "host left" after self-leave).
+        .onChange(of: onlineManager.currentRoom) { _, room in
+            if room == nil {
+                if !onlineManager.userChoseToLeaveRoomSession && !showHostLeftAlert {
+                    showHostLeftAlert = true
+                }
             }
         }
         .alert("Host has left the game", isPresented: $showHostLeftAlert) {

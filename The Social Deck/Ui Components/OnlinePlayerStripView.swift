@@ -10,8 +10,15 @@ import SwiftUI
 struct OnlinePlayerStripView: View {
     let players: [RoomPlayer]
     let currentUserId: String?
+    /// When set (non-empty), that player's turn is highlighted instead of defaulting to host.
+    var activeTurnPlayerId: String? = nil
 
     private let soDeckRed = Color(red: 0xD9 / 255.0, green: 0x3A / 255.0, blue: 0x3A / 255.0)
+
+    private var effectiveTurnPlayerId: String? {
+        guard let id = activeTurnPlayerId?.trimmingCharacters(in: .whitespacesAndNewlines), !id.isEmpty else { return nil }
+        return id
+    }
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -32,7 +39,12 @@ struct OnlinePlayerStripView: View {
 
     private func playerChip(_ player: RoomPlayer) -> some View {
         let isYou = player.id == currentUserId
-        let isTurn = player.isHost // Host's turn to control flipping/advancing
+        let isTurn: Bool = {
+            if let tid = effectiveTurnPlayerId {
+                return player.id == tid
+            }
+            return player.isHost
+        }()
 
         return VStack(spacing: 4) {
             ZStack(alignment: .bottomTrailing) {
@@ -58,9 +70,9 @@ struct OnlinePlayerStripView: View {
                 }
             }
 
-            // Fixed-height slot: "Your turn" (only you see this when you're host), "Their turn" (host is someone else), or "You" (just you)
+            // Fixed-height slot: turn label for active player, or "You" for non-turn local player
             ZStack {
-                if player.isHost {
+                if isTurn {
                     Text(isYou ? "Your turn" : "Their turn")
                         .font(.system(size: 10, weight: .semibold, design: .rounded))
                         .foregroundColor(soDeckRed)
@@ -78,5 +90,25 @@ struct OnlinePlayerStripView: View {
         .padding(.vertical, 4)
         .background(Color.appBackground.opacity(0.5))
         .cornerRadius(10)
+    }
+}
+
+// MARK: - Compact nav (online classic / couple top bars)
+
+/// Circle back control so "Previous" does not squeeze the top bar on small phones.
+struct ClassicGameCompactPreviousButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "chevron.backward")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(.primaryText)
+                .frame(width: 40, height: 40)
+                .background(Color.tertiaryBackground)
+                .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Previous card")
     }
 }

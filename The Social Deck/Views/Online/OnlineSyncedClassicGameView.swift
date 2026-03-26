@@ -79,14 +79,18 @@ struct OnlineSyncedClassicGameView: View {
         .navigationBarHidden(true)
         .onAppear {
             sync.startListening(roomId: roomCode)
+            #if DEBUG
+            let preview = cards.prefix(3).map { $0.text }
+            print("[OnlineSyncedClassic] roomCode=\(roomCode) gameType=\(gameType) first3=\(preview)")
+            #endif
             if isHost {
-                Task { try? await sync.updateCardIndex(roomId: roomCode, index: 0) }
+                Task { try? await sync.updateClassicCardProgress(roomId: roomCode, index: 0, isFlipped: false) }
             }
         }
         .onDisappear {
             sync.stopListening()
         }
-        .onChange(of: sync.remoteCardIndex) { newIndex in
+        .onChange(of: sync.classicRemoteSyncVersion) { _ in
             if !isHost {
                 animateCardChange()
             }
@@ -236,7 +240,7 @@ struct OnlineSyncedClassicGameView: View {
                     HapticManager.shared.lightImpact()
                     animateCardChange()
                     localIndex -= 1
-                    Task { try? await sync.updateCardIndex(roomId: roomCode, index: localIndex) }
+                    Task { try? await sync.updateClassicCardProgress(roomId: roomCode, index: localIndex, isFlipped: false) }
                 } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .semibold))
@@ -253,7 +257,7 @@ struct OnlineSyncedClassicGameView: View {
                     HapticManager.shared.mediumImpact()
                     animateCardChange()
                     localIndex += 1
-                    Task { try? await sync.updateCardIndex(roomId: roomCode, index: localIndex) }
+                    Task { try? await sync.updateClassicCardProgress(roomId: roomCode, index: localIndex, isFlipped: false) }
                 } label: {
                     HStack(spacing: 6) {
                         Text("Next Card")
