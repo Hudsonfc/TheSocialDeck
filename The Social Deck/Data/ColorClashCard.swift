@@ -46,33 +46,31 @@ struct ColorClashCard: Identifiable, Codable, Equatable {
     
     /// Check if this card can be played on the current top card
     func canPlay(on topCard: ColorClashCard, currentColor: CardColor, burnedColor: CardColor?) -> Bool {
-        // If this is a wild card, it can always be played
         if type == .wild || type == .wildDrawFour {
             return true
         }
-        
-        // Check if this card is the burned color
-        if let burnedColor = burnedColor, let cardColor = color, cardColor == burnedColor {
-            // Burned color cards can only be played as last card or action cards
-            // For now, we'll allow action cards to be played
-            return type != .number
-        }
-        
-        // Match by color
-        if let cardColor = color, cardColor == currentColor {
+
+        // Same rank on a numbered top card (any color) — evaluated before burned-color so rank play still works.
+        if type == .number, topCard.type == .number,
+           let cardNumber = number, let topNumber = topCard.number, cardNumber == topNumber {
             return true
         }
-        
-        // Match by number (for number cards)
-        if type == .number, let cardNumber = number, let topNumber = topCard.number, cardNumber == topNumber {
-            return true
-        }
-        
-        // Match by type (for action cards)
+
+        // Same action type (skip on skip, reverse on reverse, draw two on draw two)
         if type != .number, type == topCard.type {
             return true
         }
-        
+
+        // Burned color: block plain number cards of that color (wild already handled; rank match already returned)
+        if let burnedColor = burnedColor, let cardColor = color, cardColor == burnedColor, type == .number {
+            return false
+        }
+
+        // Match open color (includes color chosen after a wild)
+        if let cardColor = color, cardColor == currentColor {
+            return true
+        }
+
         return false
     }
     

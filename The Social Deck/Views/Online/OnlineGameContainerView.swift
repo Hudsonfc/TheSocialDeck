@@ -491,6 +491,7 @@ private struct OnlineRMTView: View {
 // MARK: -
 
 struct OnlineGameContainerView: View {
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var onlineManager = OnlineManager.shared
     @StateObject private var authManager = AuthManager.shared
     @ObservedObject private var syncService = SyncService.shared
@@ -626,6 +627,12 @@ struct OnlineGameContainerView: View {
                 if !onlineManager.userChoseToLeaveRoomSession && !showHostLeftAlert {
                     showHostLeftAlert = true
                 }
+            }
+        }
+        .onChange(of: onlineManager.currentRoom?.status) { _, status in
+            // Host returned room to waiting: pop all players back to lobby.
+            if status == .waiting {
+                dismiss()
             }
         }
         .alert("Host has left the game", isPresented: $showHostLeftAlert) {

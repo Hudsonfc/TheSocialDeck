@@ -399,6 +399,42 @@ class OnlineManager: ObservableObject {
         
         isLoading = false
     }
+
+    /// Host-only: return everyone from active game back to lobby.
+    func returnRoomToLobby() async {
+        guard let roomCode = currentRoom?.roomCode, isHost else { return }
+        isLoading = true
+        errorMessage = nil
+        do {
+            try await onlineService.returnRoomToLobby(roomCode: roomCode)
+        } catch {
+            errorMessage = "Failed to return to lobby: \(error.localizedDescription)"
+        }
+        isLoading = false
+    }
+
+    /// Host-only: pass host to the next player and leave the in-game session (3+ players). Call `dismiss()` after success to leave the game UI.
+    func hostLeaveGamePassHostToNext() async {
+        guard let roomCode = currentRoom?.roomCode,
+              let userId = authManager.userProfile?.userId,
+              isHost else { return }
+
+        isLeavingRoom = true
+        isLoading = true
+        errorMessage = nil
+        userChoseToLeaveRoomSession = true
+
+        do {
+            try await onlineService.hostLeaveInGamePromoteNext(roomCode: roomCode, leavingPlayerId: userId)
+            cleanup()
+        } catch {
+            userChoseToLeaveRoomSession = false
+            errorMessage = "Failed to leave: \(error.localizedDescription)"
+        }
+
+        isLoading = false
+        isLeavingRoom = false
+    }
     
     // MARK: - Real-Time Listening
     

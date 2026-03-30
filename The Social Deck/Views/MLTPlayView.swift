@@ -21,8 +21,9 @@ struct MLTPlayView: View {
     @AppStorage("totalCardsFlipped") private var totalCardsFlipped: Int = 0
     @State private var cardRotation: Double = 0
     @State private var showEndView: Bool = false
-    @State private var navigateToHome: Bool = false
-    @State private var showHomeAlert: Bool = false
+    @State private var showOnlineGuestLeave = false
+    @State private var showOnlineHostEveryone = false
+    @State private var showOnlineHostMulti = false
     @State private var nextButtonOpacity: Double = 0
     @State private var nextButtonOffset: CGFloat = 20
     @State private var cardOffset: CGFloat = 0
@@ -59,9 +60,7 @@ struct MLTPlayView: View {
             VStack(spacing: 0) {
                 // Top bar with exit, back button, and progress
                 HStack {
-                    Button(action: {
-                        dismiss()
-                    }) {
+                    Button(action: { handleOnlineOrOfflineBack() }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.primaryText)
@@ -69,20 +68,7 @@ struct MLTPlayView: View {
                             .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
-                    
-                    // Home button
-                    Button(action: {
-                        showHomeAlert = true
-                    }) {
-                        Image(systemName: "house.fill")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(.primaryText)
-                            .frame(width: 44, height: 44)
-                            .background(Color.tertiaryBackground)
-                            .clipShape(Circle())
-                    }
-                    .padding(.leading, 12)
-                    
+
                     if manager.canGoBack && roomId == nil {
                         ClassicGameCompactPreviousButton(action: { previousCard() })
                             .padding(.leading, 8)
@@ -216,31 +202,20 @@ struct MLTPlayView: View {
                 }
             }
             .animation(.spring(response: 0.5, dampingFraction: 0.8), value: manager.isFlipped)
+
+            OnlineGameExitAlertsView(
+                guestLeave: $showOnlineGuestLeave,
+                hostEveryone: $showOnlineHostEveryone,
+                hostMulti: $showOnlineHostMulti
+            )
         }
         .navigationBarHidden(true)
-        .alert("Go to Home?", isPresented: $showHomeAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Go Home", role: .destructive) {
-                navigateToHome = true
-            }
-        } message: {
-            Text("Are you sure you want to go back to the home screen? Your progress will be lost.")
-        }
         .background(
-            Group {
-                NavigationLink(
-                    destination: MLTEndView(deck: deck, selectedCategories: selectedCategories, cardsPlayed: manager.cards.count),
-                    isActive: $showEndView
-                ) {
-                    EmptyView()
-                }
-                
-                NavigationLink(
-                    destination: HomeView(),
-                    isActive: $navigateToHome
-                ) {
-                    EmptyView()
-                }
+            NavigationLink(
+                destination: MLTEndView(deck: deck, selectedCategories: selectedCategories, cardsPlayed: manager.cards.count),
+                isActive: $showEndView
+            ) {
+                EmptyView()
             }
         )
         .onChange(of: manager.isFlipped) { oldValue, newValue in
@@ -279,6 +254,23 @@ struct MLTPlayView: View {
         }
         .onChange(of: syncService.classicRemoteSyncVersion) { _, _ in
             applyClassicRemoteSyncIfNonHost()
+        }
+    }
+
+    private func handleOnlineOrOfflineBack() {
+        guard roomId != nil else {
+            dismiss()
+            return
+        }
+        if isHost {
+            let n = players?.count ?? 0
+            if n > 2 {
+                showOnlineHostMulti = true
+            } else {
+                showOnlineHostEveryone = true
+            }
+        } else {
+            showOnlineGuestLeave = true
         }
     }
 

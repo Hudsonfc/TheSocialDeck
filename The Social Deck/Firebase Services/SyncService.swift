@@ -39,6 +39,9 @@ class SyncService: ObservableObject {
     /// Would You Rather: "A", "B", or empty when none selected.
     @Published var remoteWyrSelectedOption: String = ""
 
+    /// Quickfire Couples: "A", "B", or empty when none selected.
+    @Published var remoteQuickfireSelectedOption: String = ""
+
     /// True when the Firestore listener has fired an error (e.g. connection lost).
     /// Automatically clears when a successful snapshot is received.
     @Published var connectionLost: Bool = false
@@ -116,6 +119,27 @@ class SyncService: ObservableObject {
         ])
     }
 
+    /// Online Quickfire Couples: card index, flip, option selection, and turn.
+    func updateQuickfireCouplesOnlineState(
+        roomId: String,
+        cardIndex: Int,
+        isFlipped: Bool,
+        turnPlayerId: String,
+        selectedOption: String?
+    ) async throws {
+        var payload: [String: Any] = [
+            "currentCardIndex": cardIndex,
+            "classicCardFlipped": isFlipped,
+            "classicTurnPlayerId": turnPlayerId
+        ]
+        if let opt = selectedOption {
+            payload["quickfireSelectedOption"] = opt
+        } else {
+            payload["quickfireSelectedOption"] = FieldValue.delete()
+        }
+        try await db.collection("rooms").document(roomId).updateData(payload)
+    }
+
     /// Host-only: set first player as turn holder when field is missing (TOR / WYR online).
     func seedClassicTurnPlayerIfNeeded(roomId: String, players: [RoomPlayer]) async throws {
         guard let firstId = players.first?.id, !firstId.isEmpty else { return }
@@ -129,7 +153,8 @@ class SyncService: ObservableObject {
             "classicTurnPlayerId": firstId,
             "torDisplayIndex": data["torDisplayIndex"] as? Int ?? idx,
             "torHasAccepted": false,
-            "wyrSelectedOption": FieldValue.delete()
+            "wyrSelectedOption": FieldValue.delete(),
+            "quickfireSelectedOption": FieldValue.delete()
         ])
     }
 
@@ -201,6 +226,12 @@ class SyncService: ObservableObject {
                         self.remoteWyrSelectedOption = ""
                     }
 
+                    if let qfc = data["quickfireSelectedOption"] as? String, !qfc.isEmpty {
+                        self.remoteQuickfireSelectedOption = qfc
+                    } else {
+                        self.remoteQuickfireSelectedOption = ""
+                    }
+
                     self.classicRemoteSyncVersion += 1
                 }
             }
@@ -217,6 +248,7 @@ class SyncService: ObservableObject {
         remoteTorDisplayIndex = 0
         remoteTorHasAccepted = false
         remoteWyrSelectedOption = ""
+        remoteQuickfireSelectedOption = ""
         classicRemoteSyncVersion = 0
     }
 

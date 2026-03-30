@@ -24,8 +24,9 @@ struct RiddleMeThisOnlinePlayView: View {
     @State private var answerText: String = ""
     @State private var hasInitialised: Bool = false
     @State private var cardRotation: Double = 0
-    @State private var showHomeAlert: Bool = false
-    @State private var navigateToHome: Bool = false
+    @State private var showOnlineGuestLeave = false
+    @State private var showOnlineHostEveryone = false
+    @State private var showOnlineHostMulti = false
     @State private var showEndView: Bool = false
     /// Prevents double reveal when timer fires and host also taps Show Answer.
     @State private var didRevealThisRound: Bool = false
@@ -123,6 +124,12 @@ struct RiddleMeThisOnlinePlayView: View {
                 .transition(.move(edge: .top).combined(with: .opacity))
                 .animation(.spring(response: 0.45, dampingFraction: 0.85), value: hostHandoffBannerText)
             }
+
+            OnlineGameExitAlertsView(
+                guestLeave: $showOnlineGuestLeave,
+                hostEveryone: $showOnlineHostEveryone,
+                hostMulti: $showOnlineHostMulti
+            )
         }
         .navigationBarHidden(true)
         .onAppear {
@@ -199,15 +206,6 @@ struct RiddleMeThisOnlinePlayView: View {
                 )
             }
         }
-        .alert("Leave game?", isPresented: $showHomeAlert) {
-            Button("Cancel", role: .cancel) {}
-            Button("Go Home", role: .destructive) { navigateToHome = true }
-        } message: {
-            Text("Are you sure you want to leave? Your progress will be lost.")
-        }
-        .background(
-            NavigationLink(destination: HomeView(), isActive: $navigateToHome) { EmptyView() }
-        )
         .background(
             NavigationLink(
                 destination: RiddleMeThisOnlineEndView(
@@ -219,6 +217,18 @@ struct RiddleMeThisOnlinePlayView: View {
                 isActive: $showEndView
             ) { EmptyView() }
         )
+    }
+
+    private func handleOnlineOrOfflineBack() {
+        if isHost {
+            if players.count > 2 {
+                showOnlineHostMulti = true
+            } else {
+                showOnlineHostEveryone = true
+            }
+        } else {
+            showOnlineGuestLeave = true
+        }
     }
 
     /// Prefer "you are now the host" when the promoted host is the current user.
@@ -238,9 +248,9 @@ struct RiddleMeThisOnlinePlayView: View {
 
     private var topBar: some View {
         HStack {
-            Button { showHomeAlert = true } label: {
-                Image(systemName: "house.fill")
-                    .font(.system(size: 18, weight: .medium))
+            Button { handleOnlineOrOfflineBack() } label: {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.primaryText)
                     .frame(width: 44, height: 44)
                     .background(Color.tertiaryBackground)

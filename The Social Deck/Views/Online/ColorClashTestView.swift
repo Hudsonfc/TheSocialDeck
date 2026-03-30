@@ -190,41 +190,6 @@ struct ColorClashTestView: View {
                             if !hasDrawnThisTurn {
                                 drawCardButton
                             }
-                            
-                            // Skip Turn button - always visible when it's your turn
-                            Button(action: {
-                                HapticManager.shared.mediumImpact()
-                                selectedCardIds.removeAll()
-                                Task {
-                                    await testManager.skipTurn()
-                                }
-                            }) {
-                                HStack(spacing: 10) {
-                                    Image(systemName: "arrow.forward.circle.fill")
-                                        .font(.system(size: 20, weight: .semibold))
-                                    Text("Skip")
-                                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                }
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(
-                                            LinearGradient(
-                                                gradient: Gradient(colors: [
-                                                    Color(red: 0x66/255.0, green: 0x66/255.0, blue: 0x66/255.0),
-                                                    Color(red: 0x4A/255.0, green: 0x4A/255.0, blue: 0x4A/255.0)
-                                                ]),
-                                                startPoint: .topLeading,
-                                                endPoint: .bottomTrailing
-                                            )
-                                        )
-                                        .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 3)
-                                )
-                            }
-                            .disabled(testManager.isLoading)
-                            .opacity(testManager.isLoading ? 0.6 : 1.0)
                         }
                         .padding(.horizontal, 40)
                         .padding(.bottom, geometry.safeAreaInsets.bottom + 16)
@@ -782,9 +747,14 @@ struct ColorClashTestView: View {
                 selectedCardIds.insert(card.id)
             } else {
                 let existingCards = testManager.myHand.filter { selectedCardIds.contains($0.id) }
-                if let firstCard = existingCards.first {
-                    let canAdd = (card.type == firstCard.type) && 
-                                ((card.type == .wild || card.type == .wildDrawFour) || (card.color == firstCard.color))
+                if let firstCard = existingCards.first, card.type == firstCard.type {
+                    let canAdd: Bool = {
+                        if card.type == .wild || card.type == .wildDrawFour { return true }
+                        if card.type == .number, firstCard.type == .number {
+                            return card.number == firstCard.number
+                        }
+                        return card.color == firstCard.color
+                    }()
                     if canAdd {
                         selectedCardIds.insert(card.id)
                     } else {
@@ -999,7 +969,7 @@ class TestColorClashGameManager: ObservableObject {
         }
         
         let isValid = cardToPlay.canPlay(on: currentTopCard, currentColor: currentColor, burnedColor: burnedColor)
-        if !isValid && myHand.count > 1 {
+        if !isValid {
             errorMessage = "Cannot play this card"
             return
         }
@@ -1094,15 +1064,6 @@ class TestColorClashGameManager: ObservableObject {
     
     func declareLastCard() async {
         // Just acknowledge in test mode
-    }
-    
-    func skipTurn() async {
-        guard isMyTurn else { return }
-        isLoading = true
-        lastActionPlayer = "testUser123"
-        lastActionType = .skipped
-        advanceTurn()
-        isLoading = false
     }
     
     private func handleAutoDraw() async {

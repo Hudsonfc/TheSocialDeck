@@ -20,7 +20,7 @@ struct ColorClashLoadingScreen: View {
         "Say 'Last Card' when you have one left!",
         "Draw Two makes the next player draw",
         "Reverse changes the turn direction",
-        "Skip to skip the next player's turn"
+        "Skip cards make the next player lose a turn"
     ]
     
     var body: some View {

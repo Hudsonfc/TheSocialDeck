@@ -16,10 +16,11 @@ struct OnlineSyncedClassicGameView: View {
 
     @StateObject private var sync = SyncService.shared
     @StateObject private var onlineManager = OnlineManager.shared
-    @Environment(\.dismiss) private var dismiss
 
     @State private var localIndex: Int = 0
-    @State private var showEndAlert = false
+    @State private var showOnlineGuestLeave = false
+    @State private var showOnlineHostEveryone = false
+    @State private var showOnlineHostMulti = false
     @State private var cardScale: CGFloat = 1.0
     @State private var cardOffset: CGFloat = 0
 
@@ -75,6 +76,12 @@ struct OnlineSyncedClassicGameView: View {
                     nonHostFooter
                 }
             }
+
+            OnlineGameExitAlertsView(
+                guestLeave: $showOnlineGuestLeave,
+                hostEveryone: $showOnlineHostEveryone,
+                hostMulti: $showOnlineHostMulti
+            )
         }
         .navigationBarHidden(true)
         .onAppear {
@@ -95,15 +102,6 @@ struct OnlineSyncedClassicGameView: View {
                 animateCardChange()
             }
         }
-        .alert("End Game", isPresented: $showEndAlert) {
-            Button("Cancel", role: .cancel) {}
-            Button("End Game", role: .destructive) {
-                Task { await onlineManager.leaveRoom() }
-                dismiss()
-            }
-        } message: {
-            Text("Are you sure you want to end the game for everyone?")
-        }
     }
 
     // MARK: - Header
@@ -111,9 +109,17 @@ struct OnlineSyncedClassicGameView: View {
     private var headerBar: some View {
         HStack {
             Button {
-                showEndAlert = true
+                if isHost {
+                    if players.count > 2 {
+                        showOnlineHostMulti = true
+                    } else {
+                        showOnlineHostEveryone = true
+                    }
+                } else {
+                    showOnlineGuestLeave = true
+                }
             } label: {
-                Image(systemName: "xmark")
+                Image(systemName: "chevron.left")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(Color(red: 0x0A / 255.0, green: 0x0A / 255.0, blue: 0x0A / 255.0))
                     .frame(width: 40, height: 40)

@@ -126,11 +126,12 @@ struct LobbyView: View {
             }
             .environmentObject(SubscriptionManager.shared)
         }
-        // Watch for game start
-        .onChange(of: onlineManager.currentRoom?.status) { status in
-            if status == .inGame {
-                navigateToGame = true
-            }
+        // Push game when in session; clear when back to lobby (so NavigationLink does not re-open after dismiss).
+        .onAppear {
+            navigateToGame = (onlineManager.currentRoom?.status == .inGame)
+        }
+        .onChange(of: onlineManager.currentRoom?.status) { _, newStatus in
+            navigateToGame = (newStatus == .inGame)
         }
         // Watch for room deletion / being kicked
         .onChange(of: onlineManager.currentRoom) { room in

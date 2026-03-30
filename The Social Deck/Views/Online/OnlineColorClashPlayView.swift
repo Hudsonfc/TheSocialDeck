@@ -25,7 +25,10 @@ struct OnlineColorClashPlayView: View {
     @State private var previousTopCardId: String?
     @State private var showCardFlip: Bool = false
     @State private var cardFlipRotation: Double = 0
-    
+    @State private var showOnlineGuestLeave = false
+    @State private var showOnlineHostEveryone = false
+    @State private var showOnlineHostMulti = false
+
     let roomCode: String
     
     init(roomCode: String, myUserId: String) {
@@ -65,20 +68,24 @@ struct OnlineColorClashPlayView: View {
                 .allowsHitTesting(false)
                 .zIndex(1000)
             }
+
+            OnlineGameExitAlertsView(
+                guestLeave: $showOnlineGuestLeave,
+                hostEveryone: $showOnlineHostEveryone,
+                hostMulti: $showOnlineHostMulti
+            )
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    dismiss()
-                }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                            .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
-                            .clipShape(Circle())
+                Button(action: { handleOnlineColorClashBack() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .frame(width: 44, height: 44)
+                        .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                        .clipShape(Circle())
                 }
             }
             
@@ -156,6 +163,19 @@ struct OnlineColorClashPlayView: View {
             }
         }
     }
+
+    private func handleOnlineColorClashBack() {
+        if onlineManager.isHost {
+            let n = onlineManager.currentRoom?.players.count ?? 0
+            if n > 2 {
+                showOnlineHostMulti = true
+            } else {
+                showOnlineHostEveryone = true
+            }
+        } else {
+            showOnlineGuestLeave = true
+        }
+    }
     
     private var gameView: some View {
         GeometryReader { geometry in
@@ -194,41 +214,6 @@ struct OnlineColorClashPlayView: View {
                             if !hasDrawnThisTurn {
                                 drawCardButton
                             }
-                            
-                            // Skip Turn button - always visible when it's your turn
-                            Button(action: {
-                                HapticManager.shared.mediumImpact()
-                                selectedCardIds.removeAll()
-                                Task {
-                                    await manager.skipTurn()
-                                }
-                            }) {
-                                HStack(spacing: 10) {
-                                    Image(systemName: "arrow.forward.circle.fill")
-                                        .font(.system(size: 20, weight: .semibold))
-                                    Text("Skip")
-                                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                }
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(
-                                            LinearGradient(
-                                                gradient: Gradient(colors: [
-                                                    Color(red: 0x66/255.0, green: 0x66/255.0, blue: 0x66/255.0),
-                                                    Color(red: 0x4A/255.0, green: 0x4A/255.0, blue: 0x4A/255.0)
-                                                ]),
-                                                startPoint: .topLeading,
-                                                endPoint: .bottomTrailing
-                                            )
-                                        )
-                                        .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 3)
-                                )
-                            }
-                            .disabled(manager.isLoading)
-                            .opacity(manager.isLoading ? 0.6 : 1.0)
                         }
                         .padding(.horizontal, 40)
                         .padding(.bottom, geometry.safeAreaInsets.bottom + 16)
@@ -819,13 +804,17 @@ struct OnlineColorClashPlayView: View {
             } else {
                 // Check if this card matches the existing selection
                 let existingCards = manager.myHand.filter { selectedCardIds.contains($0.id) }
-                if let firstCard = existingCards.first {
-                    let canAdd = (card.type == firstCard.type) && 
-                                ((card.type == .wild || card.type == .wildDrawFour) || (card.color == firstCard.color))
+                if let firstCard = existingCards.first, card.type == firstCard.type {
+                    let canAdd: Bool = {
+                        if card.type == .wild || card.type == .wildDrawFour { return true }
+                        if card.type == .number, firstCard.type == .number {
+                            return card.number == firstCard.number
+                        }
+                        return card.color == firstCard.color
+                    }()
                     if canAdd {
                         selectedCardIds.insert(card.id)
                     } else {
-                        // Clear and start new selection
                         selectedCardIds = [card.id]
                     }
                 }

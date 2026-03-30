@@ -910,7 +910,7 @@ struct GameCardView: View {
         ZStack {
             cardBackView
             
-            // Front of card (image) - uses exact image aspect ratio (shadow on image only so badge has none behind it)
+            // Front of card (image) - uses exact image aspect ratio
             ZStack(alignment: .topTrailing) {
                 Image(deck.imageName)
                     .resizable()
@@ -1081,16 +1081,6 @@ struct GameDescriptionOverlay: View {
     @State private var navigateToOnline = false
     @State private var showOnlineSignInAlert = false
 
-    // Games that support online play
-    private var isOnlineCapable: Bool {
-        deck.type == .neverHaveIEver || deck.type == .truthOrDare ||
-        deck.type == .wouldYouRather || deck.type == .mostLikelyTo ||
-        deck.type == .quickfireCouples || deck.type == .closerThanEver ||
-        deck.type == .usAfterDark ||
-        deck.type == .spillTheEx || deck.type == .takeItPersonally ||
-        deck.type == .riddleMeThis
-    }
-
     var body: some View {
         ZStack {
             // Adaptive background
@@ -1213,7 +1203,7 @@ struct GameDescriptionOverlay: View {
                 } else if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .takeItPersonally || deck.type == .categoryClash || deck.type == .bluffCall || deck.type == .whatsMySecret || deck.type == .actItOut || deck.type == .spillTheEx {
                         VStack(spacing: 12) {
                             // Play Local — same as the original Play button
-                            PrimaryButton(title: isOnlineCapable ? "Play Local" : "Play") {
+                            PrimaryButton(title: deck.type.supportsOnlineMultiplayer ? "Play Local" : "Play") {
                                 navigateToCategorySelection = deck
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                     withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
@@ -1223,7 +1213,7 @@ struct GameDescriptionOverlay: View {
                             }
 
                             // Play Online — only for the 4 online-capable classic games
-                            if isOnlineCapable {
+                            if deck.type.supportsOnlineMultiplayer {
                                 Button {
                                     HapticManager.shared.lightImpact()
                                     if authManager.isAuthenticated {

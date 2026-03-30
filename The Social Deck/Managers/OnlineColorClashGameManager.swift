@@ -163,7 +163,7 @@ class OnlineColorClashGameManager: ObservableObject {
         
         // Validate card play (checking burned color rules)
         let isValid = cardToPlay.canPlay(on: currentTopCard, currentColor: currentColor, burnedColor: burnedColor)
-        if !isValid && hand.count > 1 {
+        if !isValid {
             errorMessage = "Cannot play this card - must match color or number"
             return
         }
@@ -286,31 +286,6 @@ class OnlineColorClashGameManager: ObservableObject {
         } catch {
             errorMessage = "Failed to declare last card: \(error.localizedDescription)"
         }
-    }
-    
-    func skipTurn() async {
-        guard isMyTurn, var gameState = gameState else {
-            return
-        }
-        
-        isLoading = true
-        errorMessage = nil
-        
-        do {
-            // Track who skipped and the action type
-            gameState.lastActionPlayer = myUserId
-            gameState.lastActionType = .skipped
-            
-            // Advance turn without drawing or playing
-            advanceTurn(in: &gameState)
-            
-            // Update game state
-            try await onlineService.updateGameState(roomCode: roomCode, gameState: gameState)
-        } catch {
-            errorMessage = "Failed to skip turn: \(error.localizedDescription)"
-        }
-        
-        isLoading = false
     }
     
     private func handleAutoDraw() async {

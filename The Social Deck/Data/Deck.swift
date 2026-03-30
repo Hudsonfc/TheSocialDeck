@@ -33,6 +33,19 @@ enum DeckType: String {
     case takeItPersonally
     case spillTheEx
     case other
+
+    /// Games that support online multiplayer (badge on Play2 artwork / tiles).
+    var supportsOnlineMultiplayer: Bool {
+        switch self {
+        case .neverHaveIEver, .truthOrDare, .wouldYouRather, .mostLikelyTo,
+             .quickfireCouples, .closerThanEver, .usAfterDark, .spillTheEx,
+             .takeItPersonally, .riddleMeThis, .storyChain, .twoTruthsAndALie,
+             .colorClash, .flip21:
+            return true
+        default:
+            return false
+        }
+    }
 }
 
 struct Deck: Identifiable {

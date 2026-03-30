@@ -488,16 +488,157 @@ class OnlineService {
                 payload["torDisplayIndex"] = 0
                 payload["torHasAccepted"] = false
                 payload["wyrSelectedOption"] = FieldValue.delete()
+                payload["quickfireSelectedOption"] = FieldValue.delete()
             } else {
                 payload["classicTurnPlayerId"] = FieldValue.delete()
                 payload["torDisplayIndex"] = FieldValue.delete()
                 payload["torHasAccepted"] = FieldValue.delete()
                 payload["wyrSelectedOption"] = FieldValue.delete()
+                payload["quickfireSelectedOption"] = FieldValue.delete()
             }
 
             // Update room status to inGame and set game started time
             try await roomRef.updateData(payload)
         }
+    }
+
+    /// Host-only: return an in-game room back to waiting lobby so everyone can restart.
+    func returnRoomToLobby(roomCode: String) async throws {
+        let roomRef = db.collection("rooms").document(roomCode)
+        let snapshot = try await roomRef.getDocument()
+
+        guard snapshot.exists, let room = try? snapshot.data(as: OnlineRoom.self) else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room not found"])
+        }
+
+        guard let currentUserId = auth.currentUser?.uid, room.hostId == currentUserId else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Only the host can return to lobby"])
+        }
+
+        var payload: [String: Any] = [
+            "status": RoomStatus.waiting.rawValue,
+            "gameStartedAt": FieldValue.delete(),
+            "currentCardIndex": FieldValue.delete(),
+            "classicCardFlipped": FieldValue.delete(),
+            "classicTurnPlayerId": FieldValue.delete(),
+            "torDisplayIndex": FieldValue.delete(),
+            "torHasAccepted": FieldValue.delete(),
+            "wyrSelectedOption": FieldValue.delete(),
+            "quickfireSelectedOption": FieldValue.delete(),
+            "rmtCurrentRoundIndex": FieldValue.delete(),
+            "rmtUsedQuestionIndices": FieldValue.delete(),
+            "rmtCurrentQuestionText": FieldValue.delete(),
+            "rmtCurrentAnswer": FieldValue.delete(),
+            "rmtCurrentOptions": FieldValue.delete(),
+            "rmtRoundPhase": FieldValue.delete(),
+            "rmtRoundStartAt": FieldValue.delete(),
+            "rmtHostHandoffSeq": FieldValue.delete(),
+            "rmtHostHandoffMessage": FieldValue.delete(),
+            "roundStartTimestamp": FieldValue.delete(),
+            "gameState": FieldValue.delete(),
+            "flip21GameState": FieldValue.delete()
+        ]
+        // Keep lobby-selected categories/settings; only reset volatile in-game state.
+        try await roomRef.updateData(payload)
+    }
+
+    /// Host-only: leave an in-game session while promoting the next player as host (requires more than two players in the room). Others keep playing.
+    func hostLeaveInGamePromoteNext(roomCode: String, leavingPlayerId: String) async throws {
+        let roomRef = db.collection("rooms").document(roomCode)
+        let snapshot = try await roomRef.getDocument()
+
+        guard snapshot.exists, var room = try? snapshot.data(as: OnlineRoom.self) else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room not found"])
+        }
+
+        guard room.hostId == leavingPlayerId else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Only the host can use this action"])
+        }
+
+        guard room.status == .inGame else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Not in a game"])
+        }
+
+        guard room.players.count > 2 else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "This option is only available with more than two players"])
+        }
+
+        let raw = snapshot.data() ?? [:]
+        let encoder = Firestore.Encoder()
+        let hostIndex = room.players.firstIndex(where: { $0.id == leavingPlayerId }) ?? 0
+        let nextHostId = room.players[(hostIndex + 1) % room.players.count].id
+
+        let newPlayers: [RoomPlayer] = room.players
+            .filter { $0.id != leavingPlayerId }
+            .map { p in
+                var q = p
+                q.isHost = (p.id == nextHostId)
+                return q
+            }
+
+        let playersData = try newPlayers.map { try encoder.encode($0) }
+        var payload: [String: Any] = [
+            "players": playersData,
+            "hostId": nextHostId
+        ]
+
+        let oldHostName = room.players.first(where: { $0.id == leavingPlayerId })?.username ?? "Host"
+        let newHostName = newPlayers.first(where: { $0.id == nextHostId })?.username ?? "Host"
+        let gameType = room.selectedGameType ?? ""
+
+        switch gameType {
+        case "riddleMeThis":
+            payload["rmtHostHandoffSeq"] = FieldValue.increment(Int64(1))
+            payload["rmtHostHandoffMessage"] = "\(oldHostName) left — \(newHostName) is now the host"
+
+        case "colorClash":
+            if var gs = room.gameState {
+                gs.playerHands.removeValue(forKey: leavingPlayerId)
+                gs.lastCardDeclared.removeValue(forKey: leavingPlayerId)
+                gs.playerOrder.removeAll { $0 == leavingPlayerId }
+                if gs.winnerId == leavingPlayerId {
+                    gs.winnerId = nil
+                }
+                if gs.playerOrder.isEmpty {
+                    throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Cannot update game state"])
+                }
+                if !gs.playerOrder.contains(gs.currentPlayerId) {
+                    gs.currentPlayerId = gs.playerOrder.contains(nextHostId) ? nextHostId : gs.playerOrder[0]
+                }
+                payload["gameState"] = try encoder.encode(gs)
+            }
+
+        case "flip21":
+            if var gs = room.flip21GameState {
+                let turnPlayerId = gs.currentPlayerId
+                gs.playerHands.removeValue(forKey: leavingPlayerId)
+                gs.playerStatuses.removeValue(forKey: leavingPlayerId)
+                gs.scores.removeValue(forKey: leavingPlayerId)
+                if var rr = gs.roundResults {
+                    rr.removeValue(forKey: leavingPlayerId)
+                    gs.roundResults = rr.isEmpty ? nil : rr
+                }
+                gs.playerOrder.removeAll { $0 == leavingPlayerId }
+                guard !gs.playerOrder.isEmpty else {
+                    throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Cannot update game state"])
+                }
+                if turnPlayerId == leavingPlayerId {
+                    gs.currentPlayerIndex = gs.playerOrder.firstIndex(of: nextHostId) ?? 0
+                } else if let t = turnPlayerId, let ni = gs.playerOrder.firstIndex(of: t) {
+                    gs.currentPlayerIndex = ni
+                } else {
+                    gs.currentPlayerIndex = min(gs.currentPlayerIndex, gs.playerOrder.count - 1)
+                }
+                payload["flip21GameState"] = try encoder.encode(gs)
+            }
+
+        default:
+            if let turnId = raw["classicTurnPlayerId"] as? String, turnId == leavingPlayerId {
+                payload["classicTurnPlayerId"] = nextHostId
+            }
+        }
+
+        try await roomRef.updateData(payload)
     }
     
     // MARK: - Color Clash Game State

@@ -20,7 +20,10 @@ struct OnlineFlip21PlayView: View {
     @State private var dealerHandValue: Int = 0
     @State private var displayedDealerHandValue: Int = 0
     @State private var visibleResultPlayerIds: Set<String> = []
-    
+    @State private var showOnlineGuestLeave = false
+    @State private var showOnlineHostEveryone = false
+    @State private var showOnlineHostMulti = false
+
     let roomCode: String
     let myUserId: String
     
@@ -73,6 +76,12 @@ struct OnlineFlip21PlayView: View {
             if let roundResults = manager.roundResults, let gameState = manager.gameState, gameState.roundStatus == .finished {
                 roundResultsOverlay(results: roundResults)
             }
+
+            OnlineGameExitAlertsView(
+                guestLeave: $showOnlineGuestLeave,
+                hostEveryone: $showOnlineHostEveryone,
+                hostMulti: $showOnlineHostMulti
+            )
         }
         .navigationBarHidden(true)
         .onAppear {
@@ -111,14 +120,25 @@ struct OnlineFlip21PlayView: View {
             }
         }
     }
+
+    private func handleOnlineFlip21Back() {
+        if onlineManager.isHost {
+            let n = onlineManager.currentRoom?.players.count ?? 0
+            if n > 2 {
+                showOnlineHostMulti = true
+            } else {
+                showOnlineHostEveryone = true
+            }
+        } else {
+            showOnlineGuestLeave = true
+        }
+    }
     
     // MARK: - Top Bar
     
     private var topBar: some View {
         HStack {
-            Button(action: {
-                dismiss()
-            }) {
+            Button(action: { handleOnlineFlip21Back() }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.white)

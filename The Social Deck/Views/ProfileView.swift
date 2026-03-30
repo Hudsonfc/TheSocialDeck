@@ -156,13 +156,19 @@ struct ProfileView: View {
                 avatarEditorSection
                 usernameSection
                 statsSection
-                milestoneSection
                 plusUpgradeSection
                 friendsEntrySection
                 Spacer()
                     .frame(height: 40)
             }
             .opacity(contentOpacity)
+
+            if showMilestone {
+                milestoneDropBanner
+                    .padding(.top, 8)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .zIndex(2)
+            }
         }
         .onAppear {
             withAnimation(.easeInOut(duration: 0.5)) {
@@ -362,41 +368,37 @@ struct ProfileView: View {
         .padding(.horizontal, 40)
     }
 
-    @ViewBuilder
-    private var milestoneSection: some View {
-        if showMilestone {
-            HStack(spacing: 10) {
-                Text("🎉")
-                    .font(.system(size: 20))
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(milestoneText)
-                        .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        .foregroundColor(.primaryText)
-                    Text("Keep flipping!")
-                        .font(.system(size: 12, weight: .regular, design: .rounded))
-                        .foregroundColor(.secondaryText)
-                }
-                Spacer()
-                Button(action: {
-                    withAnimation(.easeOut(duration: 0.25)) { showMilestone = false }
-                }) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.secondaryText)
-                        .padding(6)
-                }
+    private var milestoneDropBanner: some View {
+        HStack(spacing: 10) {
+            Text("🎉")
+                .font(.system(size: 20))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(milestoneText)
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundColor(.primaryText)
+                Text("Keep flipping!")
+                    .font(.system(size: 12, weight: .regular, design: .rounded))
+                    .foregroundColor(.secondaryText)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
-            .background(Color.green.opacity(0.12))
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.green.opacity(0.35), lineWidth: 1)
-            )
-            .padding(.horizontal, 40)
-            .transition(.move(edge: .top).combined(with: .opacity))
+            Spacer()
+            Button(action: {
+                withAnimation(.easeOut(duration: 0.25)) { showMilestone = false }
+            }) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.secondaryText)
+                    .padding(6)
+            }
         }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(Color.green.opacity(0.12))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.green.opacity(0.35), lineWidth: 1)
+        )
+        .padding(.horizontal, 24)
     }
 
     @ViewBuilder
@@ -568,6 +570,11 @@ struct ProfileView: View {
             milestoneText = "You've flipped \(reached) cards!"
             withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
                 showMilestone = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                withAnimation(.easeOut(duration: 0.25)) {
+                    showMilestone = false
+                }
             }
         }
     }

@@ -21,14 +21,16 @@ struct QuickfireCouplesPlayView: View {
     @AppStorage("totalCardsFlipped") private var totalCardsFlipped: Int = 0
     @State private var cardRotation: Double = 0
     @State private var showEndView: Bool = false
-    @State private var navigateToHome: Bool = false
-    @State private var showHomeAlert: Bool = false
+    @State private var showOnlineGuestLeave = false
+    @State private var showOnlineHostEveryone = false
+    @State private var showOnlineHostMulti = false
     @State private var nextButtonOpacity: Double = 0
     @State private var nextButtonOffset: CGFloat = 20
     @State private var cardOffset: CGFloat = 0
     @State private var isTransitioning: Bool = false
     @State private var selectedOption: String? = nil // "A" or "B"
     @State private var dragOffset: CGFloat = 0
+    @State private var suppressQuickfireSelectionPush = false
 
     private var isTurnModeOnline: Bool {
         roomId != nil && syncService.remoteClassicTurnsEnabled
@@ -60,9 +62,7 @@ struct QuickfireCouplesPlayView: View {
             VStack(spacing: 0) {
                 // Top bar with exit, back button, and progress
                 HStack {
-                    Button(action: {
-                        dismiss()
-                    }) {
+                    Button(action: { handleOnlineOrOfflineBack() }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.primaryText)
@@ -70,20 +70,7 @@ struct QuickfireCouplesPlayView: View {
                             .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
-                    
-                    // Home button
-                    Button(action: {
-                        showHomeAlert = true
-                    }) {
-                        Image(systemName: "house.fill")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(.primaryText)
-                            .frame(width: 44, height: 44)
-                            .background(Color.tertiaryBackground)
-                            .clipShape(Circle())
-                    }
-                    .padding(.leading, 12)
-                    
+
                     if manager.canGoBack && roomId == nil {
                         ClassicGameCompactPreviousButton(action: { previousCard() })
                             .padding(.leading, 8)
@@ -131,7 +118,8 @@ struct QuickfireCouplesPlayView: View {
                         QuickfireCouplesCardBackView(
                             optionA: currentCard.optionA ?? "",
                             optionB: currentCard.optionB ?? "",
-                            selectedOption: $selectedOption
+                            selectedOption: $selectedOption,
+                            allowSelection: roomId == nil || canControlOnlineCard
                         )
                             .opacity(cardRotation >= 90 ? 1 : 0)
                             .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
@@ -231,31 +219,20 @@ struct QuickfireCouplesPlayView: View {
                 }
             }
             .animation(.spring(response: 0.5, dampingFraction: 0.8), value: manager.isFlipped)
+
+            OnlineGameExitAlertsView(
+                guestLeave: $showOnlineGuestLeave,
+                hostEveryone: $showOnlineHostEveryone,
+                hostMulti: $showOnlineHostMulti
+            )
         }
         .navigationBarHidden(true)
-        .alert("Go to Home?", isPresented: $showHomeAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Go Home", role: .destructive) {
-                navigateToHome = true
-            }
-        } message: {
-            Text("Are you sure you want to go back to the home screen? Your progress will be lost.")
-        }
         .background(
-            Group {
-                NavigationLink(
-                    destination: QuickfireCouplesEndView(deck: deck, selectedCategories: selectedCategories, cardsPlayed: manager.cards.count),
-                    isActive: $showEndView
-                ) {
-                    EmptyView()
-                }
-                
-                NavigationLink(
-                    destination: HomeView(),
-                    isActive: $navigateToHome
-                ) {
-                    EmptyView()
-                }
+            NavigationLink(
+                destination: QuickfireCouplesEndView(deck: deck, selectedCategories: selectedCategories, cardsPlayed: manager.cards.count),
+                isActive: $showEndView
+            ) {
+                EmptyView()
             }
         )
         .onChange(of: manager.isFlipped) { oldValue, newValue in
@@ -277,6 +254,8 @@ struct QuickfireCouplesPlayView: View {
                     nextButtonOffset = 0
                 }
             }
+            guard roomId != nil, canControlOnlineCard, !suppressQuickfireSelectionPush else { return }
+            pushQuickfireOnlineState(selectedOption: newValue)
         }
         .onChange(of: manager.isFinished) { oldValue, newValue in
             if newValue {
@@ -310,10 +289,34 @@ struct QuickfireCouplesPlayView: View {
         }
     }
 
+    private func handleOnlineOrOfflineBack() {
+        guard roomId != nil else {
+            dismiss()
+            return
+        }
+        if isHost {
+            let n = players?.count ?? 0
+            if n > 2 {
+                showOnlineHostMulti = true
+            } else {
+                showOnlineHostEveryone = true
+            }
+        } else {
+            showOnlineGuestLeave = true
+        }
+    }
+
     private func applyClassicRemoteSyncIfNonHost() {
         guard roomId != nil else { return }
         let targetIndex = syncService.remoteCardIndex
         let flipped = syncService.remoteClassicCardFlipped
+        let remoteOptRaw = syncService.remoteQuickfireSelectedOption
+        let remoteOpt: String? = remoteOptRaw.isEmpty ? nil : remoteOptRaw
+        if selectedOption != remoteOpt {
+            suppressQuickfireSelectionPush = true
+            selectedOption = remoteOpt
+            DispatchQueue.main.async { suppressQuickfireSelectionPush = false }
+        }
         if targetIndex != manager.currentIndex {
             jumpToCard(targetIndex)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.36) {
@@ -350,7 +353,7 @@ struct QuickfireCouplesPlayView: View {
             if isTurnModeOnline {
                 let turn = syncService.remoteTurnPlayerId.trimmingCharacters(in: .whitespacesAndNewlines)
                 let owner = turn.isEmpty ? (currentUserId ?? "") : turn
-                Task { try? await SyncService.shared.updateClassicTurnRoundState(roomId: rid, cardIndex: manager.currentIndex, isFlipped: willBeFlipped, turnPlayerId: owner) }
+                Task { try? await SyncService.shared.updateQuickfireCouplesOnlineState(roomId: rid, cardIndex: manager.currentIndex, isFlipped: willBeFlipped, turnPlayerId: owner, selectedOption: selectedOption) }
             } else if isHost {
                 Task { try? await SyncService.shared.updateClassicCardProgress(roomId: rid, index: manager.currentIndex, isFlipped: willBeFlipped) }
             }
@@ -410,9 +413,8 @@ struct QuickfireCouplesPlayView: View {
             if let roomId = roomId {
                 if isTurnModeOnline {
                     let turn = syncService.remoteTurnPlayerId.trimmingCharacters(in: .whitespacesAndNewlines)
-                    let from = turn.isEmpty ? (currentUserId ?? "") : turn
-                    let nextTurn = SyncService.nextClockwisePlayerId(from: from, in: players ?? [])
-                    Task { try? await SyncService.shared.updateClassicTurnRoundState(roomId: roomId, cardIndex: manager.currentIndex, isFlipped: false, turnPlayerId: nextTurn) }
+                    let owner = turn.isEmpty ? (currentUserId ?? "") : turn
+                    Task { try? await SyncService.shared.updateQuickfireCouplesOnlineState(roomId: roomId, cardIndex: manager.currentIndex, isFlipped: false, turnPlayerId: owner, selectedOption: nil) }
                 } else if isHost {
                     Task { try? await SyncService.shared.updateClassicCardProgress(roomId: roomId, index: manager.currentIndex, isFlipped: false) }
                 }
@@ -466,9 +468,11 @@ struct QuickfireCouplesPlayView: View {
             manager.nextCard()
 
             if let roomId = roomId {
-                let turn = syncService.remoteTurnPlayerId.trimmingCharacters(in: .whitespacesAndNewlines)
                 if isTurnModeOnline {
-                    Task { try? await SyncService.shared.updateClassicTurnRoundState(roomId: roomId, cardIndex: manager.currentIndex, isFlipped: false, turnPlayerId: turn) }
+                    let turn = syncService.remoteTurnPlayerId.trimmingCharacters(in: .whitespacesAndNewlines)
+                    let from = turn.isEmpty ? (currentUserId ?? "") : turn
+                    let nextTurn = SyncService.nextClockwisePlayerId(from: from, in: players ?? [])
+                    Task { try? await SyncService.shared.updateQuickfireCouplesOnlineState(roomId: roomId, cardIndex: manager.currentIndex, isFlipped: false, turnPlayerId: nextTurn, selectedOption: nil) }
                 } else if isHost {
                     Task { try? await SyncService.shared.updateClassicCardProgress(roomId: roomId, index: manager.currentIndex, isFlipped: false) }
                 }
@@ -514,6 +518,21 @@ struct QuickfireCouplesPlayView: View {
             }
         }
     }
+
+    private func pushQuickfireOnlineState(selectedOption opt: String?) {
+        guard let rid = roomId, canControlOnlineCard else { return }
+        let turn = syncService.remoteTurnPlayerId.trimmingCharacters(in: .whitespacesAndNewlines)
+        let owner = turn.isEmpty ? (currentUserId ?? "") : turn
+        Task {
+            try? await SyncService.shared.updateQuickfireCouplesOnlineState(
+                roomId: rid,
+                cardIndex: manager.currentIndex,
+                isFlipped: manager.isFlipped,
+                turnPlayerId: owner,
+                selectedOption: opt
+            )
+        }
+    }
 }
 
 struct QuickfireCouplesCardFrontView: View {
@@ -544,6 +563,8 @@ struct QuickfireCouplesCardBackView: View {
     let optionA: String
     let optionB: String
     @Binding var selectedOption: String?
+    /// When false, only viewing is allowed (another player's turn online).
+    var allowSelection: Bool = true
     
     var body: some View {
         ZStack {
@@ -554,6 +575,7 @@ struct QuickfireCouplesCardBackView: View {
             VStack(spacing: 20) {
                 // Option A - Tappable
                 Button(action: {
+                    guard allowSelection else { return }
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                         selectedOption = "A"
                     }
@@ -584,6 +606,8 @@ struct QuickfireCouplesCardBackView: View {
                     .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                 }
                 .buttonStyle(PlainButtonStyle())
+                .disabled(!allowSelection)
+                .opacity(allowSelection ? 1 : 0.85)
                 
                 // Divider
                 Text("or")
@@ -592,6 +616,7 @@ struct QuickfireCouplesCardBackView: View {
                 
                 // Option B - Tappable
                 Button(action: {
+                    guard allowSelection else { return }
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                         selectedOption = "B"
                     }
@@ -622,6 +647,8 @@ struct QuickfireCouplesCardBackView: View {
                     .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                 }
                 .buttonStyle(PlainButtonStyle())
+                .disabled(!allowSelection)
+                .opacity(allowSelection ? 1 : 0.85)
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 32)
