@@ -13,7 +13,7 @@ struct WYRCategorySelectionView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var subManager: SubscriptionManager
 
-    private let plusCategories: Set<String> = ["Dirty", "Couples", "Wild"]
+    private let plusCategories: Set<String> = ["Dirty", "Couples", "Weird"]
 
     private var freeCategories: Set<String> {
         Set(deck.availableCategories.filter { !plusCategories.contains($0) })
@@ -141,7 +141,7 @@ struct WYRCategorySelectionView: View {
             imageName: "WYR artwork",
             type: .wouldYouRather,
             cards: [],
-            availableCategories: ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family", "Weird"]
+            availableCategories: ["Party", "Couples", "Social", "Dirty", "Friends", "Family", "Weird"]
         ))
         .environmentObject(SubscriptionManager.shared)
     }

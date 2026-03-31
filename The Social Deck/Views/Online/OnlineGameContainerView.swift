@@ -20,7 +20,7 @@ fileprivate func debugPrintOnlineDeckOrder(game: String, roomCode: String, cards
 // from the online flow with roomId/isHost without touching the local launch path.
 
 private let onlineClassicCategories = ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family"]
-private let onlineWYRCategories = ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family", "Weird"]
+private let onlineWYRCategories = ["Party", "Couples", "Social", "Dirty", "Friends", "Family", "Weird"]
 
 private let onlineSpillTheExCategories = ["Confessions", "Situationship", "The Breakup", "Wild Side"]
 private let onlineTIPCategories = ["Party", "Wild", "Friends", "Couples"]

@@ -303,7 +303,7 @@ struct LobbyView: View {
         case "neverHaveIEver", "truthOrDare", "mostLikelyTo":
             return ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family"]
         case "wouldYouRather":
-            return ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family", "Weird"]
+            return ["Party", "Couples", "Social", "Dirty", "Friends", "Family", "Weird"]
         case "spillTheEx":
             return ["Confessions", "Situationship", "The Breakup", "Wild Side"]
         case "takeItPersonally":
@@ -315,8 +315,10 @@ struct LobbyView: View {
 
     private var plusLockedCategoriesForSelectedGame: Set<String> {
         switch currentGameType {
-        case "neverHaveIEver", "truthOrDare", "wouldYouRather":
+        case "neverHaveIEver", "truthOrDare":
             return ["Dirty", "Couples", "Wild"]
+        case "wouldYouRather":
+            return ["Dirty", "Couples", "Weird"]
         default:
             return []
         }
