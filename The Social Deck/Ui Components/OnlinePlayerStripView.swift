@@ -95,18 +95,24 @@ struct OnlinePlayerStripView: View {
 
 // MARK: - Compact nav (online classic / couple top bars)
 
-/// Circle back control so "Previous" does not squeeze the top bar on small phones.
+/// Pill + "Previous" label so local play clearly differs from the circular exit chevron.
 struct ClassicGameCompactPreviousButton: View {
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: "chevron.backward")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(.primaryText)
-                .frame(width: 40, height: 40)
-                .background(Color.tertiaryBackground)
-                .clipShape(Circle())
+            HStack(spacing: 6) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 14, weight: .semibold))
+                Text("Previous")
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+            }
+            .foregroundColor(.primaryText)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(Color.tertiaryBackground)
+            .cornerRadius(20)
+            .fixedSize()
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Previous card")

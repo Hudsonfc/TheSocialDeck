@@ -141,7 +141,7 @@ struct WYRCategorySelectionView: View {
             imageName: "WYR artwork",
             type: .wouldYouRather,
             cards: [],
-            availableCategories: ["Party", "Wild", "Couples", "Social", "Dirty", "Friends"]
+            availableCategories: ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family", "Weird"]
         ))
         .environmentObject(SubscriptionManager.shared)
     }

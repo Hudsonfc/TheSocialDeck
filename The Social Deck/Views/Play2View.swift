@@ -97,7 +97,7 @@ struct Play2View: View {
             imageName: "WYR 2.0",
             type: .wouldYouRather,
             cards: allWYRCards,
-            availableCategories: ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family"]
+            availableCategories: ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family", "Weird"]
         ),
         Deck(
             title: "Most Likely To",

@@ -20,6 +20,7 @@ fileprivate func debugPrintOnlineDeckOrder(game: String, roomCode: String, cards
 // from the online flow with roomId/isHost without touching the local launch path.
 
 private let onlineClassicCategories = ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family"]
+private let onlineWYRCategories = ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family", "Weird"]
 
 private let onlineSpillTheExCategories = ["Confessions", "Situationship", "The Breakup", "Wild Side"]
 private let onlineTIPCategories = ["Party", "Wild", "Friends", "Couples"]
@@ -130,7 +131,7 @@ private struct OnlineWYRView: View {
         self.players = players
         self.currentUserId = currentUserId
         self.cardCount = cardCount ?? 0
-        let activeCategories = (selectedCategories?.isEmpty == false) ? selectedCategories! : onlineClassicCategories
+        let activeCategories = (selectedCategories?.isEmpty == false) ? selectedCategories! : onlineWYRCategories
         self.selectedCategories = activeCategories
         let deck = Deck(
             title: "Would You Rather",
@@ -140,7 +141,7 @@ private struct OnlineWYRView: View {
             imageName: "WYR 2.0",
             type: .wouldYouRather,
             cards: allWYRCards,
-            availableCategories: onlineClassicCategories
+            availableCategories: onlineWYRCategories
         )
         _manager = StateObject(wrappedValue: WYRGameManager(deck: deck, selectedCategories: activeCategories, cardCount: cardCount ?? 0, deterministicRoomCode: roomCode))
     }
@@ -148,7 +149,7 @@ private struct OnlineWYRView: View {
     var body: some View {
         let deck = Deck(title: "Would You Rather", description: "", numberOfCards: allWYRCards.count,
                         estimatedTime: "30-45 min", imageName: "WYR 2.0", type: .wouldYouRather,
-                        cards: allWYRCards, availableCategories: onlineClassicCategories)
+                        cards: allWYRCards, availableCategories: onlineWYRCategories)
         WYRPlayView(manager: manager, deck: deck, selectedCategories: selectedCategories,
                     roomId: roomCode, isHost: isHost, players: players, currentUserId: currentUserId)
             .onAppear {

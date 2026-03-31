@@ -34,7 +34,7 @@ enum DeckType: String {
     case spillTheEx
     case other
 
-    /// Games that support online multiplayer (badge on Play2 artwork / tiles).
+    /// Games that support online multiplayer (e.g. Play Local vs Play Online in Play2).
     var supportsOnlineMultiplayer: Bool {
         switch self {
         case .neverHaveIEver, .truthOrDare, .wouldYouRather, .mostLikelyTo,

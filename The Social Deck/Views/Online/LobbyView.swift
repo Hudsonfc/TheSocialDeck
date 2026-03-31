@@ -300,8 +300,10 @@ struct LobbyView: View {
 
     private var lobbyCategoriesForSelectedGame: [String] {
         switch currentGameType {
-        case "neverHaveIEver", "truthOrDare", "wouldYouRather", "mostLikelyTo":
+        case "neverHaveIEver", "truthOrDare", "mostLikelyTo":
             return ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family"]
+        case "wouldYouRather":
+            return ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family", "Weird"]
         case "spillTheEx":
             return ["Confessions", "Situationship", "The Breakup", "Wild Side"]
         case "takeItPersonally":
