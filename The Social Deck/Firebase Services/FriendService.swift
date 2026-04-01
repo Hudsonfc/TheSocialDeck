@@ -20,7 +20,6 @@ class FriendService: ObservableObject {
     @Published var friends: [FriendProfile] = []
     @Published var pendingRequests: [FriendRequest] = [] // Requests sent to me
     @Published var sentRequests: [FriendRequest] = [] // Requests I sent
-    @Published var blockedUsers: [BlockedUser] = [] // Users I've blocked
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     
@@ -40,11 +39,6 @@ class FriendService: ObservableObject {
         
         guard userId != currentUserId else {
             throw NSError(domain: "FriendService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Cannot send friend request to yourself"])
-        }
-        
-        // Check if user is blocked
-        if await isUserBlocked(userId) {
-            throw NSError(domain: "FriendService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Cannot send request to this user"])
         }
         
         // Check if friend request already exists
@@ -326,10 +320,6 @@ class FriendService: ObservableObject {
             return request
         }
         
-        // Filter out requests from blocked users
-        let blockedUserIds = Set(blockedUsers.map { $0.blockedUserId })
-        requests = requests.filter { !blockedUserIds.contains($0.fromUserId) }
-        
         pendingRequests = requests
     }
     
@@ -389,10 +379,6 @@ class FriendService: ObservableObject {
         
         // Keep only profiles whose username actually starts with the query (case-insensitive)
         results = results.filter { $0.username.lowercased().hasPrefix(searchLower) }
-        
-        // Filter out blocked users
-        let blockedUserIds = Set(blockedUsers.map { $0.blockedUserId })
-        results = results.filter { !blockedUserIds.contains($0.userId) }
         
         return results
     }
@@ -521,82 +507,6 @@ class FriendService: ObservableObject {
     func stopListeningToSentRequests() {
         sentRequestsListener?.remove()
         sentRequestsListener = nil
-    }
-    
-    // MARK: - Blocking
-    
-    /// Block a user
-    func blockUser(_ userId: String) async throws {
-        guard let currentUserId = auth.currentUser?.uid else {
-            throw NSError(domain: "FriendService", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])
-        }
-        
-        guard userId != currentUserId else {
-            throw NSError(domain: "FriendService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Cannot block yourself"])
-        }
-        
-        // Check if already blocked
-        if await isUserBlocked(userId) {
-            return // Already blocked
-        }
-        
-        // Remove friend relationship if exists
-        try? await removeFriend(userId)
-        
-        // Create block record
-        let blockedUser = BlockedUser(
-            blockedById: currentUserId,
-            blockedUserId: userId
-        )
-        
-        try db.collection("blockedUsers").addDocument(from: blockedUser)
-        
-        // Load blocked users to update state
-        try await loadBlockedUsers()
-    }
-    
-    /// Unblock a user
-    func unblockUser(_ userId: String) async throws {
-        guard let currentUserId = auth.currentUser?.uid else {
-            throw NSError(domain: "FriendService", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])
-        }
-        
-        let query = db.collection("blockedUsers")
-            .whereField("blockedById", isEqualTo: currentUserId)
-            .whereField("blockedUserId", isEqualTo: userId)
-        
-        let snapshot = try await query.getDocuments()
-        
-        for doc in snapshot.documents {
-            try await doc.reference.delete()
-        }
-        
-        // Update blocked users list
-        try await loadBlockedUsers()
-    }
-    
-    /// Check if a user is blocked
-    func isUserBlocked(_ userId: String) async -> Bool {
-        guard let currentUserId = auth.currentUser?.uid else {
-            return false
-        }
-        
-        return blockedUsers.contains { $0.blockedUserId == userId }
-    }
-    
-    /// Load blocked users
-    func loadBlockedUsers() async throws {
-        guard let currentUserId = auth.currentUser?.uid else {
-            throw NSError(domain: "FriendService", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])
-        }
-        
-        let query = db.collection("blockedUsers")
-            .whereField("blockedById", isEqualTo: currentUserId)
-        
-        let snapshot = try await query.getDocuments()
-        blockedUsers = try snapshot.documents.compactMap { doc in
-            try? doc.data(as: BlockedUser.self)
-        }
     }
 }
 

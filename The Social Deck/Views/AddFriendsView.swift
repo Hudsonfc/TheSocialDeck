@@ -19,8 +19,6 @@ struct AddFriendsView: View {
     @State private var selectedTab: Int = 0 // 0 = Search, 1 = Pending
     @State private var searchTask: Task<Void, Never>?
     @State private var toast: ToastMessage? = nil
-    @State private var showBlockConfirmation = false
-    @State private var userToBlock: UserProfile? = nil
     
     var body: some View {
         ZStack {
@@ -78,39 +76,7 @@ struct AddFriendsView: View {
         } message: {
             Text(errorMessage)
         }
-        .alert("Block User", isPresented: $showBlockConfirmation) {
-            Button("Cancel", role: .cancel) {
-                userToBlock = nil
-            }
-            Button("Block", role: .destructive) {
-                if let user = userToBlock {
-                    Task {
-                        await blockUser(user.userId)
-                    }
-                }
-                userToBlock = nil
-            }
-        } message: {
-            if let user = userToBlock {
-                Text("Are you sure you want to block \(user.username)? You won't be able to send friend requests to them.")
-            }
-        }
         .toast($toast)
-    }
-    
-    private func blockUser(_ userId: String) async {
-        do {
-            try await friendService.blockUser(userId)
-            HapticManager.shared.success()
-            toast = ToastMessage(message: "User blocked", type: .success)
-            // Refresh search to update UI
-            if !searchText.isEmpty {
-                await performSearch(query: searchText)
-            }
-        } catch {
-            HapticManager.shared.error()
-            toast = ToastMessage(message: "Failed to block user", type: .error)
-        }
     }
     
     // MARK: - Search View
@@ -258,10 +224,6 @@ struct AddFriendsView: View {
                             Task {
                                 await sendFriendRequest(to: profile.userId)
                             }
-                        },
-                        onBlock: {
-                            userToBlock = profile
-                            showBlockConfirmation = true
                         }
                     )
                 }
@@ -389,10 +351,8 @@ struct UserSearchResultRow: View {
     @StateObject private var friendService = FriendService.shared
     let profile: UserProfile
     let onSendRequest: () -> Void
-    let onBlock: () -> Void
     @State private var requestStatus: String = "" // "pending", "sent", "friend", ""
     @State private var isSending: Bool = false
-    @State private var showMenu = false
     
     var body: some View {
         HStack(spacing: 12) {
@@ -426,23 +386,6 @@ struct UserSearchResultRow: View {
             .frame(maxWidth: .infinity, alignment: .leading)
 
             HStack(spacing: 6) {
-                Menu {
-                    Button(role: .destructive, action: {
-                        HapticManager.shared.lightImpact()
-                        onBlock()
-                    }) {
-                        Label("Block User", systemImage: "hand.raised.fill")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.secondaryText)
-                        .frame(width: 30, height: 30)
-                        .background(Color.secondaryBackground)
-                        .cornerRadius(8)
-                }
-                .fixedSize()
-
                 Button(action: {
                     guard !isSending && requestStatus != "friend" && requestStatus != "sent" else { return }
                     HapticManager.shared.lightImpact()
@@ -537,39 +480,48 @@ struct PendingRequestRow: View {
     @State private var isLoading = true
     @State private var isProcessing = false
     @State private var toast: ToastMessage? = nil
+
+    private let avatarSize: CGFloat = 42
     
     var body: some View {
         Group {
             if let profile = profile {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(alignment: .center, spacing: 10) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.cardBackground)
-                                .shadow(color: Color.shadowColor, radius: 2, x: 0, y: 1)
-                            
+                VStack(alignment: .leading, spacing: 6) {
+                    // Match FriendsListView `FriendRowView` player row
+                    HStack(spacing: 12) {
+                        ZStack(alignment: .bottomTrailing) {
                             AvatarView(
                                 avatarType: profile.avatarType,
                                 avatarColor: profile.avatarColor,
-                                size: 36
+                                size: avatarSize
                             )
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.borderColor.opacity(0.35), lineWidth: 1)
+                            )
+
+                            Circle()
+                                .fill(profile.isOnline ? Color.green : Color.gray.opacity(0.5))
+                                .frame(width: 10, height: 10)
+                                .overlay(Circle().stroke(Color.cardBackground, lineWidth: 2))
+                                .offset(x: 1, y: 1)
                         }
-                        
+
                         VStack(alignment: .leading, spacing: 2) {
                             Text(profile.username)
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                .font(.system(size: 15, weight: .semibold, design: .rounded))
                                 .foregroundColor(.primaryText)
-                                .lineLimit(2)
-                                .minimumScaleFactor(0.9)
-                            
+                                .lineLimit(1)
+
                             Text("Wants to be friends")
-                                .font(.system(size: 11, weight: .regular, design: .rounded))
+                                .font(.system(size: 12, weight: .regular, design: .rounded))
                                 .foregroundColor(.secondaryText)
+                                .lineLimit(1)
                         }
                         .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                     }
-                    
-                    HStack(spacing: 8) {
+
+                    HStack(spacing: 10) {
                         Spacer(minLength: 0)
                         Button(action: {
                             HapticManager.shared.lightImpact()
@@ -578,15 +530,15 @@ struct PendingRequestRow: View {
                             }
                         }) {
                             Text("Decline")
-                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                .font(.system(size: 13, weight: .semibold, design: .rounded))
                                 .foregroundColor(.secondaryText)
-                                .frame(width: 72, height: 30)
+                                .frame(width: 76, height: 32)
                                 .background(Color.secondaryBackground)
                                 .cornerRadius(8)
                         }
                         .buttonStyle(.plain)
                         .disabled(isProcessing)
-                        
+
                         Button(action: {
                             HapticManager.shared.lightImpact()
                             Task {
@@ -599,15 +551,16 @@ struct PendingRequestRow: View {
                                     .scaleEffect(0.75)
                             } else {
                                 Text("Accept")
-                                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                    .font(.system(size: 13, weight: .semibold, design: .rounded))
                                     .foregroundColor(.white)
                             }
                         }
-                        .frame(width: 72, height: 30)
+                        .frame(width: 76, height: 32)
                         .background(Color.primaryAccent)
                         .cornerRadius(8)
                         .buttonStyle(.plain)
                         .disabled(isProcessing)
+                        Spacer(minLength: 0)
                     }
                 }
             } else if isLoading {
@@ -616,14 +569,17 @@ struct PendingRequestRow: View {
                         .scaleEffect(0.85)
                     Spacer()
                 }
-                .padding(.vertical, 8)
+                .padding(.vertical, 10)
             }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .background(Color.cardBackground)
         .cornerRadius(12)
-        .shadow(color: Color.shadowColor, radius: 3, x: 0, y: 1)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.borderColor.opacity(0.34), lineWidth: 1)
+        )
         .task {
             await loadProfile()
         }

@@ -60,6 +60,10 @@ struct FriendsListView: View {
         }
     }
 
+    private var visibleHubTabs: [FriendsHubTab] {
+        [.friends, .requests, .roomInvites]
+    }
+
     // MARK: - Friends tab
 
     @ViewBuilder
@@ -227,7 +231,7 @@ struct FriendsListView: View {
                 // Tabs — same visual language as Play2View `CategoryTab`
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 24) {
-                        ForEach(FriendsHubTab.allCases, id: \.rawValue) { tab in
+                        ForEach(visibleHubTabs, id: \.rawValue) { tab in
                             FriendsHubCategoryTab(
                                 title: tab.rawValue,
                                 isSelected: selectedHubTab == tab,
@@ -460,8 +464,6 @@ private struct FriendsSearchSheet: View {
     @State private var searchTask: Task<Void, Never>?
     @State private var showError = false
     @State private var errorMessage = ""
-    @State private var showBlockConfirmation = false
-    @State private var userToBlock: UserProfile?
     @State private var toast: ToastMessage?
 
     private let brandRed = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
@@ -495,10 +497,6 @@ private struct FriendsSearchSheet: View {
                                         profile: profile,
                                         onSendRequest: {
                                             Task { await sendRequest(to: profile) }
-                                        },
-                                        onBlock: {
-                                            userToBlock = profile
-                                            showBlockConfirmation = true
                                         }
                                     )
                                 }
@@ -526,19 +524,6 @@ private struct FriendsSearchSheet: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(errorMessage)
-        }
-        .alert("Block User", isPresented: $showBlockConfirmation) {
-            Button("Cancel", role: .cancel) { userToBlock = nil }
-            Button("Block", role: .destructive) {
-                if let user = userToBlock {
-                    Task { await blockUser(user.userId) }
-                }
-                userToBlock = nil
-            }
-        } message: {
-            if let user = userToBlock {
-                Text("Block \(user.username)? You won’t be able to send them friend requests.")
-            }
         }
         .toast($toast)
     }
@@ -657,22 +642,6 @@ private struct FriendsSearchSheet: View {
         }
     }
 
-    private func blockUser(_ userId: String) async {
-        do {
-            try await friendService.blockUser(userId)
-            await MainActor.run {
-                HapticManager.shared.success()
-                toast = ToastMessage(message: "User blocked", type: .success)
-                if searchText.count >= 2 {
-                    Task { await performSearch(query: searchText) }
-                }
-            }
-        } catch {
-            await MainActor.run {
-                toast = ToastMessage(message: "Failed to block", type: .error)
-            }
-        }
-    }
 }
 
 // MARK: - Remove friend (modern sheet)
@@ -823,7 +792,7 @@ private struct FriendActionsSheet: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.appBackground)
-        .presentationDetents([.height(305)])
+        .presentationDetents([.height(340)])
         .presentationDragIndicator(.visible)
     }
 }
