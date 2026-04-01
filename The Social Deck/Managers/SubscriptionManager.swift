@@ -143,7 +143,7 @@ final class SubscriptionManager: ObservableObject {
             }
         }
 
-        isPlus = hasActive
+        isPlus = DeveloperAccountOverride.isActive || hasActive
     }
 
     // MARK: - Background transaction listener

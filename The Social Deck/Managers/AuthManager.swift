@@ -60,9 +60,11 @@ class AuthManager: ObservableObject {
             .sink { [weak self] user in
                 if let userId = user?.uid {
                     AvatarStoreManager.shared.setActiveUserId(userId)
+                    Task { await SubscriptionManager.shared.refreshEntitlements() }
                     self?.loadUserProfile(userId: userId)
                 } else {
                     AvatarStoreManager.shared.setActiveUserId(nil)
+                    Task { await SubscriptionManager.shared.refreshEntitlements() }
                     self?.userProfile = nil
                     self?.removeProfileListener()
                     // Prevent stale listeners (and potential permission errors) after sign-out.

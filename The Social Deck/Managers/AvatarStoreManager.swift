@@ -166,7 +166,8 @@ final class AvatarStoreManager: ObservableObject {
     }
 
     func isUnlocked(_ definition: PremiumAvatarDefinition) -> Bool {
-        unlockedProductIDs.contains(definition.rawValue)
+        if DeveloperAccountOverride.isActive { return true }
+        return unlockedProductIDs.contains(definition.rawValue)
     }
 
     func refreshEntitlementsFromStoreKit() async {
@@ -202,6 +203,10 @@ final class AvatarStoreManager: ObservableObject {
     /// Completes purchase flow; returns true if the avatar is now unlocked.
     func purchase(_ definition: PremiumAvatarDefinition) async -> Bool {
         avatarStoreLog.info("purchase: start \(definition.rawValue, privacy: .public)")
+        if DeveloperAccountOverride.isActive {
+            await applyUnlock(productID: definition.rawValue)
+            return true
+        }
         guard let product = await resolveProduct(for: definition) else {
             lastErrorMessage = "This avatar is not available right now. Use a StoreKit config in the run scheme for Simulator, or check App Store Connect."
             avatarStoreLog.error("purchase: abort — no Product for \(definition.rawValue, privacy: .public)")
