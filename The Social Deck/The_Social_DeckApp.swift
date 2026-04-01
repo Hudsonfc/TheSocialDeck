@@ -15,6 +15,7 @@ struct The_Social_DeckApp: App {
     @StateObject private var authManager = AuthManager.shared
     @StateObject private var gameCenterService = GameCenterService.shared
     @StateObject private var subscriptionManager = SubscriptionManager.shared
+    @StateObject private var avatarStoreManager = AvatarStoreManager.shared
     @Environment(\.scenePhase) private var scenePhase
     
     init() {
@@ -43,6 +44,7 @@ struct The_Social_DeckApp: App {
             ContentView()
                 .environmentObject(authManager)
                 .environmentObject(subscriptionManager)
+                .environmentObject(avatarStoreManager)
         }
         .modelContainer(sharedModelContainer)
         .onChange(of: scenePhase) { phase in

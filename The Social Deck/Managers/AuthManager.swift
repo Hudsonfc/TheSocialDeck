@@ -59,8 +59,10 @@ class AuthManager: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] user in
                 if let userId = user?.uid {
+                    AvatarStoreManager.shared.setActiveUserId(userId)
                     self?.loadUserProfile(userId: userId)
                 } else {
+                    AvatarStoreManager.shared.setActiveUserId(nil)
                     self?.userProfile = nil
                     self?.removeProfileListener()
                     // Prevent stale listeners (and potential permission errors) after sign-out.
@@ -129,6 +131,7 @@ class AuthManager: ObservableObject {
             
             do {
                 self.userProfile = try document.data(as: UserProfile.self)
+                    AvatarStoreManager.shared.mergeFirestorePurchases(self.userProfile?.purchasedAvatars)
                     // Link Game Center player ID if authenticated with Game Center but not linked yet
                     await self.linkGameCenterIfNeeded()
                     // One-time stale room cleanup for this signed-in user (client-side)
@@ -321,10 +324,10 @@ class AuthManager: ObservableObject {
     /// Update avatar (type and color)
     func updateAvatar(type: String, color: String) async {
         guard let userId = authService.currentUserId else { return }
-        
+
         isLoading = true
         errorMessage = nil
-        
+
         do {
             let profileRef = db.collection("profiles").document(userId)
             try await profileRef.updateData([
@@ -335,8 +338,24 @@ class AuthManager: ObservableObject {
         } catch {
             errorMessage = "Failed to update avatar: \(error.localizedDescription)"
         }
-        
+
         isLoading = false
+    }
+
+    /// Merges premium avatar product IDs into the user's Firestore profile (array union).
+    func mergePurchasedAvatarProductIds(_ productIds: [String]) async {
+        let unique = Array(Set(productIds.filter { PremiumAvatarDefinition.allProductIDs.contains($0) }))
+        guard let userId = authService.currentUserId, !unique.isEmpty else { return }
+
+        do {
+            let profileRef = db.collection("profiles").document(userId)
+            try await profileRef.updateData([
+                "purchasedAvatars": FieldValue.arrayUnion(unique),
+                "updatedAt": Timestamp(date: Date())
+            ])
+        } catch {
+            errorMessage = "Failed to save avatar purchase: \(error.localizedDescription)"
+        }
     }
     
     /// Link Game Center player ID to profile if authenticated with Game Center

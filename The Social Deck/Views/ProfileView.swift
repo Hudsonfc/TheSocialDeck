@@ -586,5 +586,6 @@ struct ProfileView: View {
         ProfileView()
             .environmentObject(AuthManager.shared)
             .environmentObject(SubscriptionManager.shared)
+            .environmentObject(AvatarStoreManager.shared)
     }
 }

@@ -12,6 +12,10 @@ struct AvatarSelectionView: View {
     @Binding var selectedAvatarColor: String
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var subManager: SubscriptionManager
+    @EnvironmentObject private var avatarStore: AvatarStoreManager
+    
+    @State private var purchaseSheetAvatar: PremiumAvatarDefinition?
+    @State private var showPurchaseError = false
     
     private let freeColors: Set<String> = ["red", "blue", "green"]
     
@@ -101,6 +105,46 @@ struct AvatarSelectionView: View {
                         }
                     }
                     
+                    // Premium avatars
+                    VStack(alignment: .leading, spacing: 20) {
+                        Text("Premium Avatars")
+                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .padding(.horizontal, 40)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 20) {
+                                ForEach(PremiumAvatarDefinition.allCases) { definition in
+                                    PremiumAvatarPickerButton(
+                                        definition: definition,
+                                        isSelected: selectedAvatarType == definition.imageAssetName,
+                                        selectedColor: getColorFromString(selectedAvatarColor),
+                                        isUnlocked: avatarStore.isUnlocked(definition),
+                                        displayPrice: avatarStore.displayPrice(for: definition)
+                                    ) {
+                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                            selectedAvatarType = definition.imageAssetName
+                                        }
+                                    } onLockedTap: {
+                                        purchaseSheetAvatar = definition
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 40)
+                            .padding(.vertical, 4)
+                        }
+                        
+                        Button(action: {
+                            Task { await avatarStore.restorePurchases() }
+                        }) {
+                            Text("Restore Purchases")
+                                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        }
+                        .padding(.horizontal, 40)
+                        .disabled(avatarStore.isRestoring)
+                    }
+                    
                     // Colors Section
                     VStack(alignment: .leading, spacing: 20) {
                         HStack(spacing: 8) {
@@ -163,6 +207,32 @@ struct AvatarSelectionView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        .onAppear {
+            Task { await avatarStore.loadProducts() }
+        }
+        .sheet(item: $purchaseSheetAvatar) { definition in
+            PremiumAvatarPurchaseSheet(
+                definition: definition,
+                displayPrice: avatarStore.displayPrice(for: definition),
+                avatarStore: avatarStore,
+                onPurchased: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        selectedAvatarType = definition.imageAssetName
+                    }
+                },
+                onDismissSheet: { purchaseSheetAvatar = nil }
+            )
+        }
+        .alert("Purchase", isPresented: $showPurchaseError) {
+            Button("OK", role: .cancel) {
+                avatarStore.clearLastError()
+            }
+        } message: {
+            Text(avatarStore.lastErrorMessage ?? "")
+        }
+        .onChange(of: avatarStore.lastErrorMessage) { _, newValue in
+            showPurchaseError = newValue != nil
+        }
     }
     
     private func getColorFromString(_ colorName: String) -> Color {
@@ -178,7 +248,7 @@ struct AvatarTypeButton: View {
     let action: () -> Void
     
     private var isImageAsset: Bool {
-        avatarType.hasPrefix("avatar ")
+        avatarType.hasPrefix("avatar ") || PremiumAvatarDefinition.isPremiumImageAssetName(avatarType)
     }
     
     var body: some View {
@@ -211,6 +281,163 @@ struct AvatarTypeButton: View {
         .buttonStyle(PlainButtonStyle())
         .scaleEffect(isSelected ? 1.05 : 1.0)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
+    }
+}
+
+// MARK: - Premium avatar picker cell
+private struct PremiumAvatarPickerButton: View {
+    let definition: PremiumAvatarDefinition
+    let isSelected: Bool
+    let selectedColor: Color
+    let isUnlocked: Bool
+    let displayPrice: String
+    let onSelect: () -> Void
+    let onLockedTap: () -> Void
+    
+    var body: some View {
+        Button(action: {
+            if isUnlocked {
+                onSelect()
+            } else {
+                onLockedTap()
+            }
+        }) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(isSelected ? selectedColor.opacity(0.15) : Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                    .frame(width: 76, height: 76)
+                    .shadow(color: isSelected ? selectedColor.opacity(0.3) : Color.black.opacity(0.05), radius: isSelected ? 8 : 4, x: 0, y: 2)
+                
+                Image(definition.imageAssetName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 56, height: 56)
+                    .opacity(isUnlocked ? (isSelected ? 1.0 : 0.7) : 0.5)
+                
+                VStack {
+                    HStack {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .padding(5)
+                            .background(Circle().fill(Color.white.opacity(0.95)))
+                            .shadow(color: Color.black.opacity(0.08), radius: 2, x: 0, y: 1)
+                        Spacer()
+                    }
+                    Spacer()
+                }
+                .frame(width: 76, height: 76)
+                .padding(5)
+                
+                if !isUnlocked {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.black.opacity(0.32))
+                        .frame(width: 76, height: 76)
+                    
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(.white)
+                    
+                    VStack {
+                        Spacer()
+                        Text(displayPrice)
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 3)
+                            .background(Color.black.opacity(0.5))
+                            .cornerRadius(6)
+                            .padding(.bottom, 6)
+                    }
+                    .frame(width: 76, height: 76)
+                }
+                
+                if isSelected {
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(selectedColor, lineWidth: 3)
+                        .frame(width: 76, height: 76)
+                }
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
+        .scaleEffect(isSelected ? 1.05 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
+    }
+}
+
+// MARK: - Premium purchase confirmation
+private struct PremiumAvatarPurchaseSheet: View {
+    let definition: PremiumAvatarDefinition
+    let displayPrice: String
+    @ObservedObject var avatarStore: AvatarStoreManager
+    var onPurchased: () -> Void
+    var onDismissSheet: () -> Void
+    
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                Image(definition.imageAssetName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 120, height: 120)
+                    .padding(.top, 8)
+                
+                Text(definition.displayTitle)
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                
+                Text(displayPrice)
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .foregroundColor(Color.gray)
+                
+                Spacer()
+                    .frame(minHeight: 12)
+                
+                Button(action: {
+                    Task {
+                        let ok = await avatarStore.purchase(definition)
+                        if ok {
+                            onPurchased()
+                            onDismissSheet()
+                            dismiss()
+                        }
+                    }
+                }) {
+                    Text("Buy for \(displayPrice)")
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .cornerRadius(14)
+                }
+                .disabled(avatarStore.isPurchasing)
+                .padding(.horizontal, 24)
+                
+                Button(action: {
+                    Task { await avatarStore.restorePurchases() }
+                }) {
+                    Text("Restore Purchases")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                }
+                .disabled(avatarStore.isRestoring)
+                
+                Button("Cancel", role: .cancel) {
+                    onDismissSheet()
+                    dismiss()
+                }
+                .font(.system(size: 16, weight: .medium, design: .rounded))
+                
+                Spacer()
+                    .frame(height: 8)
+            }
+            .padding(.horizontal, 8)
+            .navigationTitle("Premium Avatar")
+            .navigationBarTitleDisplayMode(.inline)
+        }
     }
 }
 
@@ -305,7 +532,7 @@ struct AvatarView: View {
     }
     
     private var isImageAsset: Bool {
-        avatarType.hasPrefix("avatar ")
+        avatarType.hasPrefix("avatar ") || PremiumAvatarDefinition.isPremiumImageAssetName(avatarType)
     }
     
     var body: some View {
@@ -336,6 +563,7 @@ struct AvatarView: View {
             selectedAvatarColor: .constant("red")
         )
         .environmentObject(SubscriptionManager.shared)
+        .environmentObject(AvatarStoreManager.shared)
     }
 }
 

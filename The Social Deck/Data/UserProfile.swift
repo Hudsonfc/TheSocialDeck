@@ -46,6 +46,8 @@ struct UserProfile: Codable, Identifiable {
     var isPlus: Bool?
     // FCM token for push notifications — written by the device on every launch
     var fcmToken: String?
+    /// StoreKit product IDs for purchased premium avatars (non-consumable).
+    var purchasedAvatars: [String] = []
     
     init(
         id: String? = nil,
@@ -70,7 +72,8 @@ struct UserProfile: Codable, Identifiable {
         lastActiveAt: Date? = nil,
         isOnline: Bool = false,
         isPlus: Bool? = nil,
-        fcmToken: String? = nil
+        fcmToken: String? = nil,
+        purchasedAvatars: [String] = []
     ) {
         self.id = id
         self.userId = userId
@@ -95,6 +98,7 @@ struct UserProfile: Codable, Identifiable {
         self.isOnline = isOnline
         self.isPlus = isPlus
         self.fcmToken = fcmToken
+        self.purchasedAvatars = purchasedAvatars
     }
     
     // Custom decoder so that fields added after account creation don't break decoding
@@ -123,6 +127,7 @@ struct UserProfile: Codable, Identifiable {
         isOnline            = try c.decodeIfPresent(Bool.self,     forKey: .isOnline) ?? false
         isPlus              = try c.decodeIfPresent(Bool.self,     forKey: .isPlus)
         fcmToken            = try c.decodeIfPresent(String.self,   forKey: .fcmToken)
+        purchasedAvatars    = try c.decodeIfPresent([String].self,  forKey: .purchasedAvatars) ?? []
     }
     
     var winRate: Double {

@@ -152,6 +152,7 @@ final class SubscriptionManager: ObservableObject {
             for await result in Transaction.updates {
                 guard let self else { return }
                 if case .verified(let transaction) = result {
+                    guard SubscriptionProductID.allIDs.contains(transaction.productID) else { continue }
                     await transaction.finish()
                     await self.refreshEntitlements()
                 }
