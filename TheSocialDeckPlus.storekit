@@ -14,7 +14,81 @@
 
   ],
   "products" : [
-
+    {
+      "displayPrice" : "1.99",
+      "familyShareable" : false,
+      "internalID" : "E8A1F203",
+      "localizations" : [
+        {
+          "description" : "Unlock this premium avatar for your profile.",
+          "displayName" : "Blindfolded Turtle",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.thesocialdeck.avatar.blindfoldedturtle",
+      "referenceName" : "Premium Avatar Blindfolded Turtle",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "1.99",
+      "familyShareable" : false,
+      "internalID" : "E8A1F204",
+      "localizations" : [
+        {
+          "description" : "Unlock this premium avatar for your profile.",
+          "displayName" : "Grey Cat",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.thesocialdeck.avatar.greycat",
+      "referenceName" : "Premium Avatar Grey Cat",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "1.99",
+      "familyShareable" : false,
+      "internalID" : "E8A1F205",
+      "localizations" : [
+        {
+          "description" : "Unlock this premium avatar for your profile.",
+          "displayName" : "Cool Fox",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.thesocialdeck.avatar.coolfox",
+      "referenceName" : "Premium Avatar Cool Fox",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "1.99",
+      "familyShareable" : false,
+      "internalID" : "E8A1F206",
+      "localizations" : [
+        {
+          "description" : "Unlock this premium avatar for your profile.",
+          "displayName" : "Regular Bear",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.thesocialdeck.avatar.regularbear",
+      "referenceName" : "Premium Avatar Regular Bear",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "1.99",
+      "familyShareable" : false,
+      "internalID" : "E8A1F207",
+      "localizations" : [
+        {
+          "description" : "Unlock this premium avatar for your profile.",
+          "displayName" : "Alien",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.thesocialdeck.avatar.alien",
+      "referenceName" : "Premium Avatar Alien",
+      "type" : "NonConsumable"
+    }
   ],
   "settings" : {
     "_askToBuyEnabled" : false,

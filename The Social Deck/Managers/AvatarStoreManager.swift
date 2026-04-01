@@ -4,7 +4,10 @@
 //
 
 import Foundation
+import OSLog
 import StoreKit
+
+private let avatarStoreLog = Logger(subsystem: Bundle.main.bundleIdentifier ?? "TheSocialDeck", category: "AvatarStore")
 
 // MARK: - Premium avatar catalog (product id ↔ asset name)
 
@@ -109,14 +112,53 @@ final class AvatarStoreManager: ObservableObject {
         lastErrorMessage = nil
         defer { isLoadingProducts = false }
 
+        let ids = Array(PremiumAvatarDefinition.allProductIDs)
+        avatarStoreLog.info("loadProducts: requesting \(ids.count) product IDs from StoreKit")
         do {
-            let list = try await Product.products(for: Array(PremiumAvatarDefinition.allProductIDs))
+            let list = try await Product.products(for: ids)
             var map: [String: Product] = [:]
             for p in list { map[p.id] = p }
             productsByID = map
+            let loaded = list.map(\.id).sorted().joined(separator: ", ")
+            avatarStoreLog.info("loadProducts: received \(list.count)/\(ids.count) products [\(loaded)]")
+            if list.count < ids.count {
+                let missing = Set(ids).subtracting(Set(list.map(\.id)))
+                avatarStoreLog.warning("loadProducts: missing product IDs (check App Store Connect + Scheme → StoreKit Configuration): \(missing.sorted().joined(separator: ", "))")
+            }
         } catch {
+            avatarStoreLog.error("loadProducts failed: \(error.localizedDescription, privacy: .public)")
             lastErrorMessage = "Could not load avatar prices. Check your connection."
         }
+    }
+
+    /// Resolves a `Product` for purchase, refreshing from StoreKit if the cache is empty (common on Simulator before first fetch completes).
+    private func resolveProduct(for definition: PremiumAvatarDefinition) async -> Product? {
+        let pid = definition.rawValue
+        if let cached = productsByID[pid] {
+            avatarStoreLog.debug("resolveProduct: cache hit \(pid, privacy: .public)")
+            return cached
+        }
+        avatarStoreLog.info("resolveProduct: cache miss for \(pid, privacy: .public) — running loadProducts")
+        await loadProducts()
+        if let cached = productsByID[pid] {
+            avatarStoreLog.info("resolveProduct: loaded after refresh \(pid, privacy: .public)")
+            return cached
+        }
+        do {
+            avatarStoreLog.info("resolveProduct: single-ID fetch for \(pid, privacy: .public)")
+            let list = try await Product.products(for: [pid])
+            for p in list {
+                productsByID[p.id] = p
+            }
+            if let p = list.first {
+                avatarStoreLog.info("resolveProduct: single-ID fetch OK \(pid, privacy: .public)")
+                return p
+            }
+            avatarStoreLog.error("resolveProduct: StoreKit returned zero products for \(pid, privacy: .public)")
+        } catch {
+            avatarStoreLog.error("resolveProduct: fetch failed \(error.localizedDescription, privacy: .public)")
+        }
+        return nil
     }
 
     func displayPrice(for definition: PremiumAvatarDefinition) -> String {
@@ -159,39 +201,51 @@ final class AvatarStoreManager: ObservableObject {
 
     /// Completes purchase flow; returns true if the avatar is now unlocked.
     func purchase(_ definition: PremiumAvatarDefinition) async -> Bool {
-        guard let product = productsByID[definition.rawValue] else {
-            lastErrorMessage = "This avatar is not available right now."
-            await loadProducts()
+        avatarStoreLog.info("purchase: start \(definition.rawValue, privacy: .public)")
+        guard let product = await resolveProduct(for: definition) else {
+            lastErrorMessage = "This avatar is not available right now. Use a StoreKit config in the run scheme for Simulator, or check App Store Connect."
+            avatarStoreLog.error("purchase: abort — no Product for \(definition.rawValue, privacy: .public)")
             return false
         }
 
-        guard !isPurchasing else { return false }
+        guard !isPurchasing else {
+            avatarStoreLog.warning("purchase: ignored — already purchasing")
+            return false
+        }
         isPurchasing = true
         lastErrorMessage = nil
         defer { isPurchasing = false }
 
         do {
+            avatarStoreLog.info("purchase: calling product.purchase() id=\(product.id, privacy: .public)")
             let result = try await product.purchase()
+            avatarStoreLog.info("purchase: result received for \(product.id, privacy: .public)")
             switch result {
             case .success(let verification):
                 switch verification {
                 case .verified(let transaction):
+                    avatarStoreLog.info("purchase: verified transaction productID=\(transaction.productID, privacy: .public)")
                     await transaction.finish()
                     await applyUnlock(productID: transaction.productID)
                     return true
-                case .unverified:
+                case .unverified(_, let error):
+                    avatarStoreLog.error("purchase: unverified — \(error.localizedDescription, privacy: .public)")
                     lastErrorMessage = "Purchase could not be verified."
                     return false
                 }
             case .userCancelled:
+                avatarStoreLog.info("purchase: user cancelled")
                 return false
             case .pending:
+                avatarStoreLog.info("purchase: pending")
                 lastErrorMessage = "Purchase is pending approval."
                 return false
             @unknown default:
+                avatarStoreLog.warning("purchase: unknown result case")
                 return false
             }
         } catch {
+            avatarStoreLog.error("purchase: threw \(error.localizedDescription, privacy: .public)")
             lastErrorMessage = error.localizedDescription
             return false
         }

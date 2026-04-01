@@ -116,7 +116,7 @@ struct Play2View: View {
         Deck(
             title: "Spill the Ex",
             description: "Spill the Ex is a bold, laugh-out-loud party game where the tea is hot and nobody's past is completely safe. Each round, players respond to juicy relationship prompts — from harmless confessions to slightly messy moments — and the group has to guess who the story belongs to.",
-            numberOfCards: 100,
+            numberOfCards: 200,
             estimatedTime: "20-30 min",
             imageName: "Spill the Ex",
             type: .spillTheEx,

@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct ProfileView: View {
+    /// When true (e.g. from Home hero), opens the avatar picker once after the profile screen appears.
+    var openAvatarPickerOnAppear: Bool = false
+
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var authManager: AuthManager
     @EnvironmentObject var subManager: SubscriptionManager
@@ -31,6 +34,7 @@ struct ProfileView: View {
     @State private var toast: ToastMessage? = nil
     @State private var showFriendsList = false
     @State private var friendsBadgePopScale: CGFloat = 1
+    @State private var didTriggerHeroAvatarOpen = false
 
     private var showFriendsBadge: Bool {
         let seenRequestIds = Set(lastSeenFriendRequestIds.split(separator: ",").map(String.init))
@@ -179,6 +183,12 @@ struct ProfileView: View {
                 await authManager.syncFavorites(localFavorites: FavoritesManager.shared.favoriteGameTypes)
             }
             checkMilestone()
+            if openAvatarPickerOnAppear, authManager.isAuthenticated, !didTriggerHeroAvatarOpen {
+                didTriggerHeroAvatarOpen = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    showAvatarSelection = true
+                }
+            }
         }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

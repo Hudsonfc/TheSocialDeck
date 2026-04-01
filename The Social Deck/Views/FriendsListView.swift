@@ -1015,6 +1015,7 @@ struct FriendProfileView: View {
                     VStack(spacing: 16) {
                         profileHeader
                         statsSection
+                            .padding(.top, 14)
                         removeFriendButton
                     }
                     .padding(.bottom, 28)
@@ -1070,30 +1071,37 @@ struct FriendProfileView: View {
             )
             .padding(.bottom, 52)
 
-            VStack(spacing: 7) {
-                HStack(spacing: 8) {
-                    Text(friend.username)
-                        .font(.system(size: 27, weight: .bold, design: .rounded))
-                        .foregroundColor(.primaryText)
-                    if fullProfile?.isPlus == true {
-                        Label("PLUS", systemImage: "crown.fill")
-                            .font(.system(size: 10, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(brandRed)
-                            .cornerRadius(9)
+            VStack(spacing: 16) {
+                HStack {
+                    Spacer(minLength: 0)
+                    HStack(spacing: 8) {
+                        Text(friend.username)
+                            .font(.system(size: 27, weight: .bold, design: .rounded))
+                            .foregroundColor(.primaryText)
+                        if fullProfile?.isPlus == true {
+                            Label("PLUS", systemImage: "crown.fill")
+                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(brandRed)
+                                .cornerRadius(9)
+                        }
+                        Circle()
+                            .fill(friend.isOnline ? Color.green : Color.gray.opacity(0.5))
+                            .frame(width: 10, height: 10)
                     }
-                    Circle()
-                        .fill(friend.isOnline ? Color.green : Color.gray.opacity(0.5))
-                        .frame(width: 10, height: 10)
+                    .lineLimit(1)
+                    Spacer(minLength: 0)
                 }
-                .lineLimit(1)
 
                 Text("Member since \(formattedDate(fullProfile?.createdAt ?? Date()))")
                     .font(.system(size: 13, weight: .regular, design: .rounded))
                     .foregroundColor(.secondaryText)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
+            .padding(.bottom, 22)
         }
         .frame(maxWidth: .infinity)
         .background(Color.cardBackground)

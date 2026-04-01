@@ -214,6 +214,7 @@ struct AvatarSelectionView: View {
             PremiumAvatarPurchaseSheet(
                 definition: definition,
                 displayPrice: avatarStore.displayPrice(for: definition),
+                ringColor: getColorFromString(selectedAvatarColor),
                 avatarStore: avatarStore,
                 onPurchased: {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
@@ -222,6 +223,9 @@ struct AvatarSelectionView: View {
                 },
                 onDismissSheet: { purchaseSheetAvatar = nil }
             )
+            .presentationDetents([.height(410)])
+            .presentationDragIndicator(.visible)
+            .presentationCornerRadius(28)
         }
         .alert("Purchase", isPresented: $showPurchaseError) {
             Button("OK", role: .cancel) {
@@ -314,21 +318,6 @@ private struct PremiumAvatarPickerButton: View {
                     .frame(width: 56, height: 56)
                     .opacity(isUnlocked ? (isSelected ? 1.0 : 0.7) : 0.5)
                 
-                VStack {
-                    HStack {
-                        Image(systemName: "crown.fill")
-                            .font(.system(size: 9, weight: .bold))
-                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            .padding(5)
-                            .background(Circle().fill(Color.white.opacity(0.95)))
-                            .shadow(color: Color.black.opacity(0.08), radius: 2, x: 0, y: 1)
-                        Spacer()
-                    }
-                    Spacer()
-                }
-                .frame(width: 76, height: 76)
-                .padding(5)
-                
                 if !isUnlocked {
                     RoundedRectangle(cornerRadius: 16)
                         .fill(Color.black.opacity(0.32))
@@ -365,78 +354,120 @@ private struct PremiumAvatarPickerButton: View {
     }
 }
 
-// MARK: - Premium purchase confirmation
+// MARK: - Premium purchase confirmation (compact bottom sheet)
 private struct PremiumAvatarPurchaseSheet: View {
     let definition: PremiumAvatarDefinition
     let displayPrice: String
+    let ringColor: Color
     @ObservedObject var avatarStore: AvatarStoreManager
     var onPurchased: () -> Void
     var onDismissSheet: () -> Void
     
     @Environment(\.dismiss) private var dismiss
     
+    private let accentRed = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+    private let ink = Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0)
+    
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 20) {
-                Image(definition.imageAssetName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 120, height: 120)
-                    .padding(.top, 8)
-                
-                Text(definition.displayTitle)
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                
-                Text(displayPrice)
-                    .font(.system(size: 17, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color.gray)
-                
-                Spacer()
-                    .frame(minHeight: 12)
-                
-                Button(action: {
-                    Task {
-                        let ok = await avatarStore.purchase(definition)
-                        if ok {
-                            onPurchased()
-                            onDismissSheet()
-                            dismiss()
-                        }
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Color(red: 0.99, green: 0.96, blue: 0.97),
+                    Color(red: 0.97, green: 0.97, blue: 0.99),
+                    Color.white.opacity(0.95)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                VStack(spacing: 16) {
+                    ZStack {
+                        Circle()
+                            .stroke(ringColor.opacity(0.35), lineWidth: 4)
+                            .frame(width: 136, height: 136)
+                        Circle()
+                            .stroke(ringColor, lineWidth: 4)
+                            .frame(width: 120, height: 120)
+                        Image(definition.imageAssetName)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 104, height: 104)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(Color.white.opacity(0.85), lineWidth: 2))
                     }
-                }) {
-                    Text("Buy for \(displayPrice)")
-                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .padding(.top, 4)
+                    .shadow(color: ringColor.opacity(0.25), radius: 12, x: 0, y: 6)
+                    
+                    Text("Premium Avatar")
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                        .cornerRadius(14)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 5)
+                        .background(accentRed)
+                        .clipShape(Capsule())
+                    
+                    Text(definition.displayTitle)
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .foregroundColor(ink)
+                        .multilineTextAlignment(.center)
+                    
+                    Text(displayPrice)
+                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        .foregroundColor(Color(red: 0.35, green: 0.35, blue: 0.38))
                 }
-                .disabled(avatarStore.isPurchasing)
-                .padding(.horizontal, 24)
                 
-                Button(action: {
-                    Task { await avatarStore.restorePurchases() }
-                }) {
-                    Text("Restore Purchases")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                Spacer(minLength: 12)
+                
+                VStack(spacing: 14) {
+                    Button(action: {
+                        Task { @MainActor in
+                            let ok = await avatarStore.purchase(definition)
+                            if ok {
+                                onPurchased()
+                                onDismissSheet()
+                                dismiss()
+                            }
+                        }
+                    }) {
+                        Text("Buy for \(displayPrice)")
+                            .font(.system(size: 17, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(accentRed)
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(avatarStore.isPurchasing)
+                    .opacity(avatarStore.isPurchasing ? 0.65 : 1)
+                    
+                    Button(action: {
+                        Task { @MainActor in
+                            await avatarStore.restorePurchases()
+                        }
+                    }) {
+                        Text("Restore Purchases")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundColor(Color.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(avatarStore.isRestoring)
+                    
+                    Button(action: {
+                        onDismissSheet()
+                        dismiss()
+                    }) {
+                        Text("Cancel")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundColor(Color.secondary.opacity(0.9))
+                    }
+                    .buttonStyle(.plain)
                 }
-                .disabled(avatarStore.isRestoring)
-                
-                Button("Cancel", role: .cancel) {
-                    onDismissSheet()
-                    dismiss()
-                }
-                .font(.system(size: 16, weight: .medium, design: .rounded))
-                
-                Spacer()
-                    .frame(height: 8)
+                .padding(.bottom, 8)
             }
-            .padding(.horizontal, 8)
-            .navigationTitle("Premium Avatar")
-            .navigationBarTitleDisplayMode(.inline)
+            .padding(.horizontal, 22)
         }
     }
 }

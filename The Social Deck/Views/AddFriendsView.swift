@@ -541,31 +541,32 @@ struct PendingRequestRow: View {
     var body: some View {
         Group {
             if let profile = profile {
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack(alignment: .center, spacing: 12) {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .center, spacing: 10) {
                         ZStack {
                             Circle()
                                 .fill(Color.cardBackground)
-                                .shadow(color: Color.shadowColor, radius: 3, x: 0, y: 1)
+                                .shadow(color: Color.shadowColor, radius: 2, x: 0, y: 1)
                             
                             AvatarView(
                                 avatarType: profile.avatarType,
                                 avatarColor: profile.avatarColor,
-                                size: 48
+                                size: 36
                             )
                         }
                         
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: 2) {
                             Text(profile.username)
-                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                .font(.system(size: 14, weight: .semibold, design: .rounded))
                                 .foregroundColor(.primaryText)
-                                .lineLimit(1)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.9)
                             
                             Text("Wants to be friends")
-                                .font(.system(size: 12, weight: .regular, design: .rounded))
+                                .font(.system(size: 11, weight: .regular, design: .rounded))
                                 .foregroundColor(.secondaryText)
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                     }
                     
                     HStack(spacing: 8) {
@@ -577,12 +578,13 @@ struct PendingRequestRow: View {
                             }
                         }) {
                             Text("Decline")
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                .font(.system(size: 12, weight: .semibold, design: .rounded))
                                 .foregroundColor(.secondaryText)
-                                .frame(width: 88, height: 36)
+                                .frame(width: 72, height: 30)
                                 .background(Color.secondaryBackground)
-                                .cornerRadius(10)
+                                .cornerRadius(8)
                         }
+                        .buttonStyle(.plain)
                         .disabled(isProcessing)
                         
                         Button(action: {
@@ -594,34 +596,34 @@ struct PendingRequestRow: View {
                             if isProcessing {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                    .scaleEffect(0.8)
+                                    .scaleEffect(0.75)
                             } else {
                                 Text("Accept")
-                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                    .font(.system(size: 12, weight: .semibold, design: .rounded))
                                     .foregroundColor(.white)
                             }
                         }
-                        .frame(width: 88, height: 36)
+                        .frame(width: 72, height: 30)
                         .background(Color.primaryAccent)
-                        .cornerRadius(10)
+                        .cornerRadius(8)
+                        .buttonStyle(.plain)
                         .disabled(isProcessing)
                     }
-                    .frame(maxWidth: .infinity, alignment: .trailing)
                 }
             } else if isLoading {
                 HStack {
                     ProgressView()
-                        .scaleEffect(0.9)
+                        .scaleEffect(0.85)
                     Spacer()
                 }
-                .padding(.vertical, 12)
+                .padding(.vertical, 8)
             }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
         .background(Color.cardBackground)
-        .cornerRadius(14)
-        .shadow(color: Color.shadowColor, radius: 4, x: 0, y: 2)
+        .cornerRadius(12)
+        .shadow(color: Color.shadowColor, radius: 3, x: 0, y: 1)
         .task {
             await loadProfile()
         }
