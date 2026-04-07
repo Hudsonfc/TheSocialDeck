@@ -498,6 +498,7 @@ struct OnlineGameContainerView: View {
     @ObservedObject private var syncService = SyncService.shared
     // RMT uses its own sync service; observe it so the connection banner fires for that game too
     @ObservedObject private var rmtSyncService = RiddleMeThisOnlineSyncService.shared
+    @ObservedObject private var actNaturalSyncService = ActNaturalOnlineSyncService.shared
     @State private var colorClashConnectionLost = false
     @State private var flip21ConnectionLost = false
     @State private var showWalkthrough = false
@@ -505,9 +506,11 @@ struct OnlineGameContainerView: View {
     @State private var hasShownLoading = false
     @AppStorage("colorClashShowWalkthrough") private var showWalkthroughPreference = false
 
-    // Fix 1: host-left / room-dissolved detection
-    @State private var showHostLeftAlert = false
     @State private var navigateToHome = false
+    /// True once we've seen an in-game room in this container (avoids "host left" on a bad initial load).
+    @State private var hasEnteredInGameInThisContainer = false
+    /// Preserved when `currentRoom` becomes nil so we still know this device was the host.
+    @State private var wasHostForThisGameSession = false
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -576,6 +579,19 @@ struct OnlineGameContainerView: View {
                         OnlineTIPView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount, selectedCategories: room.classicSelectedCategories)
                     case "riddleMeThis":
                         OnlineRMTView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
+                    case "actNatural":
+                        ActNaturalOnlinePlayView(
+                            roomCode: room.roomCode,
+                            isHost: room.hostId == myUserId,
+                            players: room.players,
+                            currentUserId: myUserId,
+                            twoUnknownsFromLobby: room.actNaturalTwoUnknowns ?? false,
+                            totalRounds: {
+                                let c = room.cardCount ?? 5
+                                return c > 0 ? c : 5
+                            }()
+                        )
+                        .id("\(room.roomCode)-actNatural")
                     case "storyChain", "twoTruthsAndALie":
                         OnlineSyncedClassicGameView(
                             roomCode: room.roomCode,
@@ -606,28 +622,23 @@ struct OnlineGameContainerView: View {
                 }
             }
 
-            // Fix 2: connection-lost banner — shown to non-hosts when Firestore drops.
-            // Classic games use SyncService; Riddle Me This uses its own sync service.
-            // Both are checked so the banner fires regardless of which game type is active.
-            if anyConnectionLost && !onlineManager.isHost {
-                connectionLostBanner
-                    .zIndex(1)
-                    .transition(.move(edge: .top).combined(with: .opacity))
+            if guestShouldSeeFriendlySessionEnd {
+                guestFriendlySessionEndOverlay
+                    .zIndex(2)
+                    .transition(.opacity)
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: anyConnectionLost)
+        .animation(.easeInOut(duration: 0.25), value: guestShouldSeeFriendlySessionEnd)
         .onReceive(NotificationCenter.default.publisher(for: .onlineColorClashConnectionStatusChanged)) { notification in
             colorClashConnectionLost = (notification.userInfo?["connectionLost"] as? Bool) ?? false
         }
         .onReceive(NotificationCenter.default.publisher(for: .onlineFlip21ConnectionStatusChanged)) { notification in
             flip21ConnectionLost = (notification.userInfo?["connectionLost"] as? Bool) ?? false
         }
-        // When the room disappears, alert unless this device intentionally left (avoids false "host left" after self-leave).
         .onChange(of: onlineManager.currentRoom) { _, room in
-            if room == nil {
-                if !onlineManager.userChoseToLeaveRoomSession && !showHostLeftAlert {
-                    showHostLeftAlert = true
-                }
+            if let room, room.status == .inGame, let uid = authManager.userProfile?.userId {
+                hasEnteredInGameInThisContainer = true
+                wasHostForThisGameSession = (room.hostId == uid)
             }
         }
         .onChange(of: onlineManager.currentRoom?.status) { _, status in
@@ -636,28 +647,76 @@ struct OnlineGameContainerView: View {
                 dismiss()
             }
         }
-        .alert("Host has left the game", isPresented: $showHostLeftAlert) {
-            Button("Go Home") { navigateToHome = true }
-        } message: {
-            Text("The host has left. This game has ended.")
+        .onAppear {
+            if onlineManager.currentRoom?.selectedGameType != "actNatural" {
+                ActNaturalOnlineSyncService.shared.teardownSession()
+            }
+        }
+        .onDisappear {
+            hasEnteredInGameInThisContainer = false
+            wasHostForThisGameSession = false
+            ActNaturalOnlineSyncService.shared.teardownSession()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .onlineDismissGameContainerAfterActNaturalEnd)) { _ in
+            dismiss()
         }
     }
 
-    // MARK: - Connection Lost Banner
+    /// Calm end-of-session UI for guests (host leaving / room gone / listener errors), instead of an orange strip or system error feel.
+    private var guestShouldSeeFriendlySessionEnd: Bool {
+        guard !onlineManager.userChoseToLeaveRoomSession else { return false }
+        guard hasEnteredInGameInThisContainer else { return false }
+        guard !wasHostForThisGameSession else { return false }
+        if onlineManager.currentRoom == nil { return true }
+        return anyConnectionLost
+    }
 
-    private var connectionLostBanner: some View {
-        Text("Connection lost — trying to reconnect...")
-            .font(.system(size: 13, weight: .semibold, design: .rounded))
-            .foregroundColor(.white)
-            .padding(.vertical, 10)
-            .padding(.horizontal, 16)
-            .frame(maxWidth: .infinity)
-            .background(Color.orange)
+    private var guestFriendlySessionEndOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.35)
+                .ignoresSafeArea()
+
+            VStack(spacing: 20) {
+                Image(systemName: "person.crop.circle.badge.xmark")
+                    .font(.system(size: 48, weight: .medium))
+                    .foregroundStyle(Color.primaryAccent)
+
+                Text("The host has left the game")
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 0x0A / 255.0, green: 0x0A / 255.0, blue: 0x0A / 255.0))
+                    .multilineTextAlignment(.center)
+
+                Text("This online session has ended.")
+                    .font(.system(size: 15, weight: .regular, design: .rounded))
+                    .foregroundColor(.secondaryText)
+                    .multilineTextAlignment(.center)
+
+                Button {
+                    navigateToHome = true
+                } label: {
+                    Text("Go Home")
+                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color.primaryAccent)
+                        .cornerRadius(14)
+                }
+                .padding(.top, 8)
+            }
+            .padding(28)
+            .background(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(Color(UIColor.secondarySystemBackground))
+            )
+            .padding(.horizontal, 32)
+        }
     }
 
     private var anyConnectionLost: Bool {
         syncService.connectionLost
             || rmtSyncService.connectionLost
+            || actNaturalSyncService.connectionLost
             || colorClashConnectionLost
             || flip21ConnectionLost
     }

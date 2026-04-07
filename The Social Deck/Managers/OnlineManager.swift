@@ -24,6 +24,7 @@ class OnlineManager: ObservableObject {
     
     nonisolated(unsafe) private var roomListener: ListenerRegistration?
     nonisolated(unsafe) private var roomInvitesListener: ListenerRegistration?
+    private var roomInvitesListeningForUserId: String?
     private var isLeavingRoom = false
 
     /// Stale-room cleanup runs at most once per signed-in user per app process.
@@ -355,6 +356,16 @@ class OnlineManager: ObservableObject {
         }
     }
 
+    /// Act Natural lobby: two unknowns toggle (host only).
+    func updateActNaturalTwoUnknowns(_ twoUnknowns: Bool) async {
+        guard let roomCode = currentRoom?.roomCode, isHost else { return }
+        do {
+            try await onlineService.updateActNaturalTwoUnknowns(roomCode: roomCode, twoUnknowns: twoUnknowns)
+        } catch {
+            errorMessage = "Failed to update Act Natural settings"
+        }
+    }
+
     /// Updates classic/date/couple turn mode in the lobby (host only).
     func updateClassicTurnsEnabled(_ enabled: Bool) async {
         guard let roomCode = currentRoom?.roomCode, isHost else { return }
@@ -524,10 +535,31 @@ class OnlineManager: ObservableObject {
     
     @Published var pendingRoomInvites: [RoomInvite] = []
 
+    /// Invite IDs the user hid with a home-banner swipe (still pending server-side). Keeps profile/tab badges accurate until Decline/Accept.
+    @Published private(set) var bannerSwipePinnedRoomInviteIds: Set<String> = []
+
+    /// Use for home avatar, Friends “Rooms” tab, etc. Union of live pending docs and swipe-pinned IDs so a transient empty snapshot doesn’t zero the badge.
+    var roomInviteCountForBadge: Int {
+        let pids = Set(pendingRoomInvites.compactMap(\.id))
+        return pids.union(bannerSwipePinnedRoomInviteIds).count
+    }
+
+    func pinRoomInviteForBadgeAfterBannerSwipeDismiss(inviteId: String) {
+        bannerSwipePinnedRoomInviteIds.insert(inviteId)
+    }
+
+    private func unpinRoomInviteForBadge(inviteId: String) {
+        bannerSwipePinnedRoomInviteIds.remove(inviteId)
+    }
+
     /// Start realtime listener so invite UI/badges update instantly.
     func startListeningToRoomInvites() {
         guard let currentUserId = authManager.userProfile?.userId else { return }
+        if roomInvitesListeningForUserId == currentUserId, roomInvitesListener != nil {
+            return
+        }
         stopListeningToRoomInvites()
+        roomInvitesListeningForUserId = currentUserId
 
         let query = db.collection("roomInvites")
             .whereField("toUserId", isEqualTo: currentUserId)
@@ -553,7 +585,16 @@ class OnlineManager: ObservableObject {
                     invite?.id = doc.documentID
                     return invite
                 }
+
+                let pids = Set(self.pendingRoomInvites.compactMap(\.id))
+                if !pids.isEmpty {
+                    self.bannerSwipePinnedRoomInviteIds = self.bannerSwipePinnedRoomInviteIds.intersection(pids)
+                }
             }
+        }
+
+        Task { @MainActor in
+            await self.prefetchPendingRoomInvitesFromServer()
         }
     }
 
@@ -561,6 +602,8 @@ class OnlineManager: ObservableObject {
         roomInvitesListener?.remove()
         roomInvitesListener = nil
         pendingRoomInvites = []
+        bannerSwipePinnedRoomInviteIds = []
+        roomInvitesListeningForUserId = nil
     }
     
     /// Send a room invite to a friend
@@ -598,18 +641,36 @@ class OnlineManager: ObservableObject {
         isLoading = false
     }
     
-    /// Load pending room invites
+    /// Load pending room invites (e.g. Room Invites UI).
     func loadPendingRoomInvites() async {
-        isLoading = true
+        await loadPendingRoomInvitesInternal(showGlobalLoading: true)
+    }
+
+    /// One-shot fetch for home badge / banner without toggling global `isLoading` (avoids blocking other UI).
+    func prefetchPendingRoomInvitesFromServer() async {
+        await loadPendingRoomInvitesInternal(showGlobalLoading: false)
+    }
+
+    private func loadPendingRoomInvitesInternal(showGlobalLoading: Bool) async {
+        if showGlobalLoading {
+            isLoading = true
+        }
         errorMessage = nil
-        
+        defer {
+            if showGlobalLoading {
+                isLoading = false
+            }
+        }
+
         do {
             pendingRoomInvites = try await onlineService.getPendingRoomInvites()
+            let pids = Set(pendingRoomInvites.compactMap(\.id))
+            if !pids.isEmpty {
+                bannerSwipePinnedRoomInviteIds = bannerSwipePinnedRoomInviteIds.intersection(pids)
+            }
         } catch {
             errorMessage = "Failed to load invites: \(error.localizedDescription)"
         }
-        
-        isLoading = false
     }
     
     /// Accept a room invite
@@ -630,6 +691,7 @@ class OnlineManager: ObservableObject {
             try await onlineService.acceptRoomInvite(inviteId)
             
             pendingRoomInvites.removeAll { $0.id == inviteId }
+            unpinRoomInviteForBadge(inviteId: inviteId)
             
             print("[OnlineManager] acceptRoomInvite — joining room \(roomCode)")
             await joinRoom(roomCode: roomCode)
@@ -656,6 +718,7 @@ class OnlineManager: ObservableObject {
         do {
             try await onlineService.declineRoomInvite(inviteId)
             pendingRoomInvites.removeAll { $0.id == inviteId }
+            unpinRoomInviteForBadge(inviteId: inviteId)
         } catch {
             errorMessage = "Failed to decline invite: \(error.localizedDescription)"
         }

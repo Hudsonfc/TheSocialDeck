@@ -26,6 +26,7 @@ class FriendService: ObservableObject {
     private var friendsListener: ListenerRegistration?
     private var pendingRequestsListener: ListenerRegistration?
     private var sentRequestsListener: ListenerRegistration?
+    private var pendingRequestsListeningUserId: String?
     
     private init() {}
     
@@ -431,8 +432,11 @@ class FriendService: ObservableObject {
     /// Start listening to pending requests
     func startListeningToPendingRequests() {
         guard let currentUserId = auth.currentUser?.uid else { return }
-        
+        if pendingRequestsListeningUserId == currentUserId, pendingRequestsListener != nil {
+            return
+        }
         pendingRequestsListener?.remove()
+        pendingRequestsListeningUserId = currentUserId
         
         let query = db.collection("friendRequests")
             .whereField("toUserId", isEqualTo: currentUserId)
@@ -471,12 +475,18 @@ class FriendService: ObservableObject {
                 }
             }
         }
+
+        // Immediate fetch so Home / badges populate without waiting for the first snapshot (matches opening Friends tab).
+        Task { @MainActor in
+            try? await self.loadPendingRequests()
+        }
     }
     
     /// Stop listening to pending requests
     func stopListeningToPendingRequests() {
         pendingRequestsListener?.remove()
         pendingRequestsListener = nil
+        pendingRequestsListeningUserId = nil
     }
 
     /// Start listening to sent requests so cancellations reflect immediately

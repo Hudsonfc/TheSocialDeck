@@ -160,9 +160,9 @@ struct LobbyView: View {
             VStack(spacing: 24) {
                 roomCodeCard
                 playerListSection
-                if onlineManager.isHost && isClassicGameWithCardCount {
+                if onlineManager.isHost && (isClassicGameWithCardCount || isActNaturalLobby) {
                     gameSettingsSection
-                } else if isClassicGameWithCardCount {
+                } else if isClassicGameWithCardCount || isActNaturalLobby {
                     gameSettingsReadOnlySection
                 }
                 actionButtons
@@ -280,12 +280,24 @@ struct LobbyView: View {
     private static let cardCountOptions: [Int?] = [nil, 10, 20, 30, 50]
     private static let riddleRoundOptions: [Int] = Array(stride(from: 5, through: 50, by: 5))
     private static let riddleTimerDurations: [Int] = [15, 30, 60, 90, 120]
+    /// Act Natural discussion timer (matches local setup slider range, 30-second steps).
+    private static let actNaturalDiscussionTimerDurations: [Int] = Array(stride(from: 60, through: 600, by: 30))
+    private static let actNaturalRoundOptions: [Int] = Array(1...20)
 
     private var isRiddleMeThisLobby: Bool {
         onlineManager.currentRoom?.selectedGameType == "riddleMeThis"
     }
 
+    private var isActNaturalLobby: Bool {
+        onlineManager.currentRoom?.selectedGameType == "actNatural"
+    }
+
     private var currentRiddleRounds: Int {
+        let count = onlineManager.currentRoom?.cardCount ?? 5
+        return count > 0 ? count : 5
+    }
+
+    private var currentActNaturalRounds: Int {
         let count = onlineManager.currentRoom?.cardCount ?? 5
         return count > 0 ? count : 5
     }
@@ -332,7 +344,7 @@ struct LobbyView: View {
     }
 
     private var hasCategorySettingForCurrentGame: Bool {
-        !lobbyCategoriesForSelectedGame.isEmpty && !isRiddleMeThisLobby
+        !lobbyCategoriesForSelectedGame.isEmpty && !isRiddleMeThisLobby && !isActNaturalLobby
     }
 
     private var gameSettingsSection: some View {
@@ -341,6 +353,11 @@ struct LobbyView: View {
                 .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundColor(.primaryText)
 
+            if isActNaturalLobby {
+                actNaturalHostGameSettings
+            }
+
+            if !isActNaturalLobby {
             Text(isRiddleMeThisLobby ? "Rounds to play" : "Cards to play")
                 .font(.system(size: 14, weight: .medium, design: .rounded))
                 .foregroundColor(.gray)
@@ -430,7 +447,7 @@ struct LobbyView: View {
                 .padding(.top, 8)
             }
 
-            if !isRiddleMeThisLobby {
+            if !isRiddleMeThisLobby && !isActNaturalLobby {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Taking turns")
@@ -516,6 +533,7 @@ struct LobbyView: View {
                 }
                 .padding(.top, 8)
             }
+            }
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -525,13 +543,163 @@ struct LobbyView: View {
         .padding(.horizontal, 24)
     }
 
+    private var actNaturalHostGameSettings: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Rounds to play")
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundColor(.gray)
+                let currentRounds = currentActNaturalRounds
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(Self.actNaturalRoundOptions, id: \.self) { rounds in
+                            Button {
+                                HapticManager.shared.lightImpact()
+                                Task { await onlineManager.updateCardCount(rounds) }
+                            } label: {
+                                Text("\(rounds)")
+                                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                    .foregroundColor(currentRounds == rounds ? .white : soDeckRed)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 10)
+                                    .background(currentRounds == rounds ? soDeckRed : soDeckRed.opacity(0.08))
+                                    .cornerRadius(10)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(soDeckRed.opacity(currentRounds == rounds ? 0 : 0.3), lineWidth: 1)
+                                    )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                    .padding(.vertical, 2)
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Timer")
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundColor(.primaryText)
+                        Text("Countdown during discussion")
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                            .foregroundColor(.gray)
+                    }
+                    Spacer()
+                    Toggle(
+                        "",
+                        isOn: Binding(
+                            get: { onlineManager.currentRoom?.timerEnabled ?? false },
+                            set: { on in
+                                var dur = onlineManager.currentRoom?.timerDuration ?? 300
+                                if on && !Self.actNaturalDiscussionTimerDurations.contains(dur) {
+                                    dur = 300
+                                }
+                                Task { await onlineManager.updateRiddleTimer(enabled: on, durationSeconds: dur) }
+                            }
+                        )
+                    )
+                    .labelsHidden()
+                    .tint(soDeckRed)
+                }
+
+                if onlineManager.currentRoom?.timerEnabled == true {
+                    let selectedDur = onlineManager.currentRoom?.timerDuration ?? 300
+                    Text(actNaturalTimerDescription(seconds: selectedDur))
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundColor(soDeckRed)
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                            ForEach(Self.actNaturalDiscussionTimerDurations, id: \.self) { sec in
+                                Button {
+                                    HapticManager.shared.lightImpact()
+                                    Task { await onlineManager.updateRiddleTimer(enabled: true, durationSeconds: sec) }
+                                } label: {
+                                    Text(actNaturalTimerChipLabel(seconds: sec))
+                                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                        .foregroundColor(selectedDur == sec ? .white : soDeckRed)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 10)
+                                        .background(selectedDur == sec ? soDeckRed : soDeckRed.opacity(0.08))
+                                        .cornerRadius(10)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(soDeckRed.opacity(selectedDur == sec ? 0 : 0.3), lineWidth: 1)
+                                        )
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
+            }
+
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Two Unknowns")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor((onlineManager.currentRoom?.players.count ?? 0) >= 4 ? .primaryText : .secondaryText)
+                    Text((onlineManager.currentRoom?.players.count ?? 0) >= 4
+                         ? "Play with 2 unknown players (more challenge)"
+                         : "Add 4+ players to enable")
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                        .foregroundColor(.gray)
+                }
+                Spacer()
+                Toggle(
+                    "",
+                    isOn: Binding(
+                        get: { onlineManager.currentRoom?.actNaturalTwoUnknowns ?? false },
+                        set: { on in
+                            Task { await onlineManager.updateActNaturalTwoUnknowns(on) }
+                        }
+                    )
+                )
+                .labelsHidden()
+                .tint(soDeckRed)
+                .disabled((onlineManager.currentRoom?.players.count ?? 0) < 4)
+            }
+            .opacity((onlineManager.currentRoom?.players.count ?? 0) >= 4 ? 1.0 : 0.55)
+        }
+        .padding(.bottom, 8)
+    }
+
+    private func actNaturalTimerDescription(seconds: Int) -> String {
+        let minutes = seconds / 60
+        let rem = seconds % 60
+        if rem == 0 { return "\(minutes) min discussion" }
+        return "\(minutes) min \(rem) sec discussion"
+    }
+
+    private func actNaturalTimerChipLabel(seconds: Int) -> String {
+        let minutes = seconds / 60
+        let rem = seconds % 60
+        if rem == 0 { return "\(minutes)m" }
+        return "\(minutes)m\(rem)s"
+    }
+
     private var gameSettingsReadOnlySection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Game settings")
                 .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundColor(.primaryText)
 
-            if isRiddleMeThisLobby {
+            if isActNaturalLobby {
+                Text("Rounds: \(currentActNaturalRounds)")
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .foregroundColor(.primaryText)
+                let te = onlineManager.currentRoom?.timerEnabled ?? false
+                let dur = onlineManager.currentRoom?.timerDuration ?? 300
+                Text("Discussion timer: \(te ? actNaturalTimerDescription(seconds: dur) : "Off")")
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .foregroundColor(.primaryText)
+                Text("Two unknowns: \((onlineManager.currentRoom?.actNaturalTwoUnknowns ?? false) ? "On" : "Off")")
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .foregroundColor(.primaryText)
+            } else if isRiddleMeThisLobby {
                 Text("Rounds: \(currentRiddleRounds)")
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .foregroundColor(.primaryText)
@@ -573,9 +741,10 @@ struct LobbyView: View {
         VStack(spacing: 14) {
             let allReady = onlineManager.currentRoom?.allPlayersReady ?? false
             let playerCount = onlineManager.currentRoom?.players.count ?? 0
+            let minPlayers = 2
 
             if onlineManager.isHost {
-                // HOST: Start Game (only enabled when all ready + >=2 players)
+                // HOST: Start Game (only enabled when all ready + minimum players)
                 Button {
                     Task { await onlineManager.startGame() }
                 } label: {
@@ -593,14 +762,14 @@ struct LobbyView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 54)
-                    .background(allReady && playerCount >= 2 ? soDeckRed : Color.gray.opacity(0.4))
+                    .background(allReady && playerCount >= minPlayers ? soDeckRed : Color.gray.opacity(0.4))
                     .cornerRadius(14)
                 }
-                .disabled(!allReady || playerCount < 2 || onlineManager.isLoading)
+                .disabled(!allReady || playerCount < minPlayers || onlineManager.isLoading)
 
-                if !allReady || playerCount < 2 {
-                    Text(playerCount < 2
-                         ? "Need at least 2 players to start"
+                if !allReady || playerCount < minPlayers {
+                    Text(playerCount < minPlayers
+                         ? "Need at least \(minPlayers) players to start"
                          : "Waiting for all players to be ready…")
                         .font(.system(size: 13, weight: .regular, design: .rounded))
                         .foregroundColor(.gray)

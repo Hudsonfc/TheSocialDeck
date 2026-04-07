@@ -39,7 +39,7 @@ enum DeckType: String {
         switch self {
         case .neverHaveIEver, .truthOrDare, .wouldYouRather, .mostLikelyTo,
              .quickfireCouples, .closerThanEver, .usAfterDark, .spillTheEx,
-             .takeItPersonally, .riddleMeThis, .storyChain, .twoTruthsAndALie,
+             .takeItPersonally, .riddleMeThis, .actNatural, .storyChain, .twoTruthsAndALie,
              .colorClash, .flip21:
             return true
         default:

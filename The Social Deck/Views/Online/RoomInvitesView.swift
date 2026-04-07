@@ -69,7 +69,7 @@ struct RoomInvitesView: View {
                     }
                     .padding(.horizontal, embeddedInFriendsHub ? 20 : 40)
                     .padding(.vertical, 20)
-                    .animation(.spring(response: 0.4, dampingFraction: 0.8), value: onlineManager.pendingRoomInvites.count)
+                    .animation(.spring(response: 0.4, dampingFraction: 0.8), value: onlineManager.roomInviteCountForBadge)
                 }
             }
         }

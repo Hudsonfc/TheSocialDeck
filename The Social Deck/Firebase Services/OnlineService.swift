@@ -430,6 +430,22 @@ class OnlineService {
         ])
     }
 
+    /// Act Natural lobby: two-unknowns option (host only).
+    func updateActNaturalTwoUnknowns(roomCode: String, twoUnknowns: Bool) async throws {
+        let roomRef = db.collection("rooms").document(roomCode)
+        let snapshot = try await roomRef.getDocument()
+
+        guard snapshot.exists, let room = try? snapshot.data(as: OnlineRoom.self) else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room not found"])
+        }
+
+        guard let currentUserId = auth.currentUser?.uid, room.hostId == currentUserId else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Only the host can update game settings"])
+        }
+
+        try await roomRef.updateData(["actNaturalTwoUnknowns": twoUnknowns])
+    }
+
     /// Starts the game (updates room status to .starting, then .inGame)
     func startGame(roomCode: String) async throws {
         let roomRef = db.collection("rooms").document(roomCode)
@@ -450,7 +466,7 @@ class OnlineService {
         guard room.allPlayersReady && room.players.count >= 2 else {
             throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "All players must be ready and at least 2 players required"])
         }
-        
+
         // Initialize game state based on game type
         if room.selectedGameType == "colorClash" {
             let gameState = try initializeColorClashGameState(room: room)
@@ -536,7 +552,11 @@ class OnlineService {
             "rmtHostHandoffMessage": FieldValue.delete(),
             "roundStartTimestamp": FieldValue.delete(),
             "gameState": FieldValue.delete(),
-            "flip21GameState": FieldValue.delete()
+            "flip21GameState": FieldValue.delete(),
+            "actNaturalPhase": FieldValue.delete(),
+            "actNaturalFlipped": FieldValue.delete(),
+            "actNaturalRolesRevealed": FieldValue.delete(),
+            "actNaturalRoundIndex": FieldValue.delete()
         ]
         // Keep lobby-selected categories/settings; only reset volatile in-game state.
         try await roomRef.updateData(payload)

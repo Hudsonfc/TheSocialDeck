@@ -101,6 +101,8 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
     var roundStartTimestamp: Date?
     /// Online classic/date/couple games: when true, control rotates by player turn instead of staying with host.
     var classicTurnsEnabled: Bool?
+    /// Act Natural online: host enables two unknowns when the room has 4+ players (mirrors local setup).
+    var actNaturalTwoUnknowns: Bool?
     
     // Players
     var players: [RoomPlayer]
@@ -113,7 +115,7 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
     
     private enum CodingKeys: String, CodingKey {
         case id, roomCode, roomName, createdBy, createdAt, status, maxPlayers, isPrivate
-        case selectedGameType, selectedCategory, classicSelectedCategories, cardCount, timerEnabled, timerDuration, classicTurnsEnabled
+        case selectedGameType, selectedCategory, classicSelectedCategories, cardCount, timerEnabled, timerDuration, classicTurnsEnabled, actNaturalTwoUnknowns
         case roundStartTimestamp, players, hostId, gameStartedAt, gameState, flip21GameState
     }
     
@@ -134,6 +136,7 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         timerDuration: Int? = nil,
         roundStartTimestamp: Date? = nil,
         classicTurnsEnabled: Bool? = nil,
+        actNaturalTwoUnknowns: Bool? = nil,
         players: [RoomPlayer] = [],
         hostId: String,
         gameStartedAt: Date? = nil,
@@ -156,6 +159,7 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         self.timerDuration = timerDuration
         self.roundStartTimestamp = roundStartTimestamp
         self.classicTurnsEnabled = classicTurnsEnabled
+        self.actNaturalTwoUnknowns = actNaturalTwoUnknowns
         self.players = players
         self.hostId = hostId
         self.gameStartedAt = gameStartedAt
@@ -181,6 +185,7 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         timerDuration = try container.decodeIfPresent(Int.self, forKey: .timerDuration)
         roundStartTimestamp = try container.decodeIfPresent(Date.self, forKey: .roundStartTimestamp)
         classicTurnsEnabled = try container.decodeIfPresent(Bool.self, forKey: .classicTurnsEnabled)
+        actNaturalTwoUnknowns = try container.decodeIfPresent(Bool.self, forKey: .actNaturalTwoUnknowns)
 
         do {
             players = try container.decodeIfPresent([RoomPlayer].self, forKey: .players) ?? []

@@ -46,6 +46,9 @@ class AuthManager: ObservableObject {
     }
     
     nonisolated(unsafe) private var profileListener: ListenerRegistration?
+
+    /// Starting friend-request + room-invite listeners on every profile snapshot cleared inbox data; only start once per signed-in user.
+    private var socialInboxListenersStartedForUserId: String?
     
     private init() {
         setupAuthListener()
@@ -70,6 +73,7 @@ class AuthManager: ObservableObject {
                     // Prevent stale listeners (and potential permission errors) after sign-out.
                     FriendService.shared.stopListeningToPendingRequests()
                     OnlineManager.shared.stopListeningToRoomInvites()
+                    self?.socialInboxListenersStartedForUserId = nil
                 }
             }
             .store(in: &cancellables)
@@ -101,6 +105,7 @@ class AuthManager: ObservableObject {
         do {
             try authService.signOut()
             userProfile = nil
+            socialInboxListenersStartedForUserId = nil
             removeProfileListener()
         } catch {
             errorMessage = "Failed to sign out: \(error.localizedDescription)"
@@ -138,13 +143,17 @@ class AuthManager: ObservableObject {
                     await self.linkGameCenterIfNeeded()
                     // One-time stale room cleanup for this signed-in user (client-side)
                     await OnlineManager.shared.cleanupStaleRoomsOnLaunchIfNeeded()
-                    // Keep pending-request listener alive at all times so the badge in
-                    // ProfileView is driven by live data without opening FriendsListView.
-                    FriendService.shared.startListeningToPendingRequests()
-                    // Keep room invites in sync in realtime for badges + Rooms tab.
-                    OnlineManager.shared.startListeningToRoomInvites()
-                    // Ask for push-notification permission (only after sign-in, never on cold launch).
-                    NotificationManager.shared.requestPermissionIfNeeded()
+                    // Start social inbox listeners once per user — not on every profile write (that was wiping invites + hiding badges).
+                    if self.socialInboxListenersStartedForUserId != userId {
+                        self.socialInboxListenersStartedForUserId = userId
+                        FriendService.shared.startListeningToPendingRequests()
+                        OnlineManager.shared.startListeningToRoomInvites()
+                        NotificationManager.shared.requestPermissionIfNeeded()
+                        Task { @MainActor in
+                            try? await FriendService.shared.loadPendingRequests()
+                            await OnlineManager.shared.prefetchPendingRoomInvitesFromServer()
+                        }
+                    }
             } catch {
                 self.errorMessage = "Failed to decode profile: \(error.localizedDescription)"
                 }

@@ -10,6 +10,10 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject var authManager: AuthManager
     @EnvironmentObject var subManager: SubscriptionManager
+    @Environment(\.scenePhase) private var scenePhase
+    @ObservedObject private var friendService = FriendService.shared
+    @ObservedObject private var onlineManager = OnlineManager.shared
+    @State private var isHomeSocialInboxRefreshing = false
     @State private var titleOpacity: Double = 0
     @State private var featuredCardScale: CGFloat = 0.95
     @State private var featuredCardOpacity: Double = 0
@@ -36,7 +40,46 @@ struct HomeView: View {
     @State private var plusSlideOffset: CGFloat = 0
     @AppStorage("plusCrownDotDismissed") private var plusCrownDotDismissed: Bool = false
     @AppStorage("signInNudgeDismissed") private var signInNudgeDismissed: Bool = false
-    
+    /// Kept in sync when opening `FriendsListView` — same keys as `ProfileView` Friends row badge.
+    @AppStorage("lastSeenFriendRequestIds") private var lastSeenFriendRequestIds: String = ""
+    @AppStorage("lastSeenRoomInviteIds") private var lastSeenRoomInviteIds: String = ""
+
+    /// Matches `ProfileView.showFriendsBadge`: only unseen friend requests / room invites.
+    private var showHomeAvatarFriendsNotificationBadge: Bool {
+        guard authManager.isAuthenticated else { return false }
+        let seenRequestIds = Set(lastSeenFriendRequestIds.split(separator: ",").map(String.init))
+        let seenRoomInviteIds = Set(lastSeenRoomInviteIds.split(separator: ",").map(String.init))
+        let hasUnseenRequest = friendService.pendingRequests
+            .compactMap(\.id)
+            .contains { !seenRequestIds.contains($0) }
+        let hasUnseenRoomInvite = onlineManager.pendingRoomInvites
+            .compactMap(\.id)
+            .contains { !seenRoomInviteIds.contains($0) }
+        return hasUnseenRequest || hasUnseenRoomInvite
+    }
+
+    /// Same total as `ProfileView.friendsBadgePendingTotal` (for the numeric label when badge is visible).
+    private var homeAvatarFriendsBadgePendingTotal: Int {
+        friendService.pendingRequests.count + onlineManager.roomInviteCountForBadge
+    }
+
+    private var homeAvatarFriendsBadgeCountLabel: String? {
+        let n = homeAvatarFriendsBadgePendingTotal
+        guard n >= 1 else { return nil }
+        return n > 9 ? "9+" : "\(n)"
+    }
+
+    /// Friend requests + room invites (quiet prefetch + small avatar spinner on Home).
+    private func scheduleHomeSocialInboxRefresh() {
+        guard authManager.isAuthenticated else { return }
+        Task { @MainActor in
+            isHomeSocialInboxRefreshing = true
+            defer { isHomeSocialInboxRefreshing = false }
+            try? await friendService.loadPendingRequests()
+            await onlineManager.prefetchPendingRoomInvitesFromServer()
+        }
+    }
+
     // Curated quotes for The Social Deck
     private let quotes = [
         "The game is just the excuse.",
@@ -322,20 +365,56 @@ struct HomeView: View {
             .overlay(alignment: .topTrailing) {
                 // Account: avatar when signed in, account icon when signed out
                 NavigationLink(destination: ProfileView()) {
-                    if authManager.isAuthenticated {
-                        AvatarView(
-                            avatarType: authManager.userProfile?.avatarType ?? "person.fill",
-                            avatarColor: authManager.userProfile?.avatarColor ?? "red",
-                            size: 44
-                        )
-                    } else {
-                        Image(systemName: "person.crop.circle")
-                            .font(.system(size: 28, weight: .medium))
-                            .foregroundColor(.primaryText)
-                            .frame(width: 44, height: 44)
-                            .background(Color.tertiaryBackground)
-                            .clipShape(Circle())
+                    ZStack(alignment: .topTrailing) {
+                        if authManager.isAuthenticated {
+                            ZStack {
+                                AvatarView(
+                                    avatarType: authManager.userProfile?.avatarType ?? "person.fill",
+                                    avatarColor: authManager.userProfile?.avatarColor ?? "red",
+                                    size: 44
+                                )
+                                if isHomeSocialInboxRefreshing {
+                                    ProgressView()
+                                        .scaleEffect(0.85)
+                                        .tint(Color.primaryAccent)
+                                        .frame(width: 44, height: 44)
+                                        .background(Color.appBackground.opacity(0.65))
+                                        .clipShape(Circle())
+                                }
+                            }
+                        } else {
+                            Image(systemName: "person.crop.circle")
+                                .font(.system(size: 28, weight: .medium))
+                                .foregroundColor(.primaryText)
+                                .frame(width: 44, height: 44)
+                                .background(Color.tertiaryBackground)
+                                .clipShape(Circle())
+                        }
+
+                        if showHomeAvatarFriendsNotificationBadge, let text = homeAvatarFriendsBadgeCountLabel {
+                            Text(text)
+                                .font(.system(size: text == "9+" ? 9 : 10, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.85)
+                                .padding(.horizontal, 5)
+                                .frame(minWidth: 19, minHeight: 19)
+                                .background(
+                                    Capsule()
+                                        .fill(Color.primaryAccent)
+                                )
+                                .overlay(
+                                    Capsule()
+                                        .strokeBorder(Color.appBackground, lineWidth: 2)
+                                )
+                                .offset(x: 8, y: -6)
+                                .transition(.scale.combined(with: .opacity))
+                        }
                     }
+                    .animation(
+                        .spring(response: 0.35, dampingFraction: 0.8),
+                        value: showHomeAvatarFriendsNotificationBadge
+                    )
                 }
                 .padding(.top, 10)
                 .padding(.trailing, 20)
@@ -391,6 +470,8 @@ struct HomeView: View {
                 currentQuote = quotes.randomElement() ?? quotes[0]
                 // Get today's game of the day
                 gameOfTheDay = GameOfTheDayManager.shared.getTodaysGame()
+
+                scheduleHomeSocialInboxRefresh()
                 
                 // Show tooltip on first load
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -409,6 +490,21 @@ struct HomeView: View {
             }
             .onDisappear {
                 stopTooltipTimer()
+            }
+            .onChange(of: authManager.isAuthenticated) { _, isAuth in
+                if isAuth {
+                    scheduleHomeSocialInboxRefresh()
+                }
+            }
+            .onChange(of: authManager.userProfile?.userId) { _, _ in
+                if authManager.isAuthenticated {
+                    scheduleHomeSocialInboxRefresh()
+                }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active, authManager.isAuthenticated {
+                    scheduleHomeSocialInboxRefresh()
+                }
             }
             .onChange(of: showRateUsView) { oldValue, newValue in
                 if !newValue && !hasSeenRateUsView {

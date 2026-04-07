@@ -15,12 +15,11 @@ struct SettingsView: View {
     @State private var whatsNewButtonPressed = false
     @State private var feedbackButtonPressed = false
     @State private var rateUsButtonPressed = false
-    @State private var previewOnlineUIButtonPressed = false
     @State private var showPlusPaywall = false
     
     // App version info
     private var appVersion: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.3.5"
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.3.6"
     }
     
     

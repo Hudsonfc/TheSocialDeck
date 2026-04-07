@@ -3,7 +3,7 @@
 //  The Social Deck
 //
 //  Shown when the user taps "Play Online" from a classic game description
-//  screen. Presents Create Room and Join Room for the selected game.
+//  screen. Presents Create Room for the selected game (join from Play tab).
 //
 
 import SwiftUI
@@ -19,21 +19,24 @@ struct ClassicGameOnlineView: View {
 
     @State private var isCreatingRoom = false
     @State private var navigateToLobby = false
-    @State private var navigateToJoin = false
     @State private var errorMessage: String? = nil
     @State private var showError = false
 
     private let soDeckRed = Color(red: 0xD9 / 255.0, green: 0x3A / 255.0, blue: 0x3A / 255.0)
+
+    private var onlineMaxPlayers: Int {
+        gameType == "actNatural" ? 12 : 8
+    }
+
+    private var playerCountSubtitle: String {
+        gameType == "actNatural" ? "3–12 players" : "2–8 players"
+    }
 
     var body: some View {
         ZStack {
             Color.appBackground.ignoresSafeArea()
 
             NavigationLink(destination: LobbyView(), isActive: $navigateToLobby) {
-                EmptyView()
-            }.hidden()
-
-            NavigationLink(destination: JoinRoomView(), isActive: $navigateToJoin) {
                 EmptyView()
             }.hidden()
 
@@ -92,7 +95,7 @@ struct ClassicGameOnlineView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "person.2.fill")
                             .font(.system(size: 12, weight: .semibold))
-                        Text("2–8 players")
+                        Text(playerCountSubtitle)
                             .font(.system(size: 14, weight: .medium, design: .rounded))
                     }
                     .foregroundColor(.tertiaryText)
@@ -149,24 +152,6 @@ struct ClassicGameOnlineView: View {
                 .cornerRadius(16)
             }
             .disabled(isCreatingRoom)
-
-            Button {
-                HapticManager.shared.lightImpact()
-                navigateToJoin = true
-            } label: {
-                Text("Join Room")
-                    .font(.system(size: 18, weight: .semibold, design: .rounded))
-                    .foregroundColor(soDeckRed)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.appBackground)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(soDeckRed, lineWidth: 2)
-                    )
-                    .cornerRadius(16)
-            }
-            .disabled(isCreatingRoom)
         }
         .responsiveHorizontalPadding()
         .padding(.bottom, 40)
@@ -184,7 +169,7 @@ struct ClassicGameOnlineView: View {
                 .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundColor(.primaryText)
 
-            Text("You need a free account to create or join online rooms.")
+            Text("You need a free account to create an online room. Use Join Room on the Play screen to join with a code.")
                 .font(.system(size: 14, weight: .regular, design: .rounded))
                 .foregroundColor(.secondaryText)
                 .multilineTextAlignment(.center)
@@ -212,7 +197,7 @@ struct ClassicGameOnlineView: View {
 
         await onlineManager.createRoom(
             roomName: gameTitle,
-            maxPlayers: 8,
+            maxPlayers: onlineMaxPlayers,
             isPrivate: false,
             gameType: gameType
         )

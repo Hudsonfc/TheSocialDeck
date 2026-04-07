@@ -4,8 +4,8 @@
 //
 //  Game detail screen shown when the user taps an online game card in the
 //  "Online Only" tab. Layout matches GameDescriptionOverlay; actions are
-//  Create Room / Join Room (or sign-in gate). The selected game type is
-//  passed directly into the room at creation time.
+//  Create Room (or sign-in gate). Join with a code from Play → Join Room.
+//  The selected game type is passed directly into the room at creation time.
 //
 
 import SwiftUI
@@ -22,8 +22,8 @@ struct OnlineGameEntry: Identifiable {
     let maxPlayers: Int
 }
 
-/// Single source of truth for all online-capable games — used by both
-/// the Online Only tab and the detail screen.
+/// Games that **only** exist as online titles (no local deck on the Play grid).
+/// Shown in the "Online Only" tab; local+online games use `GameDescriptionOverlay` → Play Online.
 let allOnlineGames: [OnlineGameEntry] = [
     OnlineGameEntry(
         title: "Color Clash",
@@ -47,7 +47,6 @@ struct OnlineGameDetailView: View {
 
     @State private var isCreatingRoom = false
     @State private var navigateToLobby = false
-    @State private var navigateToJoin = false
     @State private var errorMessage: String? = nil
     @State private var showError = false
 
@@ -62,11 +61,6 @@ struct OnlineGameDetailView: View {
 
             // Hidden NavigationLinks
             NavigationLink(destination: LobbyView(), isActive: $navigateToLobby) {
-                EmptyView()
-            }
-            .hidden()
-
-            NavigationLink(destination: JoinRoomView(), isActive: $navigateToJoin) {
                 EmptyView()
             }
             .hidden()
@@ -161,7 +155,7 @@ struct OnlineGameDetailView: View {
 
                 Spacer()
 
-                // Actions: Create Room / Join Room (or sign-in gate)
+                // Actions: Create Room (or sign-in gate)
                 if authManager.isAuthenticated {
                     actionButtons
                 } else {
@@ -209,25 +203,6 @@ struct OnlineGameDetailView: View {
                 .cornerRadius(16)
             }
             .disabled(isCreatingRoom)
-
-            // Join Room (outline style, same corner radius)
-            Button {
-                HapticManager.shared.lightImpact()
-                navigateToJoin = true
-            } label: {
-                Text("Join Room")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.primaryAccent)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.appBackground)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.primaryAccent, lineWidth: 2)
-                    )
-                    .cornerRadius(16)
-            }
-            .disabled(isCreatingRoom)
         }
         .responsiveHorizontalPadding()
         .padding(.bottom, 40)
@@ -245,7 +220,7 @@ struct OnlineGameDetailView: View {
                 .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundColor(.primaryText)
 
-            Text("You need a free account to create or join online rooms.")
+            Text("You need a free account to create an online room. Use Join Room on the Play screen to join with a code.")
                 .font(.system(size: 14, weight: .regular, design: .rounded))
                 .foregroundColor(.secondaryText)
                 .multilineTextAlignment(.center)

@@ -8,14 +8,13 @@
 import SwiftUI
 
 struct SplashView: View {
+    @AppStorage("hasCompletedFirstLaunchSplash") private var hasCompletedFirstLaunchSplash = false
+
     @State private var logoOpacity: Double = 0
     @State private var logoScale: CGFloat = 0.5
     @State private var logoRotation: Double = -180
     @State private var logoBounce: CGFloat = 0
     @State private var logoExitOffset: CGFloat = 0
-    @State private var navigateToOnboarding: Bool = false
-    @State private var navigateToHome: Bool = false
-    
     let words = ["The", "Social", "Deck"]
     @State private var wordOpacities: [Double] = [0, 0, 0]
     @State private var wordScales: [CGFloat] = [0.3, 0.3, 0.3]
@@ -55,19 +54,7 @@ struct SplashView: View {
                     }
                 }
             }
-            .opacity(navigateToOnboarding || navigateToHome ? 0 : 1)
-            
-            // Navigate to OnboardingView if not completed
-            if navigateToOnboarding {
-                OnboardingView()
-                    .transition(.opacity)
-            }
-            
-            // Navigate to HomeView if onboarding already completed
-            if navigateToHome {
-                HomeView()
-                    .transition(.opacity)
-            }
+            .opacity(hasCompletedFirstLaunchSplash ? 0 : 1)
         }
         .onAppear {
             // Logo animation: rotate, scale, fade in, and bounce
@@ -121,17 +108,10 @@ struct SplashView: View {
                     }
                 }
                 
-                // Navigate after exit animations
+                // Hand off to ContentView root (onboarding or home) — only runs once per install
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    // Check if onboarding has been completed
-                    if OnboardingManager.shared.hasCompletedOnboarding {
-                        withAnimation(.easeIn(duration: 0.3)) {
-                            navigateToHome = true
-                        }
-                    } else {
-                        withAnimation(.easeIn(duration: 0.3)) {
-                            navigateToOnboarding = true
-                        }
+                    withAnimation(.easeIn(duration: 0.3)) {
+                        hasCompletedFirstLaunchSplash = true
                     }
                 }
             }

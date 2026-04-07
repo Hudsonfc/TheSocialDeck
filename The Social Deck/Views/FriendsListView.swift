@@ -39,7 +39,7 @@ struct FriendsListView: View {
     }
 
     private var roomInviteBadgeCount: Int {
-        return onlineManager.pendingRoomInvites.count
+        return onlineManager.roomInviteCountForBadge
     }
 
     private var incomingRequestBadgeCount: Int {
@@ -905,10 +905,7 @@ struct FriendRowView: View {
             avatarType: friend.avatarType,
             avatarColor: friend.avatarColor,
             createdAt: Date(timeIntervalSinceNow: -3600 * 24 * 120),
-            gamesPlayed: 24,
             totalCardsFlipped: 312,
-            onlineGamesPlayed: 9,
-            onlineGamesWon: 4,
             lastActiveAt: friend.lastActiveAt,
             isOnline: friend.isOnline,
             isPlus: friend.username == "Maya"
@@ -1088,9 +1085,7 @@ struct FriendProfileView: View {
         VStack(spacing: 12) {
             if let profile = fullProfile {
                 HStack(spacing: 10) {
-                    statCard(title: "Games Played", value: "\(profile.gamesPlayed)", icon: "gamecontroller.fill")
                     statCard(title: "Cards Flipped", value: "\(profile.totalCardsFlipped)", icon: "rectangle.on.rectangle.angled.fill")
-                    statCard(title: "Online Wins", value: "\(profile.onlineGamesWon)", icon: "trophy.fill")
                 }
             }
         }

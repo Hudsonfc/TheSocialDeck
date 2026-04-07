@@ -50,7 +50,7 @@ struct ProfileView: View {
 
     /// Total pending items (for badge count display only — visibility still uses unseen-ID logic).
     private var friendsBadgePendingTotal: Int {
-        friendService.pendingRequests.count + onlineManager.pendingRoomInvites.count
+        friendService.pendingRequests.count + onlineManager.roomInviteCountForBadge
     }
 
     /// `nil` = show dot only (e.g. edge case); otherwise digit or "9+".
@@ -154,24 +154,28 @@ struct ProfileView: View {
         ZStack {
             Color.appBackground
                 .ignoresSafeArea()
-            
-            VStack(spacing: 24) {
-                profileHeaderSection
-                avatarEditorSection
-                usernameSection
-                statsSection
-                plusUpgradeSection
-                friendsEntrySection
-                Spacer()
-                    .frame(height: 40)
-            }
-            .opacity(contentOpacity)
 
-            if showMilestone {
-                milestoneDropBanner
-                    .padding(.top, 8)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                    .zIndex(2)
+            VStack(spacing: 0) {
+                if showMilestone {
+                    milestoneDropBanner
+                        .padding(.top, 4)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                }
+
+                VStack(spacing: 24) {
+                    profileHeaderSection
+                    avatarEditorSection
+                    usernameSection
+                    statsSection
+                    plusUpgradeSection
+                    friendsEntrySection
+                    Spacer()
+                        .frame(height: 40)
+                }
+                .frame(maxWidth: .infinity)
+                .opacity(contentOpacity)
+
+                Spacer(minLength: 0)
             }
         }
         .onAppear {
@@ -365,14 +369,12 @@ struct ProfileView: View {
 
     private var statsSection: some View {
         VStack(spacing: 16) {
-            Text("Game Statistics")
+            Text("Statistics")
                 .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundColor(.primaryText)
                 .frame(maxWidth: .infinity, alignment: .leading)
             HStack(spacing: 12) {
                 statTile(icon: "rectangle.stack.fill", value: "\(displayCardsFlipped)", label: "Cards Flipped")
-                statTile(icon: "gamecontroller.fill", value: "\(authManager.userProfile?.gamesPlayed ?? 0)", label: "Games Played")
-                statTile(icon: "trophy.fill", value: "\(authManager.userProfile?.onlineGamesWon ?? 0)", label: "Online Wins")
             }
         }
         .padding(.horizontal, 40)

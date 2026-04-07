@@ -152,6 +152,16 @@ struct OnlineGameSelectionScreen: View {
                     gameType: "twoTruthsAndALie",
                     minPlayers: 2,
                     maxPlayers: 8
+                ),
+                OnlineGamePlaceholder(
+                    title: "Act Natural",
+                    description: "One player doesn't know the secret word — can they blend in and figure it out before getting caught? Everyone else knows the word and tries to subtly mention it. Deception meets deduction!",
+                    imageName: "AN 2.0",
+                    hasCategories: false,
+                    availableCategories: [],
+                    gameType: "actNatural",
+                    minPlayers: 3,
+                    maxPlayers: 12
                 )
             ]
         )

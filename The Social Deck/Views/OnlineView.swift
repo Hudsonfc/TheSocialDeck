@@ -60,10 +60,10 @@ struct OnlineView: View {
                                 .font(.system(size: 18, weight: .semibold))
                                 .foregroundColor(.white)
                             
-                            if !onlineManager.pendingRoomInvites.isEmpty {
+                            if onlineManager.roomInviteCountForBadge > 0 {
                                 HStack {
                                     Spacer()
-                                    Text("\(onlineManager.pendingRoomInvites.count)")
+                                    Text("\(onlineManager.roomInviteCountForBadge)")
                                         .font(.system(size: 14, weight: .bold))
                                         .foregroundColor(.white)
                                         .padding(.horizontal, 10)
@@ -81,7 +81,7 @@ struct OnlineView: View {
                         .cornerRadius(16)
                     }
                     .padding(.horizontal, 40)
-                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: onlineManager.pendingRoomInvites.count)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: onlineManager.roomInviteCountForBadge)
                     
                     Spacer()
                         .frame(height: 20)
