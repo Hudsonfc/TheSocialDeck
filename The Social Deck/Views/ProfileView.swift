@@ -381,36 +381,48 @@ struct ProfileView: View {
     }
 
     private var milestoneDropBanner: some View {
-        HStack(spacing: 10) {
-            Text("🎉")
-                .font(.system(size: 20))
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(Color.primaryAccent.opacity(0.12))
+                    .frame(width: 38, height: 38)
+                Image(systemName: "sparkles")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.primaryAccent)
+            }
             VStack(alignment: .leading, spacing: 2) {
                 Text(milestoneText)
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundColor(.primaryText)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.9)
                 Text("Keep flipping!")
                     .font(.system(size: 12, weight: .regular, design: .rounded))
                     .foregroundColor(.secondaryText)
             }
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
             Button(action: {
+                HapticManager.shared.lightImpact()
                 withAnimation(.easeOut(duration: 0.25)) { showMilestone = false }
             }) {
                 Image(systemName: "xmark")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(.secondaryText)
-                    .padding(6)
+                    .frame(width: 32, height: 32)
+                    .background(Color.tertiaryBackground)
+                    .clipShape(Circle())
             }
+            .buttonStyle(.plain)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .background(Color.green.opacity(0.12))
-        .cornerRadius(12)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 13)
+        .background(Color.cardBackground)
+        .cornerRadius(14)
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.green.opacity(0.35), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(Color.primaryAccent.opacity(0.45), lineWidth: 1.2)
         )
-        .padding(.horizontal, 24)
+        .padding(.horizontal, 40)
     }
 
     @ViewBuilder
