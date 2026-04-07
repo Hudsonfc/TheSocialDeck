@@ -16,6 +16,7 @@ struct SettingsView: View {
     @State private var feedbackButtonPressed = false
     @State private var rateUsButtonPressed = false
     @State private var showPlusPaywall = false
+    @State private var showSplashPreview = false
     
     // App version info
     private var appVersion: String {
@@ -89,7 +90,19 @@ struct SettingsView: View {
                             destination: WhatsNewView(),
                             isPressed: $whatsNewButtonPressed
                         )
-                        
+
+                        Button(action: {
+                            HapticManager.shared.lightImpact()
+                            showSplashPreview = true
+                        }) {
+                            Text("View Splash Screen")
+                                .font(.system(size: 18, weight: .regular, design: .rounded))
+                                .foregroundColor(.white)
+                                .frame(width: UIScreen.main.bounds.width * 0.85, height: 60)
+                                .background(Color.buttonBackground)
+                                .cornerRadius(16)
+                        }
+
                         // Feedback Button
                         SettingsNavigationButton(
                             title: "Feedback",
@@ -192,6 +205,11 @@ struct SettingsView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        .fullScreenCover(isPresented: $showSplashPreview) {
+            SplashView(onPreviewComplete: {
+                showSplashPreview = false
+            })
+        }
     }
     
     private func requestReview() {

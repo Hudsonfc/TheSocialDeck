@@ -8,110 +8,119 @@
 import SwiftUI
 
 struct SplashView: View {
+    /// When set (e.g. from Settings), the animation runs without writing `hasCompletedFirstLaunchSplash`; called when the sequence finishes.
+    var onPreviewComplete: (() -> Void)? = nil
+
+    private var isPreviewMode: Bool { onPreviewComplete != nil }
+
     @AppStorage("hasCompletedFirstLaunchSplash") private var hasCompletedFirstLaunchSplash = false
 
     @State private var logoOpacity: Double = 0
-    @State private var logoScale: CGFloat = 0.5
-    @State private var logoRotation: Double = -180
-    @State private var logoBounce: CGFloat = 0
+    /// Vertical slide: starts below final position, animates to 0 (slide up into place).
+    @State private var logoSlideOffsetY: CGFloat = 200
     @State private var logoExitOffset: CGFloat = 0
     let words = ["The", "Social", "Deck"]
     @State private var wordOpacities: [Double] = [0, 0, 0]
-    @State private var wordScales: [CGFloat] = [0.3, 0.3, 0.3]
-    @State private var wordOffsets: [CGFloat] = [50, 50, 50]
+    @State private var wordOffsets: [CGFloat] = [36, 36, 36]
     @State private var wordExitOffsets: [CGFloat] = [0, 0, 0]
-    
+    @State private var previewDidFinish = false
+
+    private func finishPreviewIfNeeded() {
+        guard isPreviewMode, !previewDidFinish else { return }
+        previewDidFinish = true
+        onPreviewComplete?()
+    }
+
     var body: some View {
-        ZStack {
+        ZStack(alignment: .topTrailing) {
             // Splash screen content
             ZStack {
                 // White background
                 Color.white
                     .ignoresSafeArea()
-                
+
                 // Logo and text
                 VStack(spacing: 20) {
-                    // Logo from Assets with enhanced animation
-                    Image("TheSocialDeckLogo")
+                    // App icon art from `Applcon` imageset (replace PNG in Applcon.imageset to update splash + keep name)
+                    Image("Applcon")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 200, height: 200)
+                        .clipShape(RoundedRectangle(cornerRadius: 44, style: .continuous))
                         .opacity(logoOpacity)
-                        .scaleEffect(logoScale)
-                        .rotationEffect(.degrees(logoRotation))
-                        .offset(y: logoBounce + logoExitOffset)
-                    
-                    // Text under logo - word by word animation
+                        .offset(y: logoSlideOffsetY + logoExitOffset)
+
+                    // Text under logo — slide up in sequence
                     HStack(spacing: 8) {
                         ForEach(Array(words.enumerated()), id: \.offset) { index, word in
                             Text(word)
                                 .font(.system(size: 32, weight: .black))
                                 .foregroundColor(.black)
                                 .opacity(wordOpacities[index])
-                                .scaleEffect(wordScales[index])
                                 .offset(y: wordOffsets[index] + wordExitOffsets[index])
                         }
                     }
                 }
             }
-            .opacity(hasCompletedFirstLaunchSplash ? 0 : 1)
+            .opacity(isPreviewMode ? 1 : (hasCompletedFirstLaunchSplash ? 0 : 1))
+
+            if isPreviewMode {
+                Button {
+                    HapticManager.shared.lightImpact()
+                    finishPreviewIfNeeded()
+                } label: {
+                    Text("Done")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(.black.opacity(0.55))
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                }
+                .padding(.top, 12)
+                .padding(.trailing, 16)
+            }
         }
         .onAppear {
-            // Logo animation: rotate, scale, fade in, and bounce
-            withAnimation(.spring(response: 1.2, dampingFraction: 0.6)) {
+            // Icon: slide up into place + fade in
+            withAnimation(.spring(response: 0.85, dampingFraction: 0.82)) {
                 logoOpacity = 1.0
-                logoScale = 1.0
-                logoRotation = 0
+                logoSlideOffsetY = 0
             }
-            
-            // Bounce effect for logo
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.4)) {
-                    logoBounce = -10
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    withAnimation(.spring(response: 0.5, dampingFraction: 0.4)) {
-                        logoBounce = 0
-                    }
-                }
-            }
-            
-            // Animate words one by one
+
+            // Words: slide up one by one (lighter stagger)
             for index in 0..<words.count {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2 + Double(index) * 0.15) {
-                    withAnimation(.spring(response: 0.6, dampingFraction: 0.5)) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.55 + Double(index) * 0.12) {
+                    withAnimation(.spring(response: 0.55, dampingFraction: 0.78)) {
                         wordOpacities[index] = 1.0
-                        wordScales[index] = 1.0
                         wordOffsets[index] = 0
                     }
                 }
             }
-            
-            // Start exit animations and navigate after 3.5 seconds
+
+            // Exit and hand off after full read
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
-                // Logo exit animation: scale down, rotate slightly, fade out, move up
-                withAnimation(.easeIn(duration: 0.4)) {
-                    logoScale = 0.3
-                    logoRotation = 15
+                // Icon: slide up and fade out
+                withAnimation(.easeIn(duration: 0.45)) {
                     logoOpacity = 0
-                    logoExitOffset = -30
+                    logoExitOffset = -100
                 }
-                
-                // Text exit animation: scale down, fade out, move up (staggered in reverse)
+
+                // Words: slide up and fade (staggered)
                 for index in (0..<words.count).reversed() {
                     DispatchQueue.main.asyncAfter(deadline: .now() + Double(words.count - 1 - index) * 0.08) {
                         withAnimation(.easeIn(duration: 0.4)) {
-                            wordScales[index] = 0.2
                             wordOpacities[index] = 0
-                            wordExitOffsets[index] = -20
+                            wordExitOffsets[index] = -28
                         }
                     }
                 }
-                
-                // Hand off to ContentView root (onboarding or home) — only runs once per install
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation(.easeIn(duration: 0.3)) {
-                        hasCompletedFirstLaunchSplash = true
+                    if onPreviewComplete != nil {
+                        finishPreviewIfNeeded()
+                    } else {
+                        withAnimation(.easeIn(duration: 0.3)) {
+                            hasCompletedFirstLaunchSplash = true
+                        }
                     }
                 }
             }
@@ -122,4 +131,3 @@ struct SplashView: View {
 #Preview {
     SplashView()
 }
-
