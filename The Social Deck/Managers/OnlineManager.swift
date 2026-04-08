@@ -159,6 +159,16 @@ class OnlineManager: ObservableObject {
 
         isLoading = false
     }
+
+    /// Adopts a room created outside the normal flow (e.g. matchmaking host) and attaches the room listener.
+    func adoptRoomFromExternalCreate(_ room: OnlineRoom) {
+        currentRoom = room
+        isConnected = true
+        isLoading = false
+        errorMessage = nil
+        userChoseToLeaveRoomSession = false
+        startListeningToRoom(roomCode: room.roomCode)
+    }
     
     /// Leaves the current room
     func leaveRoom() async {
