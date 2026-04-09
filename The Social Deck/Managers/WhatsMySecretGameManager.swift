@@ -22,6 +22,12 @@ class WhatsMySecretGameManager: ObservableObject {
     @Published var groupWins: Int = 0
     @Published var secretPlayerWins: Int = 0
     @Published var isTimerPaused: Bool = false
+    /// Points for correctly guessing the secret (early “Someone guessed it” flow).
+    @Published var playerScores: [String: Int] = [:]
+    /// True when entering guessing from the timer; false when someone tapped “Someone guessed it”.
+    @Published var isResolvingEarlyGuess: Bool = false
+    /// Set when a specific player earned a guess point this round (for result copy).
+    @Published var lastRoundGuessWinner: String? = nil
     
     private var timer: Timer?
     private var pausedTimeRemaining: TimeInterval = 0
@@ -36,7 +42,13 @@ class WhatsMySecretGameManager: ObservableObject {
     }
     
     @Published var gamePhase: GamePhase = .playersTurn
-    
+
+    private func setPhase(_ phase: GamePhase) {
+        withAnimation(.spring(response: 0.52, dampingFraction: 0.88)) {
+            gamePhase = phase
+        }
+    }
+
     init(deck: Deck, selectedCategories: [String], cardCount: Int, players: [String], timerDuration: TimeInterval = 120.0) {
         // Initialize players - randomize order
         if players.isEmpty {
@@ -44,7 +56,10 @@ class WhatsMySecretGameManager: ObservableObject {
         } else {
             self.players = players.shuffled()
         }
-        
+        for p in self.players {
+            self.playerScores[p] = 0
+        }
+
         // Set timer duration
         self.roundDuration = timerDuration
         
@@ -102,6 +117,11 @@ class WhatsMySecretGameManager: ObservableObject {
         guard currentCardIndex < cards.count else { return nil }
         return cards[currentCardIndex].text
     }
+
+    /// Everyone except the current secret keeper can receive a guess point.
+    var guessablePlayers: [String] {
+        players.filter { $0 != currentPlayer }
+    }
     
     func startRound() {
         // Check if we have cards left
@@ -110,15 +130,17 @@ class WhatsMySecretGameManager: ObservableObject {
             return
         }
         
-        gamePhase = .playersTurn
+        setPhase(.playersTurn)
         timeRemaining = roundDuration
         groupGuessedCorrectly = nil
         isCardFlipped = false
+        isResolvingEarlyGuess = false
+        lastRoundGuessWinner = nil
     }
     
     func proceedToSecret() {
         // Move from "Player's Turn" to showing secret card
-        gamePhase = .showingSecret
+        setPhase(.showingSecret)
         
         // Haptic feedback
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
@@ -135,7 +157,7 @@ class WhatsMySecretGameManager: ObservableObject {
     
     func secretViewed() {
         // Move to timer phase (after player has seen the secret)
-        gamePhase = .timerRunning
+        setPhase(.timerRunning)
         isTimerPaused = false
         startTimer()
         
@@ -148,7 +170,7 @@ class WhatsMySecretGameManager: ObservableObject {
         // Pause timer and switch to showing secret
         pauseTimer()
         isCardFlipped = true // Ensure card shows secret
-        gamePhase = .showingSecret
+        setPhase(.showingSecret)
         
         // Haptic feedback
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
@@ -157,7 +179,7 @@ class WhatsMySecretGameManager: ObservableObject {
     
     func resumeTimer() {
         // Resume from showing secret back to timer
-        gamePhase = .timerRunning
+        setPhase(.timerRunning)
         isTimerPaused = false
         resumeTimerFromPause()
         
@@ -207,23 +229,44 @@ class WhatsMySecretGameManager: ObservableObject {
         }
     }
     
-    func skipTimer() {
-        // Allow skipping timer if needed (for testing or if group is ready)
+    /// Someone said the secret during the timer—pick who gets the point.
+    func someoneGuessedIt() {
         timer?.invalidate()
-        timeRemaining = 0
-        handleTimerExpired()
+        timer = nil
+        isTimerPaused = false
+        isResolvingEarlyGuess = true
+        setPhase(.guessing)
+
+        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+        impactFeedback.impactOccurred()
+    }
+
+    func awardGuessPoint(to guesserName: String) {
+        guard guessablePlayers.contains(guesserName) else { return }
+
+        playerScores[guesserName, default: 0] += 1
+        groupWins += 1
+        groupGuessedCorrectly = true
+        lastRoundGuessWinner = guesserName
+        isResolvingEarlyGuess = false
+        setPhase(.result)
+
+        let notificationFeedback = UINotificationFeedbackGenerator()
+        notificationFeedback.notificationOccurred(.success)
     }
     
     private func handleTimerExpired() {
         timer?.invalidate()
         timer = nil
-        gamePhase = .guessing
+        isResolvingEarlyGuess = false
+        setPhase(.guessing)
     }
     
     func submitGuess(wasCorrect: Bool) {
+        lastRoundGuessWinner = nil
         groupGuessedCorrectly = wasCorrect
-        gamePhase = .result
-        
+        setPhase(.result)
+
         // Update score tracking
         if wasCorrect {
             groupWins += 1
@@ -250,10 +293,12 @@ class WhatsMySecretGameManager: ObservableObject {
         }
         
         roundNumber += 1
-        gamePhase = .playersTurn
+        setPhase(.playersTurn)
         timeRemaining = roundDuration
         groupGuessedCorrectly = nil
         isCardFlipped = false
+        isResolvingEarlyGuess = false
+        lastRoundGuessWinner = nil
     }
     
     var canGoBack: Bool {
@@ -274,11 +319,13 @@ class WhatsMySecretGameManager: ObservableObject {
         }
         
         roundNumber = max(1, roundNumber - 1)
-        gamePhase = .playersTurn
+        setPhase(.playersTurn)
         timeRemaining = roundDuration
         groupGuessedCorrectly = nil
         isCardFlipped = false
-        
+        isResolvingEarlyGuess = false
+        lastRoundGuessWinner = nil
+
         timer?.invalidate()
         timer = nil
     }

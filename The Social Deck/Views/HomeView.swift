@@ -28,6 +28,7 @@ struct HomeView: View {
     @State private var featuredPlayButtonPressed = false
     @State private var mainPlayButtonPressed = false
     @State private var settingsButtonPressed = false
+    @State private var wwydButtonPressed = false
     @State private var currentSlideIndex = 0
     @State private var slideshowTimer: Timer?
     @State private var currentQuote: String = ""
@@ -295,12 +296,20 @@ struct HomeView: View {
                             destination: Play2View(),
                             isPressed: $mainPlayButtonPressed
                         )
+
+                        NavigationButton(
+                            title: "What Would You Do",
+                            offset: button2Offset,
+                            opacity: button2Opacity,
+                            destination: WhatWouldYouDoView(),
+                            isPressed: $wwydButtonPressed
+                        )
                         
                         // Settings Button (moved directly under Play)
                         NavigationButton(
                             title: "Settings",
-                            offset: button2Offset,
-                            opacity: button2Opacity,
+                            offset: button3Offset,
+                            opacity: button3Opacity,
                             destination: SettingsView(),
                             isPressed: $settingsButtonPressed
                         )
@@ -574,7 +583,7 @@ struct HomeView: View {
                 button2Opacity = 1.0
             }
         }
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
                 button3Offset = 0

@@ -10,22 +10,35 @@ import SwiftUI
 struct WhatsMySecretEndView: View {
     let deck: Deck
     let selectedCategories: [String]
-    let groupWins: Int
-    let secretPlayerWins: Int
     let totalRounds: Int
     let players: [String]
+    let playerScores: [String: Int]
     @State private var navigateToHome: Bool = false
     @State private var navigateToPlayAgain: Bool = false
     @State private var navigateToNewPlayers: Bool = false
     @Environment(\.dismiss) private var dismiss
     
-    init(deck: Deck, selectedCategories: [String], groupWins: Int, secretPlayerWins: Int, totalRounds: Int, players: [String] = []) {
+    init(
+        deck: Deck,
+        selectedCategories: [String],
+        totalRounds: Int,
+        players: [String] = [],
+        playerScores: [String: Int] = [:]
+    ) {
         self.deck = deck
         self.selectedCategories = selectedCategories
-        self.groupWins = groupWins
-        self.secretPlayerWins = secretPlayerWins
         self.totalRounds = totalRounds
         self.players = players
+        self.playerScores = playerScores
+    }
+
+    private var playersSortedByGuessPoints: [String] {
+        players.sorted {
+            let a = playerScores[$0, default: 0]
+            let b = playerScores[$1, default: 0]
+            if a != b { return a > b }
+            return $0 < $1
+        }
     }
     
     var body: some View {
@@ -72,18 +85,50 @@ struct WhatsMySecretEndView: View {
                             .font(.system(size: 32, weight: .bold, design: .rounded))
                             .foregroundColor(.primaryText)
                         
-                        Text("Secrets revealed!")
+                        Text("Most guess points wins!")
                             .font(.system(size: 16, weight: .regular, design: .rounded))
                             .foregroundColor(.secondaryText)
                     }
-                    
-                    // Game summary
-                    VStack(spacing: 16) {
-                        summaryRow(label: "Rounds Played", value: "\(totalRounds)")
-                        summaryRow(label: "Group Wins", value: "\(groupWins)")
-                        summaryRow(label: "Secret Player Wins", value: "\(secretPlayerWins)")
+
+                    // Game summary — points only
+                    VStack(alignment: .leading, spacing: 0) {
+                        HStack {
+                            Text("Rounds")
+                                .font(.system(size: 14, weight: .medium, design: .rounded))
+                                .foregroundColor(.secondaryText)
+                            Spacer()
+                            Text("\(totalRounds)")
+                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                .foregroundColor(.primaryText)
+                        }
+                        .padding(.bottom, 14)
+
+                        if !players.isEmpty {
+                            Divider()
+                                .opacity(0.35)
+                                .padding(.bottom, 10)
+
+                            ForEach(Array(playersSortedByGuessPoints.enumerated()), id: \.element) { index, name in
+                                HStack {
+                                    Text(name)
+                                        .font(.system(size: 15, weight: .regular, design: .rounded))
+                                        .foregroundColor(.primaryText)
+                                    Spacer()
+                                    Text("\(playerScores[name, default: 0])")
+                                        .font(.system(size: 15, weight: .medium, design: .rounded).monospacedDigit())
+                                        .foregroundColor(.secondaryText)
+                                }
+                                .padding(.vertical, 10)
+
+                                if index < playersSortedByGuessPoints.count - 1 {
+                                    Divider()
+                                        .opacity(0.25)
+                                }
+                            }
+                        }
                     }
                     .padding(20)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color.secondaryBackground)
                     .cornerRadius(20)
                     .padding(.horizontal, 24)
@@ -149,20 +194,6 @@ struct WhatsMySecretEndView: View {
             }
         )
     }
-    
-    private func summaryRow(label: String, value: String) -> some View {
-        HStack {
-            Text(label)
-                .font(.system(size: 16, weight: .regular, design: .rounded))
-                .foregroundColor(.secondaryText)
-            
-            Spacer()
-            
-            Text(value)
-                .font(.system(size: 16, weight: .semibold, design: .rounded))
-                .foregroundColor(.primaryText)
-        }
-    }
 }
 
 #Preview {
@@ -179,10 +210,9 @@ struct WhatsMySecretEndView: View {
                 availableCategories: []
             ),
             selectedCategories: [],
-            groupWins: 5,
-            secretPlayerWins: 3,
             totalRounds: 8,
-            players: []
+            players: ["Alex", "Sam"],
+            playerScores: ["Alex": 2, "Sam": 1]
         )
     }
 }

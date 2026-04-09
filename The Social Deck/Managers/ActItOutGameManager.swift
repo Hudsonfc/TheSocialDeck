@@ -28,6 +28,8 @@ class ActItOutGameManager: ObservableObject {
     // Players
     @Published var players: [String] = []
     @Published var currentPlayerIndex: Int = 0
+    /// Guess points (whoever guessed the prompt).
+    @Published var playerScores: [String: Int] = [:]
     
     var canGoBack: Bool {
         return currentCardIndex > 0
@@ -39,8 +41,10 @@ class ActItOutGameManager: ObservableObject {
     }
     
     init(deck: Deck, selectedCategories: [String], players: [String], cardCount: Int, timerEnabled: Bool, timerDuration: Int) {
-        // Default to 2 players if none provided
-        self.players = players.isEmpty ? ["Player 1", "Player 2"] : players.shuffled()
+        self.players = players.shuffled()
+        for p in self.players {
+            self.playerScores[p] = 0
+        }
         self.timerEnabled = timerEnabled
         self.timerDuration = timerDuration
         self.timeRemaining = timerDuration
@@ -70,7 +74,19 @@ class ActItOutGameManager: ObservableObject {
         isFlipped.toggle()
         if isFlipped && timerEnabled {
             startTimer()
+        } else if !isFlipped {
+            stopTimer()
         }
+    }
+
+    /// Award a point to someone who guessed (not the actor).
+    func addGuessPoint(for name: String) {
+        guard players.contains(name), name != currentPlayer else { return }
+        playerScores[name, default: 0] += 1
+    }
+
+    var guessEligiblePlayers: [String] {
+        players.filter { $0 != currentPlayer }
     }
     
     func revealAnswer() {

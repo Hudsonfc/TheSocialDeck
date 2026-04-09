@@ -31,9 +31,9 @@ class GameOfTheDayManager {
         // Social Deck Games (Hot Potato excluded from Game of the Day)
         GameOfTheDayInfo(title: "Rhyme Time", description: "Say a word that rhymes with the base word before time runs out!", imageName: "RT 2.0", type: .rhymeTime),
         GameOfTheDayInfo(title: "Tap Duel", description: "Fast head-to-head reaction game. Wait for GO, then tap first to win!", imageName: "TD 2.0", type: .tapDuel),
-        GameOfTheDayInfo(title: "What's My Secret?", description: "One player gets a secret rule to follow. Can the group figure out what it is?", imageName: "WMS 2.0", type: .whatsMySecret),
+        GameOfTheDayInfo(title: "What's My Secret?", description: "The secret keeper helps the group guess the rule; whoever gets it right scores a point—most points wins.", imageName: "WMS 2.0", type: .whatsMySecret),
         GameOfTheDayInfo(title: "Riddle Me This", description: "Solve riddles quickly! The first player to say the correct answer wins the round.", imageName: "RMT 2.0", type: .riddleMeThis),
-        GameOfTheDayInfo(title: "Act It Out", description: "Act out prompts silently while others guess! First to guess correctly wins the round.", imageName: "AIO 2.0", type: .actItOut),
+        GameOfTheDayInfo(title: "Act It Out", description: "Act without speaking while others guess; give a point when someone gets it right. Most points wins.", imageName: "AIO 2.0", type: .actItOut),
         GameOfTheDayInfo(title: "Category Clash", description: "Name items in a category before time runs out! Hesitate or repeat an answer and you're out.", imageName: "CC 2.0", type: .categoryClash),
         GameOfTheDayInfo(title: "Spin the Bottle", description: "Tap to spin and let the bottle decide everyone's fate. No strategy, no mercy, just pure chaos.", imageName: "STB 2.0", type: .spinTheBottle),
         GameOfTheDayInfo(title: "Story Chain", description: "Add one sentence to continue the story. Pass the phone and watch the chaos unfold.", imageName: "SC 2.0", type: .storyChain),

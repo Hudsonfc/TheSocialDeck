@@ -187,7 +187,7 @@ struct CategoryButton: View {
         ActItOutCategorySelectionView(
             deck: Deck(
                 title: "Act It Out",
-                description: "Act out prompts silently!",
+                description: "Players take turns acting out a word or idea without speaking while everyone else tries to guess. No talking—just gestures and movement. When someone guesses correctly, give them a point; whoever has the most points when the game ends wins.",
                 numberOfCards: 300,
                 estimatedTime: "15-30 min",
                 imageName: "AIO 2.0",

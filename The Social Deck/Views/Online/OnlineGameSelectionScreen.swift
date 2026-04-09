@@ -155,7 +155,7 @@ struct OnlineGameSelectionScreen: View {
                 ),
                 OnlineGamePlaceholder(
                     title: "Act Natural",
-                    description: "One player doesn't know the secret word — can they blend in and figure it out before getting caught? Everyone else knows the word and tries to subtly mention it. Deception meets deduction!",
+                    description: "Reveal roles first—the first to reveal starts. In the Know players say related words that signal each other without giving the secret to the Unknown; the Unknown fakes fitting in. Deduction and deception!",
                     imageName: "AN 2.0",
                     hasCategories: false,
                     availableCategories: [],

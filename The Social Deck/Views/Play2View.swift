@@ -158,7 +158,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "What's My Secret?",
-            description: "One player gets a secret rule to follow. Can the group figure out what it is? The secret player must act according to hidden rules while others try to guess. Pick categories like Party, Wild, Social, Actions, or Behavior. Think fast and stay sharp!",
+            description: "Each round, one player is the secret keeper: they know a hidden rule and should try their hardest to help everyone else figure it out from how they act—without saying the answer outright. Whoever says the secret and gets it right earns a point. Most points when the game ends wins.",
             numberOfCards: 562,
             estimatedTime: "5-10 min",
             imageName: "WMS 2.0",
@@ -178,7 +178,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Act It Out",
-            description: "Act out prompts silently while others guess! First to guess correctly wins the round. Challenge your acting skills with categories like Actions & Verbs, Animals, Emotions, Daily Activities, Sports, Objects, Food, Famous Concepts, Movie Genres, and Nature. No talking, only acting!",
+            description: "Players take turns acting out a word or idea without speaking while everyone else tries to guess. No talking—just gestures and movement. When someone guesses correctly, give them a point; whoever has the most points when the game ends wins.",
             numberOfCards: 556,
             estimatedTime: "15-30 min",
             imageName: "AIO 2.0",
@@ -188,7 +188,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Act Natural",
-            description: "One player doesn't know the secret word — can they blend in and figure it out before getting caught? Everyone else knows the secret word and tries to subtly mention it. The secret player must figure it out while acting natural. Deception meets deduction!",
+            description: "Everyone reveals their role—In the Know or Unknown—and the first person to reveal goes first. In the Know players take turns saying a word that relates to the secret word: enough that the others who know can tell you're in on it, but not so obvious that you give the answer away to the Unknown. The Unknown has to blend in by saying something that sounds like they belong, without knowing the real word. Can they figure it out before they're caught?",
             numberOfCards: 475,
             estimatedTime: "10-20 min",
             imageName: "AN 2.0",

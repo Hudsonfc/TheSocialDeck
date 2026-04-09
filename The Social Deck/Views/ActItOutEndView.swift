@@ -12,16 +12,27 @@ struct ActItOutEndView: View {
     let selectedCategories: [String]
     let roundsPlayed: Int
     let players: [String]
+    let playerScores: [String: Int]
     @State private var navigateToHome: Bool = false
     @State private var navigateToPlayAgain: Bool = false
     @State private var navigateToNewPlayers: Bool = false
     @Environment(\.dismiss) private var dismiss
     
-    init(deck: Deck, selectedCategories: [String], roundsPlayed: Int = 0, players: [String] = []) {
+    init(deck: Deck, selectedCategories: [String], roundsPlayed: Int = 0, players: [String] = [], playerScores: [String: Int] = [:]) {
         self.deck = deck
         self.selectedCategories = selectedCategories
         self.roundsPlayed = roundsPlayed
         self.players = players
+        self.playerScores = playerScores
+    }
+
+    private var playersSortedByPoints: [String] {
+        players.sorted {
+            let a = playerScores[$0, default: 0]
+            let b = playerScores[$1, default: 0]
+            if a != b { return a > b }
+            return $0 < $1
+        }
     }
     
     var body: some View {
@@ -68,17 +79,50 @@ struct ActItOutEndView: View {
                             .font(.system(size: 32, weight: .bold, design: .rounded))
                             .foregroundColor(.primaryText)
                         
-                        Text("Amazing performances!")
+                        Text("Most guess points wins!")
                             .font(.system(size: 16, weight: .regular, design: .rounded))
                             .foregroundColor(.secondaryText)
                     }
-                    
+
                     // Game summary
-                    VStack(spacing: 16) {
-                        summaryRow(label: "Rounds Played", value: "\(roundsPlayed)")
-                        summaryRow(label: "Categories", value: "\(selectedCategories.count)")
+                    VStack(alignment: .leading, spacing: 0) {
+                        HStack {
+                            Text("Rounds")
+                                .font(.system(size: 14, weight: .medium, design: .rounded))
+                                .foregroundColor(.secondaryText)
+                            Spacer()
+                            Text("\(roundsPlayed)")
+                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                .foregroundColor(.primaryText)
+                        }
+                        .padding(.bottom, 14)
+
+                        if !players.isEmpty {
+                            Divider()
+                                .opacity(0.35)
+                                .padding(.bottom, 10)
+
+                            ForEach(Array(playersSortedByPoints.enumerated()), id: \.element) { index, name in
+                                HStack {
+                                    Text(name)
+                                        .font(.system(size: 15, weight: .regular, design: .rounded))
+                                        .foregroundColor(.primaryText)
+                                    Spacer()
+                                    Text("\(playerScores[name, default: 0])")
+                                        .font(.system(size: 15, weight: .medium, design: .rounded).monospacedDigit())
+                                        .foregroundColor(.secondaryText)
+                                }
+                                .padding(.vertical, 10)
+
+                                if index < playersSortedByPoints.count - 1 {
+                                    Divider()
+                                        .opacity(0.25)
+                                }
+                            }
+                        }
                     }
                     .padding(20)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color.secondaryBackground)
                     .cornerRadius(20)
                     .padding(.horizontal, 24)
@@ -144,20 +188,6 @@ struct ActItOutEndView: View {
             }
         )
     }
-    
-    private func summaryRow(label: String, value: String) -> some View {
-        HStack {
-            Text(label)
-                .font(.system(size: 16, weight: .regular, design: .rounded))
-                .foregroundColor(.secondaryText)
-            
-            Spacer()
-            
-            Text(value)
-                .font(.system(size: 16, weight: .semibold, design: .rounded))
-                .foregroundColor(.primaryText)
-        }
-    }
 }
 
 #Preview {
@@ -165,7 +195,7 @@ struct ActItOutEndView: View {
         ActItOutEndView(
             deck: Deck(
                 title: "Act It Out",
-                description: "Act out prompts silently!",
+                description: "Players take turns acting out a word or idea without speaking while everyone else tries to guess. No talking—just gestures and movement. When someone guesses correctly, give them a point; whoever has the most points when the game ends wins.",
                 numberOfCards: 300,
                 estimatedTime: "15-30 min",
                 imageName: "AIO 2.0",

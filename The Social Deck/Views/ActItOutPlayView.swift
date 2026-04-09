@@ -21,13 +21,17 @@ struct ActItOutPlayView: View {
     @State private var isTransitioning: Bool = false
     @State private var actionButtonsOpacity: Double = 0
     @State private var actionButtonsOffset: CGFloat = 20
-    
+    @State private var turnIntroAcknowledged: Bool = false
+    @State private var showGivePointOverlay: Bool = false
+
+    private let winGreen = Color(red: 0x34 / 255.0, green: 0xC7 / 255.0, blue: 0x59 / 255.0)
+
     var body: some View {
         ZStack {
             // Dark adaptive background
             Color.appBackground
                 .ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
                 // Top bar with exit, home button, and progress
                 HStack(alignment: .center, spacing: 8) {
@@ -80,108 +84,113 @@ struct ActItOutPlayView: View {
                 .responsiveHorizontalPadding()
                 .padding(.top, 12)
                 .padding(.bottom, 12)
-                
-                // Current player indicator
-                if manager.isFlipped {
-                    Text("\(manager.currentPlayer)'s Turn")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+
+                if turnIntroAcknowledged {
+                    // Timer (if enabled and card is flipped)
+                    if manager.timerEnabled && manager.isFlipped {
+                        Text("\(manager.timeRemaining)")
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                            .foregroundColor(manager.timeRemaining <= 10 ? Color.buttonBackground : .primaryText)
+                            .padding(.bottom, 4)
+                    }
+                }
+
+                Spacer()
+
+                if !turnIntroAcknowledged, manager.currentCard() != nil {
+                    turnIntroContent
+                } else if turnIntroAcknowledged {
+                    Text("Act It Out")
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
                         .foregroundColor(Color.buttonBackground)
-                        .padding(.bottom, 4)
-                }
-                
-                // Timer (if enabled and card is flipped)
-                if manager.timerEnabled && manager.isFlipped {
-                    Text("\(manager.timeRemaining)")
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(manager.timeRemaining <= 10 ? Color.buttonBackground : .primaryText)
-                        .padding(.bottom, 4)
-                }
-                
-                Spacer()
-                
-                // "Act It Out" label
-                Text("Act It Out")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.buttonBackground)
-                    .padding(.bottom, 24)
-                
-                // Card
-                if let currentCard = manager.currentCard() {
-                    ZStack {
-                        // Card front - visible when rotation < 90
-                        ActItOutCardFrontView()
-                            .opacity(cardRotation < 90 ? 1 : 0)
-                        
-                        // Card back - visible when rotation >= 90, pre-rotated 180
-                        ActItOutCardBackView(text: currentCard.text)
-                            .opacity(cardRotation >= 90 ? 1 : 0)
-                            .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
-                    }
-                    .frame(width: ResponsiveSize.cardWidth, height: ResponsiveSize.cardHeight)
-                    .rotation3DEffect(
-                        .degrees(cardRotation),
-                        axis: (x: 0, y: 1, z: 0),
-                        perspective: 0.5
-                    )
-                    .offset(x: cardOffset)
-                    .id(currentCard.id)
-                    .onTapGesture {
-                        if !isTransitioning && !manager.isFlipped {
-                            toggleCard()
+                        .padding(.bottom, 8)
+
+                    Text("\(manager.currentPlayer)'s turn")
+                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                        .foregroundColor(Color.buttonBackground.opacity(0.9))
+                        .padding(.bottom, 20)
+
+                    // Card
+                    if let currentCard = manager.currentCard() {
+                        ZStack {
+                            ActItOutCardFrontView()
+                                .opacity(cardRotation < 90 ? 1 : 0)
+
+                            ActItOutCardBackView(text: currentCard.text)
+                                .opacity(cardRotation >= 90 ? 1 : 0)
+                                .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
                         }
+                        .frame(width: ResponsiveSize.cardWidth, height: ResponsiveSize.cardHeight)
+                        .rotation3DEffect(
+                            .degrees(cardRotation),
+                            axis: (x: 0, y: 1, z: 0),
+                            perspective: 0.5
+                        )
+                        .offset(x: cardOffset)
+                        .id(currentCard.id)
+                        .onTapGesture {
+                            if !isTransitioning {
+                                toggleCard()
+                            }
+                        }
+                        .padding(.bottom, 24)
                     }
-                    .padding(.bottom, 24)
-                }
-                
-                Spacer()
-                
-                // Action buttons (shown when card is flipped)
-                if manager.isFlipped {
-                    HStack(spacing: 10) {
-                        if manager.skipsRemaining > 0 {
+
+                    Spacer()
+
+                    if manager.isFlipped {
+                        HStack(spacing: 10) {
+                            if manager.skipsRemaining > 0 {
+                                Button(action: {
+                                    HapticManager.shared.lightImpact()
+                                    skipCard()
+                                }) {
+                                    Text("Skip (\(manager.skipsRemaining))")
+                                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                        .foregroundColor(Color.buttonBackground)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 12)
+                                        .background(Color.appBackground)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(Color.buttonBackground, lineWidth: 2)
+                                        )
+                                        .cornerRadius(10)
+                                }
+                            }
+
                             Button(action: {
                                 HapticManager.shared.lightImpact()
-                                skipCard()
+                                withAnimation(.spring(response: 0.45, dampingFraction: 0.92)) {
+                                    showGivePointOverlay = true
+                                }
                             }) {
-                                Text("Skip (\(manager.skipsRemaining))")
+                                Text("Give point")
                                     .font(.system(size: 15, weight: .semibold, design: .rounded))
-                                    .foregroundColor(Color.buttonBackground)
+                                    .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 12)
-                                    .background(Color.appBackground)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color.buttonBackground, lineWidth: 2)
-                                    )
+                                    .background(Color.buttonBackground)
                                     .cornerRadius(10)
                             }
                         }
-                        
-                        Button(action: {
-                            HapticManager.shared.lightImpact()
-                            if manager.currentCardIndex >= manager.cards.count - 1 {
-                                showEndView = true
-                            } else {
-                                nextCard()
-                            }
-                        }) {
-                            Text(manager.currentCardIndex >= manager.cards.count - 1 ? "Finish" : "Next")
-                                .font(.system(size: 15, weight: .semibold, design: .rounded))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
-                                .background(Color.buttonBackground)
-                                .cornerRadius(10)
-                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 32)
+                        .opacity(actionButtonsOpacity)
+                        .offset(y: actionButtonsOffset)
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 32)
-                    .opacity(actionButtonsOpacity)
-                    .offset(y: actionButtonsOffset)
                 }
+
+                Spacer(minLength: 0)
             }
-            .animation(.spring(response: 0.5, dampingFraction: 0.8), value: manager.isFlipped)
+            .animation(.spring(response: 0.5, dampingFraction: 0.82), value: manager.isFlipped)
+            .animation(.spring(response: 0.48, dampingFraction: 0.86), value: turnIntroAcknowledged)
+
+            if showGivePointOverlay {
+                actItOutGivePointOverlay
+            }
         }
+        .animation(.spring(response: 0.45, dampingFraction: 0.92), value: showGivePointOverlay)
         .navigationBarHidden(true)
         .alert("Go to Home?", isPresented: $showHomeAlert) {
             Button("Cancel", role: .cancel) { }
@@ -194,7 +203,13 @@ struct ActItOutPlayView: View {
         .background(
             Group {
                 NavigationLink(
-                    destination: ActItOutEndView(deck: deck, selectedCategories: selectedCategories, roundsPlayed: manager.cards.count, players: manager.players),
+                    destination: ActItOutEndView(
+                        deck: deck,
+                        selectedCategories: selectedCategories,
+                        roundsPlayed: manager.cards.count,
+                        players: manager.players,
+                        playerScores: manager.playerScores
+                    ),
                     isActive: $showEndView
                 ) {
                     EmptyView()
@@ -224,14 +239,119 @@ struct ActItOutPlayView: View {
             }
         }
         .onAppear {
-            // Initialize button state
             if manager.isFlipped {
                 actionButtonsOpacity = 1.0
                 actionButtonsOffset = 0
             }
         }
+        .onChange(of: manager.currentCardIndex) { _, _ in
+            turnIntroAcknowledged = false
+            if !manager.isFlipped {
+                cardRotation = 0
+            }
+        }
     }
-    
+
+    private var turnIntroContent: some View {
+        VStack(spacing: 20) {
+            Text("Up next")
+                .font(.system(size: 15, weight: .medium, design: .rounded))
+                .foregroundColor(.secondaryText)
+
+            Text(manager.currentPlayer)
+                .font(.system(size: 38, weight: .bold, design: .rounded))
+                .foregroundColor(Color.buttonBackground)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
+
+            Text("Your turn to act. When you continue, flip the card to see the prompt—still no talking!")
+                .font(.system(size: 15, weight: .regular, design: .rounded))
+                .foregroundColor(.secondaryText)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+
+            PrimaryButton(title: "Continue") {
+                HapticManager.shared.mediumImpact()
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) {
+                    turnIntroAcknowledged = true
+                }
+            }
+            .padding(.horizontal, 40)
+            .padding(.top, 8)
+        }
+    }
+
+    private var actItOutGivePointOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.5)
+                .ignoresSafeArea()
+
+            VStack(spacing: 22) {
+                Text("Who guessed it?")
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+
+                Text("Tap a player to give them a point.")
+                    .font(.system(size: 15, weight: .regular, design: .rounded))
+                    .foregroundColor(.white.opacity(0.88))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+
+                if manager.guessEligiblePlayers.isEmpty {
+                    Text("Need at least two players to award a guesser.")
+                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                        .foregroundColor(.white.opacity(0.9))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                } else {
+                    VStack(spacing: 10) {
+                        ForEach(manager.guessEligiblePlayers, id: \.self) { name in
+                            Button(action: {
+                                givePointAndAdvance(to: name)
+                            }) {
+                                Text(name)
+                                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                                    .background(winGreen)
+                                    .cornerRadius(12)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.horizontal, 28)
+                }
+
+                Button("Cancel") {
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.92)) {
+                        showGivePointOverlay = false
+                    }
+                }
+                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .foregroundColor(.white.opacity(0.9))
+                .padding(.top, 4)
+            }
+            .padding(.vertical, 32)
+        }
+    }
+
+    private func givePointAndAdvance(to name: String) {
+        HapticManager.shared.mediumImpact()
+        manager.addGuessPoint(for: name)
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.92)) {
+            showGivePointOverlay = false
+        }
+
+        let isLastRound = manager.currentCardIndex >= manager.cards.count - 1
+        if isLastRound {
+            manager.nextCard()
+            showEndView = true
+            return
+        }
+        nextCard()
+    }
+
     private func toggleCard() {
         HapticManager.shared.lightImpact()
         
@@ -424,6 +544,11 @@ struct ActItOutCardBackView: View {
                     .font(.system(size: 14, weight: .medium, design: .rounded))
                     .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
                     .padding(.top, 16)
+
+                Text("Tap the card to hide the prompt")
+                    .font(.system(size: 13, weight: .regular, design: .rounded))
+                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0).opacity(0.75))
+                    .padding(.top, 8)
             }
         }
     }

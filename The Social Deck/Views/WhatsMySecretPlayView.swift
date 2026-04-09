@@ -71,37 +71,22 @@ struct WhatsMySecretPlayView: View {
                     switch manager.gamePhase {
                     case .playersTurn:
                         PlayersTurnView(manager: manager)
-                            .transition(.asymmetric(
-                                insertion: .move(edge: .bottom).combined(with: .opacity),
-                                removal: .move(edge: .top).combined(with: .opacity)
-                            ))
+                            .transition(.opacity.combined(with: .offset(y: 16)))
                     case .showingSecret:
                         ShowingSecretView(manager: manager)
-                            .transition(.asymmetric(
-                                insertion: .move(edge: .bottom).combined(with: .opacity),
-                                removal: .move(edge: .top).combined(with: .opacity)
-                            ))
+                            .transition(.opacity.combined(with: .offset(y: 16)))
                     case .timerRunning:
                         TimerRunningView(manager: manager)
-                            .transition(.asymmetric(
-                                insertion: .move(edge: .bottom).combined(with: .opacity),
-                                removal: .move(edge: .top).combined(with: .opacity)
-                            ))
+                            .transition(.opacity.combined(with: .offset(y: 16)))
                     case .guessing:
                         GuessingView(manager: manager)
-                            .transition(.asymmetric(
-                                insertion: .move(edge: .bottom).combined(with: .opacity),
-                                removal: .move(edge: .top).combined(with: .opacity)
-                            ))
+                            .transition(.opacity.combined(with: .offset(y: 16)))
                     case .result:
                         ResultView(manager: manager, showEndView: $showEndView)
-                            .transition(.asymmetric(
-                                insertion: .scale(scale: 0.95).combined(with: .opacity),
-                                removal: .scale(scale: 0.95).combined(with: .opacity)
-                            ))
+                            .transition(.opacity.combined(with: .scale(scale: 0.98)))
                     }
                 }
-                .animation(.spring(response: 0.6, dampingFraction: 0.85), value: manager.gamePhase)
+                .animation(.spring(response: 0.52, dampingFraction: 0.9), value: manager.gamePhase)
                 
                 Spacer()
             }
@@ -128,10 +113,9 @@ struct WhatsMySecretPlayView: View {
                     destination: WhatsMySecretEndView(
                         deck: deck,
                         selectedCategories: selectedCategories,
-                        groupWins: manager.groupWins,
-                        secretPlayerWins: manager.secretPlayerWins,
                         totalRounds: manager.roundNumber - 1,
-                        players: manager.players
+                        players: manager.players,
+                        playerScores: manager.playerScores
                     ),
                     isActive: $showEndView
                 ) {
@@ -361,7 +345,7 @@ struct SecretCardFrontView: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 32)
                 
-                Text("Follow this rule without revealing it!")
+                Text("Help the group figure it out—without saying it outright!")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
                     .multilineTextAlignment(.center)
@@ -389,7 +373,7 @@ struct TimerRunningView: View {
                     .font(.system(size: 28, weight: .bold, design: .rounded))
                     .foregroundColor(.primaryText)
                 
-                Text("\(manager.currentPlayer) is following a secret rule. Try to figure it out!")
+                Text("\(manager.currentPlayer) knows the secret—help them get the group there, or be the one who guesses it for a point!")
                     .font(.system(size: 18, weight: .medium, design: .rounded))
                     .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
                     .multilineTextAlignment(.center)
@@ -445,15 +429,11 @@ struct TimerRunningView: View {
                     .cornerRadius(20)
                 }
                 
-                // Skip timer button
+                // Someone guessed during the timer
                 Button(action: {
-                    // Haptic feedback
-                    let impactFeedback = UIImpactFeedbackGenerator(style: .light)
-                    impactFeedback.impactOccurred()
-                    
-                    manager.skipTimer()
+                    manager.someoneGuessedIt()
                 }) {
-                    Text("Group Ready - Skip Timer")
+                    Text("Someone guessed it")
                         .font(.system(size: 16, weight: .medium, design: .rounded))
                         .foregroundColor(Color.buttonBackground)
                         .padding(.vertical, 12)
@@ -467,28 +447,28 @@ struct TimerRunningView: View {
     }
 }
 
-// Guessing View - Group makes final guess
+// Guessing View - Group makes final guess (timer ended) or awards a point (early guess)
 struct GuessingView: View {
     @ObservedObject var manager: WhatsMySecretGameManager
-    
+
     var body: some View {
         VStack(spacing: 32) {
-            Text("Time's Up!")
+            Text(manager.isResolvingEarlyGuess ? "Someone guessed it!" : "Time's Up!")
                 .font(.system(size: 36, weight: .bold, design: .rounded))
                 .foregroundColor(.primaryText)
-            
+
             if let secret = manager.currentSecret {
                 VStack(spacing: 24) {
-                    Text("The Secret Was:")
+                    Text("The secret was:")
                         .font(.system(size: 20, weight: .semibold, design: .rounded))
                         .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                    
+
                     // Secret card
                     ZStack {
                         RoundedRectangle(cornerRadius: 24)
                             .fill(Color(red: 0xF8/255.0, green: 0xF9/255.0, blue: 0xFA/255.0))
                             .shadow(color: Color.shadowColor, radius: 20, x: 0, y: 10)
-                        
+
                         Text(secret)
                             .font(.system(size: 24, weight: .semibold, design: .rounded))
                             .foregroundColor(.primaryText)
@@ -496,60 +476,94 @@ struct GuessingView: View {
                             .padding(32)
                     }
                     .frame(width: ResponsiveSize.cardWidth, height: ResponsiveSize.categoryCardHeight)
-                    
-                    Text("Did the group guess correctly?")
-                        .font(.system(size: 18, weight: .medium, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+
+                    if manager.isResolvingEarlyGuess {
+                        Text("Tap the player who guessed it to give them a point.")
+                            .font(.system(size: 18, weight: .medium, design: .rounded))
+                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                    } else {
+                        Text("Did the group guess correctly?")
+                            .font(.system(size: 18, weight: .medium, design: .rounded))
+                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                    }
+                }
+            }
+
+            if manager.isResolvingEarlyGuess {
+                if manager.guessablePlayers.isEmpty {
+                    Text("Add another player to award guess points.")
+                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                        .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
-                }
-            }
-            
-            // Guess buttons
-            HStack(spacing: 16) {
-                Button(action: {
-                    // Haptic feedback
-                    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-                    impactFeedback.impactOccurred()
-                    
-                    manager.submitGuess(wasCorrect: true)
-                }) {
-                    VStack(spacing: 8) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 40))
-                        Text("Yes")
-                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                } else {
+                    VStack(spacing: 12) {
+                        ForEach(manager.guessablePlayers, id: \.self) { name in
+                            Button(action: {
+                                manager.awardGuessPoint(to: name)
+                            }) {
+                                Text(name)
+                                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 16)
+                                    .background(Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0))
+                                    .cornerRadius(12)
+                                    .shadow(color: Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0).opacity(0.3), radius: 8, x: 0, y: 4)
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 20)
-                    .background(Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0))
-                    .cornerRadius(12)
-                    .shadow(color: Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0).opacity(0.3), radius: 8, x: 0, y: 4)
+                    .padding(.horizontal, 40)
                 }
-                
-                Button(action: {
-                    // Haptic feedback
-                    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-                    impactFeedback.impactOccurred()
-                    
-                    manager.submitGuess(wasCorrect: false)
-                }) {
-                    VStack(spacing: 8) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 40))
-                        Text("No")
-                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+            } else {
+                HStack(spacing: 16) {
+                    Button(action: {
+                        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                        impactFeedback.impactOccurred()
+
+                        manager.submitGuess(wasCorrect: true)
+                    }) {
+                        VStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 40))
+                            Text("Yes")
+                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 20)
+                        .background(Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0))
+                        .cornerRadius(12)
+                        .shadow(color: Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0).opacity(0.3), radius: 8, x: 0, y: 4)
                     }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 20)
-                    .background(Color.buttonBackground)
-                    .cornerRadius(12)
-                    .shadow(color: Color.buttonBackground.opacity(0.3), radius: 8, x: 0, y: 4)
+
+                    Button(action: {
+                        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                        impactFeedback.impactOccurred()
+
+                        manager.submitGuess(wasCorrect: false)
+                    }) {
+                        VStack(spacing: 8) {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 40))
+                            Text("No")
+                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 20)
+                        .background(Color.buttonBackground)
+                        .cornerRadius(12)
+                        .shadow(color: Color.buttonBackground.opacity(0.3), radius: 8, x: 0, y: 4)
+                    }
                 }
+                .padding(.horizontal, 40)
             }
-            .padding(.horizontal, 40)
         }
     }
 }
@@ -558,64 +572,91 @@ struct GuessingView: View {
 struct ResultView: View {
     @ObservedObject var manager: WhatsMySecretGameManager
     @Binding var showEndView: Bool
-    
+
+    private let winGreen = Color(red: 0x34 / 255.0, green: 0xC7 / 255.0, blue: 0x59 / 255.0)
+
+    private var playersSortedByPoints: [String] {
+        manager.players.sorted {
+            let a = manager.playerScores[$0, default: 0]
+            let b = manager.playerScores[$1, default: 0]
+            if a != b { return a > b }
+            return $0 < $1
+        }
+    }
+
+    private var minimalistStandings: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(playersSortedByPoints.enumerated()), id: \.element) { index, name in
+                HStack {
+                    Text(name)
+                        .font(.system(size: 15, weight: .regular, design: .rounded))
+                        .foregroundColor(.primaryText)
+                    Spacer()
+                    Text("\(manager.playerScores[name, default: 0])")
+                        .font(.system(size: 15, weight: .medium, design: .rounded).monospacedDigit())
+                        .foregroundColor(.secondaryText)
+                }
+                .padding(.vertical, 10)
+                .padding(.horizontal, 4)
+
+                if index < playersSortedByPoints.count - 1 {
+                    Divider()
+                        .opacity(0.35)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 4)
+    }
+
     var body: some View {
         VStack(spacing: 32) {
             if let wasCorrect = manager.groupGuessedCorrectly {
-                // Result visual
-                ZStack {
-                    Circle()
-                        .fill(wasCorrect ? Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0).opacity(0.1) : Color.buttonBackground.opacity(0.1))
-                        .frame(width: 200, height: 200)
-                    
-                    Image(systemName: wasCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
-                        .font(.system(size: 60, weight: .medium))
-                        .foregroundColor(wasCorrect ? Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0) : Color.buttonBackground)
-                }
-                
-                VStack(spacing: 16) {
-                    Text(wasCorrect ? "Group Wins!" : "\(manager.currentPlayer) Wins!")
-                        .font(.system(size: 36, weight: .bold, design: .rounded))
-                        .foregroundColor(.primaryText)
-                    
-                    Text(wasCorrect ? "The group correctly guessed the secret!" : "The group couldn't figure out the secret!")
-                        .font(.system(size: 18, weight: .medium, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 40)
-                }
-                
-                // Score summary
-                VStack(spacing: 12) {
-                    Text("Score")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                    
-                    HStack(spacing: 30) {
+                if wasCorrect, let guesser = manager.lastRoundGuessWinner {
+                    VStack(spacing: 20) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 40, weight: .medium))
+                            .foregroundColor(winGreen)
+
                         VStack(spacing: 4) {
-                            Text("Group")
-                                .font(.system(size: 14, weight: .medium, design: .rounded))
-                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                            Text("\(manager.groupWins)")
-                                .font(.system(size: 24, weight: .bold, design: .rounded))
-                                .foregroundColor(Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0))
+                            Text(guesser)
+                                .font(.system(size: 20, weight: .bold, design: .rounded))
+                                .foregroundColor(.primaryText)
+                            Text("+1")
+                                .font(.system(size: 15, weight: .regular, design: .rounded))
+                                .foregroundColor(.secondaryText)
                         }
-                        
-                        Text("—")
-                            .font(.system(size: 20, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                        
-                        VStack(spacing: 4) {
-                            Text("Players")
-                                .font(.system(size: 14, weight: .medium, design: .rounded))
-                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                            Text("\(manager.secretPlayerWins)")
-                                .font(.system(size: 24, weight: .bold, design: .rounded))
-                                .foregroundColor(Color.buttonBackground)
+
+                        if !manager.players.isEmpty {
+                            minimalistStandings
                         }
                     }
+                    .padding(.horizontal, 24)
+                } else {
+                    VStack(spacing: 20) {
+                        Image(systemName: wasCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
+                            .font(.system(size: 44, weight: .medium))
+                            .foregroundColor(wasCorrect ? winGreen : Color.buttonBackground)
+
+                        VStack(spacing: 6) {
+                            Text(wasCorrect ? "Got it" : "Round over")
+                                .font(.system(size: 22, weight: .bold, design: .rounded))
+                                .foregroundColor(.primaryText)
+
+                            Text(wasCorrect ? "The group guessed the secret." : "No one guessed it this round.")
+                                .font(.system(size: 15, weight: .regular, design: .rounded))
+                                .foregroundColor(.secondaryText)
+                                .multilineTextAlignment(.center)
+                        }
+                        .padding(.horizontal, 28)
+
+                        if !manager.players.isEmpty {
+                            minimalistStandings
+                        }
+                    }
+                    .padding(.horizontal, 24)
                 }
-                .padding(.top, 8)
             }
             
             // Next round button
