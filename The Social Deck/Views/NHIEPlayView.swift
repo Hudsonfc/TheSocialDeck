@@ -514,13 +514,13 @@ struct CardBackView: View {
                     imageName: "NHIE artwork",
                     type: .neverHaveIEver,
                     cards: [
-                        Card(text: "been skydiving", category: "Wild", cardType: nil),
-                        Card(text: "lied about my age", category: "Party", cardType: nil),
-                        Card(text: "kissed a stranger", category: "Wild", cardType: nil)
+                        Card(text: "been skydiving", category: "Wild Side", cardType: nil),
+                        Card(text: "lied about my age", category: "Confessions", cardType: nil),
+                        Card(text: "kissed a stranger", category: "Wild Side", cardType: nil)
                     ],
-                    availableCategories: ["Party", "Wild"]
+                    availableCategories: ["Confessions", "Wild Side"]
                 ),
-                selectedCategories: ["Party", "Wild"]
+                selectedCategories: ["Confessions", "Wild Side"]
             ),
             deck: Deck(
                 title: "Never Have I Ever",
@@ -532,7 +532,7 @@ struct CardBackView: View {
                 cards: [],
                 availableCategories: []
             ),
-            selectedCategories: ["Party", "Wild"]
+            selectedCategories: ["Confessions", "Wild Side"]
         )
     }
 }

@@ -31,19 +31,19 @@ struct TheSocialDeckPlusPopUpView: View {
     private var yearlyPrice: String {
         subManager.yearlyProduct?.displayPrice.appending("/year") ?? "$29.99/year"
     }
-    private var monthlyPrice: String {
-        subManager.monthlyProduct?.displayPrice.appending("/month") ?? "$4.99/month"
+    private var weeklyPrice: String {
+        subManager.weeklyProduct?.displayPrice.appending("/week") ?? "$4.99/week"
     }
 
-    /// Effective monthly rate for yearly plan, e.g. "$2.50 monthly"
-    private var yearlyEffectiveMonthlyLine: String? {
+    /// Effective weekly rate for yearly plan (yearly price ÷ 52), e.g. "$0.58 weekly"
+    private var yearlyEffectiveWeeklyLine: String? {
         guard let yearly = subManager.yearlyProduct else { return nil }
-        let perMonth = yearly.price / 12
+        let perWeek = yearly.price / 52
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
         formatter.locale = Locale.current
-        guard let str = formatter.string(from: perMonth as NSDecimalNumber) else { return nil }
-        return "\(str) monthly"
+        guard let str = formatter.string(from: perWeek as NSDecimalNumber) else { return nil }
+        return "\(str) weekly"
     }
 
     // CTA button label
@@ -51,7 +51,7 @@ struct TheSocialDeckPlusPopUpView: View {
         if subManager.isPlus { return "Unlocked ✓" }
         switch subManager.selectedPlan {
         case .yearly:  return "Continue with Yearly"
-        case .monthly: return "Continue with Monthly"
+        case .weekly: return "Continue with Weekly"
         }
     }
 
@@ -100,16 +100,16 @@ struct TheSocialDeckPlusPopUpView: View {
                             .foregroundColor(soDeckBlack)
                             .multilineTextAlignment(.center)
 
-                        Text("Unlock Plus games and pro settings.")
+                        Text("Premium packs, avatars, and extras for your table.")
                             .font(.system(size: 15, weight: .regular, design: .rounded))
                             .foregroundColor(soDeckGray)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 24)
 
                         VStack(alignment: .leading, spacing: 10) {
-                            PlusFeatureRow(text: "Access exclusive Plus games")
-                            PlusFeatureRow(text: "Advanced game controls")
-                            PlusFeatureRow(text: "Custom themes & settings")
+                            PlusFeatureRow(text: "Unlock premium categories across decks")
+                            PlusFeatureRow(text: "Exclusive profile avatars")
+                            PlusFeatureRow(text: "Themes & advanced controls where available")
                             PlusFeatureRow(text: "Support future updates")
                         }
                         .padding(.top, 14)
@@ -125,7 +125,7 @@ struct TheSocialDeckPlusPopUpView: View {
                             title: "Yearly",
                             price: yearlyPrice,
                             detail: "Billed annually",
-                            subtitle: yearlyEffectiveMonthlyLine,
+                            subtitle: yearlyEffectiveWeeklyLine,
                             showBestValue: true,
                             isSelected: subManager.selectedPlan == .yearly
                         ) {
@@ -135,14 +135,14 @@ struct TheSocialDeckPlusPopUpView: View {
                         }
 
                         PlusPlanCard(
-                            title: "Monthly",
-                            price: monthlyPrice,
-                            detail: "Billed monthly",
+                            title: "Weekly",
+                            price: weeklyPrice,
+                            detail: "Billed weekly",
                             showBestValue: false,
-                            isSelected: subManager.selectedPlan == .monthly
+                            isSelected: subManager.selectedPlan == .weekly
                         ) {
                             withAnimation(.easeInOut(duration: 0.2)) {
-                                subManager.selectedPlan = .monthly
+                                subManager.selectedPlan = .weekly
                             }
                         }
                     }

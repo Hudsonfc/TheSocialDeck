@@ -445,102 +445,107 @@ struct ExpandedGameOverlay: View {
             // White background
             Color.white
                 .ignoresSafeArea()
-            
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Close button
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                expandedGame = nil
-                            }
-                        }) {
+
+            VStack(spacing: 0) {
+                // Close button (same position and style as before)
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                            expandedGame = nil
+                        }
+                    }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
                             .frame(width: 44, height: 44)
                             .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
                             .clipShape(Circle())
+                    }
+                }
+                .padding(.horizontal, 40)
+                .padding(.top, 16)
+
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 18) {
+                        HStack {
+                            Spacer(minLength: 0)
+                            Image(game.imageName)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 260, height: 260)
+                                .clipped()
+                                .cornerRadius(16)
+                                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+                            Spacer(minLength: 0)
                         }
+                        .padding(.bottom, 4)
+
+                        Text(game.title)
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .multilineTextAlignment(.leading)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Text(game.description)
+                            .font(.system(size: 16, weight: .regular, design: .rounded))
+                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .multilineTextAlignment(.leading)
+                            .lineSpacing(6)
+
+                        GameDescriptionTagRow(tags: GameDescriptionLayoutContent.tags(for: game))
+
+                        GameDescriptionNumberedStepsView(steps: GameDescriptionLayoutContent.playSteps(for: game))
                     }
                     .padding(.horizontal, 40)
                     .padding(.top, 16)
-                    
-                    // Game artwork
-                    Image(game.imageName)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 260, height: 260)
-                        .clipped()
-                        .cornerRadius(16)
-                        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
-                    
-                    // Game title
-                    Text(game.title)
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 40)
-                        .padding(.top, 8)
-                    
-                    // Description
-                    Text(game.description)
-                        .font(.system(size: 16, weight: .regular, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                        .multilineTextAlignment(.center)
-                        .lineSpacing(6)
-                        .padding(.horizontal, 40)
-                        .padding(.bottom, 24)
-                    
-                    // Continue button
-                    Button(action: {
-                        HapticManager.shared.mediumImpact()
-                        // Set selected game to trigger onChange handler
-                        selectedGame = game
-                        // Close overlay
-                        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                            expandedGame = nil
-                        }
-                        // For Color Clash, navigate to settings; for others, onChange will handle navigation
-                        if game.gameType == "colorClash" {
+                    .padding(.bottom, 24)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                Button(action: {
+                    HapticManager.shared.mediumImpact()
+                    selectedGame = game
+                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                        expandedGame = nil
+                    }
+                    if game.gameType == "colorClash" {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                             navigateToRoom = true
-                            }
                         }
-                    }) {
-                        Text("Continue")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 55)
-                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            .cornerRadius(16)
                     }
-                    .padding(.horizontal, 40)
-                    .padding(.bottom, 40)
-                    .background(
-                        Group {
-                            if game.gameType == "colorClash" {
-                                NavigationLink(
-                                    destination: ColorClashGameSettingsScreen(game: game),
-                                    isActive: $navigateToRoom
-                                ) {
-                                    EmptyView()
-                                }
-                                .hidden()
-                            } else {
-                                NavigationLink(
-                                    destination: LobbyView(),
-                                    isActive: $navigateToRoom
-                                ) {
-                                    EmptyView()
-                                }
-                                .hidden()
-                            }
-                        }
-                    )
+                }) {
+                    Text("Continue")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 55)
+                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .cornerRadius(16)
                 }
+                .padding(.horizontal, 40)
+                .padding(.bottom, 40)
+                .background(
+                    Group {
+                        if game.gameType == "colorClash" {
+                            NavigationLink(
+                                destination: ColorClashGameSettingsScreen(game: game),
+                                isActive: $navigateToRoom
+                            ) {
+                                EmptyView()
+                            }
+                            .hidden()
+                        } else {
+                            NavigationLink(
+                                destination: LobbyView(),
+                                isActive: $navigateToRoom
+                            ) {
+                                EmptyView()
+                            }
+                            .hidden()
+                        }
+                    }
+                )
             }
         }
         .transition(.asymmetric(
@@ -562,7 +567,7 @@ struct OnlineCategorySelectionSheet: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color.white
+                Color.appBackground
                     .ignoresSafeArea()
                 
                 ScrollView {
@@ -571,11 +576,11 @@ struct OnlineCategorySelectionSheet: View {
                         VStack(spacing: 8) {
                             Text(game.title)
                                 .font(.system(size: 24, weight: .bold, design: .rounded))
-                                .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                .foregroundColor(.primaryText)
                             
                             Text("Select a category")
                                 .font(.system(size: 16, weight: .regular, design: .rounded))
-                                .foregroundColor(Color.gray)
+                                .foregroundColor(.secondaryText)
                         }
                         .padding(.top, 20)
                         .padding(.bottom, 8)
@@ -589,7 +594,7 @@ struct OnlineCategorySelectionSheet: View {
                                     HStack {
                                         Text(category)
                                             .font(.system(size: 17, weight: .semibold, design: .rounded))
-                                            .foregroundColor(selectedCategory == category ? .white : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                            .foregroundColor(selectedCategory == category ? .white : .primaryText)
                                         
                                         Spacer()
                                         
@@ -601,7 +606,7 @@ struct OnlineCategorySelectionSheet: View {
                                     }
                                     .padding(.horizontal, 20)
                                     .padding(.vertical, 16)
-                                    .background(selectedCategory == category ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0xF8/255.0, green: 0xF8/255.0, blue: 0xF8/255.0))
+                                    .background(selectedCategory == category ? Color.primaryAccent : Color.secondaryBackground)
                                     .cornerRadius(12)
                                 }
                             }
@@ -619,7 +624,7 @@ struct OnlineCategorySelectionSheet: View {
                         dismiss()
                     }
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                    .foregroundColor(.primaryAccent)
                 }
             }
         }

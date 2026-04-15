@@ -34,7 +34,7 @@ enum DeckType: String {
     case spillTheEx
     case other
 
-    /// Games that support online multiplayer (e.g. Play Local vs Play Online in Play2).
+    /// Games that support online multiplayer (e.g. Play Offline vs Create Room in Play2).
     var supportsOnlineMultiplayer: Bool {
         switch self {
         case .neverHaveIEver, .truthOrDare, .wouldYouRather, .mostLikelyTo,
@@ -44,6 +44,28 @@ enum DeckType: String {
             return true
         default:
             return false
+        }
+    }
+
+    /// Marketing pill on the Play / home grid (bottom-leading). Only set for decks that should show a tag.
+    var playGridMarketingBadge: (label: String, systemImage: String)? {
+        switch self {
+        case .neverHaveIEver:
+            return ("Must Play", "sparkles")
+        case .riddleMeThis:
+            return ("Fan Favorite", "star.fill")
+        case .actItOut:
+            return ("Most Played", "flame.fill")
+        case .mostLikelyTo:
+            return ("Crowd Pleaser", "face.smiling.fill")
+        case .takeItPersonally:
+            return ("Our Pick", "heart.fill")
+        case .quickfireCouples:
+            return ("Date Night", "moon.stars.fill")
+        case .closerThanEver:
+            return ("Go Deep", "heart.circle.fill")
+        default:
+            return nil
         }
     }
 }

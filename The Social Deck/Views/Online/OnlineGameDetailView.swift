@@ -5,6 +5,7 @@
 //  Game detail screen shown when the user taps an online game card in the
 //  "Online Only" tab. Layout matches GameDescriptionOverlay; actions are
 //  Create Room (or sign-in gate). Join with a code from Play → Join Room.
+//  Play grid games use `GameDescriptionOverlay` → Play Offline + Create Room.
 //  The selected game type is passed directly into the room at creation time.
 //
 
@@ -23,7 +24,7 @@ struct OnlineGameEntry: Identifiable {
 }
 
 /// Games that **only** exist as online titles (no local deck on the Play grid).
-/// Shown in the "Online Only" tab; local+online games use `GameDescriptionOverlay` → Play Online.
+/// Shown in the "Online Only" tab; local+online games use `GameDescriptionOverlay` → Create Room.
 let allOnlineGames: [OnlineGameEntry] = [
     OnlineGameEntry(
         title: "Color Clash",
@@ -100,62 +101,50 @@ struct OnlineGameDetailView: View {
                 .padding(.top, 20)
                 .padding(.bottom, 16)
 
-                // Game artwork (same style as GameDescriptionOverlay)
-                Image(game.imageName)
-                    .resizable()
-                    .interpolation(.high)
-                    .antialiased(true)
-                    .aspectRatio(420.0 / 577.0, contentMode: .fit)
-                    .frame(width: min(180, UIScreen.main.bounds.width - 120))
-                    .cornerRadius(12)
-                    .shadow(color: Color.shadowColor, radius: 8, x: 0, y: 4)
-                    .padding(.bottom, 20)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 18) {
+                        HStack {
+                            Spacer(minLength: 0)
+                            Image(game.imageName)
+                                .resizable()
+                                .interpolation(.high)
+                                .antialiased(true)
+                                .aspectRatio(420.0 / 577.0, contentMode: .fit)
+                                .frame(width: min(180, UIScreen.main.bounds.width - 120))
+                                .cornerRadius(12)
+                                .shadow(color: Color.shadowColor, radius: 8, x: 0, y: 4)
+                            Spacer(minLength: 0)
+                        }
+                        .padding(.bottom, 2)
 
-                Spacer()
+                        Text(game.title)
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                            .foregroundColor(.primaryText)
+                            .multilineTextAlignment(.leading)
+                            .lineLimit(nil)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
 
-                // Title (same as overlay)
-                Text(game.title)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(.primaryText)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(nil)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .responsiveHorizontalPadding()
-                    .padding(.bottom, 8)
+                        Text(game.description)
+                            .font(.system(size: 16, weight: .regular, design: .rounded))
+                            .foregroundColor(.secondaryText)
+                            .multilineTextAlignment(.leading)
+                            .lineSpacing(6)
+                            .lineLimit(nil)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
 
-                // Player count — centered pill with small icon
-                HStack {
-                    Spacer(minLength: 0)
-                    HStack(spacing: 6) {
-                        Image(systemName: "person.2.fill")
-                            .font(.system(size: 12, weight: .semibold))
-                        Text("\(game.minPlayers)–\(game.maxPlayers) players")
-                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        GameDescriptionTagRow(tags: GameDescriptionLayoutContent.tags(for: game))
+
+                        GameDescriptionNumberedStepsView(steps: GameDescriptionLayoutContent.playSteps(for: game))
                     }
-                    .foregroundColor(.primaryAccent)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.primaryAccent.opacity(0.12))
-                    .cornerRadius(20)
-                    Spacer(minLength: 0)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.bottom, 16)
-
-                // Description (same as overlay)
-                Text(game.description)
-                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                    .foregroundColor(.primaryText)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(6)
-                    .lineLimit(nil)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .responsiveHorizontalPadding()
+                    .padding(.top, 4)
                     .padding(.bottom, 24)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                Spacer()
-
-                // Actions: Create Room (or sign-in gate)
                 if authManager.isAuthenticated {
                     actionButtons
                 } else {

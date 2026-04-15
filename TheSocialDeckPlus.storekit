@@ -131,9 +131,37 @@
               "locale" : "en_US"
             }
           ],
+          "productID" : "com.thesocialdeck.plus.weekly",
+          "recurringSubscriptionPeriod" : "P1W",
+          "referenceName" : "TheSocialDeck+ Weekly",
+          "subscriptionGroupID" : "3EC79846",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "4.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "B5A2D507",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "",
+              "displayName" : "",
+              "locale" : "en_US"
+            }
+          ],
           "productID" : "com.thesocialdeck.plus.monthly",
           "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "TheSocialDeck+ Monthly",
+          "referenceName" : "TheSocialDeck+ Monthly (legacy, not loaded by app)",
           "subscriptionGroupID" : "3EC79846",
           "type" : "RecurringSubscription",
           "winbackOffers" : [

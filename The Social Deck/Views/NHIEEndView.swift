@@ -162,7 +162,7 @@ struct NHIEEndView: View {
                 cards: [],
                 availableCategories: []
             ),
-            selectedCategories: ["Party", "Wild"]
+            selectedCategories: ["Confessions", "Couples"]
         )
     }
 }

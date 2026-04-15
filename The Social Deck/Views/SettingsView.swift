@@ -8,6 +8,11 @@
 import SwiftUI
 import StoreKit
 
+// MARK: - Plus banner (matches TheSocialDeckPlusPopUpView background gradient)
+private let settingsPlusBannerBgTop = Color(red: 0x10/255.0, green: 0x0E/255.0, blue: 0x13/255.0)
+private let settingsPlusBannerBgBottom = Color(red: 0x1C/255.0, green: 0x18/255.0, blue: 0x22/255.0)
+private let settingsPlusBannerAccent = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var subManager: SubscriptionManager
@@ -29,153 +34,193 @@ struct SettingsView: View {
             Color.appBackground
                 .ignoresSafeArea()
             
-            VStack(spacing: 0) {
-            ScrollView {
-                    VStack(spacing: 20) {
+            ScrollView(.vertical, showsIndicators: true) {
+                VStack(spacing: 20) {
                     // Title
                     Text("Settings")
                         .font(.system(size: 32, weight: .bold, design: .rounded))
                         .foregroundColor(.primaryText)
                         .padding(.top, 20)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        
-                        // TheSocialDeck+ button
-                        Button(action: {
-                            HapticManager.shared.lightImpact()
-                            if subManager.isPlus {
-                                if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
-                                    UIApplication.shared.open(url)
-                                }
-                            } else {
-                                showPlusPaywall = true
-                            }
-                        }) {
-                            ZStack {
-                                Color.buttonBackground
-                                    .cornerRadius(16)
-                                HStack(spacing: 8) {
-                                    Image(systemName: "crown.fill")
-                                        .font(.system(size: 16, weight: .medium))
-                                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                                        .frame(height: 20)
-                                        .clipped()
-                                    Text(subManager.isPlus ? "TheSocialDeck+ · Active" : "TheSocialDeck+")
-                                        .font(.system(size: 18, weight: .regular, design: .rounded))
-                                        .foregroundColor(.white)
-                                        .lineLimit(1)
-                                        .fixedSize(horizontal: true, vertical: true)
-                                        .baselineOffset(0.5)
-                                }
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                .offset(x: -11)
-                            }
-                            .frame(width: UIScreen.main.bounds.width * 0.85, height: 60)
-                        }
-                        .sheet(isPresented: $showPlusPaywall) {
-                            TheSocialDeckPlusPopUpView(onDismiss: { showPlusPaywall = false })
-                                .environmentObject(SubscriptionManager.shared)
-                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
-                        // General Settings Button
-                        SettingsNavigationButton(
-                            title: "General",
-                            destination: GeneralSettingsView(),
-                            isPressed: $generalButtonPressed
-                        )
-                        
-                        // What's New Button
-                        SettingsNavigationButton(
-                            title: "What's New",
-                            destination: WhatsNewView(),
-                            isPressed: $whatsNewButtonPressed
-                        )
-
-                        // Feedback Button
-                        SettingsNavigationButton(
-                            title: "Feedback",
-                            destination: FeedbackView(),
-                            isPressed: $feedbackButtonPressed
-                        )
-                        
-                        // Rate Us Button
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.1)) {
-                                rateUsButtonPressed = true
-                            }
-                            HapticManager.shared.mediumImpact()
-                            requestReview()
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                                withAnimation(.easeInOut(duration: 0.15)) {
-                                    rateUsButtonPressed = false
-                                }
-                            }
-                        }) {
-                            Text("Rate Us")
-                                .font(.system(size: 18, weight: .regular, design: .rounded))
-                                .foregroundColor(.white)
-                                .frame(width: UIScreen.main.bounds.width * 0.85, height: 60)
-                                .background(Color.buttonBackground)
-                                .cornerRadius(16)
-                        }
-                        .scaleEffect(rateUsButtonPressed ? 0.97 : 1.0)
-
-                        // Spacer to push bottom buttons down
-                        Spacer()
-                            .frame(height: 40)
-                    }
-                    .padding(.horizontal, 40)
-                    }
-                    
-                // Instagram link
-                if let instagramURL = URL(string: "https://www.instagram.com/thesocialdeckapp/") {
+                    // TheSocialDeck+ upgrade / manage card
                     Button(action: {
                         HapticManager.shared.lightImpact()
-                        UIApplication.shared.open(instagramURL)
+                        if subManager.isPlus {
+                            if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                                UIApplication.shared.open(url)
+                            }
+                        } else {
+                            showPlusPaywall = true
+                        }
                     }) {
-                        InstagramIconView(size: 22)
-                            .foregroundColor(.primaryText)
-                            .frame(width: 44, height: 44)
-                            .background(Color.secondaryBackground)
-                            .clipShape(Circle())
-                            .overlay(
-                                Circle()
-                                    .strokeBorder(Color.borderColor, lineWidth: 1)
-                            )
+                        ZStack(alignment: .topLeading) {
+                            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [settingsPlusBannerBgTop, settingsPlusBannerBgBottom],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+
+                            VStack(alignment: .leading, spacing: 0) {
+                                Text(subManager.isPlus ? "TheSocialDeck+ · Active" : "Get The Social Deck Plus")
+                                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .multilineTextAlignment(.leading)
+                                    .fixedSize(horizontal: false, vertical: true)
+
+                                Text(
+                                    subManager.isPlus
+                                        ? "Manage your plan anytime in the App Store."
+                                        : "Unlock all premium categories and exclusive avatars"
+                                )
+                                    .font(.system(size: 15, weight: .medium, design: .rounded))
+                                    .foregroundColor(.white.opacity(0.72))
+                                    .multilineTextAlignment(.leading)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                    .padding(.top, 8)
+
+                                Color.clear
+                                    .frame(height: 28)
+
+                                Text(subManager.isPlus ? "Manage subscription" : "Unlock all benefits")
+                                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                                    .foregroundColor(settingsPlusBannerAccent)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 16)
+                                    .background(Color.white)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            }
+                            .padding(24)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(minHeight: 200)
+                        .overlay(alignment: .topTrailing) {
+                            // Decorative card art — top trailing, partially clipped by card (fixed size avoids ScrollView height bugs)
+                            Image("NHIE 2.0")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 112, height: 150)
+                                .rotationEffect(.degrees(10))
+                                .opacity(0.92)
+                                .allowsHitTesting(false)
+                                .offset(x: 28, y: -36)
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                .strokeBorder(Color.white.opacity(0.12), lineWidth: 1)
+                        )
                     }
-                    .buttonStyle(InstagramButtonStyle())
-                    .padding(.bottom, 20)
-                }
-                
-                // App Version
-                VStack(spacing: 4) {
-                    Text("The Social Deck")
-                        .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        .foregroundColor(.secondaryText)
-                    Text("Version \(appVersion)")
-                        .font(.system(size: 12, weight: .regular, design: .rounded))
-                        .foregroundColor(.tertiaryText)
-                }
-                .padding(.bottom, 16)
-                
-                // Bottom buttons - Privacy Policy and Terms of Service
-                HStack(spacing: 24) {
-                    NavigationLink(destination: PrivacyPolicyView()) {
-                        Text("Privacy Policy")
-                            .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .buttonStyle(PlainButtonStyle())
+                    .sheet(isPresented: $showPlusPaywall) {
+                        TheSocialDeckPlusPopUpView(onDismiss: { showPlusPaywall = false })
+                            .environmentObject(SubscriptionManager.shared)
+                    }
+
+                    // General Settings Button
+                    SettingsNavigationButton(
+                        title: "General",
+                        destination: GeneralSettingsView(),
+                        isPressed: $generalButtonPressed
+                    )
+
+                    // What's New Button
+                    SettingsNavigationButton(
+                        title: "What's New",
+                        destination: WhatsNewView(),
+                        isPressed: $whatsNewButtonPressed
+                    )
+
+                    // Feedback Button
+                    SettingsNavigationButton(
+                        title: "Feedback",
+                        destination: FeedbackView(),
+                        isPressed: $feedbackButtonPressed
+                    )
+
+                    // Rate Us Button
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.1)) {
+                            rateUsButtonPressed = true
+                        }
+                        HapticManager.shared.mediumImpact()
+                        requestReview()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                            withAnimation(.easeInOut(duration: 0.15)) {
+                                rateUsButtonPressed = false
+                            }
+                        }
+                    }) {
+                        Text("Rate Us")
+                            .font(.system(size: 18, weight: .regular, design: .rounded))
+                            .foregroundColor(.white)
+                            .frame(width: UIScreen.main.bounds.width * 0.85, height: 60)
+                            .background(Color.buttonBackground)
+                            .cornerRadius(16)
+                    }
+                    .scaleEffect(rateUsButtonPressed ? 0.97 : 1.0)
+
+                    Color.clear
+                        .frame(height: 24)
+
+                    // Instagram link
+                    if let instagramURL = URL(string: "https://www.instagram.com/thesocialdeckapp/") {
+                        Button(action: {
+                            HapticManager.shared.lightImpact()
+                            UIApplication.shared.open(instagramURL)
+                        }) {
+                            InstagramIconView(size: 22)
+                                .foregroundColor(.primaryText)
+                                .frame(width: 44, height: 44)
+                                .background(Color.secondaryBackground)
+                                .clipShape(Circle())
+                                .overlay(
+                                    Circle()
+                                        .strokeBorder(Color.borderColor, lineWidth: 1)
+                                )
+                        }
+                        .buttonStyle(InstagramButtonStyle())
+                        .frame(maxWidth: .infinity)
+                        .padding(.bottom, 4)
+                    }
+
+                    // App Version
+                    VStack(spacing: 4) {
+                        Text("The Social Deck")
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .foregroundColor(.secondaryText)
-                            .underline()
+                        Text("Version \(appVersion)")
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                            .foregroundColor(.tertiaryText)
                     }
-                    
-                    NavigationLink(destination: TermsOfServiceView()) {
-                        Text("Terms of Service")
-                            .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(.secondaryText)
-                            .underline()
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, 8)
+
+                    // Bottom buttons - Privacy Policy and Terms of Service
+                    HStack(spacing: 24) {
+                        NavigationLink(destination: PrivacyPolicyView()) {
+                            Text("Privacy Policy")
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
+                                .foregroundColor(.secondaryText)
+                                .underline()
+                        }
+
+                        NavigationLink(destination: TermsOfServiceView()) {
+                            Text("Terms of Service")
+                                .font(.system(size: 14, weight: .regular, design: .rounded))
+                                .foregroundColor(.secondaryText)
+                                .underline()
+                        }
                     }
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, 30)
                 }
-                .padding(.horizontal, 40)
-                        .padding(.bottom, 30)
                 .frame(maxWidth: .infinity)
+                .padding(.horizontal, 40)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -202,7 +247,7 @@ struct SettingsView: View {
 }
 
 // Preview of online game UI (non-host sees "Waiting for host to advance…")
-private let previewCategories = ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family"]
+private let previewCategories = ["Confessions", "Couples", "The Usual", "Spill the Tea", "Wild Side", "After Dark"]
 
 struct OnlineGameUIPreviewView: View {
     @StateObject private var manager: NHIEGameManager

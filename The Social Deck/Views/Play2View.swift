@@ -26,16 +26,12 @@ struct Play2View: View {
     @State private var showWelcomeView: Bool = false
     @State private var selectedDeckForDescription: Deck? = nil
 
-    // MARK: - TheSocialDeck+ gating
+    // MARK: - TheSocialDeck+ (game tiles are not gated; Plus is for categories & avatars)
     @EnvironmentObject private var subManager: SubscriptionManager
     @State private var showPlusPaywall = false
 
-    private let plusLockedTypes: Set<DeckType> = [
-        .mostLikelyTo, .takeItPersonally, .whatsMySecret, .bluffCall, .memoryMaster, .closerThanEver, .tapDuel, .spillTheEx
-    ]
-
     private func isLocked(_ deck: Deck) -> Bool {
-        plusLockedTypes.contains(deck.type) && !subManager.isPlus
+        false
     }
     
     // All category names (Favorites shown dynamically when items exist)
@@ -80,7 +76,7 @@ struct Play2View: View {
             imageName: "NHIE 2.0",
             type: .neverHaveIEver,
             cards: allNHIECards,
-            availableCategories: ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family"]
+            availableCategories: ["Confessions", "Couples", "The Usual", "Spill the Tea", "Wild Side", "After Dark"]
         ),
         Deck(
             title: "Truth or Dare",
@@ -90,7 +86,7 @@ struct Play2View: View {
             imageName: "TOD 2.0",
             type: .truthOrDare,
             cards: allTORCards,
-            availableCategories: ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family"]
+            availableCategories: ["Party", "Wild", "Couples", "Social", "Dirty", "Friends"]
         ),
         Deck(
             title: "Would You Rather",
@@ -100,7 +96,7 @@ struct Play2View: View {
             imageName: "WYR 2.0",
             type: .wouldYouRather,
             cards: allWYRCards,
-            availableCategories: ["Party", "Couples", "Social", "Dirty", "Friends", "Family", "Weird"]
+            availableCategories: ["Party", "Couples", "Social", "Dirty", "Friends", "Weird"]
         ),
         Deck(
             title: "Most Likely To",
@@ -110,7 +106,7 @@ struct Play2View: View {
             imageName: "MLT 2.0",
             type: .mostLikelyTo,
             cards: allMLTCards,
-            availableCategories: ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family"]
+            availableCategories: ["Party", "Wild", "Couples", "Social", "Dirty", "Friends"]
         )
     ]
     
@@ -258,7 +254,7 @@ struct Play2View: View {
             imageName: "Quickfire Couples",
             type: .quickfireCouples,
             cards: allQuickfireCouplesCards,
-            availableCategories: []
+            availableCategories: ["Light & Fun", "Preferences", "Personality", "Relationship"]
         ),
         Deck(
             title: "Closer Than Ever",
@@ -268,7 +264,7 @@ struct Play2View: View {
             imageName: "Closer than ever",
             type: .closerThanEver,
             cards: allCloserThanEverCards,
-            availableCategories: []
+            availableCategories: ["Love Languages", "Memories", "Vulnerability", "Intimacy"]
         ),
         Deck(
             title: "Us After Dark",
@@ -278,7 +274,7 @@ struct Play2View: View {
             imageName: "us after dark",
             type: .usAfterDark,
             cards: allUsAfterDarkCards,
-            availableCategories: []
+            availableCategories: ["Memories", "Connection", "Desires", "Intimacy"]
         )
     ]
     
@@ -731,11 +727,11 @@ struct Play2View: View {
                 SpillTheExCategorySelectionView(deck: deck)
             // Date/Couples Games
             case .quickfireCouples:
-                QuickfireCouplesSetupView(deck: deck, selectedCategories: [])
+                QuickfireCouplesCategorySelectionView(deck: deck)
             case .closerThanEver:
-                CloserThanEverSetupView(deck: deck, selectedCategories: [])
+                CloserThanEverCategorySelectionView(deck: deck)
             case .usAfterDark:
-                UsAfterDarkSetupView(deck: deck, selectedCategories: [])
+                UsAfterDarkCategorySelectionView(deck: deck)
             default:
                 EmptyView()
             }
@@ -1040,19 +1036,26 @@ struct GridGameTile: View {
                         .cornerRadius(16)
                         .opacity(isLocked ? 0.85 : 1.0)
 
-                    // Plus badge for locked games
-                    if isLocked {
-                        HStack(spacing: 3) {
-                            Image(systemName: "crown.fill")
-                                .font(.system(size: 9, weight: .bold))
-                            Text("PLUS")
-                                .font(.system(size: 9, weight: .bold, design: .rounded))
+                    // Plus + optional marketing badges (bottom-leading; same capsule metrics as PLUS)
+                    if isLocked || deck.type.playGridMarketingBadge != nil {
+                        VStack(alignment: .leading, spacing: 6) {
+                            if let badge = deck.type.playGridMarketingBadge {
+                                PlayGridGameMarketingBadgePill(label: badge.label, systemImage: badge.systemImage)
+                            }
+                            if isLocked {
+                                HStack(spacing: 3) {
+                                    Image(systemName: "crown.fill")
+                                        .font(.system(size: 9, weight: .bold))
+                                    Text("PLUS")
+                                        .font(.system(size: 9, weight: .bold, design: .rounded))
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 7)
+                                .padding(.vertical, 4)
+                                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                                .clipShape(Capsule())
+                            }
                         }
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 7)
-                        .padding(.vertical, 4)
-                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                        .clipShape(Capsule())
                         .padding(8)
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
                     }
@@ -1105,8 +1108,281 @@ struct GameDescriptionOverlay: View {
     @Binding var navigateToUsAfterDarkSetup: Deck?
     @ObservedObject private var favoritesManager = FavoritesManager.shared
     @StateObject private var authManager = AuthManager.shared
-    @State private var navigateToOnline = false
+    @StateObject private var onlineManager = OnlineManager.shared
+    @State private var isCreatingOnlineRoom = false
+    @State private var navigateToLobby = false
     @State private var showOnlineSignInAlert = false
+    @State private var showCreateRoomError = false
+    @State private var createRoomErrorMessage: String?
+
+    /// Max players for hosted online room (matches `ClassicGameOnlineView`).
+    private var onlineMaxPlayersForDeck: Int {
+        deck.type == .actNatural ? 12 : 8
+    }
+
+    /// Play Offline + Create Room side by side; same colors/typefaces/corner treatment; tighter vertical padding.
+    @ViewBuilder
+    private func playOfflineAndCreateRoomFooter(
+        localTitle: String,
+        localAction: @escaping () -> Void,
+        createRoomAction: @escaping () -> Void
+    ) -> some View {
+        HStack(spacing: 10) {
+            Button(action: localAction) {
+                Text(localTitle)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 11)
+                    .background(Color.buttonBackground)
+                    .cornerRadius(16)
+            }
+            .disabled(isCreatingOnlineRoom)
+
+            Button {
+                HapticManager.shared.lightImpact()
+                createRoomAction()
+            } label: {
+                Group {
+                    if isCreatingOnlineRoom {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .primaryAccent))
+                            .scaleEffect(0.9)
+                    } else {
+                        Text("Create Room")
+                            .font(.system(size: 17, weight: .semibold, design: .rounded))
+                            .foregroundColor(.primaryAccent)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 11)
+                .background(Color.appBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 30)
+                        .stroke(Color.primaryAccent, lineWidth: 2)
+                )
+                .clipShape(Capsule())
+            }
+            .disabled(isCreatingOnlineRoom)
+        }
+    }
+
+    private func createOnlineRoomFromDescription() async {
+        isCreatingOnlineRoom = true
+        await onlineManager.createRoom(
+            roomName: deck.title,
+            maxPlayers: onlineMaxPlayersForDeck,
+            isPrivate: false,
+            gameType: deck.type.rawValue
+        )
+        await MainActor.run {
+            isCreatingOnlineRoom = false
+            if onlineManager.currentRoom != nil {
+                HapticManager.shared.success()
+                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                    selectedDeck = nil
+                }
+                navigateToLobby = true
+            }
+        }
+    }
+
+    private func onCreateRoomTapped() {
+        if authManager.isAuthenticated {
+            Task { await createOnlineRoomFromDescription() }
+        } else {
+            showOnlineSignInAlert = true
+        }
+    }
+
+    @ViewBuilder
+    private var bottomActionButtons: some View {
+        if isLockedAndNotPlus {
+            Button(action: { onShowPaywall() }) {
+                HStack(spacing: 8) {
+                    Image(systemName: "crown.fill")
+                        .font(.system(size: 15, weight: .semibold))
+                    Text("Unlock with Plus")
+                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                .clipShape(Capsule())
+                .shadow(color: Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.3),
+                        radius: 8, x: 0, y: 4)
+            }
+            .responsiveHorizontalPadding()
+            .padding(.bottom, 40)
+        } else if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .takeItPersonally || deck.type == .categoryClash || deck.type == .bluffCall || deck.type == .whatsMySecret || deck.type == .actItOut || deck.type == .spillTheEx {
+            Group {
+                if deck.type.supportsOnlineMultiplayer {
+                    playOfflineAndCreateRoomFooter(
+                        localTitle: "Play Offline",
+                        localAction: {
+                            navigateToCategorySelection = deck
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                    selectedDeck = nil
+                                }
+                            }
+                        },
+                        createRoomAction: { onCreateRoomTapped() }
+                    )
+                } else {
+                    PrimaryButton(title: "Play") {
+                        navigateToCategorySelection = deck
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                selectedDeck = nil
+                            }
+                        }
+                    }
+                }
+            }
+            .responsiveHorizontalPadding()
+            .padding(.bottom, 40)
+        } else if deck.type == .spinTheBottle {
+            PrimaryButton(title: "Play") {
+                navigateToPlayView = deck
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                        selectedDeck = nil
+                    }
+                }
+            }
+            .responsiveHorizontalPadding()
+            .padding(.bottom, 40)
+        } else if deck.type == .storyChain {
+            PrimaryButton(title: "Play") {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    selectedDeck = nil
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    navigateToStoryChainSetup = deck
+                }
+            }
+            .responsiveHorizontalPadding()
+            .padding(.bottom, 40)
+        } else if deck.type == .memoryMaster {
+            PrimaryButton(title: "Play") {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    selectedDeck = nil
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    navigateToMemoryMasterSetup = deck
+                }
+            }
+            .responsiveHorizontalPadding()
+            .padding(.bottom, 40)
+        } else if deck.type == .rhymeTime {
+            PrimaryButton(title: "Play") {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    selectedDeck = nil
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    navigateToRhymeTimeSetup = deck
+                }
+            }
+            .responsiveHorizontalPadding()
+            .padding(.bottom, 40)
+        } else if deck.type == .tapDuel {
+            PrimaryButton(title: "Play") {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    selectedDeck = nil
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    navigateToTapDuelSetup = deck
+                }
+            }
+            .responsiveHorizontalPadding()
+            .padding(.bottom, 40)
+        } else if deck.type == .riddleMeThis {
+            playOfflineAndCreateRoomFooter(
+                localTitle: "Play Offline",
+                localAction: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        selectedDeck = nil
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        navigateToRiddleMeThisSetup = deck
+                    }
+                },
+                createRoomAction: { onCreateRoomTapped() }
+            )
+            .responsiveHorizontalPadding()
+            .padding(.bottom, 40)
+        } else if deck.type == .actNatural {
+            playOfflineAndCreateRoomFooter(
+                localTitle: "Play Offline",
+                localAction: {
+                    navigateToCategorySelection = deck
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                            selectedDeck = nil
+                        }
+                    }
+                },
+                createRoomAction: { onCreateRoomTapped() }
+            )
+            .responsiveHorizontalPadding()
+            .padding(.bottom, 40)
+        } else if deck.type == .quickfireCouples {
+            playOfflineAndCreateRoomFooter(
+                localTitle: "Play Offline",
+                localAction: {
+                    navigateToCategorySelection = deck
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                            selectedDeck = nil
+                        }
+                    }
+                },
+                createRoomAction: { onCreateRoomTapped() }
+            )
+            .responsiveHorizontalPadding()
+            .padding(.bottom, 40)
+        } else if deck.type == .closerThanEver {
+            playOfflineAndCreateRoomFooter(
+                localTitle: "Play Offline",
+                localAction: {
+                    navigateToCategorySelection = deck
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                            selectedDeck = nil
+                        }
+                    }
+                },
+                createRoomAction: { onCreateRoomTapped() }
+            )
+            .responsiveHorizontalPadding()
+            .padding(.bottom, 40)
+        } else if deck.type == .usAfterDark {
+            playOfflineAndCreateRoomFooter(
+                localTitle: "Play Offline",
+                localAction: {
+                    navigateToCategorySelection = deck
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                            selectedDeck = nil
+                        }
+                    }
+                },
+                createRoomAction: { onCreateRoomTapped() }
+            )
+            .responsiveHorizontalPadding()
+            .padding(.bottom, 40)
+        } else {
+            PrimaryButton(title: "Play") {
+                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                    selectedDeck = nil
+                }
+            }
+            .responsiveHorizontalPadding()
+            .padding(.bottom, 40)
+        }
+    }
 
     var body: some View {
         ZStack {
@@ -1114,12 +1390,11 @@ struct GameDescriptionOverlay: View {
             Color.appBackground
                 .ignoresSafeArea()
 
-            // Hidden NavigationLink to online room/lobby flow for capable games
-            NavigationLink(
-                destination: ClassicGameOnlineView(gameTitle: deck.title, gameType: deck.type.rawValue, imageName: deck.imageName),
-                isActive: $navigateToOnline
-            ) { EmptyView() }.hidden()
-            
+            NavigationLink(destination: LobbyView(), isActive: $navigateToLobby) {
+                EmptyView()
+            }
+            .hidden()
+
             VStack(spacing: 0) {
                 // Top bar with close and favorite buttons (swapped positions)
                 HStack {
@@ -1155,398 +1430,89 @@ struct GameDescriptionOverlay: View {
                 .responsiveHorizontalPadding()
                 .padding(.top, 20)
                 .padding(.bottom, 16)
-                
-                // Deck artwork - smaller version
-                Image(deck.imageName)
-                    .resizable()
-                    .interpolation(.high)
-                    .antialiased(true)
-                    .aspectRatio(420.0 / 577.0, contentMode: .fit)
-                    .frame(width: min(180, UIScreen.main.bounds.width - 120))
-                    .cornerRadius(12)
-                    .opacity(isLocked ? 0.88 : 1.0)
-                    .shadow(color: Color.shadowColor, radius: 8, x: 0, y: 4)
-                    .overlay(alignment: .bottomLeading) {
-                        if isLocked {
-                            HStack(spacing: 3) {
-                                Image(systemName: "crown.fill")
-                                    .font(.system(size: 9, weight: .bold))
-                                Text("PLUS")
-                                    .font(.system(size: 9, weight: .bold, design: .rounded))
-                            }
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 7)
-                            .padding(.vertical, 4)
-                            .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                            .clipShape(Capsule())
-                            .padding(8)
-                        }
-                    }
-                    .padding(.bottom, 20)
-                
-                Spacer()
-                
-                // Deck title
-                Text(deck.title)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(.primaryText)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(nil)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .responsiveHorizontalPadding()
-                    .padding(.bottom, 16)
-                
-                Text(deck.description)
-                    .font(.system(size: 16, weight: .regular, design: .rounded))
-                    .foregroundColor(.primaryText)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(6)
-                    .lineLimit(nil)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .responsiveHorizontalPadding()
-                    .padding(.bottom, 24)
-                
-                Spacer()
-                
-                // Play button - locked games show paywall; unlocked games navigate normally
-                if isLockedAndNotPlus {
-                    Button(action: { onShowPaywall() }) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "crown.fill")
-                                .font(.system(size: 15, weight: .semibold))
-                            Text("Unlock with Plus")
-                                .font(.system(size: 17, weight: .semibold, design: .rounded))
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
-                        .clipShape(Capsule())
-                        .shadow(color: Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0).opacity(0.3),
-                                radius: 8, x: 0, y: 4)
-                    }
-                    .responsiveHorizontalPadding()
-                    .padding(.bottom, 40)
-                } else if deck.type == .neverHaveIEver || deck.type == .truthOrDare || deck.type == .wouldYouRather || deck.type == .mostLikelyTo || deck.type == .takeItPersonally || deck.type == .categoryClash || deck.type == .bluffCall || deck.type == .whatsMySecret || deck.type == .actItOut || deck.type == .spillTheEx {
-                        VStack(spacing: 12) {
-                            // Play Local — same as the original Play button
-                            PrimaryButton(title: deck.type.supportsOnlineMultiplayer ? "Play Local" : "Play") {
-                                navigateToCategorySelection = deck
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                        selectedDeck = nil
-                                    }
-                                }
-                            }
 
-                            // Play Online — only for the 4 online-capable classic games
-                            if deck.type.supportsOnlineMultiplayer {
-                                Button {
-                                    HapticManager.shared.lightImpact()
-                                    if authManager.isAuthenticated {
-                                        navigateToOnline = true
-                                    } else {
-                                        showOnlineSignInAlert = true
-                                    }
-                                } label: {
-                                    Text("Play Online")
-                                        .font(.system(size: 17, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.primaryAccent)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 16)
-                                        .background(Color.appBackground)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 30)
-                                                .stroke(Color.primaryAccent, lineWidth: 2)
-                                        )
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 18) {
+                        HStack {
+                            Spacer(minLength: 0)
+                            Image(deck.imageName)
+                                .resizable()
+                                .interpolation(.high)
+                                .antialiased(true)
+                                .aspectRatio(420.0 / 577.0, contentMode: .fit)
+                                .frame(width: min(180, UIScreen.main.bounds.width - 120))
+                                .cornerRadius(12)
+                                .opacity(isLocked ? 0.88 : 1.0)
+                                .shadow(color: Color.shadowColor, radius: 8, x: 0, y: 4)
+                                .overlay(alignment: .bottomLeading) {
+                                    if isLocked {
+                                        HStack(spacing: 3) {
+                                            Image(systemName: "crown.fill")
+                                                .font(.system(size: 9, weight: .bold))
+                                            Text("PLUS")
+                                                .font(.system(size: 9, weight: .bold, design: .rounded))
+                                        }
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 7)
+                                        .padding(.vertical, 4)
+                                        .background(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
                                         .clipShape(Capsule())
-                                }
-                            }
-                        }
-                        .responsiveHorizontalPadding()
-                        .padding(.bottom, 40)
-                        .alert("Sign in to play online", isPresented: $showOnlineSignInAlert) {
-                            Button("Cancel", role: .cancel) {}
-                            NavigationLink(destination: SignInView()) {
-                                Text("Sign In")
-                            }
-                        } message: {
-                            Text("You need a free account to create or join online rooms.")
-                        }
-                    } else if deck.type == .spinTheBottle {
-                        PrimaryButton(title: "Play") {
-                            // Navigate first, then dismiss overlay after navigation completes
-                            navigateToPlayView = deck
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                    selectedDeck = nil
-                                }
-                            }
-                        }
-                        .responsiveHorizontalPadding()
-                        .padding(.bottom, 40)
-                    } else if deck.type == .storyChain {
-                        PrimaryButton(title: "Play") {
-                            // Dismiss overlay immediately, then navigate
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                selectedDeck = nil
-                            }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                navigateToStoryChainSetup = deck
-                            }
-                        }
-                        .responsiveHorizontalPadding()
-                        .padding(.bottom, 40)
-                    } else if deck.type == .memoryMaster {
-                        PrimaryButton(title: "Play") {
-                            // Dismiss overlay immediately, then navigate
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                selectedDeck = nil
-                            }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                navigateToMemoryMasterSetup = deck
-                            }
-                        }
-                        .responsiveHorizontalPadding()
-                        .padding(.bottom, 40)
-                    } else if deck.type == .rhymeTime {
-                        PrimaryButton(title: "Play") {
-                            // Dismiss overlay immediately, then navigate
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                selectedDeck = nil
-                            }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                navigateToRhymeTimeSetup = deck
-                            }
-                        }
-                        .responsiveHorizontalPadding()
-                        .padding(.bottom, 40)
-                    } else if deck.type == .tapDuel {
-                        PrimaryButton(title: "Play") {
-                            // Dismiss overlay immediately, then navigate
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                selectedDeck = nil
-                            }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                navigateToTapDuelSetup = deck
-                            }
-                        }
-                        .responsiveHorizontalPadding()
-                        .padding(.bottom, 40)
-                    } else if deck.type == .riddleMeThis {
-                        VStack(spacing: 12) {
-                            PrimaryButton(title: "Play Local") {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                    selectedDeck = nil
-                                }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                    navigateToRiddleMeThisSetup = deck
-                                }
-                            }
-                            Button {
-                                HapticManager.shared.lightImpact()
-                                if authManager.isAuthenticated {
-                                    navigateToOnline = true
-                                } else {
-                                    showOnlineSignInAlert = true
-                                }
-                            } label: {
-                                Text("Play Online")
-                                    .font(.system(size: 17, weight: .semibold, design: .rounded))
-                                    .foregroundColor(.primaryAccent)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 16)
-                                    .background(Color.appBackground)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 30)
-                                            .stroke(Color.primaryAccent, lineWidth: 2)
-                                    )
-                                    .clipShape(Capsule())
-                            }
-                        }
-                        .responsiveHorizontalPadding()
-                        .padding(.bottom, 40)
-                        .alert("Sign in to play online", isPresented: $showOnlineSignInAlert) {
-                            Button("Cancel", role: .cancel) {}
-                            NavigationLink(destination: SignInView()) {
-                                Text("Sign In")
-                            }
-                        } message: {
-                            Text("You need a free account to create or join online rooms.")
-                        }
-                    } else if deck.type == .actNatural {
-                        VStack(spacing: 12) {
-                            PrimaryButton(title: "Play Local") {
-                                navigateToCategorySelection = deck
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                        selectedDeck = nil
+                                        .padding(8)
                                     }
                                 }
-                            }
-                            Button {
-                                HapticManager.shared.lightImpact()
-                                if authManager.isAuthenticated {
-                                    navigateToOnline = true
-                                } else {
-                                    showOnlineSignInAlert = true
-                                }
-                            } label: {
-                                Text("Play Online")
-                                    .font(.system(size: 17, weight: .semibold, design: .rounded))
-                                    .foregroundColor(.primaryAccent)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 16)
-                                    .background(Color.appBackground)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 30)
-                                            .stroke(Color.primaryAccent, lineWidth: 2)
-                                    )
-                                    .clipShape(Capsule())
-                            }
+                            Spacer(minLength: 0)
                         }
-                        .responsiveHorizontalPadding()
-                        .padding(.bottom, 40)
-                        .alert("Sign in to play online", isPresented: $showOnlineSignInAlert) {
-                            Button("Cancel", role: .cancel) {}
-                            NavigationLink(destination: SignInView()) {
-                                Text("Sign In")
-                            }
-                        } message: {
-                            Text("You need a free account to create or join online rooms.")
-                        }
-                    } else if deck.type == .quickfireCouples {
-                        VStack(spacing: 12) {
-                            PrimaryButton(title: "Play Local") {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                    selectedDeck = nil
-                                }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                    navigateToQuickfireCouplesSetup = deck
-                                }
-                            }
-                            Button {
-                                HapticManager.shared.lightImpact()
-                                if authManager.isAuthenticated {
-                                    navigateToOnline = true
-                                } else {
-                                    showOnlineSignInAlert = true
-                                }
-                            } label: {
-                                Text("Play Online")
-                                    .font(.system(size: 17, weight: .semibold, design: .rounded))
-                                    .foregroundColor(.primaryAccent)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 16)
-                                    .background(Color.appBackground)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 30)
-                                            .stroke(Color.primaryAccent, lineWidth: 2)
-                                    )
-                                    .clipShape(Capsule())
-                            }
-                        }
-                        .responsiveHorizontalPadding()
-                        .padding(.bottom, 40)
-                        .alert("Sign in to play online", isPresented: $showOnlineSignInAlert) {
-                            Button("Cancel", role: .cancel) {}
-                            NavigationLink(destination: SignInView()) {
-                                Text("Sign In")
-                            }
-                        } message: {
-                            Text("You need a free account to create or join online rooms.")
-                        }
-                    } else if deck.type == .closerThanEver {
-                        VStack(spacing: 12) {
-                            PrimaryButton(title: "Play Local") {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                    selectedDeck = nil
-                                }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                    navigateToCloserThanEverSetup = deck
-                                }
-                            }
-                            Button {
-                                HapticManager.shared.lightImpact()
-                                if authManager.isAuthenticated {
-                                    navigateToOnline = true
-                                } else {
-                                    showOnlineSignInAlert = true
-                                }
-                            } label: {
-                                Text("Play Online")
-                                    .font(.system(size: 17, weight: .semibold, design: .rounded))
-                                    .foregroundColor(.primaryAccent)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 16)
-                                    .background(Color.appBackground)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 30)
-                                            .stroke(Color.primaryAccent, lineWidth: 2)
-                                    )
-                                    .clipShape(Capsule())
-                            }
-                        }
-                        .responsiveHorizontalPadding()
-                        .padding(.bottom, 40)
-                        .alert("Sign in to play online", isPresented: $showOnlineSignInAlert) {
-                            Button("Cancel", role: .cancel) {}
-                            NavigationLink(destination: SignInView()) {
-                                Text("Sign In")
-                            }
-                        } message: {
-                            Text("You need a free account to create or join online rooms.")
-                        }
-                    } else if deck.type == .usAfterDark {
-                        VStack(spacing: 12) {
-                            PrimaryButton(title: "Play Local") {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                    selectedDeck = nil
-                                }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                    navigateToUsAfterDarkSetup = deck
-                                }
-                            }
-                            Button {
-                                HapticManager.shared.lightImpact()
-                                if authManager.isAuthenticated {
-                                    navigateToOnline = true
-                                } else {
-                                    showOnlineSignInAlert = true
-                                }
-                            } label: {
-                                Text("Play Online")
-                                    .font(.system(size: 17, weight: .semibold, design: .rounded))
-                                    .foregroundColor(.primaryAccent)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 16)
-                                    .background(Color.appBackground)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 30)
-                                            .stroke(Color.primaryAccent, lineWidth: 2)
-                                    )
-                                    .clipShape(Capsule())
-                            }
-                        }
-                        .responsiveHorizontalPadding()
-                        .padding(.bottom, 40)
-                        .alert("Sign in to play online", isPresented: $showOnlineSignInAlert) {
-                            Button("Cancel", role: .cancel) {}
-                            NavigationLink(destination: SignInView()) {
-                                Text("Sign In")
-                            }
-                        } message: {
-                            Text("You need a free account to create or join online rooms.")
-                        }
-                    } else {
-                        PrimaryButton(title: "Play") {
-                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                selectedDeck = nil
-                            }
-                        }
-                        .responsiveHorizontalPadding()
-                        .padding(.bottom, 40)
+                        .padding(.bottom, 2)
+
+                        Text(deck.title)
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                            .foregroundColor(.primaryText)
+                            .multilineTextAlignment(.leading)
+                            .lineLimit(nil)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Text(deck.description)
+                            .font(.system(size: 16, weight: .regular, design: .rounded))
+                            .foregroundColor(.secondaryText)
+                            .multilineTextAlignment(.leading)
+                            .lineSpacing(6)
+                            .lineLimit(nil)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        GameDescriptionTagRow(tags: GameDescriptionLayoutContent.tags(for: deck))
+
+                        GameDescriptionNumberedStepsView(steps: GameDescriptionLayoutContent.playSteps(for: deck))
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .responsiveHorizontalPadding()
+                    .padding(.top, 4)
+                    .padding(.bottom, 24)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                bottomActionButtons
+            }
+            .alert("Sign in to play online", isPresented: $showOnlineSignInAlert) {
+                Button("Cancel", role: .cancel) {}
+                NavigationLink(destination: SignInView()) {
+                    Text("Sign In")
+                }
+            } message: {
+                Text("You need a free account to create or join online rooms.")
+            }
+        }
+        .alert("Error", isPresented: $showCreateRoomError) {
+            Button("OK", role: .cancel) { createRoomErrorMessage = nil }
+        } message: {
+            Text(createRoomErrorMessage ?? "Something went wrong. Please try again.")
+        }
+        .onChange(of: onlineManager.errorMessage) { msg in
+            if let msg, !msg.isEmpty {
+                createRoomErrorMessage = msg
+                showCreateRoomError = true
+                isCreatingOnlineRoom = false
             }
         }
         .transition(.asymmetric(

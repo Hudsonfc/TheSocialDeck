@@ -2,8 +2,8 @@
 //  ClassicGameOnlineView.swift
 //  The Social Deck
 //
-//  Shown when the user taps "Play Online" from a classic game description
-//  screen. Presents Create Room for the selected game (join from Play tab).
+//  Legacy intermediate screen for classic online flow; the Play grid overlay
+//  now creates a room directly. Kept for reference or future navigation.
 //
 
 import SwiftUI
@@ -83,8 +83,8 @@ struct ClassicGameOnlineView: View {
                     .responsiveHorizontalPadding()
                     .padding(.bottom, 8)
 
-                // Subtitle: "Play Online" in smaller grey
-                Text("Play Online")
+                // Subtitle in secondary text
+                Text("Create a room")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundColor(.secondaryText)
                     .padding(.bottom, 8)

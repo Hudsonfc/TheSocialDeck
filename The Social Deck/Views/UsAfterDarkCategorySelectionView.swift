@@ -1,17 +1,17 @@
 //
-//  NHIECategorySelectionView.swift
+//  UsAfterDarkCategorySelectionView.swift
 //  The Social Deck
 //
 
 import SwiftUI
 
-struct NHIECategorySelectionView: View {
+struct UsAfterDarkCategorySelectionView: View {
     let deck: Deck
     @State private var selectedCategories: Set<String> = []
     @State private var navigateToSetup: Bool = false
     @EnvironmentObject private var subManager: SubscriptionManager
 
-    private let plusCategories: Set<String> = ["Spill the Tea", "Wild Side", "After Dark"]
+    private let plusCategories: Set<String> = ["Desires", "Intimacy"]
 
     private var freeCategories: Set<String> {
         Set(deck.availableCategories.filter { !plusCategories.contains($0) })
@@ -29,22 +29,22 @@ struct NHIECategorySelectionView: View {
             navigateToSetup: $navigateToSetup,
             isLocked: categoryIsLocked
         ) {
-            NHIESetupView(deck: deck, selectedCategories: Array(selectedCategories))
+            UsAfterDarkSetupView(deck: deck, selectedCategories: Array(selectedCategories))
         }
     }
 }
 
 #Preview {
     NavigationView {
-        NHIECategorySelectionView(deck: Deck(
-            title: "Never Have I Ever",
+        UsAfterDarkCategorySelectionView(deck: Deck(
+            title: "Us After Dark",
             description: "Test",
-            numberOfCards: 50,
-            estimatedTime: "5-10 min",
-            imageName: "NHIE artwork",
-            type: .neverHaveIEver,
+            numberOfCards: 100,
+            estimatedTime: "30-45 min",
+            imageName: "us after dark",
+            type: .usAfterDark,
             cards: [],
-            availableCategories: ["Confessions", "Couples", "The Usual", "Spill the Tea", "Wild Side", "After Dark"]
+            availableCategories: ["Memories", "Connection", "Desires", "Intimacy"]
         ))
         .environmentObject(SubscriptionManager.shared)
     }

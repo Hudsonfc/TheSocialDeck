@@ -23,12 +23,9 @@ struct HomeView: View {
     @State private var button2Opacity: Double = 0
     @State private var button3Offset: CGFloat = 50
     @State private var button3Opacity: Double = 0
-    @State private var button4Offset: CGFloat = 50
-    @State private var button4Opacity: Double = 0
     @State private var featuredPlayButtonPressed = false
     @State private var mainPlayButtonPressed = false
     @State private var settingsButtonPressed = false
-    @State private var wwydButtonPressed = false
     @State private var currentSlideIndex = 0
     @State private var slideshowTimer: Timer?
     @State private var currentQuote: String = ""
@@ -298,27 +295,18 @@ struct HomeView: View {
                         )
 
                         NavigationButton(
-                            title: "What Would You Do",
+                            title: "Settings",
                             offset: button2Offset,
                             opacity: button2Opacity,
-                            destination: WhatWouldYouDoView(),
-                            isPressed: $wwydButtonPressed
-                        )
-                        
-                        // Settings Button (moved directly under Play)
-                        NavigationButton(
-                            title: "Settings",
-                            offset: button3Offset,
-                            opacity: button3Opacity,
                             destination: SettingsView(),
                             isPressed: $settingsButtonPressed
                         )
-                        
+
                         // Profile Button (Hidden for first version)
                         NavigationButton(
                             title: "Profile",
-                            offset: button4Offset,
-                            opacity: button4Opacity,
+                            offset: button3Offset,
+                            opacity: button3Opacity,
                             destination: ProfileView(),
                             isPressed: .constant(false)
                         )
@@ -356,9 +344,13 @@ struct HomeView: View {
                     }
                 }) {
                     ZStack {
-                        Image(systemName: "crown.fill")
+                        Circle()
+                            .fill(Color.primaryAccent.opacity(0.10))
+                            .frame(width: 40, height: 40)
+                        Image(systemName: "rectangle.stack.fill")
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                            .foregroundColor(.primaryAccent)
+                            .rotationEffect(.degrees(90))
                         if subManager.isPlus && !plusCrownDotDismissed {
                             Circle()
                                 .fill(Color.green)
@@ -588,13 +580,6 @@ struct HomeView: View {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
                 button3Offset = 0
                 button3Opacity = 1.0
-            }
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
-                button4Offset = 0
-                button4Opacity = 1.0
             }
         }
     }

@@ -9,8 +9,6 @@ struct ActItOutCategorySelectionView: View {
     let deck: Deck
     @State private var selectedCategories: Set<String> = []
     @State private var navigateToSetup: Bool = false
-    @State private var showPlusPaywall = false
-    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var subManager: SubscriptionManager
 
     private let plusCategories: Set<String> = ["Famous Concepts", "Movie Genres", "Food & Cooking", "Animals"]
@@ -19,120 +17,28 @@ struct ActItOutCategorySelectionView: View {
         Set(deck.availableCategories.filter { !plusCategories.contains($0) })
     }
 
-    private func isLocked(_ category: String) -> Bool {
+    private func categoryIsLocked(_ category: String) -> Bool {
         plusCategories.contains(category) && !subManager.isPlus
     }
 
     var body: some View {
-        ZStack {
-            Color.appBackground
-                .ignoresSafeArea()
-
-            VStack(spacing: 0) {
-                HStack {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primaryText)
-                    }
-                    Spacer()
-                }
-                .padding(.horizontal, 40)
-                .padding(.top, 20)
-
-                ScrollView {
-                    VStack(spacing: 0) {
-                        Image(deck.imageName)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 160, height: 220)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                            .padding(.top, 20)
-                            .padding(.bottom, 32)
-
-                        Text("Select Categories")
-                            .font(.system(size: 24, weight: .bold, design: .rounded))
-                            .foregroundColor(.primaryText)
-                            .padding(.bottom, 8)
-
-                        Text("Choose which types of prompts to include")
-                            .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(.secondaryText)
-                            .padding(.bottom, 24)
-
-                        VStack(spacing: 12) {
-                            ForEach(deck.availableCategories, id: \.self) { category in
-                                CategoryButton(
-                                    title: category,
-                                    isSelected: selectedCategories.contains(category),
-                                    isLocked: isLocked(category),
-                                    cardCount: deck.cards.filter { $0.category == category }.count
-                                ) {
-                                    if isLocked(category) {
-                                        showPlusPaywall = true
-                                    } else if selectedCategories.contains(category) {
-                                        selectedCategories.remove(category)
-                                    } else {
-                                        selectedCategories.insert(category)
-                                    }
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 40)
-                        .padding(.bottom, 24)
-
-                        Button(action: {
-                            let available = subManager.isPlus
-                                ? Set(deck.availableCategories)
-                                : freeCategories
-                            if selectedCategories == available {
-                                selectedCategories.removeAll()
-                            } else {
-                                selectedCategories = available
-                            }
-                        }) {
-                            let available = subManager.isPlus
-                                ? Set(deck.availableCategories)
-                                : freeCategories
-                            Text(selectedCategories == available ? "Deselect All" : "Select All")
-                                .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                .foregroundColor(.primaryAccent)
-                        }
-                        .padding(.bottom, 24)
-
-                        PrimaryButton(title: "Continue") {
-                            HapticManager.shared.lightImpact()
-                            navigateToSetup = true
-                        }
-                        .padding(.horizontal, 40)
-                        .disabled(selectedCategories.isEmpty)
-                        .opacity(selectedCategories.isEmpty ? 0.5 : 1.0)
-                        .padding(.bottom, 40)
-                    }
-                }
-            }
+        ClassicCategorySelectionRoot(
+            deck: deck,
+            selectedCategories: $selectedCategories,
+            freeCategories: freeCategories,
+            navigateToSetup: $navigateToSetup,
+            isLocked: categoryIsLocked
+        ) {
+            ActItOutSetupView(
+                deck: deck,
+                selectedCategories: Array(selectedCategories)
+            )
         }
-        .navigationBarHidden(true)
-        .sheet(isPresented: $showPlusPaywall) {
-            TheSocialDeckPlusPopUpView(onDismiss: { showPlusPaywall = false })
-                .environmentObject(SubscriptionManager.shared)
-        }
-        .background(
-            NavigationLink(
-                destination: ActItOutSetupView(
-                    deck: deck,
-                    selectedCategories: Array(selectedCategories)
-                ),
-                isActive: $navigateToSetup
-            ) {
-                EmptyView()
-            }
-        )
     }
 }
 
-// MARK: - Category button (shared across all category selection views)
+// MARK: - Category row (used by online lobby category sheet)
+
 struct CategoryButton: View {
     let title: String
     let isSelected: Bool
@@ -152,17 +58,9 @@ struct CategoryButton: View {
                 Spacer()
 
                 if isLocked {
-                    HStack(spacing: 3) {
-                        Image(systemName: "crown.fill")
-                            .font(.system(size: 9, weight: .bold))
-                        Text("PLUS")
-                            .font(.system(size: 9, weight: .bold, design: .rounded))
-                    }
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 4)
-                    .background(soDeckRed)
-                    .clipShape(Capsule())
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(soDeckRed)
                 } else {
                     Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                         .font(.system(size: 24))
@@ -177,6 +75,12 @@ struct CategoryButton: View {
                     : (isSelected ? Color.primaryAccent : Color.tertiaryBackground)
             )
             .cornerRadius(12)
+            .overlay {
+                if isLocked {
+                    RoundedRectangle(cornerRadius: 12)
+                        .strokeBorder(soDeckRed.opacity(0.82), lineWidth: 2)
+                }
+            }
             .opacity(isLocked ? 0.8 : 1.0)
         }
     }

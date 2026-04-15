@@ -125,7 +125,8 @@ struct UsAfterDarkEndView: View {
         )
         .background(
             NavigationLink(
-                destination: UsAfterDarkSetupView(deck: deck, selectedCategories: []),
+                destination: UsAfterDarkCategorySelectionView(deck: deck)
+                    .environmentObject(SubscriptionManager.shared),
                 isActive: $navigateToPlayAgain
             ) {
                 EmptyView()

@@ -274,6 +274,11 @@ struct RiddleMeThisOnlinePlayView: View {
         VStack(spacing: 0) {
             Spacer()
 
+            Text("Riddle Me This")
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .foregroundColor(Color.buttonBackground)
+                .padding(.bottom, 32)
+
             riddleCardView
 
             Spacer()
@@ -331,6 +336,12 @@ struct RiddleMeThisOnlinePlayView: View {
                 }
                 .frame(height: 40)
                 .padding(.top, 4)
+
+            Text("Riddle Me This")
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .foregroundColor(Color.buttonBackground)
+                .padding(.top, 8)
+                .padding(.bottom, 32)
 
                 riddleCardView
                     .padding(.top, 4)

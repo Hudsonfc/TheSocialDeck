@@ -126,7 +126,8 @@ struct QuickfireCouplesEndView: View {
         )
         .background(
             NavigationLink(
-                destination: QuickfireCouplesSetupView(deck: deck, selectedCategories: []),
+                destination: QuickfireCouplesCategorySelectionView(deck: deck)
+                    .environmentObject(SubscriptionManager.shared),
                 isActive: $navigateToPlayAgain
             ) {
                 EmptyView()

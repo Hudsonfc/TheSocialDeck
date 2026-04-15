@@ -312,10 +312,12 @@ struct LobbyView: View {
 
     private var lobbyCategoriesForSelectedGame: [String] {
         switch currentGameType {
-        case "neverHaveIEver", "truthOrDare", "mostLikelyTo":
-            return ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family"]
+        case "neverHaveIEver":
+            return ["Confessions", "Couples", "The Usual", "Spill the Tea", "Wild Side", "After Dark"]
+        case "truthOrDare", "mostLikelyTo":
+            return ["Party", "Wild", "Couples", "Social", "Dirty", "Friends"]
         case "wouldYouRather":
-            return ["Party", "Couples", "Social", "Dirty", "Friends", "Family", "Weird"]
+            return ["Party", "Couples", "Social", "Dirty", "Friends", "Weird"]
         case "spillTheEx":
             return ["Confessions", "Situationship", "The Breakup", "Wild Side"]
         case "takeItPersonally":
@@ -327,10 +329,16 @@ struct LobbyView: View {
 
     private var plusLockedCategoriesForSelectedGame: Set<String> {
         switch currentGameType {
-        case "neverHaveIEver", "truthOrDare":
+        case "neverHaveIEver":
+            return ["Spill the Tea", "Wild Side", "After Dark"]
+        case "truthOrDare", "mostLikelyTo":
             return ["Dirty", "Couples", "Wild"]
         case "wouldYouRather":
             return ["Dirty", "Couples", "Weird"]
+        case "spillTheEx":
+            return ["The Breakup", "Wild Side"]
+        case "takeItPersonally":
+            return ["Wild", "Couples"]
         default:
             return []
         }
@@ -919,6 +927,8 @@ private struct LobbyCategorySelectionSheet: View {
                     .padding(.top, 10)
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.appBackground)
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

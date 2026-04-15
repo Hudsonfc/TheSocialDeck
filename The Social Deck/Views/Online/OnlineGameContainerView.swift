@@ -19,8 +19,10 @@ fileprivate func debugPrintOnlineDeckOrder(game: String, roomCode: String, cards
 // Each wrapper creates the full deck + manager so the play view can be launched
 // from the online flow with roomId/isHost without touching the local launch path.
 
-private let onlineClassicCategories = ["Party", "Wild", "Couples", "Social", "Dirty", "Friends", "Family"]
-private let onlineWYRCategories = ["Party", "Couples", "Social", "Dirty", "Friends", "Family", "Weird"]
+/// Used by Truth or Dare and Most Likely To online decks (unchanged category keys).
+private let onlineClassicCategories = ["Party", "Wild", "Couples", "Social", "Dirty", "Friends"]
+private let onlineNHIECategories = ["Confessions", "Couples", "The Usual", "Spill the Tea", "Wild Side", "After Dark"]
+private let onlineWYRCategories = ["Party", "Couples", "Social", "Dirty", "Friends", "Weird"]
 
 private let onlineSpillTheExCategories = ["Confessions", "Situationship", "The Breakup", "Wild Side"]
 private let onlineTIPCategories = ["Party", "Wild", "Friends", "Couples"]
@@ -41,7 +43,7 @@ private struct OnlineNHIEView: View {
         self.players = players
         self.currentUserId = currentUserId
         self.cardCount = cardCount ?? 0
-        let activeCategories = (selectedCategories?.isEmpty == false) ? selectedCategories! : onlineClassicCategories
+        let activeCategories = (selectedCategories?.isEmpty == false) ? selectedCategories! : onlineNHIECategories
         self.selectedCategories = activeCategories
         let deck = Deck(
             title: "Never Have I Ever",
@@ -51,7 +53,7 @@ private struct OnlineNHIEView: View {
             imageName: "NHIE 2.0",
             type: .neverHaveIEver,
             cards: allNHIECards,
-            availableCategories: onlineClassicCategories
+            availableCategories: onlineNHIECategories
         )
         _manager = StateObject(wrappedValue: NHIEGameManager(deck: deck, selectedCategories: activeCategories, cardCount: cardCount ?? 0, deterministicRoomCode: roomCode))
     }
@@ -59,7 +61,7 @@ private struct OnlineNHIEView: View {
     var body: some View {
         let deck = Deck(title: "Never Have I Ever", description: "", numberOfCards: allNHIECards.count,
                         estimatedTime: "30-45 min", imageName: "NHIE 2.0", type: .neverHaveIEver,
-                        cards: allNHIECards, availableCategories: onlineClassicCategories)
+                        cards: allNHIECards, availableCategories: onlineNHIECategories)
         NHIEPlayView(manager: manager, deck: deck, selectedCategories: selectedCategories,
                      roomId: roomCode, isHost: isHost, players: players, currentUserId: currentUserId)
             .onAppear {

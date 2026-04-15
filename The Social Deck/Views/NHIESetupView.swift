@@ -178,7 +178,7 @@ struct NHIESetupView: View {
                 cards: [],
                 availableCategories: []
             ),
-            selectedCategories: ["Party", "Wild"]
+            selectedCategories: ["Confessions", "Wild Side"]
         )
     }
 }

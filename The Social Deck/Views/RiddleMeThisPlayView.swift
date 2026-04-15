@@ -213,6 +213,11 @@ struct RiddleView: View {
                 .transition(.move(edge: .top).combined(with: .opacity))
                 .animation(.easeInOut(duration: 0.3), value: manager.timeRemaining <= 10)
             }
+
+            Text("Riddle Me This")
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .foregroundColor(Color.buttonBackground)
+                .padding(.bottom, 32)
             
             // Card
             if let riddle = manager.currentRiddle {
@@ -361,6 +366,11 @@ struct SolutionView: View {
                     .foregroundColor(.primaryText)
                     .padding(.bottom, 24)
             }
+
+            Text("Riddle Me This")
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .foregroundColor(Color.buttonBackground)
+                .padding(.bottom, 32)
             
             // Card showing answer
             if let riddle = manager.currentRiddle {

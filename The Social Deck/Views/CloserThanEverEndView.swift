@@ -125,7 +125,8 @@ struct CloserThanEverEndView: View {
         )
         .background(
             NavigationLink(
-                destination: CloserThanEverSetupView(deck: deck, selectedCategories: []),
+                destination: CloserThanEverCategorySelectionView(deck: deck)
+                    .environmentObject(SubscriptionManager.shared),
                 isActive: $navigateToPlayAgain
             ) {
                 EmptyView()
