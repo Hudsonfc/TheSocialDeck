@@ -49,21 +49,12 @@ struct RiddleMeThisSetupView: View {
                 VStack(spacing: 0) {
                     ScrollView {
                         VStack(spacing: 0) {
-                            // Game artwork - regular card image
-                            Image(deck.imageName)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: ResponsiveSize.setupArtworkWidth, height: ResponsiveSize.setupArtworkHeight)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                                .padding(.top, 20)
-                                .padding(.bottom, 32)
-                            
                             // Card Count Selector
                             VStack(spacing: 12) {
                                 Text("Number of Riddles")
                                     .font(.system(size: 16, weight: .medium, design: .rounded))
                                     .foregroundColor(.secondaryText)
+                                    .padding(.top, 20)
                                 
                                 VStack(spacing: 8) {
                                     Text("\(Int(selectedCardCount)) riddle\(Int(selectedCardCount) == 1 ? "" : "s")")
@@ -126,6 +117,14 @@ struct RiddleMeThisSetupView: View {
                             .animation(.easeInOut(duration: 0.2), value: timerEnabled)
                             .padding(.horizontal, 40)
                             .padding(.bottom, 32)
+
+                            HowToPlayCard(steps: [
+                                "A riddle is revealed — race to be the first to say the correct answer.",
+                                "Give a wrong answer and you're locked out for that riddle.",
+                                "Think carefully before you speak — the fastest, sharpest mind wins!"
+                            ])
+                            .padding(.horizontal, 40)
+                            .padding(.bottom, 24)
                         }
                     }
                     

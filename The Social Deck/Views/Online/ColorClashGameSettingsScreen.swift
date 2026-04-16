@@ -29,33 +29,15 @@ struct ColorClashGameSettingsScreen: View {
     
     var body: some View {
         ZStack {
-            // Background
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(red: 0xFA/255.0, green: 0xFA/255.0, blue: 0xFA/255.0),
-                    Color.white
-                ]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            Color.appBackground
+                .ignoresSafeArea()
             
             ScrollView {
                 VStack(spacing: 24) {
-                    // Game artwork
-                    Image(game.imageName)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 200, height: 200)
-                        .clipped()
-                        .cornerRadius(16)
-                        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
-                        .padding(.top, 20)
-                    
                     // Game title
                     Text(game.title)
                         .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
                         .padding(.top, 8)
@@ -64,7 +46,7 @@ struct ColorClashGameSettingsScreen: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Max Players")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                         
                         HStack(spacing: 12) {
                             ForEach(playerCountOptions, id: \.self) { count in
@@ -74,9 +56,9 @@ struct ColorClashGameSettingsScreen: View {
                                 }) {
                                     Text("\(count)")
                                         .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                        .foregroundColor(maxPlayers == count ? .white : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                        .foregroundColor(maxPlayers == count ? .white : .primaryText)
                                         .frame(width: 60, height: 44)
-                                        .background(maxPlayers == count ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                                        .background(maxPlayers == count ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color.tertiaryBackground)
                                         .cornerRadius(12)
                                 }
                             }
@@ -84,8 +66,12 @@ struct ColorClashGameSettingsScreen: View {
                     }
                     .padding(.horizontal, 40)
                     .padding(.vertical, 20)
-                    .background(Color.white)
+                    .background(Color.secondaryBackground)
                     .cornerRadius(16)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .strokeBorder(Color.borderColor.opacity(0.35), lineWidth: 1)
+                    )
                     .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
                     .padding(.horizontal, 40)
                     
@@ -93,7 +79,7 @@ struct ColorClashGameSettingsScreen: View {
                     VStack(alignment: .leading, spacing: 20) {
                         Text("Game Settings")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                         
                         // Turn Timer Setting
                         VStack(alignment: .leading, spacing: 12) {
@@ -104,12 +90,12 @@ struct ColorClashGameSettingsScreen: View {
                                 
                                 Text("Turn Timer")
                                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                             }
                             
                             Text("Time limit for each player's turn")
                                 .font(.system(size: 14, weight: .regular, design: .rounded))
-                                .foregroundColor(Color.gray)
+                                .foregroundColor(.secondaryText)
                             
                             HStack(spacing: 12) {
                                 ForEach([30, 60, 90, 120], id: \.self) { seconds in
@@ -120,9 +106,9 @@ struct ColorClashGameSettingsScreen: View {
                                     }) {
                                         Text("\(seconds)s")
                                             .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                            .foregroundColor(turnTimerSeconds == seconds ? .white : Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                            .foregroundColor(turnTimerSeconds == seconds ? .white : .primaryText)
                                             .frame(width: 60, height: 36)
-                                            .background(turnTimerSeconds == seconds ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                                            .background(turnTimerSeconds == seconds ? Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0) : Color.tertiaryBackground)
                                             .cornerRadius(8)
                                     }
                                 }
@@ -142,12 +128,12 @@ struct ColorClashGameSettingsScreen: View {
                                     
                                     Text("Auto-play on Timeout")
                                         .font(.system(size: 16, weight: .medium, design: .rounded))
-                                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                        .foregroundColor(.primaryText)
                                 }
                                 
                                 Text("Automatically draw a card when timer expires")
                                     .font(.system(size: 14, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color.gray)
+                                    .foregroundColor(.secondaryText)
                             }
                             
                             Spacer()
@@ -159,8 +145,12 @@ struct ColorClashGameSettingsScreen: View {
                     }
                     .padding(.horizontal, 40)
                     .padding(.vertical, 20)
-                    .background(Color.white)
+                    .background(Color.secondaryBackground)
                     .cornerRadius(16)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .strokeBorder(Color.borderColor.opacity(0.35), lineWidth: 1)
+                    )
                     .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
                     .padding(.horizontal, 40)
                     
@@ -219,7 +209,7 @@ struct ColorClashGameSettingsScreen: View {
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                 }
             }
         }

@@ -97,12 +97,6 @@ struct CloserThanEverPlayView: View {
 
                 Spacer()
                 
-                // "Closer Than Ever" label
-                Text("Closer Than Ever")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.buttonBackground)
-                    .padding(.bottom, 32)
-                
                 // Card
                 if let currentCard = manager.currentCard() {
                     ZStack {
@@ -464,20 +458,21 @@ struct CloserThanEverCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
-            
-            VStack {
-                Image(systemName: "heart.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
-                    .padding(.bottom, 20)
-                
+                .fill(Color.cardBackground)
+
+            VStack(spacing: 0) {
+                ProgrammaticCloserThanEverCoverArtView()
+                    .environment(\.playGridAdaptiveSocialDeckCovers, true)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
                 Text("Tap to reveal")
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundColor(.secondaryText)
+                    .padding(.bottom, 24)
             }
         }
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
     }
 }
 
@@ -487,13 +482,12 @@ struct CloserThanEverCardBackView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
+                .fill(Color.cardBackground)
             
             VStack(spacing: 16) {
                 Text(text)
                     .font(.system(size: 22, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                     .multilineTextAlignment(.center)
                     .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)
@@ -501,6 +495,8 @@ struct CloserThanEverCardBackView: View {
                     .padding(.horizontal, 32)
             }
         }
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
     }
 }
 

@@ -51,10 +51,7 @@ struct CategoryClashEndView: View {
                 // End content
                 VStack(spacing: 32) {
                     // Game artwork
-                    Image(deck.imageName)
-                        .resizable()
-                        .interpolation(.high)
-                        .antialiased(true)
+                    DeckCoverArtView(deck: deck)
                         .scaledToFit()
                         .frame(width: 160, height: 220)
                         .clipShape(RoundedRectangle(cornerRadius: 20))

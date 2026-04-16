@@ -74,15 +74,6 @@ struct CategoryClashSetupView: View {
                 VStack(spacing: 0) {
                     ScrollView {
                         VStack(spacing: 32) {
-                            // Game artwork - regular card image
-                            Image(deck.imageName)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: ResponsiveSize.setupArtworkWidth, height: ResponsiveSize.setupArtworkHeight)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                                .padding(.top, 20)
-                            
                             // Selected categories chips
                             VStack(spacing: 12) {
                                 Text("Selected Categories")
@@ -171,6 +162,12 @@ struct CategoryClashSetupView: View {
                             .cornerRadius(16)
                             .animation(.easeInOut(duration: 0.2), value: timerEnabled)
                             .padding(.bottom, 32)
+
+                            HowToPlayCard(steps: [
+                                "A category is revealed — name items in that category as fast as you can.",
+                                "Hesitate, repeat an answer, or go blank and you're out of the round.",
+                                "Last player standing wins the round — most wins across all rounds takes the game!"
+                            ])
                         }
                         .padding(.horizontal, 40)
                     }

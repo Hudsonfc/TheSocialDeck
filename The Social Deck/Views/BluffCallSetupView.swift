@@ -97,17 +97,6 @@ struct BluffCallSetupView: View {
                 
                 ScrollView {
                     VStack(spacing: 32) {
-                            // Game artwork
-                        Image(deck.imageName)
-                            .resizable()
-                            .interpolation(.high)
-                            .antialiased(true)
-                            .scaledToFit()
-                            .frame(width: ResponsiveSize.setupArtworkWidth, height: ResponsiveSize.setupArtworkHeight)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                            .padding(.top, 20)
-                        
                         // Title
                         Text("Add Players")
                             .font(.system(size: 28, weight: .bold, design: .rounded))
@@ -170,7 +159,7 @@ struct BluffCallSetupView: View {
                                         .background(
                                             players.count < 12 && !newPlayerName.trimmingCharacters(in: .whitespaces).isEmpty
                                                 ? Color.primaryAccent
-                                                : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
+                                                : Color.tertiaryText
                                         )
                                         .cornerRadius(12)
                                 }
@@ -200,7 +189,7 @@ struct BluffCallSetupView: View {
                                             }) {
                                                 Image(systemName: "xmark.circle.fill")
                                                     .font(.system(size: 20))
-                                                    .foregroundColor(Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0))
+                                                    .foregroundColor(Color.tertiaryText)
                                             }
                                         }
                                         .padding(.horizontal, 16)
@@ -241,6 +230,14 @@ struct BluffCallSetupView: View {
                         .padding(.horizontal, 20)
                         }
                         .padding(.horizontal, 40)
+
+                        HowToPlayCard(steps: [
+                            "One player sees a prompt and gives their answer confidently to the group.",
+                            "Everyone decides: do they believe it's true, or is it a bluff?",
+                            "Convince them you're telling the truth — or get caught bluffing and lose the round!"
+                        ])
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
                         
                     }
                 }

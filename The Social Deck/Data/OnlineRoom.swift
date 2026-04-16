@@ -103,7 +103,9 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
     var classicTurnsEnabled: Bool?
     /// Act Natural online: host enables two unknowns when the room has 4+ players (mirrors local setup).
     var actNaturalTwoUnknowns: Bool?
-    
+    /// What Would You Do lobby: anonymous play (no attribution during rounds; scores hidden until the final screen).
+    var whatWouldYouDoAnonymousMode: Bool?
+
     // Players
     var players: [RoomPlayer]
     var hostId: String // User ID of host (usually creator)
@@ -112,11 +114,12 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
     var gameStartedAt: Date?
     var gameState: ColorClashGameState? // For Color Clash game state
     var flip21GameState: Flip21GameState? // For Flip 21 game state
-    
+    var whatWouldYouDoGameState: WhatWouldYouDoGameState? // For What Would You Do game state
+
     private enum CodingKeys: String, CodingKey {
         case id, roomCode, roomName, createdBy, createdAt, status, maxPlayers, isPrivate
-        case selectedGameType, selectedCategory, classicSelectedCategories, cardCount, timerEnabled, timerDuration, classicTurnsEnabled, actNaturalTwoUnknowns
-        case roundStartTimestamp, players, hostId, gameStartedAt, gameState, flip21GameState
+        case selectedGameType, selectedCategory, classicSelectedCategories, cardCount, timerEnabled, timerDuration, classicTurnsEnabled, actNaturalTwoUnknowns, whatWouldYouDoAnonymousMode
+        case roundStartTimestamp, players, hostId, gameStartedAt, gameState, flip21GameState, whatWouldYouDoGameState
     }
     
     init(
@@ -137,11 +140,13 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         roundStartTimestamp: Date? = nil,
         classicTurnsEnabled: Bool? = nil,
         actNaturalTwoUnknowns: Bool? = nil,
+        whatWouldYouDoAnonymousMode: Bool? = nil,
         players: [RoomPlayer] = [],
         hostId: String,
         gameStartedAt: Date? = nil,
         gameState: ColorClashGameState? = nil,
-        flip21GameState: Flip21GameState? = nil
+        flip21GameState: Flip21GameState? = nil,
+        whatWouldYouDoGameState: WhatWouldYouDoGameState? = nil
     ) {
         self.id = id
         self.roomCode = roomCode
@@ -160,11 +165,13 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         self.roundStartTimestamp = roundStartTimestamp
         self.classicTurnsEnabled = classicTurnsEnabled
         self.actNaturalTwoUnknowns = actNaturalTwoUnknowns
+        self.whatWouldYouDoAnonymousMode = whatWouldYouDoAnonymousMode
         self.players = players
         self.hostId = hostId
         self.gameStartedAt = gameStartedAt
         self.gameState = gameState
         self.flip21GameState = flip21GameState
+        self.whatWouldYouDoGameState = whatWouldYouDoGameState
     }
     
     init(from decoder: Decoder) throws {
@@ -186,6 +193,7 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         roundStartTimestamp = try container.decodeIfPresent(Date.self, forKey: .roundStartTimestamp)
         classicTurnsEnabled = try container.decodeIfPresent(Bool.self, forKey: .classicTurnsEnabled)
         actNaturalTwoUnknowns = try container.decodeIfPresent(Bool.self, forKey: .actNaturalTwoUnknowns)
+        whatWouldYouDoAnonymousMode = try container.decodeIfPresent(Bool.self, forKey: .whatWouldYouDoAnonymousMode)
 
         do {
             players = try container.decodeIfPresent([RoomPlayer].self, forKey: .players) ?? []
@@ -209,6 +217,13 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         } catch {
             print("[OnlineRoom.init] flip21GameState decode failed: \(error) — defaulting to nil")
             flip21GameState = nil
+        }
+
+        do {
+            whatWouldYouDoGameState = try container.decodeIfPresent(WhatWouldYouDoGameState.self, forKey: .whatWouldYouDoGameState)
+        } catch {
+            print("[OnlineRoom.init] whatWouldYouDoGameState decode failed: \(error) — defaulting to nil")
+            whatWouldYouDoGameState = nil
         }
     }
     
@@ -259,6 +274,7 @@ extension DeckType {
         case .closerThanEver: return "closerThanEver"
         case .usAfterDark: return "usAfterDark"
         case .spillTheEx: return "spillTheEx"
+        case .whatWouldYouDo: return "whatWouldYouDo"
         case .other: return "other"
         }
     }
@@ -290,6 +306,7 @@ extension DeckType {
         case "closerThanEver": self = .closerThanEver
         case "usAfterDark": self = .usAfterDark
         case "spillTheEx": self = .spillTheEx
+        case "whatWouldYouDo": self = .whatWouldYouDo
         case "other": self = .other
         default: return nil
         }

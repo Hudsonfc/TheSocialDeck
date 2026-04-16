@@ -48,17 +48,6 @@ struct RhymeTimeSetupView: View {
                 VStack(spacing: 0) {
                     ScrollView {
                         VStack(spacing: 0) {
-                            // Game artwork
-                            Image(deck.imageName)
-                                .resizable()
-                                .interpolation(.high)
-                                .antialiased(true)
-                                .scaledToFit()
-                                .frame(width: ResponsiveSize.setupArtworkWidth, height: ResponsiveSize.setupArtworkHeight)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                                .padding(.top, 20)
-                            
                             // Title
                             Text("Add Players")
                                 .font(.system(size: 28, weight: .bold, design: .rounded))
@@ -97,7 +86,7 @@ struct RhymeTimeSetupView: View {
                                             .background(
                                                 players.count < 12 && !newPlayerName.trimmingCharacters(in: .whitespaces).isEmpty
                                                     ? Color.primaryAccent
-                                                    : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
+                                                    : Color.tertiaryText
                                             )
                                             .cornerRadius(12)
                                     }
@@ -127,7 +116,7 @@ struct RhymeTimeSetupView: View {
                                                 }) {
                                                     Image(systemName: "xmark.circle.fill")
                                                         .font(.system(size: 20))
-                                                        .foregroundColor(Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0))
+                                                        .foregroundColor(Color.tertiaryText)
                                                 }
                                             }
                                             .padding(.horizontal, 16)
@@ -159,23 +148,13 @@ struct RhymeTimeSetupView: View {
                             }
                             .padding(.bottom, 32)
                             
-                            // Tips section
-                            if players.count >= 2 {
-                                VStack(alignment: .leading, spacing: 12) {
-                                    Text("Tips")
-                                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                                        .foregroundColor(.primaryText)
-                                    
-                                    tipRow(icon: "music.note", text: "Say a word that rhymes with the base word")
-                                    tipRow(icon: "timer", text: "You have limited time per turn")
-                                    tipRow(icon: "xmark.circle.fill", text: "Can't repeat rhymes already used")
-                                }
-                                .padding(16)
-                                .background(Color.secondaryBackground)
-                                .cornerRadius(12)
-                                .padding(.horizontal, 24)
-                                .padding(.bottom, 32)
-                            }
+                            HowToPlayCard(steps: [
+                                "A base word is revealed — say a rhyming word before the timer runs out.",
+                                "Pass to the next player; no repeating rhymes already used in that round.",
+                                "Hesitate, repeat, or blank out and you're eliminated — last one rhyming wins!"
+                            ])
+                            .padding(.horizontal, 24)
+                            .padding(.bottom, 32)
                         }
                     }
                     

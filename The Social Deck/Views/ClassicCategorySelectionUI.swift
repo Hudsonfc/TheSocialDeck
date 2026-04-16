@@ -14,40 +14,9 @@ private let categorySelectionPlusPremiumAccent = Color(red: 0xD9/255.0, green: 0
 // MARK: - Accent (selected border)
 
 extension DeckType {
-    /// Border highlight for selected category cards on selection screens.
+    /// Border highlight for selected category cards on selection screens (unified brand red for every game).
     var categorySelectionAccent: Color {
-        switch self {
-        case .neverHaveIEver:
-            return Color(red: 1, green: 0.42, blue: 0.42)
-        case .truthOrDare:
-            return Color(red: 0.63, green: 0.76, blue: 1)
-        case .wouldYouRather:
-            return Color(red: 0.99, green: 0.86, blue: 0.35)
-        case .mostLikelyTo:
-            return Color(red: 0.55, green: 0.88, blue: 0.48)
-        case .takeItPersonally:
-            return Color(red: 0.99, green: 0.86, blue: 0.35)
-        case .spillTheEx:
-            return Color(red: 1, green: 0.45, blue: 0.62)
-        case .categoryClash:
-            return Color.primaryAccent
-        case .actItOut:
-            return Color(red: 0.62, green: 0.89, blue: 0.45)
-        case .bluffCall:
-            return Color(red: 0.55, green: 0.72, blue: 1)
-        case .twoTruthsAndALie:
-            return Color(red: 0.73, green: 0.58, blue: 1)
-        case .quickfireCouples:
-            return Color(red: 1, green: 0.55, blue: 0.78)
-        case .closerThanEver:
-            return Color(red: 1, green: 0.42, blue: 0.52)
-        case .usAfterDark:
-            return Color(red: 0.58, green: 0.72, blue: 1)
-        case .whatsMySecret:
-            return Color(red: 1, green: 0.72, blue: 0.45)
-        default:
-            return Color.primaryAccent
-        }
+        categorySelectionPlusPremiumAccent
     }
 }
 
@@ -466,7 +435,7 @@ struct ClassicCategoryGridCard: View {
     let accentColor: Color
     let action: () -> Void
 
-    private let corner: CGFloat = 14
+    private let corner: CGFloat = 16
     private var cardFill: Color {
         Color(light: Color.secondaryBackground, dark: Color(red: 0.22, green: 0.22, blue: 0.26))
     }
@@ -479,8 +448,8 @@ struct ClassicCategoryGridCard: View {
         categorySelectionPlusPremiumAccent.opacity(0.82)
     }
 
-    /// Same height for every card in a row (grid uses row max); tuned low to reduce empty space.
-    private let uniformCardMinHeight: CGFloat = 128
+    /// Fixed height so every category box matches across games and rows.
+    private let uniformCardHeight: CGFloat = 172
 
     var body: some View {
         Button(action: action) {
@@ -506,16 +475,19 @@ struct ClassicCategoryGridCard: View {
                         .allowsHitTesting(false)
                 }
 
-                HStack(alignment: .top, spacing: 6) {
+                VStack(alignment: .leading, spacing: 0) {
                     Image(systemName: ClassicCategoryCardIcon.symbol(category: categoryKey, deckType: deckType))
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 22, weight: .semibold))
                         .foregroundStyle(iconColor)
-                        .frame(width: 20, height: 20, alignment: .center)
+                        .frame(width: 34, height: 34, alignment: .center)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .accessibilityHidden(true)
 
-                    VStack(alignment: .leading, spacing: 3) {
+                    Spacer(minLength: 14)
+
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(title)
-                            .font(.system(size: 13, weight: .bold, design: .rounded))
+                            .font(.system(size: 14, weight: .bold, design: .rounded))
                             .foregroundColor(titleColor)
                             .multilineTextAlignment(.leading)
                             .lineLimit(2)
@@ -523,24 +495,24 @@ struct ClassicCategoryGridCard: View {
                             .fixedSize(horizontal: false, vertical: true)
 
                         Text(subtitle)
-                            .font(.system(size: 10, weight: .regular, design: .rounded))
+                            .font(.system(size: 11, weight: .regular, design: .rounded))
                             .foregroundColor(subtitleColor)
                             .multilineTextAlignment(.leading)
-                            .lineSpacing(1)
+                            .lineSpacing(2)
+                            .lineLimit(4)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
-                    .layoutPriority(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .opacity(isLocked ? 0.72 : 1)
                 }
-                .padding(.horizontal, 9)
-                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 12)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
                 if isLocked {
                     Image(systemName: "lock.fill")
-                        .font(.system(size: 19, weight: .semibold))
+                        .font(.system(size: 24, weight: .semibold))
                         .foregroundStyle(
                             LinearGradient(
                                 colors: [
@@ -558,7 +530,7 @@ struct ClassicCategoryGridCard: View {
                         .accessibilityLabel("Locked, Plus required")
                 }
             }
-            .frame(maxWidth: .infinity, minHeight: uniformCardMinHeight, alignment: .top)
+            .frame(maxWidth: .infinity, minHeight: uniformCardHeight, maxHeight: uniformCardHeight, alignment: .topLeading)
             .overlay(
                 RoundedRectangle(cornerRadius: corner, style: .continuous)
                     .strokeBorder(
@@ -590,8 +562,8 @@ struct ClassicCategoryGridCard: View {
 // MARK: - Shared layout
 
 private let classicCategoryGridColumns = [
-    GridItem(.flexible(), spacing: 10, alignment: .top),
-    GridItem(.flexible(), spacing: 10, alignment: .top)
+    GridItem(.flexible(), spacing: 14, alignment: .top),
+    GridItem(.flexible(), spacing: 14, alignment: .top)
 ]
 
 struct ClassicCategorySelectionRoot<Destination: View>: View {
@@ -605,6 +577,7 @@ struct ClassicCategorySelectionRoot<Destination: View>: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var subManager: SubscriptionManager
     @State private var showPlusPaywall = false
+    @State private var categoryGridAppeared = false
 
     private var accent: Color {
         deck.type.categorySelectionAccent
@@ -635,6 +608,9 @@ struct ClassicCategorySelectionRoot<Destination: View>: View {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.primaryText)
+                            .frame(width: 44, height: 44)
+                            .background(Color.tertiaryBackground)
+                            .clipShape(Circle())
                     }
                     Text(deck.title)
                         .font(.system(size: 20, weight: .bold, design: .rounded))
@@ -648,21 +624,11 @@ struct ClassicCategorySelectionRoot<Destination: View>: View {
 
                 ScrollView {
                     VStack(spacing: 0) {
-                        Image(deck.imageName)
-                            .resizable()
-                            .interpolation(.high)
-                            .antialiased(true)
-                            .scaledToFit()
-                            .frame(width: 160, height: 220)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                            .padding(.top, 8)
-                            .padding(.bottom, 24)
-
                         Text("Select categories")
                             .font(.system(size: 22, weight: .bold, design: .rounded))
                             .foregroundColor(.primaryText)
                             .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, 8)
                             .padding(.bottom, 6)
 
                         Text("Tap packs to mix prompts. Locked packs need Plus.")
@@ -671,8 +637,8 @@ struct ClassicCategorySelectionRoot<Destination: View>: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.bottom, 20)
 
-                        LazyVGrid(columns: classicCategoryGridColumns, spacing: 9) {
-                            ForEach(deck.availableCategories, id: \.self) { category in
+                        LazyVGrid(columns: classicCategoryGridColumns, spacing: 12) {
+                            ForEach(Array(deck.availableCategories.enumerated()), id: \.element) { index, category in
                                 ClassicCategoryGridCard(
                                     categoryKey: category,
                                     deckType: deck.type,
@@ -682,6 +648,13 @@ struct ClassicCategorySelectionRoot<Destination: View>: View {
                                     isLocked: isLocked(category),
                                     accentColor: accent,
                                     action: { onTapCategory(category) }
+                                )
+                                .opacity(categoryGridAppeared ? 1 : 0)
+                                .offset(y: categoryGridAppeared ? 0 : 16)
+                                .animation(
+                                    .spring(response: 0.48, dampingFraction: 0.84)
+                                        .delay(Double(index) * 0.042),
+                                    value: categoryGridAppeared
                                 )
                             }
                         }
@@ -716,6 +689,14 @@ struct ClassicCategorySelectionRoot<Destination: View>: View {
             }
         }
         .navigationBarHidden(true)
+        .onAppear {
+            categoryGridAppeared = false
+            DispatchQueue.main.async {
+                withAnimation {
+                    categoryGridAppeared = true
+                }
+            }
+        }
         .sheet(isPresented: $showPlusPaywall) {
             TheSocialDeckPlusPopUpView(onDismiss: { showPlusPaywall = false })
                 .environmentObject(SubscriptionManager.shared)

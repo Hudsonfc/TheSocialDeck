@@ -305,41 +305,41 @@ struct SecretCardBackView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
-            
-            VStack(spacing: 20) {
-                Text("What's My Secret?")
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
-                    .multilineTextAlignment(.center)
-                
+                .fill(Color.cardBackground)
+
+            VStack(spacing: 0) {
+                ProgrammaticWhatsMySecretCoverArtView()
+                    .environment(\.playGridAdaptiveSocialDeckCovers, true)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
                 Text("Tap to reveal")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                    .foregroundColor(.secondaryText)
+                    .padding(.bottom, 24)
             }
         }
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
     }
 }
 
 // Secret Card Front View (shows the secret)
 struct SecretCardFrontView: View {
     let secret: String
-    
+
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
-            
+                .fill(Color.cardBackground)
+
             VStack(spacing: 20) {
                 Image(systemName: "eye.slash.fill")
                     .font(.system(size: 50))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
-                
+                    .foregroundColor(.secondaryText)
+
                 Text(secret)
                     .font(.system(size: 24, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                     .multilineTextAlignment(.center)
                     .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)
@@ -347,12 +347,14 @@ struct SecretCardFrontView: View {
                 
                 Text("Help the group figure it out—without saying it outright!")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                    .foregroundColor(.secondaryText)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
             }
             .padding(.vertical, 40)
         }
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
     }
 }
 

@@ -46,15 +46,6 @@ struct CloserThanEverSetupView: View {
                 VStack(spacing: 0) {
                     ScrollView {
                         VStack(spacing: 32) {
-                            // Game artwork - regular card image
-                            Image(deck.imageName)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: ResponsiveSize.setupArtworkWidth, height: ResponsiveSize.setupArtworkHeight)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                                .padding(.top, 20)
-                            
                             // Card Count Selector
                             VStack(spacing: 12) {
                                 Text("Number of Cards")
@@ -83,6 +74,12 @@ struct CloserThanEverSetupView: View {
                             }
                             .padding(.horizontal, 40)
                             .padding(.bottom, 32)
+
+                            HowToPlayCard(steps: [
+                                "Draw a question card and read it aloud to your partner.",
+                                "Take turns sharing your honest answer — no judgment, just openness.",
+                                "Let the conversation flow naturally beyond the card and discover new things!"
+                            ])
                         }
                         .padding(.horizontal, 40)
                     }

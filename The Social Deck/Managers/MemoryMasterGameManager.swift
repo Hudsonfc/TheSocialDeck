@@ -165,7 +165,7 @@ class MemoryMasterGameManager: ObservableObject {
     }
 }
 
-enum MemoryMasterDifficulty {
+enum MemoryMasterDifficulty: CaseIterable {
     case easy
     case medium
     case hard
@@ -204,6 +204,31 @@ enum MemoryMasterDifficulty {
         case .medium: return "Medium"
         case .hard: return "Hard"
         case .expert: return "Expert"
+        }
+    }
+
+    /// SF Symbol shown on the setup difficulty grid.
+    var selectionIcon: String {
+        switch self {
+        case .easy: return "leaf.fill"
+        case .medium: return "wind"
+        case .hard: return "flame.fill"
+        case .expert: return "bolt.fill"
+        }
+    }
+
+    /// Short line under the title on the difficulty selection card.
+    var selectionSubtitle: String {
+        let n = numberOfPairs * 2
+        switch self {
+        case .easy:
+            return "\(n) cards — quick warm-up, gentle pace."
+        case .medium:
+            return "\(n) cards — balanced challenge."
+        case .hard:
+            return "\(n) cards — bigger grid, shorter flip-back."
+        case .expert:
+            return "\(n) cards — full grid, fastest timing."
         }
     }
 }

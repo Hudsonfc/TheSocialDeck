@@ -49,17 +49,6 @@ struct HotPotatoSetupView: View {
                 
                 ScrollView {
                     VStack(spacing: 0) {
-                        // Game artwork
-                        Image(deck.imageName)
-                            .resizable()
-                            .interpolation(.high)
-                            .antialiased(true)
-                            .scaledToFit()
-                            .frame(width: 120, height: 165)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                            .padding(.top, 20)
-                        
                         // Title
                         Text("Add Players")
                             .font(.system(size: 28, weight: .bold, design: .rounded))
@@ -98,7 +87,7 @@ struct HotPotatoSetupView: View {
                                         .background(
                                             players.count < 12 && !newPlayerName.trimmingCharacters(in: .whitespaces).isEmpty
                                                 ? Color.primaryAccent
-                                                : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
+                                                : Color.tertiaryText
                                         )
                                         .cornerRadius(12)
                                 }
@@ -128,7 +117,7 @@ struct HotPotatoSetupView: View {
                                             }) {
                                                 Image(systemName: "xmark.circle.fill")
                                                     .font(.system(size: 20))
-                                                    .foregroundColor(Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0))
+                                                    .foregroundColor(Color.tertiaryText)
                                             }
                                         }
                                         .padding(.horizontal, 16)
@@ -207,23 +196,13 @@ struct HotPotatoSetupView: View {
                         .padding(.horizontal, 40)
                         .padding(.bottom, 32)
                         
-                        // Tips section
-                        if players.count >= 2 {
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("Tips")
-                                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                                    .foregroundColor(.primaryText)
-                                
-                                tipRow(icon: "timer", text: "Pass the phone before time runs out")
-                                tipRow(icon: "flame.fill", text: "Heat increases as timer counts down")
-                                tipRow(icon: "gift.fill", text: "Perks can help you survive")
-                            }
-                            .padding(16)
-                            .background(Color.secondaryBackground)
-                            .cornerRadius(12)
-                            .padding(.horizontal, 24)
-                            .padding(.bottom, 12)
-                        }
+                        HowToPlayCard(steps: [
+                            "The phone is passed quickly around the circle while the countdown ticks.",
+                            "When the 'potato explodes,' the player holding it must complete a dare.",
+                            "Keep passing fast — nobody wants to be the last one holding it!"
+                        ])
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 12)
                         
                         // Start Game button
                         Button(action: {
@@ -244,7 +223,7 @@ struct HotPotatoSetupView: View {
                                 .background(
                                     players.count >= 2
                                         ? Color.primaryAccent
-                                        : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
+                                        : Color.tertiaryText
                                 )
                                 .cornerRadius(16)
                         }

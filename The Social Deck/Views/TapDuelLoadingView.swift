@@ -27,8 +27,7 @@ struct TapDuelLoadingView: View {
                 Spacer()
                 
                 // Game artwork
-                Image(deck.imageName)
-                    .resizable()
+                DeckCoverArtView(deck: deck)
                     .scaledToFit()
                     .frame(width: 200, height: 275)
                     .clipShape(RoundedRectangle(cornerRadius: 20))

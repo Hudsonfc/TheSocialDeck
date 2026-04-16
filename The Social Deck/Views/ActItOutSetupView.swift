@@ -93,17 +93,6 @@ struct ActItOutSetupView: View {
                 VStack(spacing: 0) {
                     ScrollView {
                         VStack(spacing: 0) {
-                            // Game artwork
-                            Image(deck.imageName)
-                                .resizable()
-                                .interpolation(.high)
-                                .antialiased(true)
-                                .scaledToFit()
-                                .frame(width: ResponsiveSize.setupArtworkWidth, height: ResponsiveSize.setupArtworkHeight)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                                .padding(.top, 20)
-                            
                             // Title
                             Text("Add Players")
                                 .font(.system(size: 28, weight: .bold, design: .rounded))
@@ -150,7 +139,7 @@ struct ActItOutSetupView: View {
                                                 .background(
                                                     players.count < 12 && !newPlayerName.trimmingCharacters(in: .whitespaces).isEmpty
                                                         ? Color.primaryAccent
-                                                        : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
+                                                        : Color.tertiaryText
                                                 )
                                                 .cornerRadius(12)
                                         }
@@ -179,7 +168,7 @@ struct ActItOutSetupView: View {
                                                     }) {
                                                         Image(systemName: "xmark.circle.fill")
                                                             .font(.system(size: 20))
-                                                            .foregroundColor(Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0))
+                                                            .foregroundColor(Color.tertiaryText)
                                                     }
                                                 }
                                                 .padding(.horizontal, 16)
@@ -264,6 +253,14 @@ struct ActItOutSetupView: View {
                                         .padding(.horizontal, 40)
                                 }
                             }
+                            .padding(.bottom, 32)
+
+                            HowToPlayCard(steps: [
+                                "Draw a card and act out the word or idea silently — no talking, no sounds!",
+                                "Your team watches and tries to guess what you're acting out in time.",
+                                "Correct guesses earn a point; most points when all rounds are done wins!"
+                            ])
+                            .padding(.horizontal, 24)
                             .padding(.bottom, 32)
                         }
                     }

@@ -69,16 +69,6 @@ struct OnlineGameSelectionScreen: View {
             title: "Multiplayer Games",
             games: [
                 OnlineGamePlaceholder(
-                    title: "Color Clash",
-                    description: "A fast-paced card game where players match colors and numbers. Be the first to empty your hand!",
-                    imageName: "colorclash",
-                    hasCategories: false,
-                    availableCategories: [],
-                    gameType: "colorClash",
-                    minPlayers: 2,
-                    maxPlayers: 6
-                ),
-                OnlineGamePlaceholder(
                     title: "Flip 21",
                     description: "A classic card game where players compete against the dealer. Get as close to 21 as possible without going over!",
                     imageName: "Art 1.4",
@@ -389,25 +379,18 @@ struct OnlineGameCardView: View {
     @Binding var expandedGame: OnlineGamePlaceholder?
     
     var body: some View {
-        VStack(spacing: 8) {
-            // Game artwork
-            Image(game.imageName)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 140, height: 140)
-                .clipped()
-                .cornerRadius(12)
-            
-            // Game title
+        VStack(spacing: 10) {
+            Spacer(minLength: 8)
             Text(game.title)
-                .font(.system(size: 14, weight: .regular, design: .rounded))
-                .foregroundColor(Color.gray)
+                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .foregroundColor(.primaryText)
                 .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .frame(width: 140)
+                .lineLimit(3)
+                .frame(width: 124)
+            Spacer(minLength: 8)
         }
-        .frame(width: 140, height: 180)
-        .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+        .frame(width: 140, height: 160)
+        .background(Color.tertiaryBackground)
         .cornerRadius(16)
         .onTapGesture {
             expandCard()
@@ -430,7 +413,6 @@ struct ExpandedGameOverlay: View {
     @Binding var selectedGame: OnlineGamePlaceholder?
     @Binding var selectedCategory: String?
     @Binding var showCategorySelection: Bool
-    @State private var navigateToRoom = false
     
     init(game: OnlineGamePlaceholder, expandedGame: Binding<OnlineGamePlaceholder?>, selectedGame: Binding<OnlineGamePlaceholder?>, selectedCategory: Binding<String?>, showCategorySelection: Binding<Bool>) {
         self.game = game
@@ -442,8 +424,7 @@ struct ExpandedGameOverlay: View {
     
     var body: some View {
         ZStack {
-            // White background
-            Color.white
+            Color.appBackground
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -457,9 +438,9 @@ struct ExpandedGameOverlay: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0xF1/255.0, green: 0xF1/255.0, blue: 0xF1/255.0))
+                            .background(Color.tertiaryBackground)
                             .clipShape(Circle())
                     }
                 }
@@ -468,28 +449,15 @@ struct ExpandedGameOverlay: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
-                        HStack {
-                            Spacer(minLength: 0)
-                            Image(game.imageName)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 260, height: 260)
-                                .clipped()
-                                .cornerRadius(16)
-                                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
-                            Spacer(minLength: 0)
-                        }
-                        .padding(.bottom, 4)
-
                         Text(game.title)
                             .font(.system(size: 28, weight: .bold, design: .rounded))
-                            .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                            .foregroundColor(.primaryText)
                             .multilineTextAlignment(.leading)
                             .frame(maxWidth: .infinity, alignment: .leading)
 
                         Text(game.description)
                             .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                             .multilineTextAlignment(.leading)
                             .lineSpacing(6)
 
@@ -509,11 +477,6 @@ struct ExpandedGameOverlay: View {
                     withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                         expandedGame = nil
                     }
-                    if game.gameType == "colorClash" {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            navigateToRoom = true
-                        }
-                    }
                 }) {
                     Text("Continue")
                         .font(.system(size: 18, weight: .semibold))
@@ -525,27 +488,6 @@ struct ExpandedGameOverlay: View {
                 }
                 .padding(.horizontal, 40)
                 .padding(.bottom, 40)
-                .background(
-                    Group {
-                        if game.gameType == "colorClash" {
-                            NavigationLink(
-                                destination: ColorClashGameSettingsScreen(game: game),
-                                isActive: $navigateToRoom
-                            ) {
-                                EmptyView()
-                            }
-                            .hidden()
-                        } else {
-                            NavigationLink(
-                                destination: LobbyView(),
-                                isActive: $navigateToRoom
-                            ) {
-                                EmptyView()
-                            }
-                            .hidden()
-                        }
-                    }
-                )
             }
         }
         .transition(.asymmetric(

@@ -44,12 +44,9 @@ struct TapDuelSetupView: View {
                     ScrollView {
                         VStack(spacing: 0) {
                             // Game artwork
-                            Image(deck.imageName)
-                                .resizable()
-                                .interpolation(.high)
-                                .antialiased(true)
+                            DeckCoverArtView(deck: deck)
                                 .scaledToFit()
-                                .frame(width: 120, height: 165)
+                                .frame(width: ResponsiveSize.setupArtworkWidth, height: ResponsiveSize.setupArtworkHeight)
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
                                 .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
                                 .padding(.top, 20)
@@ -104,6 +101,14 @@ struct TapDuelSetupView: View {
                             .padding(.horizontal, 24)
                             .padding(.top, 32)
                             .padding(.bottom, 24)
+
+                            HowToPlayCard(steps: [
+                                "Both players place a thumb on their side of the screen.",
+                                "Wait for the GO signal to appear — tapping early means an instant loss!",
+                                "First to tap after GO wins the round — most wins across all rounds wins the duel!"
+                            ])
+                            .padding(.horizontal, 24)
+                            .padding(.bottom, 32)
                         }
                     }
                     

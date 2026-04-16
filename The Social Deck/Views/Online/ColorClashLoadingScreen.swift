@@ -9,7 +9,6 @@ import SwiftUI
 
 struct ColorClashLoadingScreen: View {
     @State private var currentTipIndex = 0
-    @State private var logoScale: CGFloat = 1.0
     @State private var dot1Scale: CGFloat = 0.5
     @State private var dot2Scale: CGFloat = 0.7
     @State private var dot3Scale: CGFloat = 1.0
@@ -25,27 +24,11 @@ struct ColorClashLoadingScreen: View {
     
     var body: some View {
         ZStack {
-            // Background
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(red: 0xFA/255.0, green: 0xFA/255.0, blue: 0xFA/255.0),
-                    Color.white
-                ]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            Color.appBackground
+                .ignoresSafeArea()
             
             VStack(spacing: 40) {
                 Spacer()
-                
-                // Game logo with animation
-                Image("colorclash")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 150, height: 150)
-                    .scaleEffect(logoScale)
-                    .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
                 
                 // Loading indicator - Modern dot animation
                 VStack(spacing: 20) {
@@ -68,7 +51,7 @@ struct ColorClashLoadingScreen: View {
                     
                     Text("Preparing Game")
                         .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                         .tracking(0.5)
                 }
                 
@@ -76,13 +59,13 @@ struct ColorClashLoadingScreen: View {
                 VStack(spacing: 12) {
                     Text("Quick Tip")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0))
+                        .foregroundColor(Color.primaryAccent)
                         .textCase(.uppercase)
                         .tracking(1)
                     
                     Text(tips[currentTipIndex])
                         .font(.system(size: 16, weight: .regular, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
                         .transition(.opacity.combined(with: .scale))
@@ -90,8 +73,12 @@ struct ColorClashLoadingScreen: View {
                 }
                 .padding(.vertical, 20)
                 .padding(.horizontal, 30)
-                .background(Color.white)
+                .background(Color.secondaryBackground)
                 .cornerRadius(16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .strokeBorder(Color.borderColor.opacity(0.35), lineWidth: 1)
+                )
                 .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
                 .padding(.horizontal, 40)
                 
@@ -99,11 +86,6 @@ struct ColorClashLoadingScreen: View {
             }
         }
         .onAppear {
-            // Start logo animation (subtle pulse)
-            withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
-                logoScale = 1.08
-            }
-            
             // Start dot animations (staggered pulse effect)
             withAnimation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true)) {
                 dot1Scale = 1.0

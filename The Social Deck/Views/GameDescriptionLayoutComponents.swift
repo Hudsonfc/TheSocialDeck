@@ -94,7 +94,7 @@ enum GameDescriptionLayoutContent {
     static func playSteps(for deck: Deck) -> [(title: String, detail: String)] {
         switch deck.type {
         case .neverHaveIEver, .truthOrDare, .wouldYouRather, .mostLikelyTo, .takeItPersonally,
-             .categoryClash, .bluffCall, .whatsMySecret, .actItOut, .spillTheEx:
+             .categoryClash, .bluffCall, .whatsMySecret, .spillTheEx:
             return chooseTopicsPlayAndRotate()
         case .twoTruthsAndALie:
             return [
@@ -174,6 +174,12 @@ enum GameDescriptionLayoutContent {
                 ("Hit or stand", "Try to get closer to 21 than the dealer without busting."),
                 ("Settle the round", "Compare hands, then play the next round.")
             ]
+        case .whatWouldYouDo:
+            return [
+                ("Read a prompt", "Everyone gets the same silly or tricky situation."),
+                ("Pick in secret", "Choose what you would actually do — no judgment."),
+                ("Reveal and laugh", "Compare answers and see who thinks alike. (Preview only for now.)")
+            ]
         case .other:
             return chooseTopicsPlayAndRotate()
         }
@@ -201,6 +207,8 @@ enum GameDescriptionLayoutContent {
             return "2–8 players"
         case .storyChain:
             return "2+ players"
+        case .whatWouldYouDo:
+            return "3–8 players"
         default:
             return "2+ players"
         }
@@ -224,6 +232,8 @@ enum GameDescriptionLayoutContent {
             return "Trivia"
         case .actItOut, .actNatural:
             return "Acting"
+        case .whatWouldYouDo:
+            return "Party"
         default:
             return "Party"
         }
@@ -264,6 +274,8 @@ enum GameDescriptionLayoutContent {
         switch gameType {
         case "colorClash":
             return "~15 min"
+        case "whatWouldYouDo":
+            return "~20 min"
         case "flip21":
             return "~20 min"
         case "neverHaveIEver", "wouldYouRather", "truthOrDare", "mostLikelyTo", "twoTruthsAndALie", "storyChain":
@@ -280,6 +292,8 @@ enum GameDescriptionLayoutContent {
         switch gameType {
         case "colorClash", "flip21":
             return "Cards"
+        case "whatWouldYouDo":
+            return "Party"
         case "neverHaveIEver", "wouldYouRather", "truthOrDare", "mostLikelyTo", "twoTruthsAndALie", "storyChain":
             return "Party"
         case "actNatural":
@@ -302,6 +316,12 @@ enum GameDescriptionLayoutContent {
                 ("Join the table", "Create or join a room from the online lobby."),
                 ("Play your hand", "Hit or stand against the dealer like classic 21."),
                 ("Best hand wins", "Compare totals each round and keep score your way.")
+            ]
+        case "whatWouldYouDo":
+            return [
+                ("Read a prompt", "Everyone gets the same silly or tricky situation."),
+                ("Pick in secret", "Choose what you would actually do — no judgment."),
+                ("Reveal and laugh", "Compare answers and see who thinks alike. (Preview only for now.)")
             ]
         case "storyChain":
             return [

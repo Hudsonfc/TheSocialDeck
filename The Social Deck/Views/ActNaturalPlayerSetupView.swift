@@ -56,17 +56,6 @@ struct ActNaturalPlayerSetupView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 20)
                 
-                // Game artwork
-                Image(deck.imageName)
-                    .resizable()
-                    .interpolation(.high)
-                    .antialiased(true)
-                    .scaledToFit()
-                    .frame(width: ResponsiveSize.setupArtworkWidth, height: ResponsiveSize.setupArtworkHeight)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                    .padding(.top, 20)
-                
                 // Title
                 Text("Add Players")
                     .font(.system(size: 28, weight: .bold, design: .rounded))
@@ -99,7 +88,7 @@ struct ActNaturalPlayerSetupView: View {
                             .background(
                                 manager.players.count < maxPlayers && !currentName.trimmingCharacters(in: .whitespaces).isEmpty
                                     ? Color.primaryAccent
-                                    : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
+                                    : Color.tertiaryText
                             )
                             .cornerRadius(12)
                     }
@@ -134,7 +123,7 @@ struct ActNaturalPlayerSetupView: View {
                                     }) {
                                         Image(systemName: "xmark.circle.fill")
                                             .font(.system(size: 20))
-                                            .foregroundColor(Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0))
+                                            .foregroundColor(Color.tertiaryText)
                                     }
                                 }
                                 .padding(.horizontal, 16)
@@ -213,6 +202,14 @@ struct ActNaturalPlayerSetupView: View {
                     }
                 }
                 
+                HowToPlayCard(steps: [
+                    "Receive your role: In the Know (knows the secret word) or Unknown.",
+                    "In the Know players say related words to hint at the secret; Unknown players blend in.",
+                    "Unknown players must figure out the secret word before the group exposes them!"
+                ])
+                .padding(.horizontal, 24)
+                .padding(.bottom, 8)
+
                 Spacer()
                 
                 // Unknown count info
@@ -233,7 +230,7 @@ struct ActNaturalPlayerSetupView: View {
                         .background(
                             manager.players.count >= minPlayers
                                 ? Color.primaryAccent
-                                : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
+                                : Color.tertiaryText
                         )
                         .cornerRadius(16)
                 }

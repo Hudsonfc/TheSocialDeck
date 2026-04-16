@@ -47,10 +47,7 @@ struct StoryChainEndView: View {
                 
                 // Title section with artwork
                 HStack(spacing: 16) {
-                    Image(deck.imageName)
-                        .resizable()
-                        .interpolation(.high)
-                        .antialiased(true)
+                    DeckCoverArtView(deck: deck)
                         .scaledToFit()
                         .frame(width: 80, height: 110)
                         .clipShape(RoundedRectangle(cornerRadius: 12))

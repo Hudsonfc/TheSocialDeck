@@ -27,14 +27,6 @@ struct QuickfireCouplesLoadingView: View {
             VStack(spacing: 32) {
                 Spacer()
                 
-                // Game artwork
-                Image(deck.imageName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 200, height: 275)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .shadow(color: Color.cardShadowColor, radius: 15, x: 0, y: 8)
-                
                 // Loading text
                 VStack(spacing: 12) {
                     Text("Get Ready!")

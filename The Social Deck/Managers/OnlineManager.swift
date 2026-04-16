@@ -376,6 +376,16 @@ class OnlineManager: ObservableObject {
         }
     }
 
+    /// What Would You Do lobby: anonymous mode (host only).
+    func updateWhatWouldYouDoAnonymousMode(_ anonymous: Bool) async {
+        guard let roomCode = currentRoom?.roomCode, isHost else { return }
+        do {
+            try await onlineService.updateWhatWouldYouDoAnonymousMode(roomCode: roomCode, anonymous: anonymous)
+        } catch {
+            errorMessage = "Failed to update What Would You Do settings"
+        }
+    }
+
     /// Updates classic/date/couple turn mode in the lobby (host only).
     func updateClassicTurnsEnabled(_ enabled: Bool) async {
         guard let roomCode = currentRoom?.roomCode, isHost else { return }

@@ -30,28 +30,36 @@ class FavoritesManager: ObservableObject {
         UserDefaults.standard.set(Array(favoriteGameTypes), forKey: favoritesKey)
     }
     
-    func isFavorite(_ gameType: DeckType) -> Bool {
-        return favoriteGameTypes.contains(gameType.rawValue)
+    /// Favorites keyed by `DeckType.rawValue` or online-only `OnlineGameEntry.gameType` (e.g. `whatWouldYouDo`).
+    func isFavoriteRawGameType(_ rawValue: String) -> Bool {
+        favoriteGameTypes.contains(rawValue)
     }
-    
-    func toggleFavorite(_ gameType: DeckType) {
-        if favoriteGameTypes.contains(gameType.rawValue) {
-            favoriteGameTypes.remove(gameType.rawValue)
+
+    func toggleFavoriteRawGameType(_ rawValue: String) {
+        if favoriteGameTypes.contains(rawValue) {
+            favoriteGameTypes.remove(rawValue)
         } else {
-            favoriteGameTypes.insert(gameType.rawValue)
+            favoriteGameTypes.insert(rawValue)
         }
         HapticManager.shared.lightImpact()
-        // Mirror change to Firestore for signed-in users
         let snapshot = favoriteGameTypes
         Task {
             await AuthManager.shared.saveFavoritesToFirestore(snapshot)
         }
     }
+
+    func isFavorite(_ gameType: DeckType) -> Bool {
+        isFavoriteRawGameType(gameType.rawValue)
+    }
+
+    func toggleFavorite(_ gameType: DeckType) {
+        toggleFavoriteRawGameType(gameType.rawValue)
+    }
     
     func addFavorite(_ gameType: DeckType) {
         favoriteGameTypes.insert(gameType.rawValue)
     }
-    
+
     func removeFavorite(_ gameType: DeckType) {
         favoriteGameTypes.remove(gameType.rawValue)
     }

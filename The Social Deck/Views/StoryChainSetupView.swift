@@ -52,17 +52,6 @@ struct StoryChainSetupView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 20)
                 
-                // Game artwork
-                Image(deck.imageName)
-                    .resizable()
-                    .interpolation(.high)
-                    .antialiased(true)
-                    .scaledToFit()
-                    .frame(width: ResponsiveSize.setupArtworkWidth, height: ResponsiveSize.setupArtworkHeight)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                    .padding(.top, 20)
-                
                 // Title
                 Text("Add Players")
                     .font(.system(size: 28, weight: .bold, design: .rounded))
@@ -99,7 +88,7 @@ struct StoryChainSetupView: View {
                             .background(
                                 players.count < maxPlayers && !newPlayerName.trimmingCharacters(in: .whitespaces).isEmpty
                                     ? Color.primaryAccent
-                                    : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
+                                    : Color.tertiaryText
                             )
                             .cornerRadius(12)
                     }
@@ -129,7 +118,7 @@ struct StoryChainSetupView: View {
                                 }) {
                                     Image(systemName: "xmark.circle.fill")
                                         .font(.system(size: 20))
-                                        .foregroundColor(Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0))
+                                        .foregroundColor(Color.tertiaryText)
                                 }
                             }
                             .padding(.horizontal, 16)
@@ -142,6 +131,14 @@ struct StoryChainSetupView: View {
                 }
                 .padding(.top, 16)
                 
+                HowToPlayCard(steps: [
+                    "The first player reads the story starter and adds one sentence to continue it.",
+                    "Pass around and each player continues the story with exactly one sentence.",
+                    "Keep building the tale — the more creative and chaotic, the better!"
+                ])
+                .padding(.horizontal, 24)
+                .padding(.bottom, 8)
+
                 Spacer()
                 
                 // Start button
@@ -154,7 +151,7 @@ struct StoryChainSetupView: View {
                         .background(
                             players.count >= minPlayers
                                 ? Color.primaryAccent
-                                : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
+                                : Color.tertiaryText
                         )
                         .cornerRadius(16)
                 }

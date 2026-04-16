@@ -72,15 +72,6 @@ struct NHIESetupView: View {
                 VStack(spacing: 0) {
                     ScrollView {
                         VStack(spacing: 32) {
-                            // Game artwork - regular card image
-                            Image(deck.imageName)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: ResponsiveSize.setupArtworkWidth, height: ResponsiveSize.setupArtworkHeight)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                                .padding(.top, 20)
-                            
                             // Selected categories chips
                             VStack(spacing: 12) {
                                 Text("Selected Categories")
@@ -103,6 +94,7 @@ struct NHIESetupView: View {
                                     .padding(.horizontal, 40)
                                 }
                             }
+                            .padding(.top, 8)
                             .padding(.bottom, 20)
                             
                             // Card Count Selector
@@ -132,6 +124,12 @@ struct NHIESetupView: View {
                                 .padding(.horizontal, 20)
                             }
                             .padding(.bottom, 32)
+
+                            HowToPlayCard(steps: [
+                                "Take turns drawing a card and reading the 'Never have I ever...' prompt aloud.",
+                                "Everyone who has done it puts a finger down. All 10 fingers down and you're out!",
+                                "Last player with fingers remaining wins!"
+                            ])
                         }
                         .padding(.horizontal, 40)
                     }

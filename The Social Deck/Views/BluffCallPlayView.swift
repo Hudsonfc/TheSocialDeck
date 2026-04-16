@@ -140,33 +140,143 @@ struct BluffCallPlayView: View {
     }
 }
 
-// Player turn view - combines prompt and choice
-struct PlayerTurnView: View {
+// MARK: - Player turn (flip to reveal prompt, then choose)
+
+private struct BluffCallPlayerCoverSide: View {
+    var onTapReveal: () -> Void
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 24)
+                .fill(Color.cardBackground)
+
+            VStack(spacing: 0) {
+                ProgrammaticBluffCallCoverArtView()
+                    .environment(\.playGridAdaptiveSocialDeckCovers, true)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                Text("Tap to reveal")
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundColor(.secondaryText)
+                    .padding(.bottom, 24)
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onTapReveal()
+        }
+    }
+}
+
+private struct BluffCallPlayerPromptSide: View {
     let card: Card
     @ObservedObject var manager: BluffCallGameManager
-    
+
+    private var optionIdleFill: Color { Color.secondaryBackground }
+    private var optionSelectedFill: Color { Color.buttonBackground.opacity(0.18) }
+    private var optionIdleStroke: Color { Color.primaryText.opacity(0.12) }
+
     var body: some View {
-        VStack(spacing: 24) {
-            Text("\(manager.currentPlayer), look at this secretly")
-                .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundColor(Color.buttonBackground)
+        ZStack {
+            RoundedRectangle(cornerRadius: 24)
+                .fill(Color.cardBackground)
+
+            Group {
+                if let optionA = card.optionA, let optionB = card.optionB {
+                    ScrollView(showsIndicators: false) {
+                        optionPairContent(optionA: optionA, optionB: optionB)
+                    }
+                } else {
+                    VStack(spacing: 20) {
+                        Spacer(minLength: 16)
+                        Text(card.text)
+                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                            .foregroundColor(.primaryText)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 24)
+
+                        HStack(spacing: 20) {
+                            Button(action: {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    manager.playerChoseAnswer("I have")
+                                }
+                            }) {
+                                VStack(spacing: 8) {
+                                    Text("I have")
+                                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                                        .foregroundColor(.primaryText)
+
+                                    if manager.playerAnswer == "I have" {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .font(.system(size: 20, weight: .semibold))
+                                            .foregroundColor(Color.buttonBackground)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 20)
+                                .background(manager.playerAnswer == "I have" ? optionSelectedFill : optionIdleFill)
+                                .cornerRadius(16)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .stroke(manager.playerAnswer == "I have" ? Color.buttonBackground : optionIdleStroke, lineWidth: manager.playerAnswer == "I have" ? 2 : 1)
+                                )
+                                .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+
+                            Button(action: {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    manager.playerChoseAnswer("I haven't")
+                                }
+                            }) {
+                                VStack(spacing: 8) {
+                                    Text("I haven't")
+                                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                                        .foregroundColor(.primaryText)
+
+                                    if manager.playerAnswer == "I haven't" {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .font(.system(size: 20, weight: .semibold))
+                                            .foregroundColor(Color.buttonBackground)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 20)
+                                .background(manager.playerAnswer == "I haven't" ? optionSelectedFill : optionIdleFill)
+                                .cornerRadius(16)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .stroke(manager.playerAnswer == "I haven't" ? Color.buttonBackground : optionIdleStroke, lineWidth: manager.playerAnswer == "I haven't" ? 2 : 1)
+                                )
+                                .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                        .padding(.horizontal, 24)
+                        Spacer(minLength: 16)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
+    }
+
+    @ViewBuilder
+    private func optionPairContent(optionA: String, optionB: String) -> some View {
+        VStack(spacing: 20) {
+            Text("Which is true for you?")
+                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .foregroundColor(.secondaryText)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-            
-            ZStack {
-                RoundedRectangle(cornerRadius: 24)
-                    .fill(Color.white)
-                    .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
-                
-                VStack(spacing: 20) {
-                    if let optionA = card.optionA, let optionB = card.optionB {
-                        // Two-option card
-                        Text("Which is true for you?")
-                            .font(.system(size: 18, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                            .padding(.top, 24)
-                        
-                        VStack(spacing: 16) {
+                .frame(maxWidth: .infinity)
+                .padding(.top, 24)
+
+            VStack(spacing: 16) {
                             Button(action: {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                                     manager.playerChoseAnswer("A")
@@ -175,16 +285,16 @@ struct PlayerTurnView: View {
                                 VStack(spacing: 8) {
                                     Text("Option A")
                                         .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                                    
+                                        .foregroundColor(.secondaryText)
+
                                     Text(optionA)
                                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                        .foregroundColor(Color.black)
+                                        .foregroundColor(.primaryText)
                                         .multilineTextAlignment(.center)
                                         .lineLimit(nil)
                                         .fixedSize(horizontal: false, vertical: true)
                                         .padding(.horizontal, 24)
-                                    
+
                                     if manager.playerAnswer == "A" {
                                         Image(systemName: "checkmark.circle.fill")
                                             .font(.system(size: 24, weight: .semibold))
@@ -194,20 +304,20 @@ struct PlayerTurnView: View {
                                 }
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 20)
-                                .background(manager.playerAnswer == "A" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.white)
+                                .background(manager.playerAnswer == "A" ? optionSelectedFill : optionIdleFill)
                                 .cornerRadius(16)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 16)
-                                        .stroke(manager.playerAnswer == "A" ? Color.buttonBackground : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: manager.playerAnswer == "A" ? 2 : 1)
+                                        .stroke(manager.playerAnswer == "A" ? Color.buttonBackground : optionIdleStroke, lineWidth: manager.playerAnswer == "A" ? 2 : 1)
                                 )
                                 .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                             }
                             .buttonStyle(PlainButtonStyle())
-                            
+
                             Text("OR")
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
-                                .foregroundColor(Color.buttonBackground)
-                            
+                                .foregroundColor(.secondaryText)
+
                             Button(action: {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                                     manager.playerChoseAnswer("B")
@@ -216,16 +326,16 @@ struct PlayerTurnView: View {
                                 VStack(spacing: 8) {
                                     Text("Option B")
                                         .font(.system(size: 14, weight: .semibold, design: .rounded))
-                                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
-                                    
+                                        .foregroundColor(.secondaryText)
+
                                     Text(optionB)
                                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                        .foregroundColor(Color.black)
+                                        .foregroundColor(.primaryText)
                                         .multilineTextAlignment(.center)
                                         .lineLimit(nil)
                                         .fixedSize(horizontal: false, vertical: true)
                                         .padding(.horizontal, 24)
-                                    
+
                                     if manager.playerAnswer == "B" {
                                         Image(systemName: "checkmark.circle.fill")
                                             .font(.system(size: 24, weight: .semibold))
@@ -235,101 +345,67 @@ struct PlayerTurnView: View {
                                 }
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 20)
-                                .background(manager.playerAnswer == "B" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.white)
+                                .background(manager.playerAnswer == "B" ? optionSelectedFill : optionIdleFill)
                                 .cornerRadius(16)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 16)
-                                        .stroke(manager.playerAnswer == "B" ? Color.buttonBackground : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: manager.playerAnswer == "B" ? 2 : 1)
+                                        .stroke(manager.playerAnswer == "B" ? Color.buttonBackground : optionIdleStroke, lineWidth: manager.playerAnswer == "B" ? 2 : 1)
                                 )
                                 .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                             }
-                            .buttonStyle(PlainButtonStyle())
-                        }
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 24)
-                    } else {
-                        // Question card
-                        VStack(spacing: 20) {
-                            Text(card.text)
-                                .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color.black)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
-                                .padding(.top, 24)
-                            
-                            HStack(spacing: 20) {
-                                Button(action: {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                        manager.playerChoseAnswer("I have")
-                                    }
-                                }) {
-                                    VStack(spacing: 8) {
-                                        Text("I have")
-                                            .font(.system(size: 20, weight: .bold, design: .rounded))
-                                            .foregroundColor(Color.black)
-                                        
-                                        if manager.playerAnswer == "I have" {
-                                            Image(systemName: "checkmark.circle.fill")
-                                                .font(.system(size: 20, weight: .semibold))
-                                                .foregroundColor(Color.buttonBackground)
-                                        }
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 20)
-                                    .background(manager.playerAnswer == "I have" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.white)
-                                    .cornerRadius(16)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 16)
-                                            .stroke(manager.playerAnswer == "I have" ? Color.buttonBackground : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: manager.playerAnswer == "I have" ? 2 : 1)
-                                    )
-                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                                
-                                Button(action: {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                        manager.playerChoseAnswer("I haven't")
-                                    }
-                                }) {
-                                    VStack(spacing: 8) {
-                                        Text("I haven't")
-                                            .font(.system(size: 20, weight: .bold, design: .rounded))
-                                            .foregroundColor(Color.black)
-                                        
-                                        if manager.playerAnswer == "I haven't" {
-                                            Image(systemName: "checkmark.circle.fill")
-                                                .font(.system(size: 20, weight: .semibold))
-                                                .foregroundColor(Color.buttonBackground)
-                                        }
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 20)
-                                    .background(manager.playerAnswer == "I haven't" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.white)
-                                    .cornerRadius(16)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 16)
-                                            .stroke(manager.playerAnswer == "I haven't" ? Color.buttonBackground : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: manager.playerAnswer == "I haven't" ? 2 : 1)
-                                    )
-                                    .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                            }
-                            .padding(.horizontal, 24)
-                            .padding(.bottom, 24)
-                        }
+                .buttonStyle(PlainButtonStyle())
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 24)
+        }
+    }
+}
+
+struct PlayerTurnView: View {
+    let card: Card
+    @ObservedObject var manager: BluffCallGameManager
+    @State private var cardRotation: Double = 0
+
+    var body: some View {
+        VStack(spacing: 24) {
+            Text("\(manager.currentPlayer), look at this secretly")
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .foregroundColor(.primaryText)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+
+            ZStack {
+                BluffCallPlayerPromptSide(card: card, manager: manager)
+                    .opacity(cardRotation >= 90 ? 1 : 0)
+                    .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+                    .allowsHitTesting(cardRotation >= 90)
+
+                BluffCallPlayerCoverSide {
+                    guard cardRotation < 90 else { return }
+                    HapticManager.shared.lightImpact()
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.75)) {
+                        cardRotation = 180
                     }
                 }
+                    .opacity(cardRotation < 90 ? 1 : 0)
+                    .allowsHitTesting(cardRotation < 90)
             }
             .frame(width: ResponsiveSize.cardWidth, height: ResponsiveSize.bluffCallCardHeight)
-            
+            .rotation3DEffect(
+                .degrees(cardRotation),
+                axis: (x: 0, y: 1, z: 0),
+                perspective: 0.5
+            )
+            .id("\(card.id)-\(manager.currentIndex)-\(manager.currentPlayerIndex)")
+
             if manager.playerAnswer != nil {
                 VStack(spacing: 12) {
                     Text("Convince the group your answer is true!")
                         .font(.system(size: 16, weight: .medium, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
-                    
+
                     PrimaryButton(title: "Ready for Group Decision") {
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                             manager.finishPlayerTurn()
@@ -341,6 +417,13 @@ struct PlayerTurnView: View {
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: manager.playerAnswer)
+        .onChange(of: manager.currentIndex) { _, _ in cardRotation = 0 }
+        .onChange(of: manager.currentPlayerIndex) { _, _ in cardRotation = 0 }
+        .onChange(of: manager.gamePhase) { _, phase in
+            if phase == .playerTurn {
+                cardRotation = 0
+            }
+        }
     }
 }
 
@@ -358,14 +441,15 @@ struct GroupDecisionView: View {
             VStack(spacing: 24) {
                 Text(hasMultipleVoters ? "Each player, decide:" : "Group, decide:")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.buttonBackground)
+                    .foregroundColor(.primaryText)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
                 
                 // Show the prompt they're deciding about
                 ZStack {
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.white)
+                        .fill(Color.cardBackground)
+                        .shadow(color: Color.black.opacity(0.12), radius: 8, x: 0, y: 4)
                     
                     VStack(spacing: 12) {
                         if let optionA = card.optionA, let optionB = card.optionB {
@@ -373,17 +457,17 @@ struct GroupDecisionView: View {
                             VStack(spacing: 8) {
                                 Text("\(manager.currentPlayer) said:")
                                     .font(.system(size: 14, weight: .medium, design: .rounded))
-                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                    .foregroundColor(.secondaryText)
                                 
                                 if manager.playerAnswer == "A" {
                                     Text(optionA)
                                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                        .foregroundColor(Color.black)
+                                        .foregroundColor(.primaryText)
                                         .multilineTextAlignment(.center)
                                 } else {
                                     Text(optionB)
                                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                        .foregroundColor(Color.black)
+                                        .foregroundColor(.primaryText)
                                         .multilineTextAlignment(.center)
                                 }
                             }
@@ -394,11 +478,11 @@ struct GroupDecisionView: View {
                             VStack(spacing: 8) {
                                 Text("\(manager.currentPlayer) said:")
                                     .font(.system(size: 14, weight: .medium, design: .rounded))
-                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                    .foregroundColor(.secondaryText)
                                 
                                 Text(card.text)
                                     .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                    .foregroundColor(Color.black)
+                                    .foregroundColor(.primaryText)
                                     .multilineTextAlignment(.center)
                                 
                                 Text(manager.playerAnswer ?? "")
@@ -417,7 +501,7 @@ struct GroupDecisionView: View {
                     VStack(spacing: 16) {
                         Text("Do you believe \(manager.currentPlayer)?")
                             .font(.system(size: 18, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color.black)
+                            .foregroundColor(.primaryText)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 40)
                         
@@ -435,7 +519,7 @@ struct GroupDecisionView: View {
                     VStack(spacing: 16) {
                         Text("Do you believe \(manager.currentPlayer)?")
                             .font(.system(size: 18, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color.black)
+                            .foregroundColor(.primaryText)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 40)
                         
@@ -486,7 +570,7 @@ struct GroupDecisionView: View {
                     if votedCount < totalCount {
                         Text("\(votedCount) of \(totalCount) players have voted")
                             .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                             .padding(.top, 8)
                     }
                 }
@@ -514,7 +598,7 @@ struct PlayerVoteCard: View {
         VStack(spacing: 12) {
             Text(player)
                 .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundColor(Color.black)
+                .foregroundColor(.primaryText)
             
             if hasVoted {
                 // Show their vote
@@ -525,11 +609,11 @@ struct PlayerVoteCard: View {
                     
                     Text(currentVote == .believe ? "Believed" : "Called Bluff")
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color.black)
+                        .foregroundColor(.primaryText)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0))
+                .background(Color.buttonBackground.opacity(0.15))
                 .cornerRadius(16)
             } else {
                 // Show voting buttons
@@ -568,7 +652,7 @@ struct PlayerVoteCard: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
-        .background(Color.white)
+        .background(Color.cardBackground)
         .cornerRadius(16)
         .shadow(color: Color.shadowColor, radius: 8, x: 0, y: 4)
     }
@@ -587,13 +671,13 @@ struct RevealView: View {
         VStack(spacing: 24) {
             Text("The Truth:")
                 .font(.system(size: 24, weight: .bold, design: .rounded))
-                .foregroundColor(Color.buttonBackground)
+                .foregroundColor(.primaryText)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
             
             ZStack {
                 RoundedRectangle(cornerRadius: 24)
-                    .fill(Color.white)
+                    .fill(Color.cardBackground)
                     .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
                 
                 ScrollView {
@@ -602,7 +686,7 @@ struct RevealView: View {
                         VStack(spacing: 12) {
                             Text("The Answer Was:")
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                .foregroundColor(.secondaryText)
                             
                             if let optionA = card.optionA, let optionB = card.optionB {
                                 // Two-option card
@@ -616,7 +700,7 @@ struct RevealView: View {
                                 VStack(spacing: 8) {
                                     Text(card.text)
                                         .font(.system(size: 16, weight: .medium, design: .rounded))
-                                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                        .foregroundColor(.secondaryText)
                                         .multilineTextAlignment(.center)
                                         .padding(.horizontal, 24)
                                     
@@ -628,19 +712,21 @@ struct RevealView: View {
                         }
                         .padding(.top, 24)
                         
-                        Divider()
+                        Rectangle()
+                            .fill(Color.primaryText.opacity(0.12))
+                            .frame(height: 1)
                             .padding(.horizontal, 24)
                         
                         // Player's Choice Section
                         VStack(spacing: 8) {
                             Text("\(manager.currentPlayer) Claimed:")
                                 .font(.system(size: 14, weight: .medium, design: .rounded))
-                                .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                .foregroundColor(.secondaryText)
                             
                             if let optionA = card.optionA, let optionB = card.optionB {
                                 Text(manager.playerAnswer == "A" ? optionA : optionB)
                                     .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                    .foregroundColor(Color.black)
+                                    .foregroundColor(.primaryText)
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 24)
                             } else {
@@ -648,18 +734,20 @@ struct RevealView: View {
                                 VStack(spacing: 4) {
                                     Text(card.text)
                                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                        .foregroundColor(.secondaryText)
                                         .multilineTextAlignment(.center)
                                         .padding(.horizontal, 24)
                                     
                                     Text(manager.playerAnswer ?? "")
                                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                        .foregroundColor(Color.black)
+                                        .foregroundColor(.primaryText)
                                 }
                             }
                         }
                         
-                        Divider()
+                        Rectangle()
+                            .fill(Color.primaryText.opacity(0.12))
+                            .frame(height: 1)
                             .padding(.horizontal, 24)
                         
                         if hasMultipleVoters {
@@ -667,7 +755,7 @@ struct RevealView: View {
                             VStack(spacing: 12) {
                                 Text("Player Guesses:")
                                     .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                    .foregroundColor(.secondaryText)
                                 
                                 ForEach(manager.votingPlayers, id: \.self) { player in
                                     if let vote = manager.getPlayerVote(player),
@@ -675,7 +763,7 @@ struct RevealView: View {
                                         HStack(spacing: 12) {
                                             Text(player)
                                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                                .foregroundColor(Color.black)
+                                                .foregroundColor(.primaryText)
                                             
                                             Spacer()
                                             
@@ -696,7 +784,9 @@ struct RevealView: View {
                             }
                             .padding(.horizontal, 24)
                             
-                            Divider()
+                            Rectangle()
+                                .fill(Color.primaryText.opacity(0.12))
+                                .frame(height: 1)
                                 .padding(.horizontal, 24)
                         } else {
                             // Group Decision Section (for 2 players)
@@ -704,7 +794,7 @@ struct RevealView: View {
                                 VStack(spacing: 8) {
                                     Text("Group Decision:")
                                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                                        .foregroundColor(.secondaryText)
                                     
                                     Text(groupDecision == .callBluff ? "Called Bluff" : "Believed")
                                         .font(.system(size: 18, weight: .bold, design: .rounded))
@@ -712,7 +802,9 @@ struct RevealView: View {
                                 }
                             }
                             
-                            Divider()
+                            Rectangle()
+                                .fill(Color.primaryText.opacity(0.12))
+                                .frame(height: 1)
                                 .padding(.horizontal, 24)
                             
                             // Visual indication if group guessed correctly (only for 2 players)
@@ -729,7 +821,9 @@ struct RevealView: View {
                                     }
                                 }
                                 
-                                Divider()
+                                Rectangle()
+                                    .fill(Color.primaryText.opacity(0.12))
+                                    .frame(height: 1)
                                     .padding(.horizontal, 24)
                             }
                         }
@@ -738,7 +832,7 @@ struct RevealView: View {
                         VStack(spacing: 12) {
                             Text("Results")
                                 .font(.system(size: 18, weight: .bold, design: .rounded))
-                                .foregroundColor(Color.buttonBackground)
+                                .foregroundColor(.primaryText)
                             
                             if hasMultipleVoters {
                                 // For 3+ players, show specific players who got it wrong
@@ -751,14 +845,14 @@ struct RevealView: View {
                                         // Player told truth and everyone believed correctly
                                         Text("Everyone guessed right!")
                                             .font(.system(size: 18, weight: .bold, design: .rounded))
-                                            .foregroundColor(Color.buttonBackground)
+                                            .foregroundColor(.primaryText)
                                             .multilineTextAlignment(.center)
                                             .padding(.horizontal, 24)
                                     } else {
                                         // Player lied and everyone called bluff correctly
                                         Text("\(manager.currentPlayer) got caught!")
                                             .font(.system(size: 18, weight: .bold, design: .rounded))
-                                            .foregroundColor(Color.buttonBackground)
+                                            .foregroundColor(.primaryText)
                                             .multilineTextAlignment(.center)
                                             .padding(.horizontal, 24)
                                     }
@@ -766,7 +860,7 @@ struct RevealView: View {
                                     // Show players who got it wrong
                                     Text("\(wrongPlayers.joined(separator: ", ")) got fooled!")
                                         .font(.system(size: 18, weight: .bold, design: .rounded))
-                                        .foregroundColor(Color.buttonBackground)
+                                        .foregroundColor(.primaryText)
                                         .multilineTextAlignment(.center)
                                         .padding(.horizontal, 24)
                                     
@@ -778,7 +872,7 @@ struct RevealView: View {
                                         if allCalledBluff {
                                             Text("\(manager.currentPlayer) got exposed!")
                                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                                .foregroundColor(Color.buttonBackground)
+                                                .foregroundColor(.primaryText)
                                                 .multilineTextAlignment(.center)
                                                 .padding(.horizontal, 24)
                                                 .padding(.top, 8)
@@ -789,7 +883,7 @@ struct RevealView: View {
                                 // For 2 players, use the original text
                                 Text(manager.getConsequenceText())
                                     .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                    .foregroundColor(Color.black)
+                                    .foregroundColor(.primaryText)
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 24)
                                 
@@ -826,11 +920,11 @@ struct PassPhoneView: View {
             VStack(spacing: 12) {
                 Text("Pass the phone to")
                     .font(.system(size: 20, weight: .regular, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(.secondaryText)
                 
                 Text(manager.currentPlayer)
                     .font(.system(size: 36, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.buttonBackground)
+                    .foregroundColor(.primaryText)
                     .scaleEffect(pulseScale)
             }
             

@@ -430,6 +430,22 @@ class OnlineService {
         ])
     }
 
+    /// What Would You Do lobby: anonymous mode (host only).
+    func updateWhatWouldYouDoAnonymousMode(roomCode: String, anonymous: Bool) async throws {
+        let roomRef = db.collection("rooms").document(roomCode)
+        let snapshot = try await roomRef.getDocument()
+
+        guard snapshot.exists, let room = try? snapshot.data(as: OnlineRoom.self) else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room not found"])
+        }
+
+        guard let currentUserId = auth.currentUser?.uid, room.hostId == currentUserId else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Only the host can update game settings"])
+        }
+
+        try await roomRef.updateData(["whatWouldYouDoAnonymousMode": anonymous])
+    }
+
     /// Act Natural lobby: two-unknowns option (host only).
     func updateActNaturalTwoUnknowns(roomCode: String, twoUnknowns: Bool) async throws {
         let roomRef = db.collection("rooms").document(roomCode)
@@ -481,6 +497,28 @@ class OnlineService {
                 "status": RoomStatus.inGame.rawValue,
                 "gameStartedAt": Timestamp(date: Date()),
                 "flip21GameState": try Firestore.Encoder().encode(gameState)
+            ])
+        } else if room.selectedGameType == "whatWouldYouDo" {
+            let totalRounds = max(1, (room.cardCount ?? 5) > 0 ? (room.cardCount ?? 5) : 5)
+            let prompt = allWhatWouldYouDoPrompts.randomElement() ?? allWhatWouldYouDoPrompts[0]
+            let revealOrder = room.players.map { $0.id }.shuffled()
+            let initialScores = Dictionary(uniqueKeysWithValues: room.players.map { ($0.id, 0) })
+            let gameState = WhatWouldYouDoGameState(
+                currentRound: 0,
+                totalRounds: totalRounds,
+                currentPrompt: prompt,
+                answers: [:],
+                phase: .answering,
+                votes: [:],
+                scores: initialScores,
+                revealIndex: -1,
+                revealOrder: revealOrder,
+                anonymousMode: room.whatWouldYouDoAnonymousMode == true
+            )
+            try await roomRef.updateData([
+                "status": RoomStatus.inGame.rawValue,
+                "gameStartedAt": Timestamp(date: Date()),
+                "whatWouldYouDoGameState": try Firestore.Encoder().encode(gameState)
             ])
         } else {
             let classicTurnEligibleTypes: Set<String> = [
@@ -556,7 +594,8 @@ class OnlineService {
             "actNaturalPhase": FieldValue.delete(),
             "actNaturalFlipped": FieldValue.delete(),
             "actNaturalRolesRevealed": FieldValue.delete(),
-            "actNaturalRoundIndex": FieldValue.delete()
+            "actNaturalRoundIndex": FieldValue.delete(),
+            "whatWouldYouDoGameState": FieldValue.delete()
         ]
         // Keep lobby-selected categories/settings; only reset volatile in-game state.
         try await roomRef.updateData(payload)
@@ -809,6 +848,14 @@ class OnlineService {
         return gameState
     }
     
+    /// Updates What Would You Do game state in Firestore (any field updates merged by caller).
+    func updateWhatWouldYouDoGameState(roomCode: String, gameState: WhatWouldYouDoGameState) async throws {
+        let roomRef = db.collection("rooms").document(roomCode)
+        let encoder = Firestore.Encoder()
+        let data = try encoder.encode(gameState)
+        try await roomRef.updateData(["whatWouldYouDoGameState": data])
+    }
+
     /// Updates the Flip 21 game state in Firestore
     func updateFlip21GameState(roomCode: String, gameState: Flip21GameState) async throws {
         let roomRef = db.collection("rooms").document(roomCode)

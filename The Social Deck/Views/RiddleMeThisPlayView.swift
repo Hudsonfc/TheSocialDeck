@@ -214,16 +214,11 @@ struct RiddleView: View {
                 .animation(.easeInOut(duration: 0.3), value: manager.timeRemaining <= 10)
             }
 
-            Text("Riddle Me This")
-                .font(.system(size: 24, weight: .bold, design: .rounded))
-                .foregroundColor(Color.buttonBackground)
-                .padding(.bottom, 32)
-            
             // Card
             if let riddle = manager.currentRiddle {
                 ZStack {
-                    // Card back (initial) - "Riddle Me This" text - visible when rotation < 90
-                    RiddleCardBackView(text: "Riddle Me This")
+                    // Card back (initial) — programmatic cover — visible when rotation < 90
+                    RiddleCardBackView()
                         .opacity(cardRotation < 90 ? 1 : 0)
                     
                     // Card front (after flip) - showing riddle text - visible when rotation >= 90
@@ -367,11 +362,6 @@ struct SolutionView: View {
                     .padding(.bottom, 24)
             }
 
-            Text("Riddle Me This")
-                .font(.system(size: 24, weight: .bold, design: .rounded))
-                .foregroundColor(Color.buttonBackground)
-                .padding(.bottom, 32)
-            
             // Card showing answer
             if let riddle = manager.currentRiddle {
                 RiddleCardAnswerView(text: riddle.text, answer: manager.currentAnswer)
@@ -408,42 +398,43 @@ struct RiddleCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
+                .fill(Color.cardBackground)
             
             VStack(spacing: 16) {
                 Text(text)
                     .font(.system(size: 24, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                     .multilineTextAlignment(.center)
                     .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 32)
             }
         }
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
     }
 }
 
-// Card Back View (showing "Riddle Me This" text)
+// Card Back View (hidden side — programmatic cover + tap hint)
 struct RiddleCardBackView: View {
-    let text: String
-    
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
-            
-            VStack(spacing: 20) {
-                Image(systemName: "questionmark.circle.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
-                
-                Text(text)
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                .fill(Color.cardBackground)
+
+            VStack(spacing: 0) {
+                ProgrammaticRiddleMeThisCoverArtView()
+                    .environment(\.playGridAdaptiveSocialDeckCovers, true)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                Text("Tap to reveal")
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundColor(.secondaryText)
+                    .padding(.bottom, 24)
             }
         }
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
     }
 }
 
@@ -455,27 +446,28 @@ struct RiddleCardAnswerView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
+                .fill(Color.cardBackground)
             
             VStack(spacing: 0) {
                 // Answer section
                 VStack(spacing: 16) {
                     Text("Answer")
                         .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                        .foregroundColor(.primaryText)
                         .padding(.top, 40)
                     
                     Text(answer)
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                        .foregroundColor(.primaryText)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 
                 // Divider with spacing
-                Divider()
+                Rectangle()
+                    .fill(Color.primaryText.opacity(0.12))
+                    .frame(height: 1)
                     .padding(.horizontal, 32)
                     .padding(.top, 32)
                     .padding(.bottom, 24)
@@ -484,11 +476,11 @@ struct RiddleCardAnswerView: View {
                 VStack(spacing: 8) {
                     Text("Riddle")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                     
                     Text(text)
                         .font(.system(size: 18, weight: .regular, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
                         .fixedSize(horizontal: false, vertical: true)
@@ -496,6 +488,8 @@ struct RiddleCardAnswerView: View {
                 }
             }
         }
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
     }
 }
 

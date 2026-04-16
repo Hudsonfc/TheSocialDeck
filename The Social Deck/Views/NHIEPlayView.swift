@@ -100,16 +100,11 @@ struct NHIEPlayView: View {
                 // Card area fills remaining space so top bar and bottom hint stay visible
                 VStack(spacing: 0) {
                     Spacer(minLength: 0)
-                    // "Never Have I Ever" label
-                    Text("Never Have I Ever")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(Color.buttonBackground)
-                        .padding(.bottom, 32)
                     // Card
                     if let currentCard = manager.currentCard() {
                         ZStack {
                             // Card front - visible when rotation < 90
-                            CardFrontView(text: currentCard.text)
+                            CardFrontView()
                                 .opacity(cardRotation < 90 ? 1 : 0)
                             // Card back - visible when rotation >= 90, pre-rotated 180
                             CardBackView(text: currentCard.text)
@@ -455,26 +450,20 @@ struct NHIEPlayView: View {
 }
 
 struct CardFrontView: View {
-    let text: String
-    
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color.cardBackground)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
-            
-            VStack(spacing: 16) {
-                Image(systemName: "hand.raised.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
-                
-                Text("Never Have I Ever")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
-                
+
+            VStack(spacing: 0) {
+                ProgrammaticClassicCoverArtView(deckType: .neverHaveIEver, showsCardPanel: false)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
                 Text("Tap to reveal")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(.secondaryText)
+                    .padding(.bottom, 24)
             }
         }
     }
@@ -482,17 +471,17 @@ struct CardFrontView: View {
 
 struct CardBackView: View {
     let text: String
-    
+
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color.cardBackground)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
-            
+
             VStack(spacing: 16) {
                 Text(text)
                     .font(.system(size: 24, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                     .multilineTextAlignment(.center)
                     .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)

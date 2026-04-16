@@ -69,14 +69,6 @@ struct TTLSetupView: View {
                 Spacer()
                 
                 VStack(spacing: 32) {
-                    // Game artwork - regular card image
-                    Image(deck.imageName)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: ResponsiveSize.setupArtworkWidth, height: ResponsiveSize.setupArtworkHeight)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                    
                     // Selected categories chips
                     VStack(spacing: 12) {
                         Text("Selected Categories")
@@ -152,6 +144,13 @@ struct TTLSetupView: View {
                         .padding(.horizontal, 20)
                     }
                     
+                    HowToPlayCard(steps: [
+                        "Each player shares two true statements and one lie about themselves.",
+                        "The rest of the group discusses and votes on which statement is the lie.",
+                        "Fool the most people and you're crowned the master of deception!"
+                    ])
+                    .padding(.top, 8)
+
                     // Start Game button
                     PrimaryButton(title: "Start Game") {
                         navigateToPlay = true

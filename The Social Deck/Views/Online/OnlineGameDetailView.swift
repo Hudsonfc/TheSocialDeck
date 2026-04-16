@@ -13,28 +13,45 @@ import SwiftUI
 
 // MARK: - Data Model
 
+enum BuiltInOnlineGameCover: Equatable {
+    case whatWouldYouDo
+}
+
 struct OnlineGameEntry: Identifiable {
-    let id = UUID()
+    let id: UUID
     let title: String
     let description: String
     let imageName: String
     let gameType: String     // Matches DeckType rawValue or custom string
     let minPlayers: Int
     let maxPlayers: Int
+    /// When set, grid/detail use this SwiftUI art instead of `Image(imageName)`.
+    let builtInCover: BuiltInOnlineGameCover?
+
+    init(
+        id: UUID = UUID(),
+        title: String,
+        description: String,
+        imageName: String,
+        gameType: String,
+        minPlayers: Int,
+        maxPlayers: Int,
+        builtInCover: BuiltInOnlineGameCover? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.imageName = imageName
+        self.gameType = gameType
+        self.minPlayers = minPlayers
+        self.maxPlayers = maxPlayers
+        self.builtInCover = builtInCover
+    }
 }
 
 /// Games that **only** exist as online titles (no local deck on the Play grid).
-/// Shown in the "Online Only" tab; local+online games use `GameDescriptionOverlay` → Create Room.
-let allOnlineGames: [OnlineGameEntry] = [
-    OnlineGameEntry(
-        title: "Color Clash",
-        description: "A fast-paced card game where players match colors and numbers. Play cards, use action cards to shake things up, and be the first to empty your hand. Wild cards, skips, reverses — anything goes.",
-        imageName: "colorclash",
-        gameType: "colorClash",
-        minPlayers: 2,
-        maxPlayers: 6
-    ),
-]
+/// Shown in the "Online Only" tab when non-empty. "What Would You Do" lives under Social Deck Games.
+let allOnlineGames: [OnlineGameEntry] = []
 
 // MARK: - Detail View
 
@@ -50,10 +67,6 @@ struct OnlineGameDetailView: View {
     @State private var navigateToLobby = false
     @State private var errorMessage: String? = nil
     @State private var showError = false
-
-    private var favoriteDeckType: DeckType? {
-        DeckType(rawValue: game.gameType)
-    }
 
     var body: some View {
         ZStack {
@@ -83,18 +96,15 @@ struct OnlineGameDetailView: View {
 
                     Spacer()
 
-                    if let deckType = favoriteDeckType {
-                        Button(action: {
-                            favoritesManager.toggleFavorite(deckType)
-                            HapticManager.shared.lightImpact()
-                        }) {
-                            Image(systemName: favoritesManager.isFavorite(deckType) ? "heart.fill" : "heart")
-                                .font(.system(size: 18, weight: .medium))
-                                .foregroundColor(favoritesManager.isFavorite(deckType) ? .primaryAccent : .primaryText)
-                                .frame(width: 44, height: 44)
-                                .background(Color.tertiaryBackground)
-                                .clipShape(Circle())
-                        }
+                    Button(action: {
+                        favoritesManager.toggleFavoriteRawGameType(game.gameType)
+                    }) {
+                        Image(systemName: favoritesManager.isFavoriteRawGameType(game.gameType) ? "heart.fill" : "heart")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(favoritesManager.isFavoriteRawGameType(game.gameType) ? .primaryAccent : .primaryText)
+                            .frame(width: 44, height: 44)
+                            .background(Color.tertiaryBackground)
+                            .clipShape(Circle())
                     }
                 }
                 .responsiveHorizontalPadding()
@@ -103,20 +113,6 @@ struct OnlineGameDetailView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
-                        HStack {
-                            Spacer(minLength: 0)
-                            Image(game.imageName)
-                                .resizable()
-                                .interpolation(.high)
-                                .antialiased(true)
-                                .aspectRatio(420.0 / 577.0, contentMode: .fit)
-                                .frame(width: min(180, UIScreen.main.bounds.width - 120))
-                                .cornerRadius(12)
-                                .shadow(color: Color.shadowColor, radius: 8, x: 0, y: 4)
-                            Spacer(minLength: 0)
-                        }
-                        .padding(.bottom, 2)
-
                         Text(game.title)
                             .font(.system(size: 32, weight: .bold, design: .rounded))
                             .foregroundColor(.primaryText)
@@ -145,7 +141,9 @@ struct OnlineGameDetailView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                if authManager.isAuthenticated {
+                if game.builtInCover != nil {
+                    previewOnlyFooter
+                } else if authManager.isAuthenticated {
                     actionButtons
                 } else {
                     signInGate
@@ -165,6 +163,24 @@ struct OnlineGameDetailView: View {
                 isCreatingRoom = false
             }
         }
+    }
+
+    // MARK: - Preview-only (no online flow)
+
+    private var previewOnlyFooter: some View {
+        VStack(spacing: 10) {
+            Text("Cover preview")
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .foregroundColor(.secondaryText)
+
+            Text("No rooms or gameplay yet — this is only to try the art in the Online Only tab.")
+                .font(.system(size: 14, weight: .regular, design: .rounded))
+                .foregroundColor(.tertiaryText)
+                .multilineTextAlignment(.center)
+                .lineSpacing(4)
+        }
+        .responsiveHorizontalPadding()
+        .padding(.bottom, 40)
     }
 
     // MARK: - Action Buttons

@@ -29,10 +29,7 @@ struct CardFlipView: View {
     private var frontSide: some View {
         VStack(spacing: 8) {
             // Placeholder artwork
-            Image(deck.imageName)
-                .resizable()
-                .interpolation(.high)
-                .antialiased(true)
+            DeckCoverArtView(deck: deck)
                 .scaledToFill()
                 .frame(width: 140, height: 140)
                 .clipped()

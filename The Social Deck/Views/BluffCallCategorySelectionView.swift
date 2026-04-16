@@ -11,13 +11,17 @@ struct BluffCallCategorySelectionView: View {
     let deck: Deck
     @State private var selectedCategories: Set<String> = []
     @State private var navigateToSetup: Bool = false
+    @EnvironmentObject private var subManager: SubscriptionManager
+
+    /// Four of six packs require Plus (free: Party, Friends).
+    private let plusCategories: Set<String> = ["Wild", "Couples", "Social", "Dirty"]
 
     private var freeCategories: Set<String> {
-        Set(deck.availableCategories)
+        Set(deck.availableCategories.filter { !plusCategories.contains($0) })
     }
 
     private func categoryIsLocked(_ category: String) -> Bool {
-        false
+        plusCategories.contains(category) && !subManager.isPlus
     }
 
     var body: some View {

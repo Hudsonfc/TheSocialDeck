@@ -72,15 +72,6 @@ struct TORSetupView: View {
                 VStack(spacing: 0) {
                     ScrollView {
                         VStack(spacing: 32) {
-                            // Game artwork - regular card image
-                            Image(deck.imageName)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: ResponsiveSize.setupArtworkWidth, height: ResponsiveSize.setupArtworkHeight)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                                .padding(.top, 20)
-                            
                             // Selected categories chips
                             VStack(spacing: 12) {
                                 Text("Selected Categories")
@@ -132,6 +123,12 @@ struct TORSetupView: View {
                                 .padding(.horizontal, 20)
                             }
                             .padding(.bottom, 32)
+
+                            HowToPlayCard(steps: [
+                                "Draw a card and choose Truth or Dare.",
+                                "Pick Truth and answer the question honestly, or pick Dare and complete the challenge.",
+                                "Everyone takes turns — be brave, be honest, have fun!"
+                            ])
                         }
                         .padding(.horizontal, 40)
                     }

@@ -100,11 +100,6 @@ struct ActItOutPlayView: View {
                 if !turnIntroAcknowledged, manager.currentCard() != nil {
                     turnIntroContent
                 } else if turnIntroAcknowledged {
-                    Text("Act It Out")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(Color.buttonBackground)
-                        .padding(.bottom, 8)
-
                     Text("\(manager.currentPlayer)'s turn")
                         .font(.system(size: 17, weight: .semibold, design: .rounded))
                         .foregroundColor(Color.buttonBackground.opacity(0.9))
@@ -501,20 +496,20 @@ struct ActItOutCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
-            
-            VStack {
-                Image(systemName: "theatermasks.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
-                    .padding(.bottom, 20)
-                
+                .fill(Color.cardBackground)
+
+            VStack(spacing: 0) {
+                ProgrammaticActItOutCoverArtView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
                 Text("Tap to reveal")
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundColor(.secondaryText)
+                    .padding(.bottom, 24)
             }
         }
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
     }
 }
 
@@ -524,17 +519,16 @@ struct ActItOutCardBackView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
+                .fill(Color.cardBackground)
             
             VStack(spacing: 16) {
                 Text("Act It Out")
                     .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                    .foregroundColor(.primaryText)
                 
                                 Text(text)
                                     .font(.system(size: 28, weight: .semibold, design: .rounded))
-                                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                                    .foregroundColor(.primaryText)
                                     .multilineTextAlignment(.center)
                                     .lineLimit(nil)
                                     .fixedSize(horizontal: false, vertical: true)
@@ -542,15 +536,17 @@ struct ActItOutCardBackView: View {
                 
                 Text("Act this out!")
                     .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                    .foregroundColor(.secondaryText)
                     .padding(.top, 16)
 
                 Text("Tap the card to hide the prompt")
                     .font(.system(size: 13, weight: .regular, design: .rounded))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0).opacity(0.75))
+                    .foregroundColor(.secondaryText.opacity(0.85))
                     .padding(.top, 8)
             }
         }
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
     }
 }
 

@@ -101,12 +101,6 @@ struct QuickfireCouplesPlayView: View {
 
                 Spacer()
                 
-                // "Quickfire Couples" label
-                Text("Quickfire Couples")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.buttonBackground)
-                    .padding(.bottom, 32)
-                
                 // Card
                 if let currentCard = manager.currentCard() {
                     ZStack {
@@ -539,23 +533,21 @@ struct QuickfireCouplesCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
-            
-            VStack(spacing: 16) {
-                Image(systemName: "heart.2.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(Color.black)
-                
-                Text("Quickfire Couples")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.black)
-                
+                .fill(Color.cardBackground)
+
+            VStack(spacing: 0) {
+                ProgrammaticQuickfireCouplesCoverArtView()
+                    .environment(\.playGridAdaptiveSocialDeckCovers, true)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
                 Text("Tap to reveal")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(.secondaryText)
+                    .padding(.bottom, 24)
             }
         }
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
     }
 }
 
@@ -565,12 +557,15 @@ struct QuickfireCouplesCardBackView: View {
     @Binding var selectedOption: String?
     /// When false, only viewing is allowed (another player's turn online).
     var allowSelection: Bool = true
+
+    private var optionIdleFill: Color { Color.secondaryBackground }
+    private var optionSelectedFill: Color { Color.buttonBackground.opacity(0.18) }
+    private var optionIdleStroke: Color { Color.primaryText.opacity(0.12) }
     
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
+                .fill(Color.cardBackground)
             
             VStack(spacing: 20) {
                 // Option A - Tappable
@@ -583,7 +578,7 @@ struct QuickfireCouplesCardBackView: View {
                     VStack(spacing: 8) {
                         Text(optionA)
                             .font(.system(size: 18, weight: .medium, design: .rounded))
-                            .foregroundColor(Color.black)
+                            .foregroundColor(.primaryText)
                             .multilineTextAlignment(.center)
                             .lineLimit(nil)
                             .fixedSize(horizontal: false, vertical: true)
@@ -597,11 +592,11 @@ struct QuickfireCouplesCardBackView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 20)
                     .padding(.horizontal, 24)
-                    .background(selectedOption == "A" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.white)
+                    .background(selectedOption == "A" ? optionSelectedFill : optionIdleFill)
                     .cornerRadius(12)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(selectedOption == "A" ? Color.buttonBackground : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: selectedOption == "A" ? 2 : 1)
+                            .stroke(selectedOption == "A" ? Color.buttonBackground : optionIdleStroke, lineWidth: selectedOption == "A" ? 2 : 1)
                     )
                     .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                 }
@@ -612,7 +607,7 @@ struct QuickfireCouplesCardBackView: View {
                 // Divider
                 Text("or")
                     .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(.secondaryText)
                 
                 // Option B - Tappable
                 Button(action: {
@@ -624,7 +619,7 @@ struct QuickfireCouplesCardBackView: View {
                     VStack(spacing: 8) {
                         Text(optionB)
                             .font(.system(size: 18, weight: .medium, design: .rounded))
-                            .foregroundColor(Color.black)
+                            .foregroundColor(.primaryText)
                             .multilineTextAlignment(.center)
                             .lineLimit(nil)
                             .fixedSize(horizontal: false, vertical: true)
@@ -638,11 +633,11 @@ struct QuickfireCouplesCardBackView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 20)
                     .padding(.horizontal, 24)
-                    .background(selectedOption == "B" ? Color(red: 0xFF/255.0, green: 0xE5/255.0, blue: 0xE5/255.0) : Color.white)
+                    .background(selectedOption == "B" ? optionSelectedFill : optionIdleFill)
                     .cornerRadius(12)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(selectedOption == "B" ? Color.buttonBackground : Color(red: 0xE0/255.0, green: 0xE0/255.0, blue: 0xE0/255.0), lineWidth: selectedOption == "B" ? 2 : 1)
+                            .stroke(selectedOption == "B" ? Color.buttonBackground : optionIdleStroke, lineWidth: selectedOption == "B" ? 2 : 1)
                     )
                     .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                 }
@@ -653,6 +648,8 @@ struct QuickfireCouplesCardBackView: View {
             .padding(.horizontal, 24)
             .padding(.vertical, 32)
         }
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
     }
 }
 

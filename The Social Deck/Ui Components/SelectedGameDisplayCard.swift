@@ -39,28 +39,17 @@ struct SelectedGameDisplayCard: View {
         case .closerThanEver: return "Closer Than Ever"
         case .usAfterDark: return "Us After Dark"
         case .spillTheEx: return "Spill the Ex"
+        case .whatWouldYouDo: return "What Would You Do"
         case .other: return "Game"
         }
     }
     
     private var gameArtwork: String? {
         switch gameType {
-        case .colorClash: return "colorclash"
-        case .categoryClash: return "CC artwork"
-        case .bluffCall: return "BC artwork"
-        case .hotPotato: return "HP artwork"
-        case .memoryMaster: return "MM artwork"
-        case .rhymeTime: return "RT artwork"
-        case .storyChain: return "SC artwork"
-        case .whatsMySecret: return "WMS artwork"
-        case .riddleMeThis: return "RMT artwork"
-        case .actItOut: return "AIO 2.0"
-        case .actNatural: return "AN 2.0"
-        case .neverHaveIEver: return "NHIE artwork"
-        case .spinTheBottle: return "STB artwork"
-        case .tapDuel: return "TD artwork"
-        case .flip21: return "Art 1.4"
-        case .spillTheEx: return "Spill the Ex"
+        case .neverHaveIEver, .truthOrDare, .wouldYouRather, .mostLikelyTo:
+            return nil // programmatic classic cover in body
+        case .spillTheEx, .takeItPersonally, .rhymeTime, .tapDuel, .whatsMySecret, .riddleMeThis, .actItOut, .actNatural, .categoryClash, .storyChain, .memoryMaster, .bluffCall, .spinTheBottle, .twoTruthsAndALie, .hotPotato, .colorClash, .flip21, .quickfireCouples, .closerThanEver, .usAfterDark, .whatWouldYouDo:
+            return nil // programmatic cover in body
         default: return nil
         }
     }
@@ -73,7 +62,140 @@ struct SelectedGameDisplayCard: View {
             
             HStack(spacing: 16) {
                 // Game artwork
-                if let artwork = gameArtwork {
+                if gameType.usesProgrammaticClassicCoverArt {
+                    ProgrammaticClassicCoverArtView(deckType: gameType)
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .spillTheEx {
+                    ProgrammaticSpillTheExCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .takeItPersonally {
+                    ProgrammaticTakeItPersonallyCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .rhymeTime {
+                    ProgrammaticRhymeTimeCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .tapDuel {
+                    ProgrammaticTapDuelCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .whatsMySecret {
+                    ProgrammaticWhatsMySecretCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .riddleMeThis {
+                    ProgrammaticRiddleMeThisCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .actItOut {
+                    ProgrammaticActItOutCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .actNatural {
+                    ProgrammaticActNaturalCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .categoryClash {
+                    ProgrammaticCategoryClashCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .storyChain {
+                    ProgrammaticStoryChainCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .memoryMaster {
+                    ProgrammaticMemoryMasterCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .bluffCall {
+                    ProgrammaticBluffCallCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .spinTheBottle {
+                    ProgrammaticSpinTheBottleCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .twoTruthsAndALie {
+                    ProgrammaticTwoTruthsAndALieCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .hotPotato {
+                    ProgrammaticHotPotatoCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .colorClash {
+                    ProgrammaticColorClashCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .flip21 {
+                    ProgrammaticFlip21CoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .quickfireCouples {
+                    ProgrammaticQuickfireCouplesCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .closerThanEver {
+                    ProgrammaticCloserThanEverCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .usAfterDark {
+                    ProgrammaticUsAfterDarkCoverArtView()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .whatWouldYouDo {
+                    WhatWouldYouDoCoverArtView()
+                        .environment(\.playGridAdaptiveSocialDeckCovers, true)
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if let artwork = gameArtwork {
                     Image(artwork)
                         .resizable()
                         .scaledToFill()

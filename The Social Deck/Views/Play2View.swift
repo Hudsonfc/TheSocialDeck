@@ -33,22 +33,34 @@ struct Play2View: View {
     private func isLocked(_ deck: Deck) -> Bool {
         false
     }
+
+    /// Dark-mode-friendly programmatic covers on Social Deck Games and Date/Couples tabs (and their Favorites tiles). Tap Duel stays split high-contrast art.
+    private func playGridAdaptiveSocialDeckCovers(for deck: Deck) -> Bool {
+        guard deck.type != .tapDuel else { return false }
+        if selectedCategory == "Social Deck Games" { return true }
+        if selectedCategory == "Date/Couples" { return true }
+        if selectedCategory == "Favorites" {
+            return socialDeckGamesDecks.contains { $0.type == deck.type }
+                || dateCouplesGamesDecks.contains { $0.type == deck.type }
+        }
+        return false
+    }
     
     // All category names (Favorites shown dynamically when items exist)
     var categories: [String] {
-        var cats = ["Classic Games", "Social Deck Games", "Date/Couples", "Online Only"]
+        var cats = ["Classic Games", "Social Deck Games", "Date/Couples"]
+        if !allOnlineGames.isEmpty {
+            cats.append("Online Only")
+        }
         if !favoriteDecks.isEmpty || !favoriteOnlineGames.isEmpty {
             cats.insert("Favorites", at: 0)
         }
         return cats
     }
     
-    // Favorite online-only games (e.g. Color Clash) so they appear in Favorites tab
+    // Favorite online-only games (from `allOnlineGames`) so they appear in Favorites tab
     private var favoriteOnlineGames: [OnlineGameEntry] {
-        allOnlineGames.filter { game in
-            guard let deckType = DeckType(rawValue: game.gameType) else { return false }
-            return favoritesManager.isFavorite(deckType)
-        }
+        allOnlineGames.filter { favoritesManager.isFavoriteRawGameType($0.gameType) }
     }
     
     // Selected online game for detail navigation
@@ -113,8 +125,18 @@ struct Play2View: View {
     // Social Deck Games decks with 2.0 artwork
     let socialDeckGamesDecks: [Deck] = [
         Deck(
+            title: "What Would You Do",
+            description: "Silly scenarios and tough calls — everyone secretly picks what they'd do, then you compare answers. This card is a visual preview only; online rooms are not connected yet.",
+            numberOfCards: 0,
+            estimatedTime: "~20 min",
+            imageName: "",
+            type: .whatWouldYouDo,
+            cards: [],
+            availableCategories: ["Party"]
+        ),
+        Deck(
             title: "Spill the Ex",
-            description: "Spill the Ex is a bold, laugh-out-loud party game where the tea is hot and nobody's past is completely safe. Each round, players respond to juicy relationship prompts — from harmless confessions to slightly messy moments — and the group has to guess who the story belongs to.",
+            description: "The tea is hot and nobody's past is completely safe. Each round, players share juicy relationship stories and the group tries to guess who each one belongs to. From harmless confessions to messy moments — bold, funny, and surprisingly revealing.",
             numberOfCards: 200,
             estimatedTime: "20-30 min",
             imageName: "Spill the Ex",
@@ -154,7 +176,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "What's My Secret?",
-            description: "Each round, one player is the secret keeper: they know a hidden rule and should try their hardest to help everyone else figure it out from how they act—without saying the answer outright. Whoever says the secret and gets it right earns a point. Most points when the game ends wins.",
+            description: "One player holds a hidden rule and acts it out for the group to decode — without saying it outright. Everyone else watches closely and tries to crack the secret. The first to guess correctly earns a point; most points at the end wins!",
             numberOfCards: 562,
             estimatedTime: "5-10 min",
             imageName: "WMS 2.0",
@@ -184,7 +206,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Act Natural",
-            description: "Everyone reveals their role—In the Know or Unknown—and the first person to reveal goes first. In the Know players take turns saying a word that relates to the secret word: enough that the others who know can tell you're in on it, but not so obvious that you give the answer away to the Unknown. The Unknown has to blend in by saying something that sounds like they belong, without knowing the real word. Can they figure it out before they're caught?",
+            description: "Players are split into 'In the Know' and 'Unknown' roles. In the Know players drop hints about a secret word without giving it away, while the Unknown tries to blend in and figure it out. Most convincing bluff wins — can the Unknown crack the secret before being exposed?",
             numberOfCards: 475,
             estimatedTime: "10-20 min",
             imageName: "AN 2.0",
@@ -234,7 +256,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Bluff Call",
-            description: "Convince the group your answer is true, or call their bluff! One player sees a prompt and must convince others their answer is true. The group decides whether to believe or call the bluff. Pick categories like Party, Wild, Couples, Teens, Dirty, or Friends. Deception meets deduction!",
+            description: "Convince the group your answer is real, or call out the bluffer! One player sees a prompt and delivers their answer with confidence — truth or total bluff. The group votes to believe or call it out. Deception meets deduction!",
             numberOfCards: 584,
             estimatedTime: "15-20 min",
             imageName: "BC 2.0",
@@ -248,7 +270,7 @@ struct Play2View: View {
     let dateCouplesGamesDecks: [Deck] = [
         Deck(
             title: "Quickfire Couples",
-            description: "Fast-paced \"this or that\" choices for couples. Answer instantly to reveal preferences and chemistry.",
+            description: "Fast-paced 'this or that' choices for couples — answer instantly without overthinking. See how often your preferences match and discover where you're totally different. Quick, honest, and surprisingly revealing for couples at any stage of their relationship.",
             numberOfCards: 408,
             estimatedTime: "15-25 min",
             imageName: "Quickfire Couples",
@@ -258,7 +280,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Closer Than Ever",
-            description: "Meaningful questions designed to deepen connection and strengthen emotional bonds. Explore love languages, shared memories, values, and future dreams through thoughtful conversation.",
+            description: "Meaningful questions designed to deepen connection and strengthen your bond. Take turns exploring love languages, shared memories, values, and future dreams together. Each card opens a real conversation that goes beyond small talk. Slow down and grow closer than ever.",
             numberOfCards: 394,
             estimatedTime: "30-45 min",
             imageName: "Closer than ever",
@@ -268,7 +290,7 @@ struct Play2View: View {
         ),
         Deck(
             title: "Us After Dark",
-            description: "A deeper, intimate couples game focused on honesty, curiosity, and emotional closeness. Questions explore desires, boundaries, memories, and what makes your connection special.",
+            description: "A deeper couples game built on honesty, curiosity, and emotional closeness. Questions explore desires, boundaries, memories, and what makes your connection truly special. Designed for late nights when you're ready to go beyond the surface and rediscover each other.",
             numberOfCards: 236,
             estimatedTime: "30-45 min",
             imageName: "us after dark",
@@ -336,7 +358,11 @@ struct Play2View: View {
                         ]
                         LazyVGrid(columns: columns, spacing: 20) {
                             ForEach(Array(favoriteDecks.enumerated()), id: \.element.id) { _, deck in
-                                GridGameTile(deck: deck, isLocked: isLocked(deck)) {
+                                GridGameTile(
+                                    deck: deck,
+                                    isLocked: isLocked(deck),
+                                    useAdaptiveSocialDeckProgrammaticCovers: playGridAdaptiveSocialDeckCovers(for: deck)
+                                ) {
                                     HapticManager.shared.lightImpact()
                                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                         selectedDeckForDescription = deck
@@ -379,7 +405,8 @@ struct Play2View: View {
                             ForEach(Array(currentDecks.enumerated()), id: \.element.id) { index, deck in
                                 GridGameTile(
                                     deck: deck,
-                                    isLocked: isLocked(deck)
+                                    isLocked: isLocked(deck),
+                                    useAdaptiveSocialDeckProgrammaticCovers: playGridAdaptiveSocialDeckCovers(for: deck)
                                 ) {
                                     HapticManager.shared.lightImpact()
                                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
@@ -532,6 +559,7 @@ struct Play2View: View {
                     isLocked: isLocked(deck),
                     isLockedAndNotPlus: isLocked(deck) && !subManager.isPlus,
                     onShowPaywall: { showPlusPaywall = true },
+                    useAdaptiveSocialDeckProgrammaticCovers: playGridAdaptiveSocialDeckCovers(for: deck),
                     navigateToCategorySelection: $navigateToCategorySelection,
                     navigateToPlayView: $navigateToPlayView,
                     navigateToStoryChainSetup: $navigateToStoryChainSetup,
@@ -935,10 +963,7 @@ struct GameCardView: View {
             
             // Front of card (image) - uses exact image aspect ratio
             ZStack(alignment: .topTrailing) {
-                Image(deck.imageName)
-                    .resizable()
-                    .interpolation(.high)
-                    .antialiased(true)
+                DeckCoverArtView(deck: deck)
                     .aspectRatio(imageAspectRatio, contentMode: .fit)
                     .frame(width: cardWidth, height: cardHeight)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
@@ -993,6 +1018,7 @@ struct GameCardView: View {
 struct GridGameTile: View {
     let deck: Deck
     let isLocked: Bool
+    var useAdaptiveSocialDeckProgrammaticCovers: Bool = false
     let onTap: () -> Void
     @ObservedObject private var favoritesManager = FavoritesManager.shared
     @State private var isPressed = false
@@ -1026,11 +1052,9 @@ struct GridGameTile: View {
                         .fill(Color.tertiaryBackground)
                         .frame(width: tileWidth, height: tileHeight)
                     
-                    // Card image - scaled to fit to show full shape
-                    Image(deck.imageName)
-                        .resizable()
-                        .interpolation(.high)
-                        .antialiased(true)
+                    // Card image — or programmatic cover for NHIE
+                    DeckCoverArtView(deck: deck)
+                        .environment(\.playGridAdaptiveSocialDeckCovers, useAdaptiveSocialDeckProgrammaticCovers)
                         .aspectRatio(imageAspectRatio, contentMode: .fit)
                         .frame(width: tileWidth, height: tileHeight)
                         .cornerRadius(16)
@@ -1074,6 +1098,8 @@ struct GridGameTile: View {
                     }
                     .padding(8)
                 }
+                .shadow(color: Color.cardShadowColor, radius: 9, x: 0, y: 5)
+                .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
                 
                 // Game title
                 Text(deck.title)
@@ -1096,6 +1122,7 @@ struct GameDescriptionOverlay: View {
     let isLocked: Bool
     let isLockedAndNotPlus: Bool
     let onShowPaywall: () -> Void
+    let useAdaptiveSocialDeckProgrammaticCovers: Bool
     @Binding var navigateToCategorySelection: Deck?
     @Binding var navigateToPlayView: Deck?
     @Binding var navigateToStoryChainSetup: Deck?
@@ -1114,6 +1141,7 @@ struct GameDescriptionOverlay: View {
     @State private var showOnlineSignInAlert = false
     @State private var showCreateRoomError = false
     @State private var createRoomErrorMessage: String?
+    @State private var showFindGameComingSoon = false
 
     /// Max players for hosted online room (matches `ClassicGameOnlineView`).
     private var onlineMaxPlayersForDeck: Int {
@@ -1373,6 +1401,57 @@ struct GameDescriptionOverlay: View {
             )
             .responsiveHorizontalPadding()
             .padding(.bottom, 40)
+        } else if deck.type == .whatWouldYouDo {
+            HStack(spacing: 12) {
+                Button {
+                    onCreateRoomTapped()
+                } label: {
+                    Group {
+                        if isCreatingOnlineRoom {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .scaleEffect(0.9)
+                        } else {
+                            Text("Create Room")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color.buttonBackground)
+                    .cornerRadius(16)
+                }
+                .disabled(isCreatingOnlineRoom)
+
+                Button {
+                    HapticManager.shared.lightImpact()
+                    showFindGameComingSoon = true
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 15, weight: .semibold))
+                        Text("Find Game")
+                            .font(.system(size: 17, weight: .semibold))
+                    }
+                    .foregroundColor(Color.buttonBackground)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color.buttonBackground.opacity(0.12))
+                    .cornerRadius(16)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.buttonBackground.opacity(0.3), lineWidth: 1.5)
+                    )
+                }
+            }
+            .responsiveHorizontalPadding()
+            .padding(.bottom, 40)
+            .alert("Coming Soon", isPresented: $showFindGameComingSoon) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Matchmaking for What Would You Do is coming soon. For now, create a room and share the code with friends!")
+            }
         } else {
             PrimaryButton(title: "Play") {
                 withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
@@ -1435,15 +1514,15 @@ struct GameDescriptionOverlay: View {
                     VStack(alignment: .leading, spacing: 18) {
                         HStack {
                             Spacer(minLength: 0)
-                            Image(deck.imageName)
-                                .resizable()
-                                .interpolation(.high)
-                                .antialiased(true)
+                            DeckCoverArtView(deck: deck)
+                                .environment(\.playGridAdaptiveSocialDeckCovers, useAdaptiveSocialDeckProgrammaticCovers)
+                                .environment(\.whatWouldYouDoCoverEmbeddedPills, false)
                                 .aspectRatio(420.0 / 577.0, contentMode: .fit)
                                 .frame(width: min(180, UIScreen.main.bounds.width - 120))
                                 .cornerRadius(12)
                                 .opacity(isLocked ? 0.88 : 1.0)
-                                .shadow(color: Color.shadowColor, radius: 8, x: 0, y: 4)
+                                .shadow(color: Color.cardShadowColor, radius: 11, x: 0, y: 6)
+                                .shadow(color: Color.shadowColor, radius: 5, x: 0, y: 3)
                                 .overlay(alignment: .bottomLeading) {
                                     if isLocked {
                                         HStack(spacing: 3) {
@@ -1537,11 +1616,6 @@ struct OnlineGameTile: View {
     private var tileWidth: CGFloat  { ResponsiveSize.gridTileWidth }
     private var tileHeight: CGFloat { ResponsiveSize.gridTileHeight }
 
-    /// DeckType for favoriting when this game has a matching type (e.g. colorClash).
-    private var favoriteDeckType: DeckType? {
-        DeckType(rawValue: game.gameType)
-    }
-
     var body: some View {
         Button {
             withAnimation(.easeInOut(duration: 0.1)) { isPressed = true }
@@ -1556,37 +1630,36 @@ struct OnlineGameTile: View {
                         .fill(Color.tertiaryBackground)
                         .frame(width: tileWidth, height: tileHeight)
 
-                    Image(game.imageName)
-                        .resizable()
-                        .interpolation(.high)
-                        .antialiased(true)
-                        .scaledToFill()
-                        .frame(width: tileWidth, height: tileHeight)
-                        .clipped()
-                        .cornerRadius(16)
-
-                    // Favorite button (same as GridGameTile) when this game has a DeckType
-                    if let deckType = favoriteDeckType {
-                        Button(action: {
-                            favoritesManager.toggleFavorite(deckType)
-                        }) {
-                            Image(systemName: favoritesManager.isFavorite(deckType) ? "heart.fill" : "heart")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(favoritesManager.isFavorite(deckType) ? .primaryAccent : .white)
-                                .frame(width: 32, height: 32)
-                                .background(Color.black.opacity(0.3))
-                                .clipShape(Circle())
+                    Group {
+                        if game.builtInCover == .whatWouldYouDo {
+                            WhatWouldYouDoCoverArtView()
+                                .environment(\.playGridAdaptiveSocialDeckCovers, true)
+                                .frame(width: tileWidth, height: tileHeight)
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                        } else {
+                            Text(game.title)
+                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                .foregroundColor(.primaryText)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(5)
+                                .minimumScaleFactor(0.75)
+                                .padding(.horizontal, 14)
+                                .frame(width: tileWidth, height: tileHeight)
                         }
-                        .padding(8)
                     }
-                }
 
-                Text(game.title)
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .foregroundColor(.primaryText)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .frame(maxWidth: .infinity)
+                    Button(action: {
+                        favoritesManager.toggleFavoriteRawGameType(game.gameType)
+                    }) {
+                        Image(systemName: favoritesManager.isFavoriteRawGameType(game.gameType) ? "heart.fill" : "heart")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(favoritesManager.isFavoriteRawGameType(game.gameType) ? .primaryAccent : .white)
+                            .frame(width: 32, height: 32)
+                            .background(Color.black.opacity(0.3))
+                            .clipShape(Circle())
+                    }
+                    .padding(8)
+                }
             }
             .scaleEffect(isPressed ? 0.97 : 1.0)
         }

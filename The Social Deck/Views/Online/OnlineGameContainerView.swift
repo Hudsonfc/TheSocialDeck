@@ -581,6 +581,13 @@ struct OnlineGameContainerView: View {
                         OnlineTIPView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount, selectedCategories: room.classicSelectedCategories)
                     case "riddleMeThis":
                         OnlineRMTView(roomCode: room.roomCode, isHost: room.hostId == myUserId, players: room.players, currentUserId: myUserId, cardCount: room.cardCount)
+                    case "whatWouldYouDo":
+                        WhatWouldYouDoOnlineView(
+                            roomCode: room.roomCode,
+                            isHost: room.hostId == myUserId,
+                            players: room.players,
+                            currentUserId: myUserId
+                        )
                     case "actNatural":
                         ActNaturalOnlinePlayView(
                             roomCode: room.roomCode,

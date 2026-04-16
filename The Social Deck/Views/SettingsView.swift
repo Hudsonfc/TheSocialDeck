@@ -499,7 +499,7 @@ struct RiddleMeThisHostRoundSimulationView: View {
             Spacer(minLength: 2)
 
             ZStack {
-                RiddleCardBackView(text: "Riddle Me This")
+                RiddleCardBackView()
                     .opacity(cardRotation < 90 ? 1 : 0)
                 RiddleCardFrontView(text: rmtPreviewPhaseCard.text)
                     .opacity(cardRotation >= 90 ? 1 : 0)
@@ -979,7 +979,7 @@ private struct RiddlePhase1QuestionHostPreviewView: View {
 
             let effectiveRotation = isHost ? cardRotation : 0
             ZStack {
-                RiddleCardBackView(text: "Riddle Me This")
+                RiddleCardBackView()
                     .opacity(effectiveRotation < 90 ? 1 : 0)
                 RiddleCardFrontView(text: rmtPreviewPhaseCard.text)
                     .opacity(effectiveRotation >= 90 ? 1 : 0)

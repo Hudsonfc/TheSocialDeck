@@ -60,17 +60,6 @@ struct ClassicGameOnlineView: View {
                 .padding(.top, 20)
                 .padding(.bottom, 16)
 
-                // Game artwork — same as description screen (large, centered, rounded, shadow)
-                Image(imageName)
-                    .resizable()
-                    .interpolation(.high)
-                    .antialiased(true)
-                    .aspectRatio(420.0 / 577.0, contentMode: .fit)
-                    .frame(width: min(180, UIScreen.main.bounds.width - 120))
-                    .cornerRadius(12)
-                    .shadow(color: Color.shadowColor, radius: 8, x: 0, y: 4)
-                    .padding(.bottom, 20)
-
                 Spacer()
 
                 // Title — same bold style as description screen

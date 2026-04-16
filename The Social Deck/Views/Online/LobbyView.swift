@@ -160,9 +160,9 @@ struct LobbyView: View {
             VStack(spacing: 24) {
                 roomCodeCard
                 playerListSection
-                if onlineManager.isHost && (isClassicGameWithCardCount || isActNaturalLobby) {
+                if onlineManager.isHost && (isClassicGameWithCardCount || isActNaturalLobby || isWhatWouldYouDoLobby) {
                     gameSettingsSection
-                } else if isClassicGameWithCardCount || isActNaturalLobby {
+                } else if isClassicGameWithCardCount || isActNaturalLobby || isWhatWouldYouDoLobby {
                     gameSettingsReadOnlySection
                 }
                 actionButtons
@@ -292,6 +292,10 @@ struct LobbyView: View {
         onlineManager.currentRoom?.selectedGameType == "actNatural"
     }
 
+    private var isWhatWouldYouDoLobby: Bool {
+        onlineManager.currentRoom?.selectedGameType == "whatWouldYouDo"
+    }
+
     private var currentRiddleRounds: Int {
         let count = onlineManager.currentRoom?.cardCount ?? 5
         return count > 0 ? count : 5
@@ -352,7 +356,7 @@ struct LobbyView: View {
     }
 
     private var hasCategorySettingForCurrentGame: Bool {
-        !lobbyCategoriesForSelectedGame.isEmpty && !isRiddleMeThisLobby && !isActNaturalLobby
+        !lobbyCategoriesForSelectedGame.isEmpty && !isRiddleMeThisLobby && !isActNaturalLobby && !isWhatWouldYouDoLobby
     }
 
     private var gameSettingsSection: some View {
@@ -365,7 +369,11 @@ struct LobbyView: View {
                 actNaturalHostGameSettings
             }
 
-            if !isActNaturalLobby {
+            if isWhatWouldYouDoLobby {
+                whatWouldYouDoHostGameSettings
+            }
+
+            if !isActNaturalLobby && !isWhatWouldYouDoLobby {
             Text(isRiddleMeThisLobby ? "Rounds to play" : "Cards to play")
                 .font(.system(size: 14, weight: .medium, design: .rounded))
                 .foregroundColor(.gray)
@@ -551,6 +559,66 @@ struct LobbyView: View {
         .padding(.horizontal, 24)
     }
 
+    private var whatWouldYouDoHostGameSettings: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Rounds to play")
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundColor(.gray)
+                let currentRounds = onlineManager.currentRoom?.cardCount ?? 5
+                let effectiveRounds = currentRounds > 0 ? currentRounds : 5
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(Self.riddleRoundOptions, id: \.self) { rounds in
+                            Button {
+                                HapticManager.shared.lightImpact()
+                                Task { await onlineManager.updateCardCount(rounds) }
+                            } label: {
+                                Text("\(rounds)")
+                                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                    .foregroundColor(effectiveRounds == rounds ? .white : soDeckRed)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 10)
+                                    .background(effectiveRounds == rounds ? soDeckRed : soDeckRed.opacity(0.08))
+                                    .cornerRadius(10)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(soDeckRed.opacity(effectiveRounds == rounds ? 0 : 0.3), lineWidth: 1)
+                                    )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                    .padding(.vertical, 2)
+                }
+            }
+
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Anonymous mode")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(.primaryText)
+                    Text("Hide who wrote each answer and keep scores secret until the game ends")
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                        .foregroundColor(.gray)
+                }
+                Spacer()
+                Toggle(
+                    "",
+                    isOn: Binding(
+                        get: { onlineManager.currentRoom?.whatWouldYouDoAnonymousMode ?? false },
+                        set: { on in
+                            Task { await onlineManager.updateWhatWouldYouDoAnonymousMode(on) }
+                        }
+                    )
+                )
+                .labelsHidden()
+                .tint(soDeckRed)
+            }
+        }
+        .padding(.bottom, 8)
+    }
+
     private var actNaturalHostGameSettings: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 8) {
@@ -705,6 +773,15 @@ struct LobbyView: View {
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .foregroundColor(.primaryText)
                 Text("Two unknowns: \((onlineManager.currentRoom?.actNaturalTwoUnknowns ?? false) ? "On" : "Off")")
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .foregroundColor(.primaryText)
+            } else if isWhatWouldYouDoLobby {
+                let r = onlineManager.currentRoom?.cardCount ?? 5
+                let effective = r > 0 ? r : 5
+                Text("Rounds: \(effective)")
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .foregroundColor(.primaryText)
+                Text("Anonymous mode: \((onlineManager.currentRoom?.whatWouldYouDoAnonymousMode ?? false) ? "On" : "Off")")
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .foregroundColor(.primaryText)
             } else if isRiddleMeThisLobby {

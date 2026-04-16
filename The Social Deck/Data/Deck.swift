@@ -32,6 +32,8 @@ enum DeckType: String {
     case usAfterDark
     case takeItPersonally
     case spillTheEx
+    /// Online-first party game (same `rawValue` as legacy `OnlineGameEntry.gameType`).
+    case whatWouldYouDo
     case other
 
     /// Games that support online multiplayer (e.g. Play Offline vs Create Room in Play2).
@@ -56,6 +58,8 @@ enum DeckType: String {
             return ("Fan Favorite", "star.fill")
         case .actItOut:
             return ("Most Played", "flame.fill")
+        case .actNatural:
+            return ("Just like imposter", "theatermasks.fill")
         case .mostLikelyTo:
             return ("Crowd Pleaser", "face.smiling.fill")
         case .takeItPersonally:
@@ -80,4 +84,46 @@ struct Deck: Identifiable {
     let type: DeckType
     let cards: [Card]
     let availableCategories: [String] // e.g., ["Party", "Wild", "Couples", "Social", "Dirty", "Friends"]
+
+    /// Minimal deck for cover-only UI (online placeholders, loading, synthetic contexts).
+    static func coverOnly(type: DeckType, catalogImageName: String = "") -> Deck {
+        Deck(
+            title: "",
+            description: "",
+            numberOfCards: 0,
+            estimatedTime: "",
+            imageName: catalogImageName,
+            type: type,
+            cards: [],
+            availableCategories: []
+        )
+    }
+}
+
+extension Deck {
+    /// When true, UI uses programmatic cover (`DeckCoverArtView`) instead of `Image(imageName)`.
+    var usesProgrammaticCoverArt: Bool {
+        type.usesProgrammaticClassicCoverArt
+            || type == .spillTheEx
+            || type == .takeItPersonally
+            || type == .rhymeTime
+            || type == .tapDuel
+            || type == .whatsMySecret
+            || type == .riddleMeThis
+            || type == .actItOut
+            || type == .actNatural
+            || type == .categoryClash
+            || type == .storyChain
+            || type == .memoryMaster
+            || type == .bluffCall
+            || type == .spinTheBottle
+            || type == .twoTruthsAndALie
+            || type == .hotPotato
+            || type == .colorClash
+            || type == .flip21
+            || type == .quickfireCouples
+            || type == .closerThanEver
+            || type == .usAfterDark
+            || type == .whatWouldYouDo
+    }
 }

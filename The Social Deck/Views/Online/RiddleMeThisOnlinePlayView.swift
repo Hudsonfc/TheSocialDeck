@@ -274,11 +274,6 @@ struct RiddleMeThisOnlinePlayView: View {
         VStack(spacing: 0) {
             Spacer()
 
-            Text("Riddle Me This")
-                .font(.system(size: 24, weight: .bold, design: .rounded))
-                .foregroundColor(Color.buttonBackground)
-                .padding(.bottom, 32)
-
             riddleCardView
 
             Spacer()
@@ -336,12 +331,6 @@ struct RiddleMeThisOnlinePlayView: View {
                 }
                 .frame(height: 40)
                 .padding(.top, 4)
-
-            Text("Riddle Me This")
-                .font(.system(size: 24, weight: .bold, design: .rounded))
-                .foregroundColor(Color.buttonBackground)
-                .padding(.top, 8)
-                .padding(.bottom, 32)
 
                 riddleCardView
                     .padding(.top, 4)
@@ -656,7 +645,7 @@ struct RiddleMeThisOnlinePlayView: View {
 
     private var riddleCardView: some View {
         ZStack {
-            RiddleCardBackView(text: "Riddle Me This")
+            RiddleCardBackView()
                 .opacity(cardRotation < 90 ? 1 : 0)
 
             if let card = currentCard {
@@ -805,9 +794,7 @@ struct RiddleMeThisOnlineEndView: View {
             VStack(spacing: 0) {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
-                        Image("RMT 2.0")
-                            .resizable()
-                            .interpolation(.high)
+                        ProgrammaticRiddleMeThisCoverArtView()
                             .scaledToFit()
                             .frame(width: 140, height: 190)
                             .clipShape(RoundedRectangle(cornerRadius: 20))

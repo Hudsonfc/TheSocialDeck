@@ -72,15 +72,6 @@ struct MLTSetupView: View {
                 VStack(spacing: 0) {
                     ScrollView {
                         VStack(spacing: 32) {
-                            // Game artwork - regular card image
-                            Image(deck.imageName)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: ResponsiveSize.setupArtworkWidth, height: ResponsiveSize.setupArtworkHeight)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                                .padding(.top, 20)
-                            
                             // Selected categories chips
                             VStack(spacing: 12) {
                                 Text("Selected Categories")
@@ -132,6 +123,12 @@ struct MLTSetupView: View {
                                 .padding(.horizontal, 20)
                             }
                             .padding(.bottom, 32)
+
+                            HowToPlayCard(steps: [
+                                "Read a 'Most Likely To...' prompt aloud to the group.",
+                                "Everyone points at the person they think fits best — all at the same time.",
+                                "The person with the most votes gets the title. Most overall wins!"
+                            ])
                         }
                         .padding(.horizontal, 40)
                     }

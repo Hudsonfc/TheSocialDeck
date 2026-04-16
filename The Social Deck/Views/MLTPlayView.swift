@@ -100,11 +100,6 @@ struct MLTPlayView: View {
                 // Card area fills remaining space so top bar and bottom hint stay visible
                 VStack(spacing: 0) {
                     Spacer(minLength: 0)
-                    // "Most Likely To" label
-                    Text("Most Likely To")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(Color.buttonBackground)
-                        .padding(.bottom, 32)
                     // Card
                     if let currentCard = manager.currentCard() {
                         ZStack {
@@ -434,21 +429,17 @@ struct MLTCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color.cardBackground)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
-            
-            VStack(spacing: 16) {
-                Image(systemName: "crown.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
-                
-                Text("Most Likely To")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
-                
+
+            VStack(spacing: 0) {
+                ProgrammaticClassicCoverArtView(deckType: .mostLikelyTo, showsCardPanel: false)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
                 Text("Tap to reveal")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(.secondaryText)
+                    .padding(.bottom, 24)
             }
         }
     }
@@ -456,7 +447,7 @@ struct MLTCardFrontView: View {
 
 struct MLTCardBackView: View {
     let text: String
-    
+
     private var displayText: String {
         // Format the text to show "Most likely to [text]" if it doesn't already start with it
         let lowercased = text.lowercased()
@@ -466,17 +457,17 @@ struct MLTCardBackView: View {
             return "Most likely to \(text)"
         }
     }
-    
+
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color.cardBackground)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
-            
+
             VStack(spacing: 16) {
                 Text(displayText)
                     .font(.system(size: 24, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                     .multilineTextAlignment(.center)
                     .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)

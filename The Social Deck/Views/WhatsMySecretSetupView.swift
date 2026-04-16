@@ -62,17 +62,6 @@ struct WhatsMySecretSetupView: View {
                 VStack(spacing: 0) {
                     ScrollView {
                         VStack(spacing: 0) {
-                            // Game artwork
-                            Image(deck.imageName)
-                                .resizable()
-                                .interpolation(.high)
-                                .antialiased(true)
-                                .scaledToFit()
-                                .frame(width: ResponsiveSize.setupArtworkWidth, height: ResponsiveSize.setupArtworkHeight)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 5)
-                                .padding(.top, 20)
-                            
                             // Title
                             Text("Add Players")
                                 .font(.system(size: 28, weight: .bold, design: .rounded))
@@ -112,7 +101,7 @@ struct WhatsMySecretSetupView: View {
                                             .background(
                                                 players.count < 12 && !newPlayerName.trimmingCharacters(in: .whitespaces).isEmpty
                                                     ? Color.primaryAccent
-                                                    : Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0)
+                                                    : Color.tertiaryText
                                             )
                                             .cornerRadius(12)
                                     }
@@ -142,7 +131,7 @@ struct WhatsMySecretSetupView: View {
                                                 }) {
                                                     Image(systemName: "xmark.circle.fill")
                                                         .font(.system(size: 20))
-                                                        .foregroundColor(Color(red: 0xC0/255.0, green: 0xC0/255.0, blue: 0xC0/255.0))
+                                                        .foregroundColor(Color.tertiaryText)
                                                 }
                                             }
                                             .padding(.horizontal, 16)
@@ -214,23 +203,13 @@ struct WhatsMySecretSetupView: View {
                             .padding(.horizontal, 40)
                             .padding(.bottom, 32)
                             
-                            // Tips section
-                            if players.count >= 2 {
-                                VStack(alignment: .leading, spacing: 12) {
-                                    Text("Tips")
-                                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                                        .foregroundColor(.primaryText)
-                                    
-                                    tipRow(icon: "person.2.fill", text: "Each player gets a secret rule to follow")
-                                    tipRow(icon: "eye.slash.fill", text: "Don't reveal your secret until the end")
-                                    tipRow(icon: "bubble.left.and.bubble.right.fill", text: "Try to guess others' secrets")
-                                }
-                                .padding(16)
-                                .background(Color.secondaryBackground)
-                                .cornerRadius(12)
-                                .padding(.horizontal, 24)
-                                .padding(.bottom, 32)
-                            }
+                            HowToPlayCard(steps: [
+                                "One player draws a secret rule and acts naturally while trying to hint at it.",
+                                "Everyone else watches and listens closely to guess the hidden rule.",
+                                "The first to guess correctly earns a point — most points when all secrets are revealed wins!"
+                            ])
+                            .padding(.horizontal, 24)
+                            .padding(.bottom, 32)
                         }
                     }
                     

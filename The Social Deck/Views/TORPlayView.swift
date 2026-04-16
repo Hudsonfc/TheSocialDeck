@@ -98,15 +98,10 @@ struct TORPlayView: View {
                 // Card area fills remaining space so top bar and bottom hint stay visible
                 VStack(spacing: 0) {
                     Spacer(minLength: 0)
-                    // "Truth or Dare" label
-                    Text("Truth or Dare")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(Color.buttonBackground)
-                        .padding(.bottom, 32)
                     // Card
                     if let currentCard = manager.currentCard() {
                         ZStack {
-                            TORCardFrontView(card: currentCard)
+                            TORCardFrontView()
                                 .opacity(cardRotation < 90 ? 1 : 0)
                             TORCardBackView(card: currentCard)
                                 .opacity(cardRotation >= 90 ? 1 : 0)
@@ -520,26 +515,20 @@ struct TORPlayView: View {
 }
 
 struct TORCardFrontView: View {
-    let card: Card
-    
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color.cardBackground)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
-            
-            VStack(spacing: 16) {
-                Image(systemName: "mouth.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
-                
-                Text("Truth or Dare")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
-                
+
+            VStack(spacing: 0) {
+                ProgrammaticClassicCoverArtView(deckType: .truthOrDare, showsCardPanel: false)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
                 Text("Tap to reveal")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(.secondaryText)
+                    .padding(.bottom, 24)
             }
         }
     }
@@ -547,24 +536,24 @@ struct TORCardFrontView: View {
 
 struct TORCardBackView: View {
     let card: Card
-    
+
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color.cardBackground)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
-            
+
             // Show full content (type + text)
             VStack(spacing: 16) {
                 if let cardType = card.cardType {
                     Text(cardType == .truth ? "Truth" : "Dare")
                         .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                        .foregroundColor(.primaryText)
                 }
-                
+
                 Text(card.text)
                     .font(.system(size: 24, weight: .semibold, design: .rounded))
-                    .foregroundColor(Color(red: 0x0A/255.0, green: 0x0A/255.0, blue: 0x0A/255.0))
+                    .foregroundColor(.primaryText)
                     .multilineTextAlignment(.center)
                     .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)

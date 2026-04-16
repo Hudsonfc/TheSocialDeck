@@ -72,7 +72,7 @@ struct ActNaturalPlayView: View {
                     VStack(spacing: 8) {
                         Text("Pass the phone to")
                             .font(.system(size: 16, weight: .medium, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                         
                         Text(currentPlayer.name)
                             .font(.system(size: 24, weight: .bold, design: .rounded))
@@ -222,23 +222,21 @@ struct ActNaturalCardFrontView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
-            
-            VStack(spacing: 16) {
-                Image(systemName: "eye.slash.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
-                
-                Text("Act Natural")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
-                
+                .fill(Color.cardBackground)
+
+            VStack(spacing: 0) {
+                ProgrammaticActNaturalCoverArtView()
+                    .environment(\.playGridAdaptiveSocialDeckCovers, true)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
                 Text("Tap to reveal")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                    .foregroundColor(.secondaryText)
+                    .padding(.bottom, 24)
             }
         }
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
     }
 }
 
@@ -249,8 +247,7 @@ struct ActNaturalCardBackView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
+                .fill(Color.cardBackground)
             
             if player.isUnknown {
                 // Unknown player view
@@ -261,18 +258,18 @@ struct ActNaturalCardBackView: View {
                     
                     Text("You are the Unknown")
                         .font(.system(size: 22, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                        .foregroundColor(.primaryText)
                         .multilineTextAlignment(.center)
                     
                     VStack(spacing: 12) {
                         Text("You do NOT know the word")
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                            .foregroundColor(.primaryText)
                             .multilineTextAlignment(.center)
                         
                         Text("Listen carefully and try to figure out what it is. Blend in!")
                             .font(.system(size: 14, weight: .regular, design: .rounded))
-                            .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                            .foregroundColor(.secondaryText)
                             .multilineTextAlignment(.center)
                             .lineSpacing(4)
                     }
@@ -288,11 +285,11 @@ struct ActNaturalCardBackView: View {
                     
                     Text("The Secret Word")
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                     
                     Text(secretWord)
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                        .foregroundColor(.primaryText)
                         .multilineTextAlignment(.center)
                         .lineLimit(nil)
                         .fixedSize(horizontal: false, vertical: true)
@@ -300,13 +297,15 @@ struct ActNaturalCardBackView: View {
                     
                     Text("Subtly mention this word during discussion")
                         .font(.system(size: 14, weight: .regular, design: .rounded))
-                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
                 }
                 .padding(32)
             }
         }
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
     }
 }
 

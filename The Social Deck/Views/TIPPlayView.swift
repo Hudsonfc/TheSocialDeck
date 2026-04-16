@@ -96,13 +96,7 @@ struct TIPPlayView: View {
                 }
                 
                 Spacer()
-                
-                // "Take It Personally" label
-                Text("Take It Personally")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.buttonBackground)
-                    .padding(.bottom, 32)
-                
+
                 // Card
                 ZStack {
                     // Card front - visible when rotation < 90
@@ -492,25 +486,62 @@ struct TIPPlayView: View {
 
 struct TIPCardFrontView: View {
     let card: Card
-    
+
+    /// Pre-flip card face: matches `ProgrammaticTakeItPersonallyCoverArtView` (yellow accent bar + two-line wordmark).
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color.cardBackground)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
-            
-            VStack(spacing: 16) {
-                Image(systemName: "hand.point.up.left.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
-                
-                Text("Take It Personally")
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
-                
-                Text("Tap to reveal")
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
-                    .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+
+            GeometryReader { geo in
+                let u = min(geo.size.width, geo.size.height)
+                let barW = max(3, u * 0.042)
+                let topLine = max(10, u * 0.098)
+                let hero = max(14, u * 0.168)
+
+                VStack(spacing: 0) {
+                    Spacer(minLength: 0)
+
+                    HStack(alignment: .center, spacing: u * 0.075) {
+                        RoundedRectangle(cornerRadius: 2, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color(red: 0.98, green: 0.74, blue: 0.26),
+                                        Color(red: 0.90, green: 0.50, blue: 0.10)
+                                    ],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .frame(width: barW, height: u * 0.58)
+
+                        VStack(alignment: .leading, spacing: u * 0.028) {
+                            Text("Take it")
+                                .font(.system(size: topLine, weight: .regular, design: .rounded))
+                                .foregroundStyle(Color.secondaryText)
+                                .tracking(0.6)
+
+                            Text("personally")
+                                .font(.system(size: hero, weight: .bold, design: .rounded))
+                                .foregroundStyle(Color.primaryText)
+                                .tracking(0.2)
+                                .minimumScaleFactor(0.48)
+                                .lineLimit(1)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .padding(.horizontal, u * 0.1)
+
+                    Spacer(minLength: 0)
+
+                    Text("Tap to reveal")
+                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                        .foregroundColor(Color(red: 0x7A/255.0, green: 0x7A/255.0, blue: 0x7A/255.0))
+                        .padding(.bottom, 24)
+                }
+                .frame(width: geo.size.width, height: geo.size.height)
             }
         }
     }
@@ -518,17 +549,17 @@ struct TIPCardFrontView: View {
 
 struct TIPCardBackView: View {
     let card: Card
-    
+
+    /// Revealed prompt side — semantic surface + text so it matches dark mode like the pre-flip face.
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color.cardBackground)
                 .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
-            
-            // Prompt centered in the card
+
             Text(card.text)
                 .font(.system(size: 22, weight: .bold, design: .rounded))
-                .foregroundColor(Color(red: 0x2A/255.0, green: 0x2A/255.0, blue: 0x2A/255.0))
+                .foregroundColor(.primaryText)
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
                 .padding(.horizontal, 40)
