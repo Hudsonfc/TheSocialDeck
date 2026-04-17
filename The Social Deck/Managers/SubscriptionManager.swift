@@ -7,16 +7,15 @@ import StoreKit
 
 // MARK: - Plan enum (shared with the paywall view)
 enum PlusPlan: Equatable {
-    case weekly, yearly
+    case monthly, yearly
 }
 
 // MARK: - Product IDs
 enum SubscriptionProductID {
-    /// Previous App Store subscription (monthly). Kept for reference; app uses `weekly` below.
-    // static let monthly = "com.thesocialdeck.plus.monthly"
-    static let weekly = "com.thesocialdeck.plus.weekly"
-    static let yearly = "com.thesocialdeck.plus.yearly"
-    static var allIDs: Set<String> { [weekly, yearly] }
+    static let monthly = "com.thesocialdeck.plus.monthly"
+    static let weekly  = "com.thesocialdeck.plus.weekly"   // legacy — recognised for entitlements but not shown in UI
+    static let yearly  = "com.thesocialdeck.plus.yearly"
+    static var allIDs: Set<String> { [monthly, weekly, yearly] }
 }
 
 // MARK: - Manager
@@ -28,7 +27,7 @@ final class SubscriptionManager: ObservableObject {
 
     // MARK: - Published state
     @Published var isPlus: Bool = false
-    @Published var weeklyProduct: Product?
+    @Published var monthlyProduct: Product?
     @Published var yearlyProduct: Product?
     @Published var selectedPlan: PlusPlan = .yearly
     @Published var isLoading: Bool = false
@@ -56,9 +55,9 @@ final class SubscriptionManager: ObservableObject {
             let fetched = try await Product.products(for: SubscriptionProductID.allIDs)
             for product in fetched {
                 switch product.id {
-                case SubscriptionProductID.weekly: weeklyProduct = product
+                case SubscriptionProductID.monthly: monthlyProduct = product
                 case SubscriptionProductID.yearly:  yearlyProduct  = product
-                default: break
+                default: break  // weekly: legacy plan — entitlement recognised but not sold in current UI
                 }
             }
         } catch {
@@ -70,7 +69,7 @@ final class SubscriptionManager: ObservableObject {
     func purchaseSelectedPlan() async {
         let product: Product?
         switch selectedPlan {
-        case .weekly: product = weeklyProduct
+        case .monthly: product = monthlyProduct
         case .yearly:  product = yearlyProduct
         }
 

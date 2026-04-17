@@ -87,6 +87,8 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
     // Settings
     var maxPlayers: Int // 2-8
     var isPrivate: Bool
+    /// When true, the room may appear in public “find game” matchmaking queries (`isPrivate == false` implies public, but this flag is indexed for Firestore queries).
+    var isPublic: Bool
     var selectedGameType: String? // DeckType stored as string (e.g., "neverHaveIEver")
     var selectedCategory: String? // Selected category for game
     /// Online classic/date/couple lobby: host-selected categories to include in play.
@@ -117,7 +119,7 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
     var whatWouldYouDoGameState: WhatWouldYouDoGameState? // For What Would You Do game state
 
     private enum CodingKeys: String, CodingKey {
-        case id, roomCode, roomName, createdBy, createdAt, status, maxPlayers, isPrivate
+        case id, roomCode, roomName, createdBy, createdAt, status, maxPlayers, isPrivate, isPublic
         case selectedGameType, selectedCategory, classicSelectedCategories, cardCount, timerEnabled, timerDuration, classicTurnsEnabled, actNaturalTwoUnknowns, whatWouldYouDoAnonymousMode
         case roundStartTimestamp, players, hostId, gameStartedAt, gameState, flip21GameState, whatWouldYouDoGameState
     }
@@ -131,6 +133,7 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         status: RoomStatus = .waiting,
         maxPlayers: Int = 4,
         isPrivate: Bool = false,
+        isPublic: Bool? = nil,
         selectedGameType: String? = nil,
         selectedCategory: String? = nil,
         classicSelectedCategories: [String]? = nil,
@@ -156,6 +159,7 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         self.status = status
         self.maxPlayers = maxPlayers
         self.isPrivate = isPrivate
+        self.isPublic = isPublic ?? !isPrivate
         self.selectedGameType = selectedGameType
         self.selectedCategory = selectedCategory
         self.classicSelectedCategories = classicSelectedCategories
@@ -184,6 +188,7 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         status = try container.decodeIfPresent(RoomStatus.self, forKey: .status) ?? .waiting
         maxPlayers = try container.decodeIfPresent(Int.self, forKey: .maxPlayers) ?? 4
         isPrivate = try container.decodeIfPresent(Bool.self, forKey: .isPrivate) ?? false
+        isPublic = try container.decodeIfPresent(Bool.self, forKey: .isPublic) ?? !isPrivate
         selectedGameType = try container.decodeIfPresent(String.self, forKey: .selectedGameType)
         selectedCategory = try container.decodeIfPresent(String.self, forKey: .selectedCategory)
         classicSelectedCategories = try container.decodeIfPresent([String].self, forKey: .classicSelectedCategories)

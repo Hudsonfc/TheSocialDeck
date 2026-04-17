@@ -168,7 +168,6 @@ struct ProfileView: View {
                     usernameSection
                     statsSection
                     plusUpgradeSection
-                    friendsEntrySection
                     Spacer()
                         .frame(height: 40)
                 }
@@ -217,9 +216,40 @@ struct ProfileView: View {
                     Image(systemName: "ellipsis")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.primaryText)
-                        .frame(width: 44, height: 44)
                 }
             }
+
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    HapticManager.shared.lightImpact()
+                    showFriendsList = true
+                }) {
+                    Image(systemName: "person.2.fill")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(.primaryText)
+                        .overlay(alignment: .topTrailing) {
+                            if showFriendsBadge {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.primaryAccent)
+                                    if let label = friendsBadgeCountLabel {
+                                        Text(label)
+                                            .font(.system(size: 8, weight: .bold, design: .rounded))
+                                            .foregroundColor(.white)
+                                            .minimumScaleFactor(0.7)
+                                            .lineLimit(1)
+                                    }
+                                }
+                                .frame(width: 14, height: 14)
+                                .offset(x: 7, y: -5)
+                                .allowsHitTesting(false)
+                                .transition(.opacity.combined(with: .scale))
+                                .scaleEffect(friendsBadgePopScale)
+                            }
+                        }
+                }
+            }
+
             }
             .navigationBarBackButtonHidden(true)
             .background(
@@ -433,9 +463,10 @@ struct ProfileView: View {
                 showPlusPaywall = true
             }) {
                 HStack(spacing: 10) {
-                    Image(systemName: "crown.fill")
+                    Image(systemName: "rectangle.stack.fill")
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(.primaryAccent)
+                        .rotationEffect(.degrees(90))
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Upgrade to TheSocialDeck+")
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
@@ -527,9 +558,13 @@ struct ProfileView: View {
         }
     }
 
-    /// Red badge with white ring; numeric label when count ≥ 1, else compact dot.
+    /// Notification badge: default red on light UI; `invertedForRedTint` = white pill on solid red (toolbar friends button).
     @ViewBuilder
-    private func profileFriendsNotificationBadge(countLabel: String?, popScale: CGFloat) -> some View {
+    private func profileFriendsNotificationBadge(
+        countLabel: String?,
+        popScale: CGFloat,
+        invertedForRedTint: Bool = false
+    ) -> some View {
         let brandRed = Color.primaryAccent
         let stroke: CGFloat = 2
 
@@ -537,26 +572,32 @@ struct ProfileView: View {
             if let text = countLabel {
                 Text(text)
                     .font(.system(size: text == "9+" ? 9 : 10, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(invertedForRedTint ? brandRed : .white)
                     .lineLimit(1)
                     .minimumScaleFactor(0.85)
                     .padding(.horizontal, 5)
                     .frame(minWidth: 19, minHeight: 19)
                     .background(
                         Capsule()
-                            .fill(brandRed)
+                            .fill(invertedForRedTint ? Color.white : brandRed)
                     )
                     .overlay(
                         Capsule()
-                            .strokeBorder(Color.appBackground, lineWidth: stroke)
+                            .strokeBorder(
+                                invertedForRedTint ? brandRed.opacity(0.35) : Color.appBackground,
+                                lineWidth: stroke
+                            )
                     )
             } else {
                 Circle()
-                    .fill(brandRed)
+                    .fill(invertedForRedTint ? Color.white : brandRed)
                     .frame(width: 11, height: 11)
                     .overlay(
                         Circle()
-                            .strokeBorder(Color.appBackground, lineWidth: stroke)
+                            .strokeBorder(
+                                invertedForRedTint ? brandRed.opacity(0.45) : Color.appBackground,
+                                lineWidth: stroke
+                            )
                     )
             }
         }

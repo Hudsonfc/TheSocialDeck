@@ -67,6 +67,8 @@ struct Play2View: View {
     @State private var selectedOnlineGame: OnlineGameEntry? = nil
     @State private var navigateToJoinRoom = false
     @State private var navigateToSignInForJoin = false
+    @State private var showJoinRoomOptionsSheet = false
+    @State private var navigateToBrowsePublicRooms = false
     
     // Get all decks
     private var allDecks: [Deck] {
@@ -126,7 +128,7 @@ struct Play2View: View {
     let socialDeckGamesDecks: [Deck] = [
         Deck(
             title: "What Would You Do",
-            description: "Silly scenarios and tough calls — everyone secretly picks what they'd do, then you compare answers. This card is a visual preview only; online rooms are not connected yet.",
+            description: "An online party game for your group in one room. Each round everyone sees the same “what would you do if…” scenario, writes a short answer in private, and submits. When everyone’s in, answers reveal one by one on screen. Then players vote for their favorites—you can’t vote for yourself—and scores update each round until the final leaderboard. The host can run another game from the lobby; optional anonymous mode hides names on answers until the end.",
             numberOfCards: 0,
             estimatedTime: "~20 min",
             imageName: "",
@@ -540,6 +542,14 @@ struct Play2View: View {
             }
             .hidden()
 
+            NavigationLink(
+                destination: PublicRoomsView(gameType: nil, gameDisplayName: "All games"),
+                isActive: $navigateToBrowsePublicRooms
+            ) {
+                EmptyView()
+            }
+            .hidden()
+
             NavigationLink(destination: SignInView(), isActive: $navigateToSignInForJoin) {
                 EmptyView()
             }
@@ -602,24 +612,91 @@ struct Play2View: View {
                 Button {
                     HapticManager.shared.lightImpact()
                     if authManager.isAuthenticated {
-                        navigateToJoinRoom = true
+                        showJoinRoomOptionsSheet = true
                     } else {
                         navigateToSignInForJoin = true
                     }
                 } label: {
-                    Text("Join Room")
+                    Text("Join Game")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundColor(.primaryAccent)
                 }
             }
         }
         .navigationBarBackButtonHidden(true)
+        .sheet(isPresented: $showJoinRoomOptionsSheet) {
+            joinRoomOptionsSheet
+                .presentationDetents([.height(220)])
+                .presentationDragIndicator(.visible)
+        }
         .sheet(isPresented: $showPlusPaywall, onDismiss: {
             Task { await subManager.refreshEntitlements() }
         }) {
             TheSocialDeckPlusPopUpView(onDismiss: { showPlusPaywall = false })
                 .environmentObject(SubscriptionManager.shared)
         }
+    }
+
+    private var joinRoomOptionsSheet: some View {
+        VStack(spacing: 20) {
+            Text("Join a game")
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .foregroundColor(.primaryText)
+                .padding(.top, 8)
+
+            VStack(spacing: 12) {
+                Button {
+                    HapticManager.shared.lightImpact()
+                    showJoinRoomOptionsSheet = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                        navigateToJoinRoom = true
+                    }
+                } label: {
+                    Text("Enter Room Code")
+                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color.primaryAccent)
+                        .cornerRadius(14)
+                }
+
+                Button {
+                    HapticManager.shared.lightImpact()
+                    showJoinRoomOptionsSheet = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                        if subManager.isPlus {
+                            navigateToBrowsePublicRooms = true
+                        } else {
+                            showPlusPaywall = true
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        if !subManager.isPlus {
+                            Image(systemName: "crown.fill")
+                                .font(.system(size: 13, weight: .semibold))
+                        }
+                        Text("Browse Open Rooms")
+                            .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    }
+                    .foregroundColor(.primaryAccent)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Color.primaryAccent.opacity(0.12))
+                    .cornerRadius(14)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(Color.primaryAccent.opacity(0.35), lineWidth: 1.5)
+                    )
+                }
+            }
+            .padding(.horizontal, 20)
+
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.appBackground)
     }
     
     @ViewBuilder
@@ -1136,12 +1213,41 @@ struct GameDescriptionOverlay: View {
     @ObservedObject private var favoritesManager = FavoritesManager.shared
     @StateObject private var authManager = AuthManager.shared
     @StateObject private var onlineManager = OnlineManager.shared
+    @EnvironmentObject private var subManager: SubscriptionManager
     @State private var isCreatingOnlineRoom = false
     @State private var navigateToLobby = false
     @State private var showOnlineSignInAlert = false
     @State private var showCreateRoomError = false
     @State private var createRoomErrorMessage: String?
-    @State private var showFindGameComingSoon = false
+    @State private var showDailyLimitModal = false
+
+    // MARK: - Daily room-creation limit (free users only)
+
+    private let kRoomLimitDate  = "com.thesocialdeck.roomCreation.date"
+    private let kRoomLimitCount = "com.thesocialdeck.roomCreation.dailyCount"
+    private let dailyFreeRoomLimit = 3
+
+    private func hasReachedDailyRoomLimit() -> Bool {
+        let stored = UserDefaults.standard.object(forKey: kRoomLimitDate) as? Date
+        let count  = UserDefaults.standard.integer(forKey: kRoomLimitCount)
+        if let stored, Calendar.current.isDateInToday(stored) {
+            return count >= dailyFreeRoomLimit
+        }
+        return false
+    }
+
+    private func incrementDailyRoomCount() {
+        let stored = UserDefaults.standard.object(forKey: kRoomLimitDate) as? Date
+        if let stored, Calendar.current.isDateInToday(stored) {
+            UserDefaults.standard.set(
+                UserDefaults.standard.integer(forKey: kRoomLimitCount) + 1,
+                forKey: kRoomLimitCount
+            )
+        } else {
+            UserDefaults.standard.set(Date(), forKey: kRoomLimitDate)
+            UserDefaults.standard.set(1, forKey: kRoomLimitCount)
+        }
+    }
 
     /// Max players for hosted online room (matches `ClassicGameOnlineView`).
     private var onlineMaxPlayersForDeck: Int {
@@ -1197,15 +1303,21 @@ struct GameDescriptionOverlay: View {
 
     private func createOnlineRoomFromDescription() async {
         isCreatingOnlineRoom = true
+        // WWYD rooms default to private so hosts explicitly opt in to public discovery.
+        let defaultPrivate = deck.type == .whatWouldYouDo
         await onlineManager.createRoom(
             roomName: deck.title,
             maxPlayers: onlineMaxPlayersForDeck,
-            isPrivate: false,
+            isPrivate: defaultPrivate,
             gameType: deck.type.rawValue
         )
         await MainActor.run {
             isCreatingOnlineRoom = false
             if onlineManager.currentRoom != nil {
+                // Count this successful creation toward the free daily quota.
+                if !subManager.isPlus {
+                    incrementDailyRoomCount()
+                }
                 HapticManager.shared.success()
                 withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                     selectedDeck = nil
@@ -1216,12 +1328,28 @@ struct GameDescriptionOverlay: View {
     }
 
     private func onCreateRoomTapped() {
+        // What Would You Do requires Plus to create a room.
+        // (Joining via room code / invite is unaffected — that goes through a separate path.)
+        if deck.type == .whatWouldYouDo && !subManager.isPlus {
+            onShowPaywall()
+            return
+        }
+
+        // Free users may create up to 3 rooms per day — show the styled modal first.
+        if !subManager.isPlus && hasReachedDailyRoomLimit() {
+            withAnimation(.spring(response: 0.38, dampingFraction: 0.82)) {
+                showDailyLimitModal = true
+            }
+            return
+        }
+
         if authManager.isAuthenticated {
             Task { await createOnlineRoomFromDescription() }
         } else {
             showOnlineSignInAlert = true
         }
     }
+
 
     @ViewBuilder
     private var bottomActionButtons: some View {
@@ -1402,56 +1530,28 @@ struct GameDescriptionOverlay: View {
             .responsiveHorizontalPadding()
             .padding(.bottom, 40)
         } else if deck.type == .whatWouldYouDo {
-            HStack(spacing: 12) {
-                Button {
-                    onCreateRoomTapped()
-                } label: {
-                    Group {
-                        if isCreatingOnlineRoom {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                .scaleEffect(0.9)
-                        } else {
-                            Text("Create Room")
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(.white)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.buttonBackground)
-                    .cornerRadius(16)
-                }
-                .disabled(isCreatingOnlineRoom)
-
-                Button {
-                    HapticManager.shared.lightImpact()
-                    showFindGameComingSoon = true
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 15, weight: .semibold))
-                        Text("Find Game")
+            Button {
+                onCreateRoomTapped()
+            } label: {
+                Group {
+                    if isCreatingOnlineRoom {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .scaleEffect(0.9)
+                    } else {
+                        Text("Create Room")
                             .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.white)
                     }
-                    .foregroundColor(Color.buttonBackground)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.buttonBackground.opacity(0.12))
-                    .cornerRadius(16)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.buttonBackground.opacity(0.3), lineWidth: 1.5)
-                    )
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(Color.buttonBackground)
+                .cornerRadius(16)
             }
+            .disabled(isCreatingOnlineRoom)
             .responsiveHorizontalPadding()
             .padding(.bottom, 40)
-            .alert("Coming Soon", isPresented: $showFindGameComingSoon) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text("Matchmaking for What Would You Do is coming soon. For now, create a room and share the code with friends!")
-            }
         } else {
             PrimaryButton(title: "Play") {
                 withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
@@ -1599,6 +1699,109 @@ struct GameDescriptionOverlay: View {
             removal: .scale(scale: 0.1).combined(with: .opacity)
         ))
         .zIndex(1000)
+        // ── Daily limit modal ──────────────────────────────────────────
+        if showDailyLimitModal {
+            DailyRoomLimitModal {
+                // "Upgrade to Plus" tapped
+                withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
+                    showDailyLimitModal = false
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    onShowPaywall()
+                }
+            } onDismiss: {
+                withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
+                    showDailyLimitModal = false
+                }
+            }
+            .zIndex(1001)
+            .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .center)))
+        }
+    }
+}
+
+// MARK: - Daily room-creation limit modal
+
+private struct DailyRoomLimitModal: View {
+    let onUpgrade: () -> Void
+    let onDismiss: () -> Void
+
+    private let brandRed = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+
+    var body: some View {
+        ZStack {
+            // Dim scrim — tap anywhere to dismiss
+            Color.black.opacity(0.52)
+                .ignoresSafeArea()
+                .onTapGesture { onDismiss() }
+
+            // Card
+            VStack(spacing: 0) {
+
+                // Icon
+                ZStack {
+                    Circle()
+                        .fill(Color.primaryAccent.opacity(0.10))
+                        .frame(width: 68, height: 68)
+                    Image(systemName: "rectangle.stack.fill")
+                        .font(.system(size: 28, weight: .semibold))
+                        .foregroundColor(.primaryAccent)
+                        .rotationEffect(.degrees(90))
+                }
+                .padding(.top, 28)
+                .padding(.bottom, 14)
+
+                // Title
+                Text("Daily Limit Reached")
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundColor(.primaryText)
+                    .multilineTextAlignment(.center)
+
+                // Body
+                Text("You've hit your daily limit of 3 room creations. Upgrade to Plus for unlimited room creation and the full online experience.")
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .foregroundColor(.secondaryText)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(3)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 10)
+                    .padding(.bottom, 24)
+
+                Divider()
+                    .background(Color.primaryText.opacity(0.08))
+
+                // Upgrade button
+                Button(action: onUpgrade) {
+                    Text("Upgrade to Plus")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 15)
+                        .background(brandRed)
+                        .cornerRadius(14)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+
+                // Maybe Later
+                Button(action: onDismiss) {
+                    Text("Maybe Later")
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundColor(.secondaryText)
+                        .padding(.vertical, 14)
+                }
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(Color.appBackground)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .strokeBorder(Color.primaryText.opacity(0.07), lineWidth: 1)
+            )
+            .shadow(color: .black.opacity(0.22), radius: 28, x: 0, y: 10)
+            .padding(.horizontal, 30)
+        }
     }
 }
 

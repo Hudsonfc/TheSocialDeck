@@ -7,225 +7,241 @@ import SwiftUI
 import StoreKit
 
 // MARK: - Brand tokens
-private let soDeckRed       = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
-private let soDeckBlack     = Color(red: 0xF2/255.0, green: 0xF2/255.0, blue: 0xF2/255.0)
-private let soDeckGray      = Color(red: 0xB0/255.0, green: 0xB0/255.0, blue: 0xB8/255.0)
-private let soDeckLightGray = Color(red: 0x70/255.0, green: 0x70/255.0, blue: 0x78/255.0)
-
-// Background layers
-private let soDeckBgTop     = Color(red: 0x10/255.0, green: 0x0E/255.0, blue: 0x13/255.0)
-private let soDeckBgBottom  = Color(red: 0x1C/255.0, green: 0x18/255.0, blue: 0x22/255.0)
-private let soDeckCardBg    = Color(red: 0x22/255.0, green: 0x1E/255.0, blue: 0x28/255.0)
-private let soDeckCardBorder = Color(red: 0x38/255.0, green: 0x34/255.0, blue: 0x40/255.0)
+private let soDeckRed        = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
+private let soDeckRedDark    = Color(red: 0xBB/255.0, green: 0x20/255.0, blue: 0x20/255.0)
+private let soDeckBgTop      = Color(red: 0x10/255.0, green: 0x0E/255.0, blue: 0x13/255.0)
+private let soDeckCardBg     = Color(white: 1, opacity: 0.07)
+private let soDeckCardBorder = Color(white: 1, opacity: 0.16)
+private let soDeckGray       = Color(red: 0xB0/255.0, green: 0xB0/255.0, blue: 0xB8/255.0)
+private let soDeckLightGray  = Color(red: 0x70/255.0, green: 0x70/255.0, blue: 0x78/255.0)
 
 // MARK: - Paywall view
 struct TheSocialDeckPlusPopUpView: View {
     var onDismiss: () -> Void
 
     @EnvironmentObject private var subManager: SubscriptionManager
-    @State private var showTerms = false
+    @State private var showTerms   = false
     @State private var showPrivacy = false
     @State private var showWelcome = false
 
-    // Derived display values
+    // MARK: - Derived price strings
+
     private var yearlyPrice: String {
         subManager.yearlyProduct?.displayPrice.appending("/year") ?? "$29.99/year"
     }
-    private var weeklyPrice: String {
-        subManager.weeklyProduct?.displayPrice.appending("/week") ?? "$4.99/week"
+
+    private var monthlyPrice: String {
+        subManager.monthlyProduct?.displayPrice.appending("/month") ?? "$5.99/month"
     }
 
-    /// Effective weekly rate for yearly plan (yearly price ÷ 52), e.g. "$0.58 weekly"
-    private var yearlyEffectiveWeeklyLine: String? {
+    private var yearlyPerMonth: String? {
         guard let yearly = subManager.yearlyProduct else { return nil }
-        let perWeek = yearly.price / 52
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.locale = Locale.current
-        guard let str = formatter.string(from: perWeek as NSDecimalNumber) else { return nil }
-        return "\(str) weekly"
+        let perMonth = yearly.price / 12
+        let fmt = NumberFormatter()
+        fmt.numberStyle = .currency
+        fmt.locale = .current
+        guard let s = fmt.string(from: perMonth as NSDecimalNumber) else { return nil }
+        return "~\(s)/month"
     }
 
-    // CTA button label
-    private var ctaLabel: String {
-        if subManager.isPlus { return "Unlocked ✓" }
-        switch subManager.selectedPlan {
-        case .yearly:  return "Continue with Yearly"
-        case .weekly: return "Continue with Weekly"
-        }
+    private var yearlyDiscountBadge: String {
+        guard let yearly  = subManager.yearlyProduct,
+              let monthly = subManager.monthlyProduct else { return "BEST VALUE" }
+        let annualised = (monthly.price as NSDecimalNumber).doubleValue * 12
+        let yearlyD    = (yearly.price  as NSDecimalNumber).doubleValue
+        guard annualised > 0 else { return "BEST VALUE" }
+        let pct = Int(((annualised - yearlyD) / annualised * 100).rounded())
+        return pct > 0 ? "SAVE \(pct)%" : "BEST VALUE"
     }
+
+    // MARK: - Body
 
     var body: some View {
+        let screenW = UIScreen.main.bounds.width
+        let screenH = UIScreen.main.bounds.height
+
         ZStack {
+
+            // ── Layer 1: solid dark base ──────────────────────────────
+            soDeckBgTop.ignoresSafeArea()
+
+            // ── Layer 2: animated card grid — clamped to screen size ──
+            // The hero is given an explicit frame so it never inflates
+            // the ZStack beyond screen bounds.
+            PaywallGameCardsHero()
+                .frame(width: screenW, height: screenH, alignment: .top)
+                .clipped()
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+
+            // ── Layer 3: gradient — cards visible top, dark at bottom ─
             LinearGradient(
-                colors: [soDeckBgTop, soDeckBgBottom],
+                stops: [
+                    .init(color: .black.opacity(0.00), location: 0.00),
+                    .init(color: .black.opacity(0.12), location: 0.25),
+                    .init(color: soDeckBgTop.opacity(0.85), location: 0.40),
+                    .init(color: soDeckBgTop,               location: 0.52),
+                ],
                 startPoint: .top,
                 endPoint: .bottom
             )
             .ignoresSafeArea()
+            .allowsHitTesting(false)
 
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 0) {
+            // ── Layer 4: content pinned to the bottom of the screen ───
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
 
-                    // ── Close row ─────────────────────────────────────────
-                    HStack {
-                        Spacer()
-                        Button(action: { onDismiss() }) {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.system(size: 28))
-                                .symbolRenderingMode(.hierarchical)
-                                .foregroundStyle(soDeckGray)
-                        }
-                        .disabled(subManager.isLoading)
+                VStack(spacing: 11) {
+
+                    // Headline
+                    VStack(spacing: 1) {
+                        Text("Unlock the")
+                            .font(.system(size: 26, weight: .heavy, design: .rounded))
+                            .foregroundColor(.white)
+                        Text("Ultimate Deck")
+                            .font(.system(size: 26, weight: .heavy, design: .rounded))
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [soDeckRed,
+                                             Color(red: 0xFF/255.0, green: 0x70/255.0, blue: 0x70/255.0)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.top, 64)
-                    .padding(.bottom, 20)
+                    .multilineTextAlignment(.center)
 
-                    // ── SECTION 1: Header ──────────────────────────────────
-                    VStack(spacing: 10) {
-                        ZStack {
-                            Circle()
-                                .fill(soDeckRed.opacity(0.10))
-                                .frame(width: 76, height: 76)
-                            Image(systemName: "rectangle.stack.fill")
-                                .font(.system(size: 34, weight: .semibold))
-                                .foregroundColor(soDeckRed)
-                                .rotationEffect(.degrees(90))
-                        }
-                        .padding(.bottom, 4)
+                    // Feature bullets
+                    PaywallFeaturesBox()
 
-                        Text("TheSocialDeck+")
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
-                            .foregroundColor(soDeckBlack)
-                            .multilineTextAlignment(.center)
-
-                        Text("Premium packs, avatars, and extras for your table.")
-                            .font(.system(size: 15, weight: .regular, design: .rounded))
-                            .foregroundColor(soDeckGray)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 24)
-
-                        VStack(alignment: .leading, spacing: 10) {
-                            PlusFeatureRow(text: "Unlock premium categories across decks")
-                            PlusFeatureRow(text: "Exclusive profile avatars")
-                            PlusFeatureRow(text: "Themes & advanced controls where available")
-                            PlusFeatureRow(text: "Support future updates")
-                        }
-                        .padding(.top, 14)
-                        .padding(.horizontal, 32)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.bottom, 36)
-
-                    // ── SECTION 2: Plan cards ──────────────────────────────
-                    VStack(spacing: 20) {
-                        PlusPlanCard(
+                    // Plan selector cards
+                    VStack(spacing: 8) {
+                        PaywallPlanCard(
                             title: "Yearly",
                             price: yearlyPrice,
                             detail: "Billed annually",
-                            subtitle: yearlyEffectiveWeeklyLine,
-                            showBestValue: true,
+                            subtitle: yearlyPerMonth,
+                            badgeText: yearlyDiscountBadge,
                             isSelected: subManager.selectedPlan == .yearly
                         ) {
-                            withAnimation(.easeInOut(duration: 0.2)) {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                                 subManager.selectedPlan = .yearly
                             }
                         }
 
-                        PlusPlanCard(
-                            title: "Weekly",
-                            price: weeklyPrice,
-                            detail: "Billed weekly",
-                            showBestValue: false,
-                            isSelected: subManager.selectedPlan == .weekly
+                        PaywallPlanCard(
+                            title: "Monthly",
+                            price: monthlyPrice,
+                            detail: "Billed every month",
+                            subtitle: nil,
+                            badgeText: nil,
+                            isSelected: subManager.selectedPlan == .monthly
                         ) {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                subManager.selectedPlan = .weekly
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                                subManager.selectedPlan = .monthly
                             }
                         }
                     }
-                    .padding(.horizontal, 24)
-                    .frame(maxWidth: min(480, UIScreen.main.bounds.width))
-                    .frame(maxWidth: .infinity)
-                    .padding(.bottom, 36)
 
-                    // ── SECTION 3: CTA ─────────────────────────────────────
-                    VStack(spacing: 14) {
-                        // Continue / Unlocked button
+                    // Error (shown inline when present)
+                    if let error = subManager.errorMessage {
+                        Text(error)
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .foregroundColor(soDeckRed)
+                            .multilineTextAlignment(.center)
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+
+                    // CTA button
+                    VStack(spacing: 5) {
                         Button {
                             guard !subManager.isPlus else { onDismiss(); return }
                             Task { await subManager.purchaseSelectedPlan() }
                         } label: {
                             ZStack {
-                                Text(ctaLabel)
+                                Text(subManager.isPlus ? "Unlocked ✓" : "Continue")
                                     .font(.system(size: 17, weight: .bold, design: .rounded))
                                     .foregroundColor(.white)
                                     .opacity(subManager.isLoading ? 0 : 1)
-
                                 if subManager.isLoading {
-                                    ProgressView()
-                                        .progressViewStyle(.circular)
-                                        .tint(.white)
+                                    ProgressView().tint(.white)
                                 }
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 20)
+                            .padding(.vertical, 16)
                             .background(
-                                subManager.isPlus
-                                    ? Color.green.opacity(0.85)
-                                    : soDeckRed.opacity(subManager.isLoading ? 0.6 : 1)
+                                Group {
+                                    if subManager.isPlus {
+                                        LinearGradient(colors: [.green, .green.opacity(0.80)],
+                                                       startPoint: .leading, endPoint: .trailing)
+                                    } else {
+                                        LinearGradient(colors: [soDeckRed, soDeckRedDark],
+                                                       startPoint: .topLeading, endPoint: .bottomTrailing)
+                                    }
+                                }
                             )
-                            .cornerRadius(24)
+                            .clipShape(Capsule())
                             .shadow(
-                                color: (subManager.isPlus ? Color.green : soDeckRed).opacity(0.30),
-                                radius: 12, x: 0, y: 6
+                                color: (subManager.isPlus ? Color.green : soDeckRed).opacity(0.45),
+                                radius: 14, x: 0, y: 5
                             )
                         }
                         .disabled(subManager.isLoading)
-                        .animation(.easeInOut(duration: 0.2), value: subManager.selectedPlan)
                         .animation(.easeInOut(duration: 0.3), value: subManager.isPlus)
-                        .padding(.horizontal, 20)
+                        .animation(.easeInOut(duration: 0.25), value: subManager.errorMessage)
 
-                        // Error message (animated)
-                        if let error = subManager.errorMessage {
-                            Text(error)
-                                .font(.system(size: 13, weight: .medium, design: .rounded))
-                                .foregroundColor(soDeckRed)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
-                                .transition(.opacity.combined(with: .move(edge: .top)))
-                        }
+                        Text("Cancel anytime")
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundColor(Color.white.opacity(0.38))
+                    }
 
-                        // Restore purchases
+                    // Footer
+                    VStack(spacing: 8) {
                         Button {
                             Task { await subManager.restorePurchases() }
                         } label: {
                             Text("Restore Purchases")
-                                .font(.system(size: 14, weight: .medium, design: .rounded))
-                                .foregroundColor(soDeckRed)
+                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                .foregroundColor(soDeckGray)
+                                .underline()
                         }
                         .disabled(subManager.isLoading)
-                        .padding(.top, 2)
 
                         Text("Subscription auto-renews. Cancel anytime in\nSettings > Apple ID > Subscriptions.")
-                            .font(.system(size: 11, weight: .regular, design: .rounded))
+                            .font(.system(size: 10, weight: .regular, design: .rounded))
                             .foregroundColor(soDeckLightGray)
                             .multilineTextAlignment(.center)
-                            .padding(.horizontal, 16)
 
                         HStack(spacing: 4) {
                             Button("Terms of Service") { showTerms = true }
-                            Text("·")
+                            Text("·").foregroundColor(soDeckLightGray)
                             Button("Privacy Policy") { showPrivacy = true }
                         }
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .font(.system(size: 10, weight: .medium, design: .rounded))
                         .foregroundColor(soDeckLightGray)
                     }
-                    .padding(.bottom, 48)
-                    .animation(.easeInOut(duration: 0.25), value: subManager.errorMessage)
                 }
+                .padding(.horizontal, 22)
+                .padding(.bottom, 44)
+            }
+
+            // ── Layer 5: close button pinned to top-right ─────────────
+            VStack {
+                HStack {
+                    Spacer()
+                    Button(action: { onDismiss() }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(.white.opacity(0.75))
+                            .frame(width: 30, height: 30)
+                            .background(Circle().fill(Color.white.opacity(0.16)))
+                    }
+                    .disabled(subManager.isLoading)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 56)
+                Spacer()
             }
         }
         .sheet(isPresented: $showTerms) {
@@ -234,7 +250,6 @@ struct TheSocialDeckPlusPopUpView: View {
         .sheet(isPresented: $showPrivacy) {
             NavigationStack { PrivacyPolicyView() }
         }
-        // Welcome screen shown right after a successful purchase
         .fullScreenCover(isPresented: $showWelcome) {
             TheSocialDeckPlusWelcomeView {
                 showWelcome = false
@@ -248,7 +263,6 @@ struct TheSocialDeckPlusPopUpView: View {
                 }
             }
         }
-        // If already subscribed when the sheet opens, dismiss immediately
         .onAppear {
             if subManager.isPlus {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -259,109 +273,201 @@ struct TheSocialDeckPlusPopUpView: View {
     }
 }
 
-// MARK: - Feature bullet row
-private struct PlusFeatureRow: View {
-    let text: String
+// MARK: - Animated masonry hero background
+
+private struct PaywallGameCardsHero: View {
+    // Same aspect ratio Play2View uses for grid tiles (420 × 577 artwork)
+    private static let aspectRatio: CGFloat = 420.0 / 577.0
+    private let colGap: CGFloat = 8
+    private let rowGap: CGFloat = 8
+
+    private let col1: [DeckType] = [
+        .neverHaveIEver, .spillTheEx, .actItOut, .quickfireCouples, .closerThanEver, .memoryMaster
+    ]
+    private let col2: [DeckType] = [
+        .truthOrDare, .takeItPersonally, .riddleMeThis, .actNatural, .usAfterDark, .bluffCall
+    ]
+    private let col3: [DeckType] = [
+        .wouldYouRather, .mostLikelyTo, .rhymeTime, .storyChain, .flip21
+    ]
+
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 16))
-                .foregroundColor(soDeckRed)
-            Text(text)
-                .font(.system(size: 14, weight: .medium, design: .rounded))
-                .foregroundColor(soDeckBlack)
+        let screenW = UIScreen.main.bounds.width
+        let cardW   = (screenW - colGap * 2) / 3
+        let cardH   = cardW / Self.aspectRatio
+        let step    = cardH + rowGap
+
+        HStack(alignment: .top, spacing: colGap) {
+            AnimatingCardColumn(types: col1, cardW: cardW, cardH: cardH, rowGap: rowGap,
+                                duration: 24, masonryOffset: 0)
+            AnimatingCardColumn(types: col2, cardW: cardW, cardH: cardH, rowGap: rowGap,
+                                duration: 28, masonryOffset: step * 0.55)
+            AnimatingCardColumn(types: col3, cardW: cardW, cardH: cardH, rowGap: rowGap,
+                                duration: 21, masonryOffset: step * 0.26)
         }
     }
 }
 
+// MARK: - Single auto-scrolling column
+
+private struct AnimatingCardColumn: View {
+    let types: [DeckType]
+    let cardW: CGFloat
+    let cardH: CGFloat
+    let rowGap: CGFloat
+    let duration: Double
+    let masonryOffset: CGFloat
+
+    @State private var scrolled = false
+
+    private var singleSetH: CGFloat { CGFloat(types.count) * (cardH + rowGap) }
+
+    var body: some View {
+        let doubled = types + types
+        VStack(spacing: rowGap) {
+            ForEach(Array(doubled.enumerated()), id: \.offset) { _, deckType in
+                DeckCoverArtView(deck: .coverOnly(type: deckType))
+                    .environment(\.playGridAdaptiveSocialDeckCovers, false)
+                    .environment(\.whatWouldYouDoCoverEmbeddedPills, false)
+                    .frame(width: cardW, height: cardH)
+                    .cornerRadius(10)
+                    .clipped()
+                    .allowsHitTesting(false)
+            }
+        }
+        .offset(y: masonryOffset)
+        .offset(y: scrolled ? -singleSetH : 0)
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.06) {
+                withAnimation(.linear(duration: duration).repeatForever(autoreverses: false)) {
+                    scrolled = true
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Feature bullets card
+
+private struct PaywallFeaturesBox: View {
+    private let features: [(icon: String, text: String)] = [
+        ("person.2.fill",        "Unlimited room creation & online play"),
+        ("gamecontroller.fill",  "Access to online games"),
+        ("square.grid.2x2.fill", "Premium categories across all decks"),
+        ("paintpalette.fill",    "Custom avatar colors"),
+        ("sparkles",             "More online games coming soon"),
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            ForEach(features, id: \.text) { feature in
+                HStack(spacing: 10) {
+                    Image(systemName: feature.icon)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(soDeckRed)
+                        .frame(width: 24, height: 24)
+                        .background(Circle().fill(soDeckRed.opacity(0.14)))
+
+                    Text(feature.text)
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundColor(.white.opacity(0.88))
+
+                    Spacer(minLength: 0)
+                }
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(soDeckCardBg)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(soDeckCardBorder, lineWidth: 1)
+                )
+        )
+    }
+}
+
 // MARK: - Plan selection card
-private struct PlusPlanCard: View {
+
+private struct PaywallPlanCard: View {
     let title: String
     let price: String
     let detail: String
-    var subtitle: String? = nil
-    let showBestValue: Bool
+    let subtitle: String?
+    let badgeText: String?
     let isSelected: Bool
     let onTap: () -> Void
 
     var body: some View {
         Button(action: onTap) {
             ZStack(alignment: .topTrailing) {
-                HStack(spacing: 14) {
-                    // Radio indicator
+                HStack(spacing: 12) {
                     ZStack {
                         Circle()
-                            .stroke(
-                                isSelected
-                                    ? soDeckRed
-                                    : Color(red: 0xCC/255.0, green: 0xCC/255.0, blue: 0xCC/255.0),
-                                lineWidth: 2
-                            )
-                            .frame(width: 22, height: 22)
+                            .stroke(isSelected ? soDeckRed : Color.white.opacity(0.35), lineWidth: 2)
+                            .frame(width: 20, height: 20)
                         if isSelected {
                             Circle()
                                 .fill(soDeckRed)
-                                .frame(width: 12, height: 12)
+                                .frame(width: 10, height: 10)
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 3) {
+                    VStack(alignment: .leading, spacing: 2) {
                         Text(title)
-                            .font(.system(size: 17, weight: .semibold, design: .rounded))
-                            .foregroundColor(soDeckBlack)
+                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            .foregroundColor(.white)
                         Text(detail)
-                            .font(.system(size: 13, weight: .regular, design: .rounded))
-                            .foregroundColor(soDeckGray)
-                        if let subtitle = subtitle {
-                            Text(subtitle)
-                                .font(.system(size: 12, weight: .medium, design: .rounded))
-                                .foregroundColor(soDeckGray)
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                            .foregroundColor(Color.white.opacity(0.50))
+                        if let sub = subtitle {
+                            Text(sub)
+                                .font(.system(size: 11, weight: .medium, design: .rounded))
+                                .foregroundColor(isSelected ? soDeckRed.opacity(0.85) : Color.white.opacity(0.40))
                         }
                     }
 
                     Spacer(minLength: 8)
 
                     Text(price)
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundColor(isSelected ? soDeckRed : soDeckBlack)
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundColor(isSelected ? soDeckRed : .white)
                 }
-                .padding(.horizontal, 18)
-                .padding(.vertical, 20)
-                .padding(.top, showBestValue ? 10 : 0)
+                .padding(.horizontal, 16)
+                .padding(.top, badgeText != nil ? 28 : 13)
+                .padding(.bottom, 13)
 
-                // Best Value pill
-                if showBestValue {
-                    Text("Best Value")
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                if let badge = badgeText {
+                    Text(badge)
+                        .font(.system(size: 9, weight: .black, design: .rounded))
                         .foregroundColor(.white)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
-                        .background(soDeckRed)
-                        .cornerRadius(8)
-                        .padding(.top, 12)
-                        .padding(.trailing, 16)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Capsule().fill(soDeckRed))
+                        .padding(.top, 10)
+                        .padding(.trailing, 14)
                 }
             }
-            .background(isSelected ? soDeckRed.opacity(0.12) : soDeckCardBg)
-            .cornerRadius(20)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(isSelected ? soDeckRed.opacity(0.10) : soDeckCardBg)
+            )
             .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(
-                        isSelected ? soDeckRed : soDeckCardBorder,
-                        lineWidth: isSelected ? 2 : 1
-                    )
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .strokeBorder(isSelected ? soDeckRed : soDeckCardBorder,
+                                  lineWidth: isSelected ? 2 : 1)
             )
-            .shadow(
-                color: isSelected ? soDeckRed.opacity(0.14) : Color.black.opacity(0.05),
-                radius: isSelected ? 14 : 6, x: 0, y: isSelected ? 4 : 2
-            )
+            .shadow(color: isSelected ? soDeckRed.opacity(0.18) : .black.opacity(0.05),
+                    radius: isSelected ? 12 : 3, x: 0, y: isSelected ? 4 : 1)
         }
         .buttonStyle(.plain)
         .scaleEffect(isSelected ? 1.02 : 1.0)
-        .animation(.easeInOut(duration: 0.2), value: isSelected)
+        .animation(.spring(response: 0.3, dampingFraction: 0.72), value: isSelected)
     }
 }
 
 #Preview {
     TheSocialDeckPlusPopUpView(onDismiss: {})
+        .environmentObject(SubscriptionManager.shared)
 }

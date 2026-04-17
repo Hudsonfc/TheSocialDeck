@@ -13,8 +13,12 @@ struct ContentView: View {
     @AppStorage("hasCompletedFirstLaunchSplash") private var hasCompletedFirstLaunchSplash = false
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @EnvironmentObject private var authManager: AuthManager
+    @EnvironmentObject private var subManager: SubscriptionManager
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var showLobbyFromInviteBanner = false
+    @State private var showLaunchPlusPaywall = false
+    @State private var launchPlusPresentationTask: Task<Void, Never>?
 
     var body: some View {
         Group {
@@ -40,10 +44,43 @@ struct ContentView: View {
                 LobbyView()
             }
         }
+        .sheet(isPresented: $showLaunchPlusPaywall, onDismiss: {
+            Task { await subManager.refreshEntitlements() }
+        }) {
+            TheSocialDeckPlusPopUpView(onDismiss: { showLaunchPlusPaywall = false })
+                .environmentObject(subManager)
+        }
+        .onAppear {
+            scheduleLaunchPlusPaywallIfEligible()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                scheduleLaunchPlusPaywallIfEligible()
+            }
+        }
+        .onChange(of: hasCompletedFirstLaunchSplash) { _, _ in
+            scheduleLaunchPlusPaywallIfEligible()
+        }
+        .onChange(of: hasCompletedOnboarding) { _, _ in
+            scheduleLaunchPlusPaywallIfEligible()
+        }
+    }
+
+    /// Presents TheSocialDeck+ after splash and onboarding, whenever the app becomes active (non‑Plus only).
+    private func scheduleLaunchPlusPaywallIfEligible() {
+        guard hasCompletedFirstLaunchSplash, hasCompletedOnboarding, !subManager.isPlus else { return }
+        launchPlusPresentationTask?.cancel()
+        launchPlusPresentationTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 450_000_000)
+            guard !Task.isCancelled else { return }
+            guard hasCompletedFirstLaunchSplash, hasCompletedOnboarding, !subManager.isPlus else { return }
+            showLaunchPlusPaywall = true
+        }
     }
 }
 
 #Preview {
     ContentView()
         .environmentObject(AuthManager.shared)
+        .environmentObject(SubscriptionManager.shared)
 }

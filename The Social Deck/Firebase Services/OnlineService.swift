@@ -69,6 +69,7 @@ class OnlineService {
             status: .waiting,
             maxPlayers: maxPlayers,
             isPrivate: isPrivate,
+            isPublic: !isPrivate,
             selectedGameType: gameType,
             players: [playerProfile],
             hostId: createdBy
@@ -444,6 +445,46 @@ class OnlineService {
         }
 
         try await roomRef.updateData(["whatWouldYouDoAnonymousMode": anonymous])
+    }
+
+    /// Updates the public visibility of a room (host only).
+    func updateIsPublic(roomCode: String, isPublic: Bool) async throws {
+        let roomRef = db.collection("rooms").document(roomCode)
+        let snapshot = try await roomRef.getDocument()
+
+        guard snapshot.exists, let room = try? snapshot.data(as: OnlineRoom.self) else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Room not found"])
+        }
+
+        guard let currentUserId = auth.currentUser?.uid, room.hostId == currentUserId else {
+            throw NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Only the host can update room visibility"])
+        }
+
+        try await roomRef.updateData(["isPublic": isPublic])
+    }
+
+    /// Attaches a real-time listener for public lobby rooms.
+    /// - Parameter gameType: When non-nil, only rooms for that `selectedGameType` are included.
+    ///   Pass `nil` to listen for all public waiting rooms (any game).
+    /// Returns the `ListenerRegistration`; call `.remove()` when the view disappears.
+    func listenToPublicRooms(
+        gameType: String?,
+        onChange: @escaping ([OnlineRoom]) -> Void
+    ) -> ListenerRegistration {
+        let base = db.collection("rooms")
+            .whereField("isPublic", isEqualTo: true)
+            .whereField("status", isEqualTo: RoomStatus.waiting.rawValue)
+        let query: Query
+        if let gameType {
+            query = base.whereField("selectedGameType", isEqualTo: gameType)
+        } else {
+            query = base
+        }
+        return query.addSnapshotListener { snapshot, _ in
+            guard let snapshot else { return }
+            let rooms: [OnlineRoom] = snapshot.documents.compactMap { try? $0.data(as: OnlineRoom.self) }
+            onChange(rooms.sorted { $0.createdAt < $1.createdAt })
+        }
     }
 
     /// Act Natural lobby: two-unknowns option (host only).
@@ -923,6 +964,37 @@ class OnlineService {
     
     // MARK: - Room Validation
     
+    // MARK: - Public lobby discovery (Find Game)
+
+    /// Finds a joinable public lobby for matchmaking: `isPublic == true`, **waiting** (lobby only), matching `gameType`, with an open seat and the user not already listed as a player.
+    /// - Parameter gameType: Same string as `OnlineRoom.selectedGameType` / `DeckType.rawValue` (e.g. `"whatWouldYouDo"`).
+    /// - Returns: A room code to pass to `joinRoom`, or `nil` if none available.
+    func findJoinablePublicLobbyRoomCode(gameType: String, currentUserId: String) async throws -> String? {
+        let snapshot = try await db.collection("rooms")
+            .whereField("isPublic", isEqualTo: true)
+            .whereField("status", isEqualTo: RoomStatus.waiting.rawValue)
+            .whereField("selectedGameType", isEqualTo: gameType)
+            .limit(to: 25)
+            .getDocuments()
+
+        let rooms: [OnlineRoom] = snapshot.documents.compactMap { doc in
+            try? doc.data(as: OnlineRoom.self)
+        }
+
+        let joinable = rooms.filter { room in
+            room.status == .waiting
+                && room.selectedGameType == gameType
+                && room.isPublic
+                && room.players.count < room.maxPlayers
+                && !room.players.contains(where: { $0.id == currentUserId })
+        }
+
+        return joinable
+            .sorted { $0.createdAt < $1.createdAt }
+            .first?
+            .roomCode
+    }
+
     /// Validates if a room code exists and can be joined
     func validateRoomCode(_ roomCode: String) async throws -> Bool {
         let roomRef = db.collection("rooms").document(roomCode.uppercased())

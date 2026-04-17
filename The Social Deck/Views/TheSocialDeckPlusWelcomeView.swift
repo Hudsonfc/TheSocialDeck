@@ -97,11 +97,6 @@ struct TheSocialDeckPlusWelcomeView: View {
                         title: "Premium categories",
                         subtitle: "Spicy packs and deep cuts across your favorite decks—tap any locked pack and it’s yours."
                     )
-                    welcomeHighlightRow(
-                        icon: "person.crop.circle.badge.checkmark",
-                        title: "Premium avatars",
-                        subtitle: "Dress your profile with exclusive looks reserved for Plus members."
-                    )
                 }
                 .padding(22)
                 .frame(maxWidth: .infinity, alignment: .leading)

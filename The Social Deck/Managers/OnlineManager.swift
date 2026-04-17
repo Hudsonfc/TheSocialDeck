@@ -85,6 +85,43 @@ class OnlineManager: ObservableObject {
         isLoading = false
     }
     
+    /// Finds a public lobby (`isPublic`, status **waiting**) for the given `gameType` and joins it. Returns `true` if joined.
+    /// Use `PublicLobbyMatchmaking` / `DeckType.rawValue` for `gameType`. Does not set `errorMessage` when no room exists (caller shows “no games”).
+    @discardableResult
+    func findAndJoinPublicLobby(gameType: String) async -> Bool {
+        guard let userId = authManager.userProfile?.userId,
+              authManager.userProfile != nil else {
+            errorMessage = "You must be signed in to find a game"
+            return false
+        }
+
+        if currentRoom != nil {
+            errorMessage = "You're already in a room. Leave it first to find another."
+            return false
+        }
+
+        isLoading = true
+        errorMessage = nil
+        userChoseToLeaveRoomSession = false
+
+        defer { isLoading = false }
+
+        do {
+            guard let code = try await onlineService.findJoinablePublicLobbyRoomCode(
+                gameType: gameType,
+                currentUserId: userId
+            ) else {
+                return false
+            }
+
+            await joinRoom(roomCode: code)
+            return currentRoom != nil
+        } catch {
+            errorMessage = "Failed to find a game: \(error.localizedDescription)"
+            return false
+        }
+    }
+
     /// Joins an existing room
     func joinRoom(roomCode: String) async {
         guard let userId = authManager.userProfile?.userId,
@@ -383,6 +420,16 @@ class OnlineManager: ObservableObject {
             try await onlineService.updateWhatWouldYouDoAnonymousMode(roomCode: roomCode, anonymous: anonymous)
         } catch {
             errorMessage = "Failed to update What Would You Do settings"
+        }
+    }
+
+    /// Updates the public/private visibility of the current room (host only).
+    func updateRoomIsPublic(_ isPublic: Bool) async {
+        guard let roomCode = currentRoom?.roomCode, isHost else { return }
+        do {
+            try await onlineService.updateIsPublic(roomCode: roomCode, isPublic: isPublic)
+        } catch {
+            errorMessage = "Failed to update room visibility"
         }
     }
 

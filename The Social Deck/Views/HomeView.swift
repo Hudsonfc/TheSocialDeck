@@ -26,7 +26,6 @@ struct HomeView: View {
     @State private var featuredPlayButtonPressed = false
     @State private var mainPlayButtonPressed = false
     @State private var settingsButtonPressed = false
-    @State private var onlineShellButtonPressed = false
     @State private var currentSlideIndex = 0
     @State private var slideshowTimer: Timer?
     @State private var currentQuote: String = ""
@@ -303,14 +302,6 @@ struct HomeView: View {
                             isPressed: $settingsButtonPressed
                         )
 
-                        NavigationButton(
-                            title: "Online Shell Preview",
-                            offset: 0,
-                            opacity: 1.0,
-                            destination: onlineShellPreviewDestination,
-                            isPressed: $onlineShellButtonPressed
-                        )
-
                         // Profile Button (Hidden for first version)
                         NavigationButton(
                             title: "Profile",
@@ -529,61 +520,6 @@ struct HomeView: View {
         }
     }
     
-    // MARK: - Online Shell Preview
-
-    private var onlineShellPreviewDestination: some View {
-        let mockPlayers: [RoomPlayer] = [
-            RoomPlayer(
-                id: "local-preview",
-                username: "You",
-                avatarType: "avatar 1",
-                avatarColor: "red",
-                isHost: true,
-                gameScore: 3
-            ),
-            RoomPlayer(
-                id: "preview-2",
-                username: "Alex",
-                avatarType: "avatar 2",
-                avatarColor: "blue",
-                gameScore: 1
-            ),
-            RoomPlayer(
-                id: "preview-3",
-                username: "Sam",
-                avatarType: "avatar 3",
-                avatarColor: "green",
-                gameScore: 2
-            ),
-            RoomPlayer(
-                id: "preview-4",
-                username: "Jordan",
-                avatarType: "avatar 4",
-                avatarColor: "purple",
-                gameScore: 0
-            )
-        ]
-        return OnlineGameShellView(
-            gameName: "Never Have I Ever",
-            currentRound: 2,
-            totalRounds: 10,
-            players: mockPlayers,
-            localPlayerId: "local-preview"
-        ) {
-            VStack(spacing: 16) {
-                Spacer()
-                Text("Game zone goes here")
-                    .font(.system(size: 20, weight: .semibold, design: .rounded))
-                    .foregroundColor(.secondaryText)
-                Text("Drop any view in this slot")
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                    .foregroundColor(.tertiaryText)
-                Spacer()
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-    }
-
     private func startSlideshow() {
         stopSlideshow() // Stop any existing timer
         slideshowTimer = Timer.scheduledTimer(withTimeInterval: 6.0, repeats: true) { _ in
@@ -1018,36 +954,13 @@ struct HeroGameOfTheDaySlide: View {
             )
             
             HStack(spacing: 16) {
-                // Game artwork (programmatic for types that dropped catalog covers)
-                Group {
-                    if game.type == .whatsMySecret {
-                        ProgrammaticWhatsMySecretCoverArtView()
-                    } else if game.type == .riddleMeThis {
-                        ProgrammaticRiddleMeThisCoverArtView()
-                    } else if game.type == .actItOut {
-                        ProgrammaticActItOutCoverArtView()
-                    } else if game.type == .actNatural {
-                        ProgrammaticActNaturalCoverArtView()
-                    } else if game.type == .categoryClash {
-                        ProgrammaticCategoryClashCoverArtView()
-                    } else if game.type == .storyChain {
-                        ProgrammaticStoryChainCoverArtView()
-                    } else if game.type == .memoryMaster {
-                        ProgrammaticMemoryMasterCoverArtView()
-                    } else if game.type == .bluffCall {
-                        ProgrammaticBluffCallCoverArtView()
-                    } else if game.type == .spinTheBottle {
-                        ProgrammaticSpinTheBottleCoverArtView()
-                    } else {
-                        Image(game.imageName)
-                            .resizable()
-                            .scaledToFit()
-                    }
-                }
-                .frame(width: 100, height: 140)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
-                .padding(.leading, 20)
+                // Game artwork: use the same router as Play so classics (NHIE, TOD, WYR, MLT) get
+                // programmatic covers instead of missing catalog assets; other GOTD types stay in sync.
+                DeckCoverArtView(deck: .coverOnly(type: game.type, catalogImageName: game.imageName))
+                    .frame(width: 100, height: 140)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
+                    .padding(.leading, 20)
                 
                 // Game Info
                 VStack(alignment: .leading, spacing: 8) {

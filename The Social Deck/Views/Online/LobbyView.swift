@@ -159,6 +159,9 @@ struct LobbyView: View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 24) {
                 roomCodeCard
+                if isWhatWouldYouDoLobby {
+                    roomVisibilityRow
+                }
                 playerListSection
                 if onlineManager.isHost && (isClassicGameWithCardCount || isActNaturalLobby || isWhatWouldYouDoLobby) {
                     gameSettingsSection
@@ -212,6 +215,55 @@ struct LobbyView: View {
         .cornerRadius(16)
         .padding(.horizontal, 24)
         .padding(.top, 16)
+    }
+
+    // MARK: - Room Visibility Row (What Would You Do only)
+
+    private var roomVisibilityRow: some View {
+        let isPublic = onlineManager.currentRoom?.isPublic ?? false
+        return HStack(spacing: 14) {
+            Image(systemName: isPublic ? "globe" : "lock.fill")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(isPublic
+                    ? Color(red: 0x34/255.0, green: 0xC7/255.0, blue: 0x59/255.0)
+                    : .secondaryText)
+                .frame(width: 24)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(isPublic ? "Public room" : "Private room")
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .foregroundColor(.primaryText)
+                Text(isPublic
+                     ? "Anyone can find and join via Browse Rooms"
+                     : "Only players with the room code can join")
+                    .font(.system(size: 12, weight: .regular, design: .rounded))
+                    .foregroundColor(.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer()
+
+            if onlineManager.isHost {
+                Toggle(
+                    "",
+                    isOn: Binding(
+                        get: { onlineManager.currentRoom?.isPublic ?? false },
+                        set: { on in
+                            HapticManager.shared.lightImpact()
+                            Task { await onlineManager.updateRoomIsPublic(on) }
+                        }
+                    )
+                )
+                .labelsHidden()
+                .tint(soDeckRed)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
+        .background(Color.cardBackground)
+        .cornerRadius(16)
+        .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 4)
+        .padding(.horizontal, 24)
     }
 
     // MARK: - Player List

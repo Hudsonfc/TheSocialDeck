@@ -176,9 +176,9 @@ enum GameDescriptionLayoutContent {
             ]
         case .whatWouldYouDo:
             return [
-                ("Read a prompt", "Everyone gets the same silly or tricky situation."),
-                ("Pick in secret", "Choose what you would actually do — no judgment."),
-                ("Reveal and laugh", "Compare answers and see who thinks alike. (Preview only for now.)")
+                ("Get everyone in a room", "Create a room from Play or join with a friend’s code. When the group is ready, the host starts from the lobby."),
+                ("Answer the prompt in secret", "Each round shows one “what would you do if…” scenario. Type your answer and submit while others do the same—no one sees answers until everyone has sent one."),
+                ("Reveal, vote, and score", "Answers appear one at a time. Then vote for your favorites (you can’t pick your own). Points update each round until the final leaderboard; the host can play again from the lobby.")
             ]
         case .other:
             return chooseTopicsPlayAndRotate()
@@ -319,9 +319,9 @@ enum GameDescriptionLayoutContent {
             ]
         case "whatWouldYouDo":
             return [
-                ("Read a prompt", "Everyone gets the same silly or tricky situation."),
-                ("Pick in secret", "Choose what you would actually do — no judgment."),
-                ("Reveal and laugh", "Compare answers and see who thinks alike. (Preview only for now.)")
+                ("Get everyone in a room", "Create a room from Play or join with a friend’s code. When the group is ready, the host starts from the lobby."),
+                ("Answer the prompt in secret", "Each round shows one “what would you do if…” scenario. Type your answer and submit while others do the same—no one sees answers until everyone has sent one."),
+                ("Reveal, vote, and score", "Answers appear one at a time. Then vote for your favorites (you can’t pick your own). Points update each round until the final leaderboard; the host can play again from the lobby.")
             ]
         case "storyChain":
             return [
