@@ -24,7 +24,7 @@ struct SettingsView: View {
     
     // App version info
     private var appVersion: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.3.7"
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.3.8"
     }
     
     

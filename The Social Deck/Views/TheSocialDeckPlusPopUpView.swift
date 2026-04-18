@@ -22,7 +22,6 @@ struct TheSocialDeckPlusPopUpView: View {
     @EnvironmentObject private var subManager: SubscriptionManager
     @State private var showTerms   = false
     @State private var showPrivacy = false
-    @State private var showWelcome = false
 
     // MARK: - Derived price strings
 
@@ -250,16 +249,10 @@ struct TheSocialDeckPlusPopUpView: View {
         .sheet(isPresented: $showPrivacy) {
             NavigationStack { PrivacyPolicyView() }
         }
-        .fullScreenCover(isPresented: $showWelcome) {
-            TheSocialDeckPlusWelcomeView {
-                showWelcome = false
-                onDismiss()
-            }
-        }
         .onChange(of: subManager.isPlus) { _, isNowPlus in
             if isNowPlus {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                    showWelcome = true
+                    onDismiss()
                 }
             }
         }
@@ -319,20 +312,34 @@ private struct AnimatingCardColumn: View {
     let masonryOffset: CGFloat
 
     @State private var scrolled = false
+    @Environment(\.colorScheme) private var colorScheme
 
     private var singleSetH: CGFloat { CGFloat(types.count) * (cardH + rowGap) }
 
+    /// Flip 21 uses a hard-coded white panel; tint it to match paywall charcoal in dark mode.
+    private let flip21DarkMultiply = Color(red: 0.18, green: 0.16, blue: 0.22)
+
     var body: some View {
         let doubled = types + types
+        let useAdaptivePanels = colorScheme == .dark
         VStack(spacing: rowGap) {
             ForEach(Array(doubled.enumerated()), id: \.offset) { _, deckType in
-                DeckCoverArtView(deck: .coverOnly(type: deckType))
-                    .environment(\.playGridAdaptiveSocialDeckCovers, false)
-                    .environment(\.whatWouldYouDoCoverEmbeddedPills, false)
-                    .frame(width: cardW, height: cardH)
-                    .cornerRadius(10)
-                    .clipped()
-                    .allowsHitTesting(false)
+                Group {
+                    if colorScheme == .dark && deckType == .flip21 {
+                        DeckCoverArtView(deck: .coverOnly(type: deckType))
+                            .environment(\.playGridAdaptiveSocialDeckCovers, useAdaptivePanels)
+                            .environment(\.whatWouldYouDoCoverEmbeddedPills, false)
+                            .colorMultiply(flip21DarkMultiply)
+                    } else {
+                        DeckCoverArtView(deck: .coverOnly(type: deckType))
+                            .environment(\.playGridAdaptiveSocialDeckCovers, useAdaptivePanels)
+                            .environment(\.whatWouldYouDoCoverEmbeddedPills, false)
+                    }
+                }
+                .frame(width: cardW, height: cardH)
+                .cornerRadius(10)
+                .clipped()
+                .allowsHitTesting(false)
             }
         }
         .offset(y: masonryOffset)
@@ -350,25 +357,24 @@ private struct AnimatingCardColumn: View {
 // MARK: - Feature bullets card
 
 private struct PaywallFeaturesBox: View {
-    private let features: [(icon: String, text: String)] = [
-        ("person.2.fill",        "Unlimited room creation & online play"),
-        ("gamecontroller.fill",  "Access to online games"),
-        ("square.grid.2x2.fill", "Premium categories across all decks"),
-        ("paintpalette.fill",    "Custom avatar colors"),
-        ("sparkles",             "More online games coming soon"),
+    private let features: [String] = [
+        "Unlimited room creation & online play",
+        "Access to online games",
+        "Premium categories across all decks",
+        "Custom avatar colors",
+        "More online games coming soon",
     ]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
-            ForEach(features, id: \.text) { feature in
-                HStack(spacing: 10) {
-                    Image(systemName: feature.icon)
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(soDeckRed)
-                        .frame(width: 24, height: 24)
-                        .background(Circle().fill(soDeckRed.opacity(0.14)))
+            ForEach(features, id: \.self) { line in
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .foregroundColor(Color.primaryAccent)
+                        .frame(width: 18, alignment: .center)
 
-                    Text(feature.text)
+                    Text(line)
                         .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundColor(.white.opacity(0.88))
 
