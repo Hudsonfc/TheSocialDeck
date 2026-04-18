@@ -588,6 +588,20 @@ struct OnlineGameContainerView: View {
                             players: room.players,
                             currentUserId: myUserId
                         )
+                    case "obviousAnswer":
+                        ObviousAnswerOnlineView(
+                            roomCode: room.roomCode,
+                            isHost: room.hostId == myUserId,
+                            players: room.players,
+                            currentUserId: myUserId
+                        )
+                    case "overconfidence":
+                        OverconfidenceOnlineView(
+                            roomCode: room.roomCode,
+                            isHost: room.hostId == myUserId,
+                            players: room.players,
+                            currentUserId: myUserId
+                        )
                     case "actNatural":
                         ActNaturalOnlinePlayView(
                             roomCode: room.roomCode,

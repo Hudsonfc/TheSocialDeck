@@ -23,6 +23,8 @@ struct OnlineGameShellView<GameContent: View>: View {
     let answeredUserIds: Set<String>
     /// When true, the score under each avatar is hidden (e.g. WWYD anonymous mode until the game ends).
     let hideScores: Bool
+    /// When set, the chevron calls this instead of plain `dismiss`. Use it so the host runs `returnRoomToLobby()` (room stays `inGame` otherwise and Lobby re-pushes the game).
+    let onBack: (() -> Void)?
     private let gameContent: GameContent
 
     init(
@@ -33,6 +35,7 @@ struct OnlineGameShellView<GameContent: View>: View {
         localPlayerId: String,
         answeredUserIds: Set<String> = [],
         hideScores: Bool = false,
+        onBack: (() -> Void)? = nil,
         @ViewBuilder content: () -> GameContent
     ) {
         self.gameName = gameName
@@ -42,6 +45,7 @@ struct OnlineGameShellView<GameContent: View>: View {
         self.localPlayerId = localPlayerId
         self.answeredUserIds = answeredUserIds
         self.hideScores = hideScores
+        self.onBack = onBack
         self.gameContent = content()
     }
 
@@ -67,7 +71,11 @@ struct OnlineGameShellView<GameContent: View>: View {
         HStack(alignment: .center, spacing: 10) {
             Button {
                 HapticManager.shared.lightImpact()
-                dismiss()
+                if let onBack {
+                    onBack()
+                } else {
+                    dismiss()
+                }
             } label: {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 16, weight: .semibold))

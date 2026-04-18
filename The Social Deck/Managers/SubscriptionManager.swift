@@ -4,6 +4,7 @@
 //
 
 import StoreKit
+import SwiftUI
 
 // MARK: - Plan enum (shared with the paywall view)
 enum PlusPlan: Equatable {
@@ -27,6 +28,8 @@ final class SubscriptionManager: ObservableObject {
 
     // MARK: - Published state
     @Published var isPlus: Bool = false
+    /// `true` after the first `refreshEntitlements()` in `init` completes — use to avoid flashing paywalls before StoreKit reports active subscriptions.
+    @Published private(set) var hasCompletedInitialEntitlementCheck: Bool = false
     @Published var monthlyProduct: Product?
     @Published var yearlyProduct: Product?
     @Published var selectedPlan: PlusPlan = .yearly
@@ -42,6 +45,7 @@ final class SubscriptionManager: ObservableObject {
         Task {
             await loadProducts()
             await refreshEntitlements()
+            hasCompletedInitialEntitlementCheck = true
         }
     }
 
@@ -145,6 +149,17 @@ final class SubscriptionManager: ObservableObject {
         }
 
         isPlus = DeveloperAccountOverride.isActive || hasActive
+    }
+
+    /// Use with `.sheet(isPresented:)` so subscribers never see the paywall: `get` is false while `isPlus`, even if the flag is true.
+    /// The setter must forward both `true` and `false` so SwiftUI can sync presentation; only forwarding `false` broke sheets for non‑subscribers.
+    func paywallSheetIsPresented(_ isPresented: Binding<Bool>) -> Binding<Bool> {
+        Binding(
+            get: { isPresented.wrappedValue && !self.isPlus },
+            set: { newValue in
+                isPresented.wrappedValue = newValue
+            }
+        )
     }
 
     // MARK: - Background transaction listener

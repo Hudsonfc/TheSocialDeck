@@ -42,33 +42,50 @@ struct WhatWouldYouDoOnlineView: View {
             players: playersWithScores,
             localPlayerId: currentUserId,
             answeredUserIds: shellSubmittedUserIds,
-            hideScores: shellHideScores
+            hideScores: shellHideScores,
+            onBack: {
+                if isHost {
+                    Task { await OnlineManager.shared.returnRoomToLobby() }
+                } else {
+                    Task {
+                        await OnlineManager.shared.leaveRoom()
+                        await MainActor.run { dismiss() }
+                    }
+                }
+            }
         ) {
             ZStack {
                 Color.appBackground.ignoresSafeArea()
 
-                if let state = vm.gameState {
-                    switch state.phase {
-                    case .answering:
-                        answeringView(state: state)
-                    case .revealing:
-                        revealingView(state: state)
-                    case .voting:
-                        votingView(state: state)
-                    case .results:
-                        resultsView(state: state)
-                    case .finished:
-                        finalLeaderboardView(state: state)
+                Group {
+                    if let state = vm.gameState {
+                        switch state.phase {
+                        case .answering:
+                            answeringView(state: state)
+                        case .revealing:
+                            revealingView(state: state)
+                        case .voting:
+                            votingView(state: state)
+                        case .results:
+                            resultsView(state: state)
+                        case .finished:
+                            finalLeaderboardView(state: state)
+                        }
+                    } else {
+                        ProgressView()
+                            .scaleEffect(1.4)
+                            .tint(Color.primaryAccent)
                     }
-                } else {
-                    ProgressView()
-                        .scaleEffect(1.4)
-                        .tint(Color.primaryAccent)
                 }
+                .transition(.asymmetric(
+                    insertion: .opacity.combined(with: .move(edge: .trailing)).combined(with: .scale(scale: 0.98)),
+                    removal: .opacity.combined(with: .move(edge: .leading)).combined(with: .scale(scale: 0.98))
+                ))
+                .animation(.spring(response: 0.44, dampingFraction: 0.86), value: wwydPhaseAnimationID)
             }
         }
         .onAppear {
-            vm.startListening(allPlayers: players)
+            vm.startListening()
         }
         .onDisappear {
             vm.stopListening()
@@ -112,6 +129,12 @@ struct WhatWouldYouDoOnlineView: View {
     private var shellHideScores: Bool {
         guard let s = vm.gameState else { return false }
         return s.anonymousMode && s.phase != .finished
+    }
+
+    /// Drives smooth transitions when phase or round changes.
+    private var wwydPhaseAnimationID: String {
+        guard let s = vm.gameState else { return "loading" }
+        return "\(s.phase.rawValue)-\(s.currentRound)"
     }
 
     private func anonymousAnswerLabel(playerId: String, state: WhatWouldYouDoGameState) -> String {
@@ -639,11 +662,19 @@ struct WhatWouldYouDoOnlineView: View {
 
     @ViewBuilder
     private func finalLeaderboardView(state: WhatWouldYouDoGameState) -> some View {
-        let sortedPlayers = players.sorted { a, b in
-            (state.scores[a.id] ?? 0) > (state.scores[b.id] ?? 0)
-        }
-        let topScore = state.scores.values.max() ?? 0
-        let overallWinners = sortedPlayers.filter { (state.scores[$0.id] ?? 0) == topScore }
+        let rows = state.scores.map { ($0.key, $0.value) }.sorted { $0.1 > $1.1 }
+        let topScore = rows.first?.1 ?? 0
+        let idsWithTop = rows.filter { $0.1 == topScore }.map { $0.0 }
+        let headline: String = {
+            if state.anonymousMode {
+                return idsWithTop.count == 1 ? "We have a winner!" : "It's a tie!"
+            }
+            if idsWithTop.count == 1, let wid = idsWithTop.first {
+                let name = players.first { $0.id == wid }?.username ?? "Player"
+                return "\(name) wins!"
+            }
+            return "It's a tie!"
+        }()
 
         ScrollView {
             VStack(spacing: 24) {
@@ -651,7 +682,7 @@ struct WhatWouldYouDoOnlineView: View {
                     Image(systemName: "trophy.fill")
                         .font(.system(size: 44))
                         .foregroundColor(Color(red: 0xFF/255.0, green: 0xCC/255.0, blue: 0x00/255.0))
-                    Text(overallWinners.count == 1 ? "\(overallWinners[0].username) wins!" : "It's a tie!")
+                    Text(headline)
                         .font(.system(size: 26, weight: .bold, design: .rounded))
                         .foregroundColor(.primaryText)
                         .multilineTextAlignment(.center)
@@ -669,18 +700,30 @@ struct WhatWouldYouDoOnlineView: View {
                 .padding(.horizontal, 20)
 
                 VStack(spacing: 10) {
-                    ForEach(Array(sortedPlayers.enumerated()), id: \.element.id) { idx, player in
+                    ForEach(Array(rows.enumerated()), id: \.element.0) { idx, entry in
+                        let playerId = entry.0
+                        let score = entry.1
+                        let roomPlayer = players.first { $0.id == playerId }
                         HStack(spacing: 14) {
                             Text("\(idx + 1)")
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
                                 .foregroundColor(.tertiaryText)
                                 .frame(width: 24)
-                            AvatarView(avatarType: player.avatarType, avatarColor: player.avatarColor, size: 44)
-                            Text(player.username)
-                                .font(.system(size: 16, weight: .semibold, design: .rounded))
-                                .foregroundColor(.primaryText)
+                            if let p = roomPlayer {
+                                AvatarView(avatarType: p.avatarType, avatarColor: p.avatarColor, size: 44)
+                                Text(p.username)
+                                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.primaryText)
+                            } else {
+                                Circle()
+                                    .fill(Color.secondaryText.opacity(0.2))
+                                    .frame(width: 44, height: 44)
+                                Text("Player")
+                                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.secondaryText)
+                            }
                             Spacer()
-                            Text("\(state.scores[player.id] ?? 0) pts")
+                            Text("\(score) pts")
                                 .font(.system(size: 15, weight: .bold, design: .rounded))
                                 .foregroundColor(idx == 0 ? Color.primaryAccent : .secondaryText)
                         }
@@ -797,7 +840,7 @@ final class WhatWouldYouDoViewModel: ObservableObject {
         self.currentUserId = currentUserId
     }
 
-    func startListening(allPlayers: [RoomPlayer]) {
+    func startListening() {
         let db = Firestore.firestore()
         listener = db.collection("rooms").document(roomCode).addSnapshotListener { [weak self] snap, _ in
             guard let self else { return }
@@ -806,10 +849,11 @@ final class WhatWouldYouDoViewModel: ObservableObject {
                 let room = try snap.data(as: OnlineRoom.self)
                 if let state = room.whatWouldYouDoGameState {
                     self.gameState = state
+                    let roster = room.players
                     // Host auto-advances reveal: once all answers in + revealIndex < end
-                    Task { await self.hostDriveRevealIfNeeded(state: state, allPlayers: allPlayers) }
+                    Task { await self.hostDriveRevealIfNeeded(state: state, allPlayers: roster) }
                     // Once all voted, host transitions to results
-                    Task { await self.hostDriveVotingIfNeeded(state: state, allPlayers: allPlayers) }
+                    Task { await self.hostDriveVotingIfNeeded(state: state, allPlayers: roster) }
                 }
             } catch {
                 print("[WWYD] snapshot decode failed: \(error)")

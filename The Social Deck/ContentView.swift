@@ -44,11 +44,14 @@ struct ContentView: View {
                 LobbyView()
             }
         }
-        .sheet(isPresented: $showLaunchPlusPaywall, onDismiss: {
+        .sheet(isPresented: subManager.paywallSheetIsPresented($showLaunchPlusPaywall), onDismiss: {
             Task { await subManager.refreshEntitlements() }
         }) {
             TheSocialDeckPlusPopUpView(onDismiss: { showLaunchPlusPaywall = false })
                 .environmentObject(subManager)
+        }
+        .onChange(of: subManager.isPlus) { _, isPlus in
+            if isPlus { showLaunchPlusPaywall = false }
         }
         .onAppear {
             scheduleLaunchPlusPaywallIfEligible()
@@ -68,12 +71,14 @@ struct ContentView: View {
 
     /// Presents TheSocialDeck+ after splash and onboarding, whenever the app becomes active (non‑Plus only).
     private func scheduleLaunchPlusPaywallIfEligible() {
-        guard hasCompletedFirstLaunchSplash, hasCompletedOnboarding, !subManager.isPlus else { return }
+        guard hasCompletedFirstLaunchSplash, hasCompletedOnboarding else { return }
+        guard subManager.hasCompletedInitialEntitlementCheck, !subManager.isPlus else { return }
         launchPlusPresentationTask?.cancel()
         launchPlusPresentationTask = Task { @MainActor in
             try? await Task.sleep(nanoseconds: 450_000_000)
             guard !Task.isCancelled else { return }
-            guard hasCompletedFirstLaunchSplash, hasCompletedOnboarding, !subManager.isPlus else { return }
+            guard hasCompletedFirstLaunchSplash, hasCompletedOnboarding else { return }
+            guard subManager.hasCompletedInitialEntitlementCheck, !subManager.isPlus else { return }
             showLaunchPlusPaywall = true
         }
     }

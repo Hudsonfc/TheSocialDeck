@@ -123,13 +123,15 @@ struct MemoryMasterSetupView: View {
             }
         }
         .onChange(of: subManager.isPlus) { _, isPlus in
-            if !isPlus && (selectedDifficulty == .hard || selectedDifficulty == .expert) {
+            if isPlus {
+                showPlusPaywall = false
+            } else if selectedDifficulty == .hard || selectedDifficulty == .expert {
                 selectedDifficulty = .easy
             }
         }
-        .sheet(isPresented: $showPlusPaywall) {
+        .sheet(isPresented: subManager.paywallSheetIsPresented($showPlusPaywall)) {
             TheSocialDeckPlusPopUpView(onDismiss: { showPlusPaywall = false })
-                .environmentObject(SubscriptionManager.shared)
+                .environmentObject(subManager)
         }
         .background(
             NavigationLink(

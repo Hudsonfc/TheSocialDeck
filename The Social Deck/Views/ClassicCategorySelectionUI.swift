@@ -697,9 +697,12 @@ struct ClassicCategorySelectionRoot<Destination: View>: View {
                 }
             }
         }
-        .sheet(isPresented: $showPlusPaywall) {
+        .sheet(isPresented: subManager.paywallSheetIsPresented($showPlusPaywall)) {
             TheSocialDeckPlusPopUpView(onDismiss: { showPlusPaywall = false })
-                .environmentObject(SubscriptionManager.shared)
+                .environmentObject(subManager)
+        }
+        .onChange(of: subManager.isPlus) { _, isPlus in
+            if isPlus { showPlusPaywall = false }
         }
         .background(
             NavigationLink(destination: destination(), isActive: $navigateToSetup) {

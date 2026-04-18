@@ -34,6 +34,10 @@ enum DeckType: String {
     case spillTheEx
     /// Online-first party game (same `rawValue` as legacy `OnlineGameEntry.gameType`).
     case whatWouldYouDo
+    /// Online fill-in-the-blank consensus game.
+    case obviousAnswer
+    /// Online trivia game with a confidence-stakes scoring system.
+    case overconfidence
     case other
 
     /// Games that support online multiplayer (e.g. Play Offline vs Create Room in Play2).
@@ -125,5 +129,7 @@ extension Deck {
             || type == .closerThanEver
             || type == .usAfterDark
             || type == .whatWouldYouDo
+            || type == .obviousAnswer
+            || type == .overconfidence
     }
 }

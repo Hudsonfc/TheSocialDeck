@@ -322,5 +322,52 @@ let allUsAfterDarkCards: [Card] = [
     Card(text: "What's a memory that shows how much we've grown together?", category: "Memories", cardType: nil),
     Card(text: "What's something that makes you feel emotionally connected to me?", category: "Emotions", cardType: nil),
     Card(text: "What's something you'd want more of from me emotionally?", category: "Desires", cardType: nil),
+
+    // Additional Desires
+    Card(text: "What's something you'd want me to whisper to you in the dark?", category: "Desires", cardType: nil),
+    Card(text: "What's a moment between us that lives in your head longer than it should?", category: "Desires", cardType: nil),
+    Card(text: "What's something I do without realizing it that turns you on?", category: "Desires", cardType: nil),
+    Card(text: "What's a small way I could surprise you that would feel huge?", category: "Desires", cardType: nil),
+    Card(text: "What's a part of intimacy with us that you'd never want to change?", category: "Desires", cardType: nil),
+    Card(text: "What's the version of me you want more of when we're alone?", category: "Desires", cardType: nil),
+    Card(text: "What's a setting or place we've never tried that you'd want to?", category: "Desires", cardType: nil),
+    Card(text: "What's a 'first' you still want to have with me?", category: "Desires", cardType: nil),
+    Card(text: "What does slow with me feel like to you?", category: "Desires", cardType: nil),
+    Card(text: "What does fast with me feel like to you?", category: "Desires", cardType: nil),
+
+    // Additional Vulnerability & Honesty
+    Card(text: "What's something you've been holding in this week that you can hand to me now?", category: "Vulnerability", cardType: nil),
+    Card(text: "What's a side of you that only comes out when we're truly alone?", category: "Vulnerability", cardType: nil),
+    Card(text: "What's a fear you have about us that you'd want to say out loud one time?", category: "Vulnerability", cardType: nil),
+    Card(text: "What's something I've never asked that you secretly wish I would?", category: "Honesty", cardType: nil),
+    Card(text: "What's the truest sentence you could say about us right now?", category: "Honesty", cardType: nil),
+    Card(text: "What's something you'd tell me if you knew I wouldn't react?", category: "Honesty", cardType: nil),
+
+    // Additional Connection & Emotions
+    Card(text: "When was the last moment you felt truly close to me?", category: "Connection", cardType: nil),
+    Card(text: "What's something we share that no one outside this room would understand?", category: "Connection", cardType: nil),
+    Card(text: "What does 'safe' feel like in your body when you're next to me?", category: "Connection", cardType: nil),
+    Card(text: "What's something I do that quiets your mind?", category: "Emotions", cardType: nil),
+    Card(text: "What's a feeling you've had about us that you couldn't name until tonight?", category: "Emotions", cardType: nil),
+    Card(text: "What does loving me feel like on a really hard day?", category: "Emotions", cardType: nil),
+
+    // Additional Curiosity & Intimacy
+    Card(text: "What's a question about my body or mind you've been too shy to ask?", category: "Curiosity", cardType: nil),
+    Card(text: "What's something you want to learn about how I love?", category: "Curiosity", cardType: nil),
+    Card(text: "What's a way you'd want us to take care of each other after intimacy?", category: "Intimacy", cardType: nil),
+    Card(text: "What's a moment of intimacy between us you wish lasted longer?", category: "Intimacy", cardType: nil),
+    Card(text: "What's something we do during intimacy that makes you feel chosen?", category: "Intimacy", cardType: nil),
+    Card(text: "What part of intimacy with me feels like home?", category: "Intimacy", cardType: nil),
+
+    // Additional Boundaries & Trust
+    Card(text: "What's a boundary you've never had to say out loud because I just got it?", category: "Boundaries", cardType: nil),
+    Card(text: "What's a way I could check in with you better in the moment?", category: "Boundaries", cardType: nil),
+    Card(text: "What's something you'd want me to do if you went quiet during intimacy?", category: "Boundaries", cardType: nil),
+    Card(text: "What's a soft 'no' from you I should always treat like a real no?", category: "Boundaries", cardType: nil),
+
+    // Additional Appreciation
+    Card(text: "What's a part of how I love you that you'd never want me to outgrow?", category: "Appreciation", cardType: nil),
+    Card(text: "What's something I gave you without realizing I was giving it?", category: "Appreciation", cardType: nil),
+    Card(text: "What's a version of yourself you've only become because of us?", category: "Appreciation", cardType: nil),
 ]
 

@@ -472,5 +472,52 @@ let allCloserThanEverCards: [Card] = [
     Card(text: "What's a way we could make our relationship feel more like a partnership?", category: "Growth", cardType: nil),
     Card(text: "What's something you need from me when you're feeling lonely?", category: "Love Languages", cardType: nil),
     Card(text: "What's a dream you have for us that you're scared to say out loud?", category: "Dreams", cardType: nil),
+
+    // Additional Love Languages
+    Card(text: "What does 'I love you' look like to you when it isn't said out loud?", category: "Love Languages", cardType: nil),
+    Card(text: "What's something I do thinking it's small that actually means a lot?", category: "Love Languages", cardType: nil),
+    Card(text: "When was the last time you felt truly seen by me?", category: "Love Languages", cardType: nil),
+    Card(text: "What's a way I've shown up for you that you've never thanked me for?", category: "Love Languages", cardType: nil),
+    Card(text: "What's something I could stop doing tomorrow that would make you feel more loved?", category: "Love Languages", cardType: nil),
+    Card(text: "If I had to pick one thing to do for you every single day, what should it be?", category: "Love Languages", cardType: nil),
+    Card(text: "What do you need from me on the days you can't ask for anything?", category: "Love Languages", cardType: nil),
+    Card(text: "What's the most loving thing I've ever said to you?", category: "Love Languages", cardType: nil),
+
+    // Additional Memories
+    Card(text: "What's a moment with me you replay in your head when you're stressed?", category: "Memories", cardType: nil),
+    Card(text: "What's a quiet, ordinary day with us that you'd live again if you could?", category: "Memories", cardType: nil),
+    Card(text: "What's the first moment you knew this was different?", category: "Memories", cardType: nil),
+    Card(text: "What's a memory of us I've probably already forgotten that you still hold onto?", category: "Memories", cardType: nil),
+    Card(text: "What's a song that brings back a specific moment of us?", category: "Memories", cardType: nil),
+    Card(text: "What's a place you can't go without thinking of us?", category: "Memories", cardType: nil),
+
+    // Additional Communication & Growth
+    Card(text: "What's something you've been wanting to tell me but kept rephrasing in your head?", category: "Communication", cardType: nil),
+    Card(text: "What's a topic you wish we talked about more often?", category: "Communication", cardType: nil),
+    Card(text: "What's a question you've never asked me because you were afraid of the answer?", category: "Communication", cardType: nil),
+    Card(text: "What's something I do during a fight that actually helps?", category: "Communication", cardType: nil),
+    Card(text: "What's something I do during a fight you wish I'd stop?", category: "Communication", cardType: nil),
+    Card(text: "What's something we should talk about more openly with each other?", category: "Communication", cardType: nil),
+    Card(text: "What part of you do you feel I bring out the most?", category: "Personal Growth", cardType: nil),
+    Card(text: "What's something you've grown out of since we've been together?", category: "Personal Growth", cardType: nil),
+    Card(text: "What's something you've grown into because of us?", category: "Personal Growth", cardType: nil),
+
+    // Additional Dreams & Future
+    Card(text: "What's a small, specific dream you have for us in the next year?", category: "Dreams", cardType: nil),
+    Card(text: "If we built our 'perfect life' from scratch, what's one detail I might forget?", category: "Dreams", cardType: nil),
+    Card(text: "What does 'home' mean to you when you picture it with me?", category: "Dreams", cardType: nil),
+    Card(text: "What tradition do you want us to start that we haven't yet?", category: "Dreams", cardType: nil),
+    Card(text: "What's a 'someday' you want us to actually plan a date for?", category: "Dreams", cardType: nil),
+
+    // Additional Daily Life & Values
+    Card(text: "What's a small ritual we have that you'd never want to lose?", category: "Daily Life", cardType: nil),
+    Card(text: "What's something I could start doing on Sunday nights to make Mondays easier for you?", category: "Daily Life", cardType: nil),
+    Card(text: "What's the version of us at home you love the most?", category: "Daily Life", cardType: nil),
+    Card(text: "What's a value you've held since you were a kid that I should know about?", category: "Values", cardType: nil),
+    Card(text: "What's a value you've changed your mind about since we met?", category: "Values", cardType: nil),
+    Card(text: "What's something you're grateful for about us that you've never said aloud?", category: "Gratitude", cardType: nil),
+    Card(text: "What's a part of you that only I get to see?", category: "Vulnerability", cardType: nil),
+    Card(text: "What's a fear you've handed to me without realizing it?", category: "Vulnerability", cardType: nil),
+    Card(text: "What's something you trust me with that you've never trusted anyone else with?", category: "Vulnerability", cardType: nil),
 ]
 

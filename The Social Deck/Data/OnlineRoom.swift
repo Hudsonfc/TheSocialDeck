@@ -117,11 +117,13 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
     var gameState: ColorClashGameState? // For Color Clash game state
     var flip21GameState: Flip21GameState? // For Flip 21 game state
     var whatWouldYouDoGameState: WhatWouldYouDoGameState? // For What Would You Do game state
+    var obviousAnswerGameState: ObviousAnswerGameState? // For The Obvious Answer game state
+    var overconfidenceGameState: OverconfidenceGameState? // For Overconfidence game state
 
     private enum CodingKeys: String, CodingKey {
         case id, roomCode, roomName, createdBy, createdAt, status, maxPlayers, isPrivate, isPublic
         case selectedGameType, selectedCategory, classicSelectedCategories, cardCount, timerEnabled, timerDuration, classicTurnsEnabled, actNaturalTwoUnknowns, whatWouldYouDoAnonymousMode
-        case roundStartTimestamp, players, hostId, gameStartedAt, gameState, flip21GameState, whatWouldYouDoGameState
+        case roundStartTimestamp, players, hostId, gameStartedAt, gameState, flip21GameState, whatWouldYouDoGameState, obviousAnswerGameState, overconfidenceGameState
     }
     
     init(
@@ -149,7 +151,9 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         gameStartedAt: Date? = nil,
         gameState: ColorClashGameState? = nil,
         flip21GameState: Flip21GameState? = nil,
-        whatWouldYouDoGameState: WhatWouldYouDoGameState? = nil
+        whatWouldYouDoGameState: WhatWouldYouDoGameState? = nil,
+        obviousAnswerGameState: ObviousAnswerGameState? = nil,
+        overconfidenceGameState: OverconfidenceGameState? = nil
     ) {
         self.id = id
         self.roomCode = roomCode
@@ -176,6 +180,8 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
         self.gameState = gameState
         self.flip21GameState = flip21GameState
         self.whatWouldYouDoGameState = whatWouldYouDoGameState
+        self.obviousAnswerGameState = obviousAnswerGameState
+        self.overconfidenceGameState = overconfidenceGameState
     }
     
     init(from decoder: Decoder) throws {
@@ -230,6 +236,20 @@ struct OnlineRoom: Codable, Identifiable, Equatable {
             print("[OnlineRoom.init] whatWouldYouDoGameState decode failed: \(error) — defaulting to nil")
             whatWouldYouDoGameState = nil
         }
+
+        do {
+            obviousAnswerGameState = try container.decodeIfPresent(ObviousAnswerGameState.self, forKey: .obviousAnswerGameState)
+        } catch {
+            print("[OnlineRoom.init] obviousAnswerGameState decode failed: \(error) — defaulting to nil")
+            obviousAnswerGameState = nil
+        }
+
+        do {
+            overconfidenceGameState = try container.decodeIfPresent(OverconfidenceGameState.self, forKey: .overconfidenceGameState)
+        } catch {
+            print("[OnlineRoom.init] overconfidenceGameState decode failed: \(error) — defaulting to nil")
+            overconfidenceGameState = nil
+        }
     }
     
     // Helper computed property to get current player count
@@ -280,6 +300,8 @@ extension DeckType {
         case .usAfterDark: return "usAfterDark"
         case .spillTheEx: return "spillTheEx"
         case .whatWouldYouDo: return "whatWouldYouDo"
+        case .obviousAnswer: return "obviousAnswer"
+        case .overconfidence: return "overconfidence"
         case .other: return "other"
         }
     }
@@ -312,6 +334,8 @@ extension DeckType {
         case "usAfterDark": self = .usAfterDark
         case "spillTheEx": self = .spillTheEx
         case "whatWouldYouDo": self = .whatWouldYouDo
+        case "obviousAnswer": self = .obviousAnswer
+        case "overconfidence": self = .overconfidence
         case "other": self = .other
         default: return nil
         }

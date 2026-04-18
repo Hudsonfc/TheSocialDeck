@@ -40,6 +40,8 @@ struct SelectedGameDisplayCard: View {
         case .usAfterDark: return "Us After Dark"
         case .spillTheEx: return "Spill the Ex"
         case .whatWouldYouDo: return "What Would You Do"
+        case .obviousAnswer: return "The Obvious Answer"
+        case .overconfidence: return "Overconfidence"
         case .other: return "Game"
         }
     }
@@ -48,7 +50,7 @@ struct SelectedGameDisplayCard: View {
         switch gameType {
         case .neverHaveIEver, .truthOrDare, .wouldYouRather, .mostLikelyTo:
             return nil // programmatic classic cover in body
-        case .spillTheEx, .takeItPersonally, .rhymeTime, .tapDuel, .whatsMySecret, .riddleMeThis, .actItOut, .actNatural, .categoryClash, .storyChain, .memoryMaster, .bluffCall, .spinTheBottle, .twoTruthsAndALie, .hotPotato, .colorClash, .flip21, .quickfireCouples, .closerThanEver, .usAfterDark, .whatWouldYouDo:
+        case .spillTheEx, .takeItPersonally, .rhymeTime, .tapDuel, .whatsMySecret, .riddleMeThis, .actItOut, .actNatural, .categoryClash, .storyChain, .memoryMaster, .bluffCall, .spinTheBottle, .twoTruthsAndALie, .hotPotato, .colorClash, .flip21, .quickfireCouples, .closerThanEver, .usAfterDark, .whatWouldYouDo, .obviousAnswer, .overconfidence:
             return nil // programmatic cover in body
         default: return nil
         }
@@ -190,6 +192,20 @@ struct SelectedGameDisplayCard: View {
                         .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
                 } else if gameType == .whatWouldYouDo {
                     WhatWouldYouDoCoverArtView()
+                        .environment(\.playGridAdaptiveSocialDeckCovers, true)
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .obviousAnswer {
+                    ObviousAnswerCoverArtView()
+                        .environment(\.playGridAdaptiveSocialDeckCovers, true)
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.cardShadowColor, radius: 4, x: 0, y: 2)
+                        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+                } else if gameType == .overconfidence {
+                    OverconfidenceCoverArtView()
                         .environment(\.playGridAdaptiveSocialDeckCovers, true)
                         .frame(width: 60, height: 60)
                         .clipShape(RoundedRectangle(cornerRadius: 12))

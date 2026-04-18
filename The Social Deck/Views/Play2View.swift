@@ -127,6 +127,26 @@ struct Play2View: View {
     // Social Deck Games decks with 2.0 artwork
     let socialDeckGamesDecks: [Deck] = [
         Deck(
+            title: "Overconfidence",
+            description: "An online trivia game with a confidence twist. Every round you pick the right answer from four choices — but you also bet your confidence on a 0–100 slider. Correct? You score your confidence value. Wrong? You lose it. Scores can go negative, which is exactly the point. High confidence means high stakes.",
+            numberOfCards: 0,
+            estimatedTime: "~15 min",
+            imageName: "",
+            type: .overconfidence,
+            cards: [],
+            availableCategories: ["Trivia"]
+        ),
+        Deck(
+            title: "The Obvious Answer",
+            description: "An online party game where every round shows a fill-in-the-blank sentence with one obvious correct answer. Everyone types what they think that answer is — scoring is like trivia: your answer must match the official one (same letters; capitalization and punctuation differences are ignored). Get it right and you earn a point; miss it and you score nothing. After each round you see the correct answer, who got it right or wrong, and an updated leaderboard until the final scores.",
+            numberOfCards: 0,
+            estimatedTime: "~15 min",
+            imageName: "",
+            type: .obviousAnswer,
+            cards: [],
+            availableCategories: ["Trivia"]
+        ),
+        Deck(
             title: "What Would You Do",
             description: "An online party game for your group in one room. Each round everyone sees the same “what would you do if…” scenario, writes a short answer in private, and submits. When everyone’s in, answers reveal one by one on screen. Then players vote for their favorites—you can’t vote for yourself—and scores update each round until the final leaderboard. The host can run another game from the lobby; optional anonymous mode hides names on answers until the end.",
             numberOfCards: 0,
@@ -568,7 +588,10 @@ struct Play2View: View {
                     selectedDeck: $selectedDeckForDescription,
                     isLocked: isLocked(deck),
                     isLockedAndNotPlus: isLocked(deck) && !subManager.isPlus,
-                    onShowPaywall: { showPlusPaywall = true },
+                    onShowPaywall: {
+                        guard !subManager.isPlus else { return }
+                        showPlusPaywall = true
+                    },
                     useAdaptiveSocialDeckProgrammaticCovers: playGridAdaptiveSocialDeckCovers(for: deck),
                     navigateToCategorySelection: $navigateToCategorySelection,
                     navigateToPlayView: $navigateToPlayView,
@@ -629,11 +652,14 @@ struct Play2View: View {
                 .presentationDetents([.height(220)])
                 .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $showPlusPaywall, onDismiss: {
+        .sheet(isPresented: subManager.paywallSheetIsPresented($showPlusPaywall), onDismiss: {
             Task { await subManager.refreshEntitlements() }
         }) {
             TheSocialDeckPlusPopUpView(onDismiss: { showPlusPaywall = false })
-                .environmentObject(SubscriptionManager.shared)
+                .environmentObject(subManager)
+        }
+        .onChange(of: subManager.isPlus) { _, isPlus in
+            if isPlus { showPlusPaywall = false }
         }
     }
 
@@ -1183,7 +1209,8 @@ struct GridGameTile: View {
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundColor(.primaryText)
                     .multilineTextAlignment(.center)
-                    .lineLimit(2)
+                    .lineLimit(deck.type == .obviousAnswer ? 1 : 2)
+                    .minimumScaleFactor(deck.type == .obviousAnswer ? 0.65 : 1.0)
                     .frame(maxWidth: .infinity)
             }
             .scaleEffect(isPressed ? 0.97 : 1.0)
@@ -1303,8 +1330,8 @@ struct GameDescriptionOverlay: View {
 
     private func createOnlineRoomFromDescription() async {
         isCreatingOnlineRoom = true
-        // WWYD rooms default to private so hosts explicitly opt in to public discovery.
-        let defaultPrivate = deck.type == .whatWouldYouDo
+        // WWYD, Obvious Answer, and Overconfidence rooms default to private so hosts explicitly opt in to public discovery.
+        let defaultPrivate = deck.type == .whatWouldYouDo || deck.type == .obviousAnswer || deck.type == .overconfidence
         await onlineManager.createRoom(
             roomName: deck.title,
             maxPlayers: onlineMaxPlayersForDeck,
@@ -1328,9 +1355,9 @@ struct GameDescriptionOverlay: View {
     }
 
     private func onCreateRoomTapped() {
-        // What Would You Do requires Plus to create a room.
+        // What Would You Do, The Obvious Answer, and Overconfidence require Plus to create a room.
         // (Joining via room code / invite is unaffected — that goes through a separate path.)
-        if deck.type == .whatWouldYouDo && !subManager.isPlus {
+        if (deck.type == .whatWouldYouDo || deck.type == .obviousAnswer || deck.type == .overconfidence) && !subManager.isPlus {
             onShowPaywall()
             return
         }
@@ -1529,7 +1556,7 @@ struct GameDescriptionOverlay: View {
             )
             .responsiveHorizontalPadding()
             .padding(.bottom, 40)
-        } else if deck.type == .whatWouldYouDo {
+        } else if deck.type == .whatWouldYouDo || deck.type == .obviousAnswer || deck.type == .overconfidence {
             Button {
                 onCreateRoomTapped()
             } label: {
@@ -1617,6 +1644,8 @@ struct GameDescriptionOverlay: View {
                             DeckCoverArtView(deck: deck)
                                 .environment(\.playGridAdaptiveSocialDeckCovers, useAdaptiveSocialDeckProgrammaticCovers)
                                 .environment(\.whatWouldYouDoCoverEmbeddedPills, false)
+                                .environment(\.obviousAnswerCoverEmbeddedPills, false)
+                                .environment(\.overconfidenceCoverEmbeddedPills, false)
                                 .aspectRatio(420.0 / 577.0, contentMode: .fit)
                                 .frame(width: min(180, UIScreen.main.bounds.width - 120))
                                 .cornerRadius(12)
@@ -1647,7 +1676,8 @@ struct GameDescriptionOverlay: View {
                             .font(.system(size: 32, weight: .bold, design: .rounded))
                             .foregroundColor(.primaryText)
                             .multilineTextAlignment(.leading)
-                            .lineLimit(nil)
+                            .lineLimit(deck.type == .obviousAnswer ? 1 : nil)
+                            .minimumScaleFactor(deck.type == .obviousAnswer ? 0.55 : 1.0)
                             .fixedSize(horizontal: false, vertical: true)
                             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -1707,7 +1737,7 @@ struct GameDescriptionOverlay: View {
                     showDailyLimitModal = false
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                    onShowPaywall()
+                    if !subManager.isPlus { onShowPaywall() }
                 }
             } onDismiss: {
                 withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {

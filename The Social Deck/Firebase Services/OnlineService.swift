@@ -561,6 +561,43 @@ class OnlineService {
                 "gameStartedAt": Timestamp(date: Date()),
                 "whatWouldYouDoGameState": try Firestore.Encoder().encode(gameState)
             ])
+        } else if room.selectedGameType == "obviousAnswer" {
+            let totalRounds = max(1, (room.cardCount ?? 5) > 0 ? (room.cardCount ?? 5) : 5)
+            let pair = allObviousAnswerPrompts.randomElement() ?? allObviousAnswerPrompts[0]
+            let initialScores = Dictionary(uniqueKeysWithValues: room.players.map { ($0.id, 0) })
+            let gameState = ObviousAnswerGameState(
+                currentRound: 0,
+                totalRounds: totalRounds,
+                currentPrompt: pair.prompt,
+                correctAnswer: pair.correctAnswer,
+                answers: [:],
+                phase: .answering,
+                scores: initialScores
+            )
+            try await roomRef.updateData([
+                "status": RoomStatus.inGame.rawValue,
+                "gameStartedAt": Timestamp(date: Date()),
+                "obviousAnswerGameState": try Firestore.Encoder().encode(gameState)
+            ])
+        } else if room.selectedGameType == "overconfidence" {
+            let totalRounds = max(1, (room.cardCount ?? 5) > 0 ? (room.cardCount ?? 5) : 5)
+            let q = allOverconfidenceQuestions.randomElement() ?? allOverconfidenceQuestions[0]
+            let initialScores = Dictionary(uniqueKeysWithValues: room.players.map { ($0.id, 0) })
+            let gameState = OverconfidenceGameState(
+                currentRound: 0,
+                totalRounds: totalRounds,
+                currentQuestion: q.question,
+                currentOptions: q.options.shuffled(),
+                correctAnswer: q.correctAnswer,
+                submissions: [:],
+                phase: .answering,
+                scores: initialScores
+            )
+            try await roomRef.updateData([
+                "status": RoomStatus.inGame.rawValue,
+                "gameStartedAt": Timestamp(date: Date()),
+                "overconfidenceGameState": try Firestore.Encoder().encode(gameState)
+            ])
         } else {
             let classicTurnEligibleTypes: Set<String> = [
                 "neverHaveIEver", "truthOrDare", "wouldYouRather", "mostLikelyTo",
@@ -636,7 +673,9 @@ class OnlineService {
             "actNaturalFlipped": FieldValue.delete(),
             "actNaturalRolesRevealed": FieldValue.delete(),
             "actNaturalRoundIndex": FieldValue.delete(),
-            "whatWouldYouDoGameState": FieldValue.delete()
+            "whatWouldYouDoGameState": FieldValue.delete(),
+            "obviousAnswerGameState": FieldValue.delete(),
+            "overconfidenceGameState": FieldValue.delete()
         ]
         // Keep lobby-selected categories/settings; only reset volatile in-game state.
         try await roomRef.updateData(payload)
@@ -895,6 +934,22 @@ class OnlineService {
         let encoder = Firestore.Encoder()
         let data = try encoder.encode(gameState)
         try await roomRef.updateData(["whatWouldYouDoGameState": data])
+    }
+
+    /// Updates The Obvious Answer game state in Firestore
+    func updateObviousAnswerGameState(roomCode: String, gameState: ObviousAnswerGameState) async throws {
+        let roomRef = db.collection("rooms").document(roomCode)
+        let encoder = Firestore.Encoder()
+        let data = try encoder.encode(gameState)
+        try await roomRef.updateData(["obviousAnswerGameState": data])
+    }
+
+    /// Updates the Overconfidence game state in Firestore
+    func updateOverconfidenceGameState(roomCode: String, gameState: OverconfidenceGameState) async throws {
+        let roomRef = db.collection("rooms").document(roomCode)
+        let encoder = Firestore.Encoder()
+        let data = try encoder.encode(gameState)
+        try await roomRef.updateData(["overconfidenceGameState": data])
     }
 
     /// Updates the Flip 21 game state in Firestore

@@ -176,9 +176,21 @@ enum GameDescriptionLayoutContent {
             ]
         case .whatWouldYouDo:
             return [
-                ("Get everyone in a room", "Create a room from Play or join with a friend’s code. When the group is ready, the host starts from the lobby."),
-                ("Answer the prompt in secret", "Each round shows one “what would you do if…” scenario. Type your answer and submit while others do the same—no one sees answers until everyone has sent one."),
-                ("Reveal, vote, and score", "Answers appear one at a time. Then vote for your favorites (you can’t pick your own). Points update each round until the final leaderboard; the host can play again from the lobby.")
+                ("Same prompt for everyone", "Each round is one shared “what would you do if…” scenario."),
+                ("Answer in private", "Type and submit before anyone sees your take."),
+                ("Reveal, then vote", "Answers appear in order; vote for favorites (not yourself) and rack up points.")
+            ]
+        case .obviousAnswer:
+            return [
+                ("Spot the blank", "You get one sentence with a missing word or phrase."),
+                ("Fill it in", "Submit what you think the game’s official answer is."),
+                ("See who matched", "Only the exact right wording scores; check results and standings.")
+            ]
+        case .overconfidence:
+            return [
+                ("Pick an option", "Four choices—tap the answer you think is right."),
+                ("Dial your confidence", "Slide 0–100, then lock in. Higher means bigger win or bigger loss."),
+                ("Add or lose points", "Correct: +confidence. Wrong: −confidence. Host moves to the next round.")
             ]
         case .other:
             return chooseTopicsPlayAndRotate()
@@ -209,6 +221,10 @@ enum GameDescriptionLayoutContent {
             return "2+ players"
         case .whatWouldYouDo:
             return "3–8 players"
+        case .obviousAnswer:
+            return "3–8 players"
+        case .overconfidence:
+            return "2–8 players"
         default:
             return "2+ players"
         }
@@ -234,6 +250,10 @@ enum GameDescriptionLayoutContent {
             return "Acting"
         case .whatWouldYouDo:
             return "Party"
+        case .obviousAnswer:
+            return "Trivia"
+        case .overconfidence:
+            return "Trivia"
         default:
             return "Party"
         }
@@ -276,6 +296,8 @@ enum GameDescriptionLayoutContent {
             return "~15 min"
         case "whatWouldYouDo":
             return "~20 min"
+        case "overconfidence":
+            return "~15 min"
         case "flip21":
             return "~20 min"
         case "neverHaveIEver", "wouldYouRather", "truthOrDare", "mostLikelyTo", "twoTruthsAndALie", "storyChain":
@@ -294,6 +316,8 @@ enum GameDescriptionLayoutContent {
             return "Cards"
         case "whatWouldYouDo":
             return "Party"
+        case "overconfidence":
+            return "Trivia"
         case "neverHaveIEver", "wouldYouRather", "truthOrDare", "mostLikelyTo", "twoTruthsAndALie", "storyChain":
             return "Party"
         case "actNatural":
@@ -319,9 +343,21 @@ enum GameDescriptionLayoutContent {
             ]
         case "whatWouldYouDo":
             return [
-                ("Get everyone in a room", "Create a room from Play or join with a friend’s code. When the group is ready, the host starts from the lobby."),
-                ("Answer the prompt in secret", "Each round shows one “what would you do if…” scenario. Type your answer and submit while others do the same—no one sees answers until everyone has sent one."),
-                ("Reveal, vote, and score", "Answers appear one at a time. Then vote for your favorites (you can’t pick your own). Points update each round until the final leaderboard; the host can play again from the lobby.")
+                ("Same prompt for everyone", "Each round is one shared “what would you do if…” scenario."),
+                ("Answer in private", "Type and submit before anyone sees your take."),
+                ("Reveal, then vote", "Answers appear in order; vote for favorites (not yourself) and rack up points.")
+            ]
+        case "obviousAnswer":
+            return [
+                ("Spot the blank", "You get one sentence with a missing word or phrase."),
+                ("Fill it in", "Submit what you think the game’s official answer is."),
+                ("See who matched", "Only the exact right wording scores; check results and standings.")
+            ]
+        case "overconfidence":
+            return [
+                ("Pick an option", "Four choices—tap the answer you think is right."),
+                ("Dial your confidence", "Slide 0–100, then lock in. Higher means bigger win or bigger loss."),
+                ("Add or lose points", "Correct: +confidence. Wrong: −confidence. Host moves to the next round.")
             ]
         case "storyChain":
             return [

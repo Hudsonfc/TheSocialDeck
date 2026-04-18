@@ -116,9 +116,12 @@ struct SettingsView: View {
                         )
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .sheet(isPresented: $showPlusPaywall) {
+                    .sheet(isPresented: subManager.paywallSheetIsPresented($showPlusPaywall)) {
                         TheSocialDeckPlusPopUpView(onDismiss: { showPlusPaywall = false })
-                            .environmentObject(SubscriptionManager.shared)
+                            .environmentObject(subManager)
+                    }
+                    .onChange(of: subManager.isPlus) { _, isPlus in
+                        if isPlus { showPlusPaywall = false }
                     }
 
                     // General Settings Button

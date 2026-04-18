@@ -21,6 +21,34 @@ extension EnvironmentValues {
     }
 }
 
+// MARK: - The Obvious Answer cover (embedded pills only on Play grid tiles)
+
+struct ObviousAnswerCoverEmbeddedPillsKey: EnvironmentKey {
+    /// `true` = show "New" / "Online matchmaking" pills inside the artwork (Play grid). `false` = title art only.
+    static let defaultValue = true
+}
+
+extension EnvironmentValues {
+    var obviousAnswerCoverEmbeddedPills: Bool {
+        get { self[ObviousAnswerCoverEmbeddedPillsKey.self] }
+        set { self[ObviousAnswerCoverEmbeddedPillsKey.self] = newValue }
+    }
+}
+
+// MARK: - Overconfidence cover (embedded pills only on Play grid tiles)
+
+struct OverconfidenceCoverEmbeddedPillsKey: EnvironmentKey {
+    /// `true` = show "New" / "Online matchmaking" pills inside the artwork (Play grid). `false` = title art only.
+    static let defaultValue = true
+}
+
+extension EnvironmentValues {
+    var overconfidenceCoverEmbeddedPills: Bool {
+        get { self[OverconfidenceCoverEmbeddedPillsKey.self] }
+        set { self[OverconfidenceCoverEmbeddedPillsKey.self] = newValue }
+    }
+}
+
 // MARK: - What Would You Do cover (embedded pills only on Play grid tiles)
 
 struct WhatWouldYouDoCoverEmbeddedPillsKey: EnvironmentKey {
@@ -1293,6 +1321,10 @@ struct DeckCoverArtView: View {
                 ProgrammaticUsAfterDarkCoverArtView()
             } else if deck.type == .whatWouldYouDo {
                 WhatWouldYouDoCoverArtView()
+            } else if deck.type == .obviousAnswer {
+                ObviousAnswerCoverArtView()
+            } else if deck.type == .overconfidence {
+                OverconfidenceCoverArtView()
             } else {
                 Image(deck.imageName)
                     .resizable()

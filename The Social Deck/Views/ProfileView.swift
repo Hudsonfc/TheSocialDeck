@@ -298,9 +298,12 @@ struct ProfileView: View {
                 }
             }
         .toast($toast)
-        .sheet(isPresented: $showPlusPaywall) {
+        .sheet(isPresented: subManager.paywallSheetIsPresented($showPlusPaywall)) {
             TheSocialDeckPlusPopUpView(onDismiss: { showPlusPaywall = false })
                 .environmentObject(subManager)
+        }
+        .onChange(of: subManager.isPlus) { _, isPlus in
+            if isPlus { showPlusPaywall = false }
         }
     }
     
