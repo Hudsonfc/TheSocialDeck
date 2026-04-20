@@ -52,9 +52,11 @@ struct OverconfidenceGameState: Codable, Equatable {
     var phase: OverconfidencePhase
     /// Cumulative scores across all rounds (can be negative).
     var scores: [String: Int]
+    /// User IDs who have claimed their Social Deck online win for this match.
+    var socialDeckWinRecordedUserIds: [String]
 
     private enum CodingKeys: String, CodingKey {
-        case currentRound, totalRounds, currentQuestion, currentOptions, correctAnswer, submissions, phase, scores
+        case currentRound, totalRounds, currentQuestion, currentOptions, correctAnswer, submissions, phase, scores, socialDeckWinRecordedUserIds
     }
 
     init(
@@ -65,7 +67,8 @@ struct OverconfidenceGameState: Codable, Equatable {
         correctAnswer: String = "",
         submissions: [String: OverconfidenceSubmission] = [:],
         phase: OverconfidencePhase = .answering,
-        scores: [String: Int] = [:]
+        scores: [String: Int] = [:],
+        socialDeckWinRecordedUserIds: [String] = []
     ) {
         self.currentRound = currentRound
         self.totalRounds = totalRounds
@@ -75,6 +78,33 @@ struct OverconfidenceGameState: Codable, Equatable {
         self.submissions = submissions
         self.phase = phase
         self.scores = scores
+        self.socialDeckWinRecordedUserIds = socialDeckWinRecordedUserIds
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        currentRound = try c.decodeIfPresent(Int.self, forKey: .currentRound) ?? 0
+        totalRounds = try c.decodeIfPresent(Int.self, forKey: .totalRounds) ?? 5
+        currentQuestion = try c.decodeIfPresent(String.self, forKey: .currentQuestion) ?? ""
+        currentOptions = try c.decodeIfPresent([String].self, forKey: .currentOptions) ?? []
+        correctAnswer = try c.decodeIfPresent(String.self, forKey: .correctAnswer) ?? ""
+        submissions = try c.decodeIfPresent([String: OverconfidenceSubmission].self, forKey: .submissions) ?? [:]
+        phase = try c.decodeIfPresent(OverconfidencePhase.self, forKey: .phase) ?? .answering
+        scores = try c.decodeIfPresent([String: Int].self, forKey: .scores) ?? [:]
+        socialDeckWinRecordedUserIds = try c.decodeIfPresent([String].self, forKey: .socialDeckWinRecordedUserIds) ?? []
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(currentRound, forKey: .currentRound)
+        try c.encode(totalRounds, forKey: .totalRounds)
+        try c.encode(currentQuestion, forKey: .currentQuestion)
+        try c.encode(currentOptions, forKey: .currentOptions)
+        try c.encode(correctAnswer, forKey: .correctAnswer)
+        try c.encode(submissions, forKey: .submissions)
+        try c.encode(phase, forKey: .phase)
+        try c.encode(scores, forKey: .scores)
+        try c.encode(socialDeckWinRecordedUserIds, forKey: .socialDeckWinRecordedUserIds)
     }
 }
 

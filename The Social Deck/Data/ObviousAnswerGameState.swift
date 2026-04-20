@@ -41,9 +41,11 @@ struct ObviousAnswerGameState: Codable, Equatable {
     var phase: ObviousAnswerPhase
     /// Cumulative scores across all rounds.
     var scores: [String: Int]
+    /// User IDs who have claimed their Social Deck online win for this match.
+    var socialDeckWinRecordedUserIds: [String]
 
     private enum CodingKeys: String, CodingKey {
-        case currentRound, totalRounds, currentPrompt, correctAnswer, answers, phase, scores
+        case currentRound, totalRounds, currentPrompt, correctAnswer, answers, phase, scores, socialDeckWinRecordedUserIds
     }
 
     init(
@@ -53,7 +55,8 @@ struct ObviousAnswerGameState: Codable, Equatable {
         correctAnswer: String = "",
         answers: [String: String] = [:],
         phase: ObviousAnswerPhase = .answering,
-        scores: [String: Int] = [:]
+        scores: [String: Int] = [:],
+        socialDeckWinRecordedUserIds: [String] = []
     ) {
         self.currentRound = currentRound
         self.totalRounds = totalRounds
@@ -62,6 +65,31 @@ struct ObviousAnswerGameState: Codable, Equatable {
         self.answers = answers
         self.phase = phase
         self.scores = scores
+        self.socialDeckWinRecordedUserIds = socialDeckWinRecordedUserIds
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        currentRound = try c.decodeIfPresent(Int.self, forKey: .currentRound) ?? 0
+        totalRounds = try c.decodeIfPresent(Int.self, forKey: .totalRounds) ?? 5
+        currentPrompt = try c.decodeIfPresent(String.self, forKey: .currentPrompt) ?? ""
+        correctAnswer = try c.decodeIfPresent(String.self, forKey: .correctAnswer) ?? ""
+        answers = try c.decodeIfPresent([String: String].self, forKey: .answers) ?? [:]
+        phase = try c.decodeIfPresent(ObviousAnswerPhase.self, forKey: .phase) ?? .answering
+        scores = try c.decodeIfPresent([String: Int].self, forKey: .scores) ?? [:]
+        socialDeckWinRecordedUserIds = try c.decodeIfPresent([String].self, forKey: .socialDeckWinRecordedUserIds) ?? []
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(currentRound, forKey: .currentRound)
+        try c.encode(totalRounds, forKey: .totalRounds)
+        try c.encode(currentPrompt, forKey: .currentPrompt)
+        try c.encode(correctAnswer, forKey: .correctAnswer)
+        try c.encode(answers, forKey: .answers)
+        try c.encode(phase, forKey: .phase)
+        try c.encode(scores, forKey: .scores)
+        try c.encode(socialDeckWinRecordedUserIds, forKey: .socialDeckWinRecordedUserIds)
     }
 
     /// Normalizes for comparison: trim, lowercase, strip punctuation except spaces

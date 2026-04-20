@@ -854,6 +854,7 @@ final class WhatWouldYouDoViewModel: ObservableObject {
                     Task { await self.hostDriveRevealIfNeeded(state: state, allPlayers: roster) }
                     // Once all voted, host transitions to results
                     Task { await self.hostDriveVotingIfNeeded(state: state, allPlayers: roster) }
+                    Task { await self.claimSocialDeckOnlineWinIfNeeded(state: state, participants: roster) }
                 }
             } catch {
                 print("[WWYD] snapshot decode failed: \(error)")
@@ -999,6 +1000,23 @@ final class WhatWouldYouDoViewModel: ObservableObject {
 
     private func gameStateIsHostControlled() -> Bool {
         OnlineManager.shared.currentRoom?.hostId == currentUserId
+    }
+
+    /// Winners each claim once; room state tracks user ids so repeats / losers no-op (matches Firestore self-only profile rules).
+    private func claimSocialDeckOnlineWinIfNeeded(state: WhatWouldYouDoGameState, participants: [RoomPlayer]) async {
+        guard state.phase == .finished else { return }
+        guard !state.socialDeckWinRecordedUserIds.contains(currentUserId) else { return }
+        let ids = participants.map { $0.id }
+        let maxScore = ids.map { state.scores[$0] ?? 0 }.max() ?? 0
+        guard (state.scores[currentUserId] ?? 0) == maxScore else { return }
+        do {
+            let claimed = try await OnlineService.shared.tryClaimSocialDeckOnlineWin(roomCode: roomCode)
+            if claimed {
+                await AuthManager.shared.updateStats(onlineGamesWon: 1)
+            }
+        } catch {
+            print("[WWYD] tryClaimSocialDeckOnlineWin failed: \(error)")
+        }
     }
 
     // MARK: - Helpers

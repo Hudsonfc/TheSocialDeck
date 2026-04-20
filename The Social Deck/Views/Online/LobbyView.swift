@@ -159,13 +159,13 @@ struct LobbyView: View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 24) {
                 roomCodeCard
-                if isWhatWouldYouDoLobby {
+                if isSocialDeckOnlineGameWithPublicLobby {
                     roomVisibilityRow
                 }
                 playerListSection
-                if onlineManager.isHost && (isClassicGameWithCardCount || isActNaturalLobby || isWhatWouldYouDoLobby) {
+                if onlineManager.isHost && (isClassicGameWithCardCount || isActNaturalLobby || isSocialDeckOnlineGameWithPublicLobby) {
                     gameSettingsSection
-                } else if isClassicGameWithCardCount || isActNaturalLobby || isWhatWouldYouDoLobby {
+                } else if isClassicGameWithCardCount || isActNaturalLobby || isSocialDeckOnlineGameWithPublicLobby {
                     gameSettingsReadOnlySection
                 }
                 actionButtons
@@ -217,7 +217,7 @@ struct LobbyView: View {
         .padding(.top, 16)
     }
 
-    // MARK: - Room Visibility Row (What Would You Do only)
+    // MARK: - Room Visibility Row (WWYD, Obvious Answer, Overconfidence)
 
     private var roomVisibilityRow: some View {
         let isPublic = onlineManager.currentRoom?.isPublic ?? false
@@ -348,6 +348,19 @@ struct LobbyView: View {
         onlineManager.currentRoom?.selectedGameType == "whatWouldYouDo"
     }
 
+    private var isObviousAnswerLobby: Bool {
+        onlineManager.currentRoom?.selectedGameType == "obviousAnswer"
+    }
+
+    private var isOverconfidenceLobby: Bool {
+        onlineManager.currentRoom?.selectedGameType == "overconfidence"
+    }
+
+    /// Social Deck online games that support public discovery (Browse Open Rooms) via `isPublic`.
+    private var isSocialDeckOnlineGameWithPublicLobby: Bool {
+        isWhatWouldYouDoLobby || isObviousAnswerLobby || isOverconfidenceLobby
+    }
+
     private var currentRiddleRounds: Int {
         let count = onlineManager.currentRoom?.cardCount ?? 5
         return count > 0 ? count : 5
@@ -408,7 +421,7 @@ struct LobbyView: View {
     }
 
     private var hasCategorySettingForCurrentGame: Bool {
-        !lobbyCategoriesForSelectedGame.isEmpty && !isRiddleMeThisLobby && !isActNaturalLobby && !isWhatWouldYouDoLobby
+        !lobbyCategoriesForSelectedGame.isEmpty && !isRiddleMeThisLobby && !isActNaturalLobby && !isSocialDeckOnlineGameWithPublicLobby
     }
 
     private var gameSettingsSection: some View {
@@ -425,7 +438,11 @@ struct LobbyView: View {
                 whatWouldYouDoHostGameSettings
             }
 
-            if !isActNaturalLobby && !isWhatWouldYouDoLobby {
+            if isObviousAnswerLobby || isOverconfidenceLobby {
+                socialDeckRoundsOnlyHostGameSettings
+            }
+
+            if !isActNaturalLobby && !isWhatWouldYouDoLobby && !isObviousAnswerLobby && !isOverconfidenceLobby {
             Text(isRiddleMeThisLobby ? "Rounds to play" : "Cards to play")
                 .font(.system(size: 14, weight: .medium, design: .rounded))
                 .foregroundColor(.gray)
@@ -609,6 +626,44 @@ struct LobbyView: View {
         .cornerRadius(16)
         .shadow(color: Color.shadowColor, radius: 10, x: 0, y: 4)
         .padding(.horizontal, 24)
+    }
+
+    /// Rounds picker shared by The Obvious Answer and Overconfidence (no WWYD-only anonymous mode).
+    private var socialDeckRoundsOnlyHostGameSettings: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Rounds to play")
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundColor(.gray)
+                let currentRounds = onlineManager.currentRoom?.cardCount ?? 5
+                let effectiveRounds = currentRounds > 0 ? currentRounds : 5
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(Self.riddleRoundOptions, id: \.self) { rounds in
+                            Button {
+                                HapticManager.shared.lightImpact()
+                                Task { await onlineManager.updateCardCount(rounds) }
+                            } label: {
+                                Text("\(rounds)")
+                                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                    .foregroundColor(effectiveRounds == rounds ? .white : soDeckRed)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 10)
+                                    .background(effectiveRounds == rounds ? soDeckRed : soDeckRed.opacity(0.08))
+                                    .cornerRadius(10)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(soDeckRed.opacity(effectiveRounds == rounds ? 0 : 0.3), lineWidth: 1)
+                                    )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                    .padding(.vertical, 2)
+                }
+            }
+        }
+        .padding(.bottom, 8)
     }
 
     private var whatWouldYouDoHostGameSettings: some View {
@@ -834,6 +889,12 @@ struct LobbyView: View {
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .foregroundColor(.primaryText)
                 Text("Anonymous mode: \((onlineManager.currentRoom?.whatWouldYouDoAnonymousMode ?? false) ? "On" : "Off")")
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .foregroundColor(.primaryText)
+            } else if isObviousAnswerLobby || isOverconfidenceLobby {
+                let r = onlineManager.currentRoom?.cardCount ?? 5
+                let effective = r > 0 ? r : 5
+                Text("Rounds: \(effective)")
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .foregroundColor(.primaryText)
             } else if isRiddleMeThisLobby {

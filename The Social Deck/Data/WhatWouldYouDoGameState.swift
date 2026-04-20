@@ -38,6 +38,8 @@ struct WhatWouldYouDoGameState: Codable, Equatable {
     var revealOrder: [String]
     /// When true, answers are shown without names/avatars during play and scores stay hidden in the shell until the game ends.
     var anonymousMode: Bool
+    /// User IDs who have claimed their Social Deck online win for this match (each client records self; prevents double-counting).
+    var socialDeckWinRecordedUserIds: [String]
 
     init(
         currentRound: Int = 0,
@@ -49,7 +51,8 @@ struct WhatWouldYouDoGameState: Codable, Equatable {
         scores: [String: Int] = [:],
         revealIndex: Int = -1,
         revealOrder: [String] = [],
-        anonymousMode: Bool = false
+        anonymousMode: Bool = false,
+        socialDeckWinRecordedUserIds: [String] = []
     ) {
         self.currentRound = currentRound
         self.totalRounds = totalRounds
@@ -61,10 +64,13 @@ struct WhatWouldYouDoGameState: Codable, Equatable {
         self.revealIndex = revealIndex
         self.revealOrder = revealOrder
         self.anonymousMode = anonymousMode
+        self.socialDeckWinRecordedUserIds = socialDeckWinRecordedUserIds
     }
 
     enum CodingKeys: String, CodingKey {
         case currentRound, totalRounds, currentPrompt, answers, phase, votes, scores, revealIndex, revealOrder, anonymousMode
+        case socialDeckWinRecordedUserIds
+        case onlineWinStatsRecorded // legacy bool — migrated in decoder
     }
 
     init(from decoder: Decoder) throws {
@@ -85,6 +91,13 @@ struct WhatWouldYouDoGameState: Codable, Equatable {
         revealIndex = try c.decodeIfPresent(Int.self, forKey: .revealIndex) ?? -1
         revealOrder = try c.decodeIfPresent([String].self, forKey: .revealOrder) ?? []
         anonymousMode = try c.decodeIfPresent(Bool.self, forKey: .anonymousMode) ?? false
+        if let ids = try c.decodeIfPresent([String].self, forKey: .socialDeckWinRecordedUserIds) {
+            socialDeckWinRecordedUserIds = ids
+        } else if (try c.decodeIfPresent(Bool.self, forKey: .onlineWinStatsRecorded)) == true {
+            socialDeckWinRecordedUserIds = Array(scores.keys)
+        } else {
+            socialDeckWinRecordedUserIds = []
+        }
     }
 
     func encode(to encoder: Encoder) throws {
@@ -99,6 +112,7 @@ struct WhatWouldYouDoGameState: Codable, Equatable {
         try c.encode(revealIndex, forKey: .revealIndex)
         try c.encode(revealOrder, forKey: .revealOrder)
         try c.encode(anonymousMode, forKey: .anonymousMode)
+        try c.encode(socialDeckWinRecordedUserIds, forKey: .socialDeckWinRecordedUserIds)
     }
 }
 

@@ -666,6 +666,7 @@ final class ObviousAnswerViewModel: ObservableObject {
                     self.gameState = state
                     let roster = room.players
                     Task { await self.hostDriveResultsIfNeeded(state: state, allPlayers: roster) }
+                    Task { await self.claimSocialDeckOnlineWinIfNeeded(state: state, participants: roster) }
                 }
             } catch {
                 print("[ObviousAnswer] snapshot decode failed: \(error)")
@@ -723,6 +724,22 @@ final class ObviousAnswerViewModel: ObservableObject {
             } catch {
                 print("[ObviousAnswer] finishGame failed: \(error)")
             }
+        }
+    }
+
+    private func claimSocialDeckOnlineWinIfNeeded(state: ObviousAnswerGameState, participants: [RoomPlayer]) async {
+        guard state.phase == .finished else { return }
+        guard !state.socialDeckWinRecordedUserIds.contains(currentUserId) else { return }
+        let ids = participants.map { $0.id }
+        let maxScore = ids.map { state.scores[$0] ?? 0 }.max() ?? 0
+        guard (state.scores[currentUserId] ?? 0) == maxScore else { return }
+        do {
+            let claimed = try await OnlineService.shared.tryClaimSocialDeckOnlineWin(roomCode: roomCode)
+            if claimed {
+                await AuthManager.shared.updateStats(onlineGamesWon: 1)
+            }
+        } catch {
+            print("[ObviousAnswer] tryClaimSocialDeckOnlineWin failed: \(error)")
         }
     }
 

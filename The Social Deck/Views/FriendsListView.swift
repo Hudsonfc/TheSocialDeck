@@ -1086,6 +1086,7 @@ struct FriendProfileView: View {
             if let profile = fullProfile {
                 HStack(spacing: 10) {
                     statCard(title: "Cards Flipped", value: "\(profile.totalCardsFlipped)", icon: "rectangle.on.rectangle.angled.fill")
+                    statCard(title: "Online Wins", value: "\(profile.onlineGamesWon)", icon: "trophy.fill")
                 }
             }
         }

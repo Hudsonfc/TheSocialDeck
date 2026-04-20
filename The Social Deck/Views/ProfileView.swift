@@ -408,6 +408,7 @@ struct ProfileView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             HStack(spacing: 12) {
                 statTile(icon: "rectangle.stack.fill", value: "\(displayCardsFlipped)", label: "Cards Flipped")
+                statTile(icon: "trophy.fill", value: "\(authManager.userProfile?.onlineGamesWon ?? 0)", label: "Online Wins")
             }
         }
         .padding(.horizontal, 40)

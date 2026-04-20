@@ -952,6 +952,88 @@ class OnlineService {
         try await roomRef.updateData(["overconfidenceGameState": data])
     }
 
+    // MARK: - Social Deck online win stats (WWYD, Obvious Answer, Overconfidence)
+
+    /// Each winner calls this once after `finished`. Records their user id on the room's game state (transaction),
+    /// then the caller should increment **their own** `onlineGamesWon` via `AuthManager.updateStats` (Firestore rules allow self-only profile writes).
+    /// - Returns: `true` if this user was a winner and was newly recorded (caller should bump profile stat).
+    func tryClaimSocialDeckOnlineWin(roomCode: String) async throws -> Bool {
+        guard let uid = auth.currentUser?.uid else { return false }
+
+        let roomRef = db.collection("rooms").document(roomCode)
+        final class ClaimFlag: @unchecked Sendable {
+            var value = false
+        }
+        let claimed = ClaimFlag()
+
+        try await db.runTransaction { [weak self] transaction, errorPointer -> Any? in
+            guard let self else {
+                errorPointer?.pointee = NSError(domain: "OnlineService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Internal error"])
+                return nil
+            }
+            do {
+                let snapshot = try transaction.getDocument(roomRef)
+                guard snapshot.exists, let raw = snapshot.data() else { return nil }
+
+                let decoder = Firestore.Decoder()
+                let room = try decoder.decode(OnlineRoom.self, from: raw)
+                let participantIds = room.players.map { $0.id }
+                guard participantIds.contains(uid) else { return nil }
+
+                let encoder = Firestore.Encoder()
+
+                switch room.selectedGameType {
+                case "whatWouldYouDo":
+                    guard var gs = room.whatWouldYouDoGameState else { return nil }
+                    guard gs.phase == .finished else { return nil }
+                    let winners = Self.winnerUserIdsForOnlineGame(scores: gs.scores, participantIds: participantIds)
+                    guard winners.contains(uid), !gs.socialDeckWinRecordedUserIds.contains(uid) else { return nil }
+                    gs.socialDeckWinRecordedUserIds.append(uid)
+                    let encoded = try encoder.encode(gs)
+                    transaction.updateData(["whatWouldYouDoGameState": encoded], forDocument: roomRef)
+                    claimed.value = true
+
+                case "obviousAnswer":
+                    guard var gs = room.obviousAnswerGameState else { return nil }
+                    guard gs.phase == .finished else { return nil }
+                    let winners = Self.winnerUserIdsForOnlineGame(scores: gs.scores, participantIds: participantIds)
+                    guard winners.contains(uid), !gs.socialDeckWinRecordedUserIds.contains(uid) else { return nil }
+                    gs.socialDeckWinRecordedUserIds.append(uid)
+                    let encoded = try encoder.encode(gs)
+                    transaction.updateData(["obviousAnswerGameState": encoded], forDocument: roomRef)
+                    claimed.value = true
+
+                case "overconfidence":
+                    guard var gs = room.overconfidenceGameState else { return nil }
+                    guard gs.phase == .finished else { return nil }
+                    let winners = Self.winnerUserIdsForOnlineGame(scores: gs.scores, participantIds: participantIds)
+                    guard winners.contains(uid), !gs.socialDeckWinRecordedUserIds.contains(uid) else { return nil }
+                    gs.socialDeckWinRecordedUserIds.append(uid)
+                    let encoded = try encoder.encode(gs)
+                    transaction.updateData(["overconfidenceGameState": encoded], forDocument: roomRef)
+                    claimed.value = true
+
+                default:
+                    return nil
+                }
+
+                return nil
+            } catch {
+                errorPointer?.pointee = error as NSError
+                return nil
+            }
+        }
+
+        return claimed.value
+    }
+
+    /// Players tied for the highest score among current room participants each get a win credited.
+    private static func winnerUserIdsForOnlineGame(scores: [String: Int], participantIds: [String]) -> [String] {
+        guard !participantIds.isEmpty else { return [] }
+        let maxScore = participantIds.map { scores[$0] ?? 0 }.max() ?? 0
+        return participantIds.filter { (scores[$0] ?? 0) == maxScore }
+    }
+
     /// Updates the Flip 21 game state in Firestore
     func updateFlip21GameState(roomCode: String, gameState: Flip21GameState) async throws {
         let roomRef = db.collection("rooms").document(roomCode)

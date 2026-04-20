@@ -134,13 +134,6 @@ struct HomeView: View {
                                 }
                                 .buttonStyle(PlainButtonStyle())
                                 .tag(1)
-                                
-                                // Premium Avatars — opens Profile → avatar picker
-                                NavigationLink(destination: ProfileView(openAvatarPickerOnAppear: true)) {
-                                    HeroPremiumAvatarsSlide()
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                                .tag(2)
                             }
                             .tabViewStyle(.page(indexDisplayMode: .never))
                             .frame(width: ResponsiveSize.heroBannerWidth, height: ResponsiveSize.heroBannerHeight)
@@ -156,7 +149,7 @@ struct HomeView: View {
                                 DragGesture(minimumDistance: 30, coordinateSpace: .local)
                                     .onEnded { value in
                                         // Right swipe on last slide wraps to first
-                                        if currentSlideIndex == 2 && value.translation.width > 80 {
+                                        if currentSlideIndex == 1 && value.translation.width > 80 {
                                             withAnimation(.easeInOut(duration: 0.3)) {
                                                 currentSlideIndex = 0
                                             }
@@ -168,7 +161,7 @@ struct HomeView: View {
                             VStack {
                                 Spacer()
                                 HStack(spacing: 6) {
-                                    ForEach(0..<3, id: \.self) { index in
+                                    ForEach(0..<2, id: \.self) { index in
                                         Circle()
                                             .fill(index == currentSlideIndex ? Color(light: Color.black, dark: Color.black) : Color(light: Color.black.opacity(0.4), dark: Color.black.opacity(0.4)))
                                             .frame(width: 6, height: 6)
@@ -524,7 +517,7 @@ struct HomeView: View {
         stopSlideshow() // Stop any existing timer
         slideshowTimer = Timer.scheduledTimer(withTimeInterval: 6.0, repeats: true) { _ in
             withAnimation(.easeInOut(duration: 0.6)) {
-                currentSlideIndex = (currentSlideIndex + 1) % 3
+                currentSlideIndex = (currentSlideIndex + 1) % 2
             }
         }
     }
@@ -859,78 +852,6 @@ struct HeroQuoteSlide: View {
                 Spacer()
             }
             .padding(.vertical, 32)
-        }
-        .frame(width: ResponsiveSize.heroBannerWidth, height: ResponsiveSize.heroBannerHeight)
-        .cornerRadius(16, corners: [.topLeft, .topRight])
-    }
-}
-
-// Hero Banner — Premium avatars (IAP)
-struct HeroPremiumAvatarsSlide: View {
-    private let brandRed = Color(red: 0xD9/255.0, green: 0x3A/255.0, blue: 0x3A/255.0)
-
-    var body: some View {
-        ZStack {
-            LinearGradient(
-                colors: [
-                    Color(red: 0x2C/255.0, green: 0x18/255.0, blue: 0x22/255.0),
-                    brandRed.opacity(0.92),
-                    Color(red: 0x4A/255.0, green: 0x22/255.0, blue: 0x28/255.0)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-
-            VStack(spacing: 10) {
-                HStack(spacing: 0) {
-                    Text("PREMIUM")
-                        .font(.system(size: 9, weight: .heavy, design: .rounded))
-                        .foregroundColor(.white.opacity(0.95))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.white.opacity(0.18))
-                        .cornerRadius(4)
-                    Spacer()
-                    Image(systemName: "star.fill")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.35))
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 14)
-
-                Text("Premium Avatars")
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .minimumScaleFactor(0.85)
-                    .lineLimit(1)
-
-                Text("Stand out online — collect rare looks for your profile.")
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundColor(.white.opacity(0.88))
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.85)
-                    .padding(.horizontal, 24)
-
-                HStack(spacing: -6) {
-                    ForEach(PremiumAvatarDefinition.allCases) { def in
-                        Image(def.imageAssetName)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 36, height: 36)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.white.opacity(0.5), lineWidth: 2))
-                    }
-                }
-                .padding(.vertical, 4)
-
-                Text("From \(AvatarStoreManager.fallbackPrice) each · Tap to browse")
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundColor(.white.opacity(0.75))
-
-                Spacer(minLength: 0)
-            }
-            .padding(.bottom, 28)
         }
         .frame(width: ResponsiveSize.heroBannerWidth, height: ResponsiveSize.heroBannerHeight)
         .cornerRadius(16, corners: [.topLeft, .topRight])
